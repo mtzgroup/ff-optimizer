@@ -1,0 +1,22 @@
+
+[tool.pytest.ini_options]
+testpaths = "tests/"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+force_grid_wrap = 0
+include_trailing_comma = true
+line_length = 88
+multi_line_output = 3
+use_parentheses = true
+
+[tool.coverage.run]
+branch = true
+omit = [
+"*/tests/*",
+  "*/migrations/*",
+    "*site-packages*",
+      "*__init__.py",
+      ]
