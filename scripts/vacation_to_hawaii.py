@@ -2,13 +2,14 @@
 
 import os
 import argparse
-import random
+from random import randint
 import matplotlib as mpl
 import numpy as np
+from ff_optimizer import qmengine
+from shutil import rmtree
 
 mpl.use("Agg")
 import matplotlib.pyplot as plt
-import subprocess
 from time import sleep
 from textwrap import dedent
 
@@ -30,22 +31,6 @@ def addTargetLines(inputFile, targetLines, initialTarget, newTarget):
             f.write("\n")
             for line in targetLines:
                 f.write(line.replace(initialTarget, newTarget))
-
-
-def slurmCommand(command):
-    maxTries = 100
-    i = 1
-    done = False
-    while i < maxTries and not done:
-        try:
-            output = subprocess.check_output(command)
-            done = True
-        except:
-            sleep(2)
-            i += 1
-    if not done:
-        raise RuntimeError("Slurm command " + command + " failed")
-    return output
 
 
 def convertTCtoFB(
@@ -203,6 +188,7 @@ def changeParameter(inputFile, prmName, prmValue):
             lines.append(line)
         if not changed:
             lines.insert(1, f"{prmName} {prmValue}")
+            pass
 
     with open("temp.txt", "w") as f:
         for line in lines:
@@ -280,16 +266,6 @@ def determineAdaptiveDamping(
             return adaptiveDamping
 
 
-def readPDB(filename):
-    coords = []
-    with open(filename, "r") as f:
-        for line in f.readlines():
-            if "ATOM" in line or "HETATM" in line:
-                splitLine = line.split()
-                coords.append(splitLine[5])
-                coords.append(splitLine[6])
-                coords.append(splitLine[7])
-    return coords
 
 
 def readRst(filename):
@@ -302,57 +278,6 @@ def readRst(filename):
                     coords.append(coord)
             lineCounter = lineCounter + 1
     return coords
-
-
-def readGradFromTCout(filename):
-    inGradient = False
-    gradCounter = 0
-    molSize = 0
-    grads = []
-    energy = 0
-    with open(filename, "r") as f:
-        for line in f.readlines():
-            if "Total atoms" in line:
-                molSize = int(line.split()[2])
-            if "FINAL ENERGY" in line:
-                energy = float(line.split()[2])
-            if "Gradient units" in line:
-                inGradient = True
-            if gradCounter < molSize + 3 and gradCounter > 2:
-                for token in line.split():
-                    grads.append(token)
-            if inGradient:
-                gradCounter = gradCounter + 1
-    if not inGradient:
-        print("File %s did not complete calculation" % filename)
-        grads = -1
-    return energy, grads
-
-
-def writeData(coords, energy, grads):
-    with open("qdata.txt", "a") as f:
-        coordLine = "COORDS "
-        for coord in coords:
-            coordLine = coordLine + str(coord) + " "
-        gradLine = "FORCES "
-        for grad in grads:
-            gradLine = gradLine + str(grad) + " "
-        f.write(coordLine + "\n")
-        f.write("ENERGY " + str(energy) + "\n")
-        f.write(gradLine + "\n")
-        f.write("\n")
-
-    with open("all.mdcrd", "a") as f:
-        tokenCounter = 1
-        for coord in coords:
-            f.write("%8.3f" % float(coord))
-            if tokenCounter == 10:
-                f.write("\n")
-                tokenCounter = 1
-            else:
-                tokenCounter = tokenCounter + 1
-        if tokenCounter != 1:
-            f.write("\n")
 
 
 def readValid(filename):
@@ -790,6 +715,14 @@ if not os.path.isfile(os.path.join(args.optdir, "valid_0_initial.in")):
                 if "$target" in line:
                     break
 
+# Initialize QMEngine
+if args.engine == 'debug':
+    qmEngine = qmengine.DebugEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long))
+elif args.engine == 'fire' or args.engine == 'sbatch':
+    qmEngine = qmengine.SbatchEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),os.path.join(args.sampledir,args.sbatch),os.getenv('USER'))
+elif args.engine == 'tccloud':
+    raise RuntimeError("Not implemented yet")
+
 # First optimization cycle is not necessary if restarting from somewhere later
 if restartCycle < 0:
 
@@ -876,6 +809,9 @@ for i in range(1, args.maxcycles + 1):
     samplePath = os.path.join(args.sampledir, sampleName)
     if not os.path.isdir(samplePath):
         os.mkdir(samplePath)
+    elif restartCycle == -1:
+        rmtree(samplePath)
+        os.mkdir(samplePath)
     src = os.path.join(args.optdir, "result", "opt_" + str(i - 1), "*")
     dest = os.path.join(samplePath, ".")
     os.system(f"cp {src} {dest}")
@@ -894,11 +830,11 @@ for i in range(1, args.maxcycles + 1):
             rstCount += 1
     if rstCount < 2:
         if args.split != None:
-            coor1 = random.randint(startIndex, splitIndex)
-            coor2 = random.randint(splitIndex, endIndex)
+            coor1 = randint(startIndex, splitIndex)
+            coor2 = randint(splitIndex, endIndex)
         else:
-            coor1 = random.randint(startIndex, endIndex)
-            coor2 = random.randint(startIndex, endIndex)
+            coor1 = randint(startIndex, endIndex)
+            coor2 = randint(startIndex, endIndex)
         getFrame(coor1, os.path.join(args.dynamicsdir, args.coors), samplePath)
         getFrame(coor2, os.path.join(args.dynamicsdir, args.coors), samplePath)
 
@@ -989,151 +925,22 @@ for i in range(1, args.maxcycles + 1):
         os.chdir(calcPath)
         os.system(f"cpptraj -p ../{prmtop} -i cpptraj.in > cpptraj.out")
 
-        # TODO:Run QM calculations using TCCloud
+        # Run QM calculations
         files = os.listdir()
-        QMFinished = False
-        batchSize = 0
-        jobs = []
+        pdbs = []
         for f in files:
-            if ".pdb" in f:
-                # if pdb is fresh from cpptraj
-                if len(f.split(".")) == 3:
-                    batchSize += 1
+            if '.pdb' in f:
+                if len(f.split(".")) > 2:
                     label = f.split(".")[2]
-                    fName = label + ".pdb"
+                    fName = label + '.pdb'
                     os.system(f"mv {f} {fName}")
-                    if os.path.isfile("tc_" + str(label) + ".out"):
-                        energy, grads = readGradFromTCout("tc_" + str(label) + ".out")
-                        if grads == -1:
-                            jobs.append(label)
-                    else:
-                        jobs.append(label)
-                # else check if tc job has finished
-                # else:
-                #    label = f.split('.')[0]
-                #    if os.path.isfile("tc_" + str(label) + ".out"):
-                #        energy, grads = readGradFromTCout("tc_" + str(label) + ".out")
-                #        if grads == -1:
-                #    jobs.append(label)
-
-            if "qdata.txt" in f:
-                QMFinished = True
-        if not QMFinished:
-            if args.engine == "fire":
-                print("Running jobs on fire")
-                jobIDs = []
-                for j in jobs:
-                    submit = "sbatch_" + str(j) + ".sh"
-                    os.system(
-                        "sed 's/XXX/"
-                        + str(j)
-                        + "/g' ../../"
-                        + args.sbatch
-                        + " > "
-                        + submit
-                    )
-                    os.system(
-                        "sed 's/XXX/"
-                        + str(j)
-                        + "/g' ../../"
-                        + args.tctemplate
-                        + " > tc_"
-                        + str(j)
-                        + ".in"
-                    )
-                    os.system(
-                        "sed 's/XXX/"
-                        + str(j)
-                        + "/g' ../../"
-                        + args.tctemplate_long
-                        + " > tc_"
-                        + str(j)
-                        + "_long.in"
-                    )
-                    job = slurmCommand(["sbatch", submit])
-                    jobIDs.append(job.split()[3])
-                # print(jobIDs)
-
-                while len(jobIDs) > 0:
-                    runningIDs = []
-                    sleep(10)
-                    # print("Checking which jobs are still running")
-                    status = slurmCommand(["squeue", "-o", '"%.12i"', "-u", "curtie"])
-                    for runningID in (
-                        status.replace(b" ", b"").replace(b'"', b"").split(b"\n")[1:]
-                    ):
-                        for submitID in jobIDs:
-                            if runningID == submitID:
-                                runningIDs.append(runningID)
-                    # print(runningIDs)
-                    jobIDs = runningIDs
-
-                if os.path.isfile("qdata.txt"):
-                    os.remove("qdata.txt")
-                with open("all.mdcrd", "w") as f:
-                    f.write("converted from TC with convertTCBatchtoFB.py\n")
-                for j in range(1, batchSize + 1):
-                    pdb = str(j) + ".pdb"
-                    coords = readPDB(pdb)
-                    fileName = "tc_" + str(j) + ".out"
-                    energy, grads = readGradFromTCout(fileName)
-                    if grads == -1:
-                        if os.path.isfile("all.mdcrd"):
-                            os.remove("all.mdcrd")
-                        if os.path.isfile("qdata.txt"):
-                            os.remove("qdata.txt")
-                        raise RuntimeError(
-                            "TC job " + name + "/" + fileName + " did not complete"
-                        )
-                    with open("qdata.txt", "a") as f:
-                        f.write("JOB " + str(j) + "\n")
-                    writeData(coords, energy, grads)
-            elif args.engine == "debug":
-                print("Running jobs on debug node")
-                if os.path.isfile("qdata.txt"):
-                    os.remove("qdata.txt")
-                with open("all.mdcrd", "w") as f:
-                    f.write("converted from TC with convertTCBatchtoFB.py\n")
-                for j in jobs:
-                    os.system(
-                        "sed 's/XXX/"
-                        + str(j)
-                        + "/g' ../../"
-                        + args.tctemplate
-                        + " > tc_"
-                        + str(j)
-                        + ".in"
-                    )
-                    os.system(
-                        "sed 's/XXX/"
-                        + str(j)
-                        + "/g' ../../"
-                        + args.tctemplate_long
-                        + " > tc_"
-                        + str(j)
-                        + "_long.in"
-                    )
-                    out = "tc_" + str(j) + ".out"
-                    os.system("terachem tc_" + str(j) + ".in > " + out)
-                    energy, grads = readGradFromTCout(out)
-                    if grads == -1:
-                        os.system("terachem tc_" + str(j) + "_long.in > " + out)
-                        energy, grads = readGradFromTCout(out)
-                        if grads == -1:
-                            if os.path.isfile("all.mdcrd"):
-                                os.remove("all.mdcrd")
-                            if os.path.isfile("qdata.txt"):
-                                os.remove("qdata.txt")
-                            raise RuntimeError(
-                                "TC job " + name + "/" + out + " did not complete"
-                            )
-                    pdb = str(j) + ".pdb"
-                    coords = readPDB(pdb)
-                    with open("qdata.txt", "a") as f:
-                        f.write("JOB " + str(j) + "\n")
-                    writeData(coords, energy, grads)
-            else:
-                raise RuntimeError("Only QM engine is Fire (or debug)")
+                    pdbs.append(fName)
+                else:
+                    pdbs.append(f)
+        if i == restartCycle + 1:
+            qmEngine.restart('.')
+        else:
+            qmEngine.getQMRefData(pdbs,'.')
         os.chdir(home)
         os.chdir(samplePath)
     os.chdir(home)

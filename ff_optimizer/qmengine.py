@@ -30,7 +30,7 @@ class QMEngine():
                 if "Job finished" in line:
                     finished = True
         if not finished:
-            print("File %s did not complete calculation" % filename)
+            print("File %s did not complete calculation" % outFile)
             grads = -1
         return energy, grads
 
@@ -172,7 +172,7 @@ class SbatchEngine(QMEngine):
                 sleep(2)
                 i += 1
         if not done:
-            raise RuntimeError(f"Slurm command {command} failed")
+            raise RuntimeError(f"Slurm command {str(command)} failed")
         return output
 
     def getQMRefData(self, pdbs:list, calcDir:str):
@@ -214,7 +214,7 @@ class SbatchEngine(QMEngine):
             coords.append(coord)
         super().writeFBdata(energies,grads,coords)
 
-class debugEngine(QMEngine):
+class DebugEngine(QMEngine):
 
     def __init__(self, inputFile, backupInputFile):
         super().__init__(inputFile, backupInputFile)
