@@ -426,9 +426,9 @@ parser.add_argument(
 )
 parser.add_argument(
     "--engine",
-    help="Engine for performing QM calculations, currently supported is fire",
+    help="Engine for performing QM calculations, either queue, debug, or tccloud",
     type=str,
-    default="fire",
+    default="queue",
 )
 parser.add_argument(
     "--sbatch",
@@ -591,9 +591,9 @@ if restartCycle < 0:
         )
     if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
         raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
-    if args.engine != "fire" and args.engine != "debug":
-        raise RuntimeError("Engine " + args.engine + " hasn't been implemented yet")
-    if args.engine == "fire":
+    if args.engine != "queue" and args.engine != "debug" and args.engine != "tccloud":
+        raise RuntimeError("Engine " + args.engine + " is not implemented")
+    if args.engine == "queue":
         if not os.path.isfile(os.path.join(args.sampledir, args.sbatch)):
             raise RuntimeError(
                 "Sbatch template "
@@ -718,10 +718,10 @@ if not os.path.isfile(os.path.join(args.optdir, "valid_0_initial.in")):
 # Initialize QMEngine
 if args.engine == 'debug':
     qmEngine = qmengine.DebugEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long))
-elif args.engine == 'fire' or args.engine == 'sbatch':
+elif args.engine == 'queue':
     qmEngine = qmengine.SbatchEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),os.path.join(args.sampledir,args.sbatch),os.getenv('USER'))
 elif args.engine == 'tccloud':
-    raise RuntimeError("Not implemented yet")
+    qmEngine = qmengine.TCCloudEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long))
 
 # First optimization cycle is not necessary if restarting from somewhere later
 if restartCycle < 0:
@@ -831,7 +831,7 @@ for i in range(1, args.maxcycles + 1):
     if rstCount < 2:
         if args.split != None:
             coor1 = randint(startIndex, splitIndex)
-            coor2 = randint(splitIndex, endIndex)
+            coor2 = randint(splitIndex+1, endIndex)
         else:
             coor1 = randint(startIndex, endIndex)
             coor2 = randint(startIndex, endIndex)

@@ -29,6 +29,7 @@ class TestSbatchEngine:
         assert len(refLines) == len(testLines)
         for i in range(len(refLines)):
             assert refLines[i].replace('ml','module load') == testLines[i]
+        os.system("rm -f sbatch_23.sh")
 
     # check that job submission is being done correctly
     #def test_getQMRefData(self, monkeypatch):

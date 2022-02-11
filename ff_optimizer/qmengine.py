@@ -1,5 +1,9 @@
 import os
 import subprocess
+from tccloud import TCClient
+from tccloud.models import AtomicInput, Molecule
+from utils import convertPDBtoXYZ
+import units
 
 class QMEngine():
 
@@ -243,9 +247,95 @@ class DebugEngine(QMEngine):
 
 class TCCloudEngine(QMEngine):
     
-    def __init__(self, inputFile:str, backInputFile:str, batchSize = 10):
+    def __init__(self, inputFile:str, backInputFile:str, batchSize = None):
         self.batchSize = batchSize
+        self.client = TCClient()
         super().__init__(inputFile, backupInputFile)
+        self.keywords = {}
+        self.backupKeywords = {}
+        for setting in self.inputSettings:
+            if setting[0] == 'method':
+                self.method = setting[1]
+            elif setting[0] == 'basis':
+                self.basis = setting[1]
+            else:
+                keyword = ""
+                for token in setting[1:]:
+                    keyword += f"token "
+                self.keywords[setting[0]] = keyword
+        for setting in self.backupSettings:
+            if setting[0] == 'method' or setting[0] == 'basis':
+                pass
+            else:
+                keyword = ""
+                for token in setting[1:]:
+                    keyword += f"token "
+                self.backupKeywords[setting[0]] = keyword
+                    
         
-    def computeBatch(self, pdbs:list, calcDir:str):
-        pass
+    def computeBatch(self, atomicInputs:list):
+        if self.batchSize == None:
+            batchSize = len(atomicInputs)
+        else:
+            batchSize = self.batchSize
+        results = []
+        for i in range(ceil(1.0*len(atomicInputs)/batchSize)):
+            resultsBatch = []
+            atomicInputsBatch = []
+            for j in range(batchSize):
+                if i * batchSize + j < len(atomicInputs):
+                    atomicInputsBatch.append(atomicInputs[i * batchSize + j])
+            try:
+                futureResultBatch = client.compute(atomicInputsBatch,engine="terachem_pbs")
+                resultsBatch = futureResultBatch.get()
+            except:
+                sleep(40)
+                self.batchSize = int(batchSize/2)
+                if self.batchSize < 2:
+                    raise RuntimeError("Batch resubmission reached size 1")
+                resultsBatch = computeBatch(atomicInputsBatch)
+            for result in resultsBatch:
+                results.append(result)
+        return results
+
+    def createAtomicInputs(self, pdbs:list):
+        mod = {}
+        mod["method"] = self.method
+        mod["basis"] = self.basis
+        atomicInputs = []
+        for pdb in pdbs:
+            xyz = convertPDBtoXYZ(pdb)
+            mol = Molecule.from_file(xyz)
+            atomicInput = AtomicInput(molecule=mol,model=mod,driver="gradient",keywords=self.keywords)
+            atomicInputs.append(atomicInput)
+        return atomicInputs
+        
+    def getQMRefData(self, pdbs:list, calcDir:str):
+        atomicInputs = self.createAtomicInputs(pdbs)
+        results = self.computeBatch(atomicInputs)
+        retryInputs = []
+        failedIndices = []
+        for i in range(len(results)):
+            if not results[i].success:
+                retryInput = AtomicInput(molecule=atomicInputs[i].molecule,model=atomicInputs[i].model,driver="gradient",keywords=self.backupKeywords)
+                retryInputs.append(retryInput)
+                failedIndices.append(i)
+        retryResults = self.computeBatch(retryInputs)
+        for i, result = zip(failedIndices, retryResults):
+            if not result.success:
+                raise RuntimeError(f"Gradient calculation for {pdbs[i]} failed")
+            results[i] = result
+        coords = []
+        grads = []
+        energies = []
+        for result in results:
+            coords.append([])
+            grads.append([])
+            for atom in result.molecule.geometry:
+                for coord in atom:
+                    coords[-1].append(coord / units.ANGSTROM_TO_AU)
+            for atom in result.return_result:
+                for grad in atom:
+                    grads[-1].append(grad)
+            energies.append(result.properties.return_energy)
+       super().writeFBdata(energies,grads,coords) 
