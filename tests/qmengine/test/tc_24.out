@@ -1,0 +1,343 @@
+Startfile from command line: tc_24.in
+
+
+       ***********************************************************
+       *                    TeraChem v1.9-2021.04-dev            *
+       *                 Hg Version: 495ec1677c88+               *
+       *                   Development Version                   *
+       *           Chemistry at the Speed of Graphics!           *
+       ***********************************************************
+       * This program may only be used in connection with        *
+       * a valid license from PetaChem, LLC. Use of this program *
+       * or results thereof indicates acceptance of all terms    *
+       * and conditions stated in the license and that a valid   *
+       * license agreement between the user and PetaChem, LLC    *
+       * exists. PetaChem, LLC does not warrant the correctness  *
+       * of results or their suitability for any purpose.        *
+       * Please email bugs, suggestions, and comments to         *
+       *                  help@petachem.com                      *
+       *                                                         *
+       ***********************************************************
+
+
+       ***********************************************************
+       *  Compiled by henryw7      Fri Apr  9 18:30:10 PDT 2021  *
+       *  Supported architectures: sm_30 sm_35 sm_52 sm_61 sm_70 *
+       *  Cuda compilation tools, release 9.0, V9.0.176          *
+       ***********************************************************
+
+
+ Job started   Mon Nov 29 22:11:34 2021
+ On fire-14-03 (available memory: 198452 MB)
+
+######################################### RUNTIME INFO ##########################################
+terachem tc_24.in 
+
+NVRM version: NVIDIA UNIX x86_64 Kernel Module  460.32.03  Sun Dec 27 19:00:34 UTC 2020
+GCC version:  gcc version 4.8.5 20150623 (Red Hat 4.8.5-28) (GCC) 
+
+	linux-vdso.so.1 =>  (0x00007ffdbe430000)
+	libcurl.so.4 => /usr/lib64/libcurl.so.4 (0x00007f9dd6fb1000)
+	libmpi.so.12 => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/mpi/intel64/lib/libmpi.so.12 (0x00007f9dd627b000)
+	libdftbplus.so => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libdftbplus.so (0x00007f9dd5d94000)
+	libfsockets.so => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libfsockets.so (0x00007f9dd5b90000)
+	libxmlf90.so => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libxmlf90.so (0x00007f9dd596d000)
+	libthcbox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libthcbox.so.1 (0x00007f9dd3cc1000)
+	libOpenMM.so => /global/software/OpenMM/7.4.1-intel-2017.0.098-CUDA-9.0.176/lib/libOpenMM.so (0x00007f9dd365f000)
+	libgpubox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libgpubox.so.1 (0x00007f9dd344c000)
+	libtensorbox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libtensorbox.so.1 (0x00007f9dd3231000)
+	libmoleculebox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libmoleculebox.so.1 (0x00007f9dd301f000)
+	libintbox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libintbox.so.1 (0x00007f9dae945000)
+	libsqmbox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libsqmbox.so.1 (0x00007f9dae40c000)
+	libgridbox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libgridbox.so.1 (0x00007f9dadeaf000)
+	libdftbox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libdftbox.so.1 (0x00007f9dadbcd000)
+	libcibox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libcibox.so.1 (0x00007f9dad4b6000)
+	libccbox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libccbox.so.1 (0x00007f9dad059000)
+	libsimbox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libsimbox.so.1 (0x00007f9dace3e000)
+	liboptbox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/liboptbox.so.1 (0x00007f9dacc02000)
+	libsandboxbox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libsandboxbox.so.1 (0x00007f9dac9f1000)
+	libprotobuf.so.25 => /global/software/protobuf/3.14.0/lib/libprotobuf.so.25 (0x00007f9dac53e000)
+	libcommbox.so.1 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libcommbox.so.1 (0x00007f9dac2e7000)
+	libcuda.so.1 => /usr/lib64/libcuda.so.1 (0x00007f9daabfe000)
+	libcudart.so.9.0 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libcudart.so.9.0 (0x00007f9daa991000)
+	libcublas.so.9.0 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libcublas.so.9.0 (0x00007f9da755b000)
+	libcufft.so.9.0 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libcufft.so.9.0 (0x00007f9d9f4b9000)
+	libcusparse.so.9.0 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libcusparse.so.9.0 (0x00007f9d9bd53000)
+	libcrypto.so.10 => /usr/lib64/libcrypto.so.10 (0x00007f9d9b8f2000)
+	libssl.so.10 => /usr/lib64/libssl.so.10 (0x00007f9d9b67f000)
+	libstdc++.so.6 => /data/global/software/GCC/4.8.1/lib64/libstdc++.so.6 (0x00007f9d9b37d000)
+	libm.so.6 => /usr/lib64/libm.so.6 (0x00007f9d9b07b000)
+	libcilkrts.so.5 => /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176/lib/libcilkrts.so.5 (0x00007f9d9ae3f000)
+	libgcc_s.so.1 => /data/global/software/GCC/4.8.1/lib64/libgcc_s.so.1 (0x00007f9d9ac29000)
+	libpthread.so.0 => /usr/lib64/libpthread.so.0 (0x00007f9d9aa0d000)
+	libc.so.6 => /usr/lib64/libc.so.6 (0x00007f9d9a63f000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f9dd722f000)
+	libdl.so.2 => /usr/lib64/libdl.so.2 (0x00007f9d9a43b000)
+	libidn.so.11 => /usr/lib64/libidn.so.11 (0x00007f9d9a208000)
+	libssh2.so.1 => /usr/lib64/libssh2.so.1 (0x00007f9d99fdd000)
+	libssl3.so => /usr/lib64/libssl3.so (0x00007f9d99d8b000)
+	libsmime3.so => /usr/lib64/libsmime3.so (0x00007f9d99b64000)
+	libnss3.so => /usr/lib64/libnss3.so (0x00007f9d99836000)
+	libnssutil3.so => /usr/lib64/libnssutil3.so (0x00007f9d99607000)
+	libplds4.so => /usr/lib64/libplds4.so (0x00007f9d99403000)
+	libplc4.so => /usr/lib64/libplc4.so (0x00007f9d991fd000)
+	libnspr4.so => /usr/lib64/libnspr4.so (0x00007f9d98fbf000)
+	libgssapi_krb5.so.2 => /usr/lib64/libgssapi_krb5.so.2 (0x00007f9d98d72000)
+	libkrb5.so.3 => /usr/lib64/libkrb5.so.3 (0x00007f9d98a89000)
+	libk5crypto.so.3 => /usr/lib64/libk5crypto.so.3 (0x00007f9d98856000)
+	libcom_err.so.2 => /usr/lib64/libcom_err.so.2 (0x00007f9d98652000)
+	liblber-2.4.so.2 => /usr/lib64/liblber-2.4.so.2 (0x00007f9d98442000)
+	libldap-2.4.so.2 => /usr/lib64/libldap-2.4.so.2 (0x00007f9d981ed000)
+	libz.so.1 => /usr/lib64/libz.so.1 (0x00007f9d97fd7000)
+	librt.so.1 => /usr/lib64/librt.so.1 (0x00007f9d97dce000)
+	libifport.so.5 => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libifport.so.5 (0x00007f9d97b9f000)
+	libifcoremt.so.5 => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libifcoremt.so.5 (0x00007f9d9780e000)
+	libimf.so => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libimf.so (0x00007f9d97321000)
+	libsvml.so => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libsvml.so (0x00007f9d96403000)
+	libiomp5.so => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libiomp5.so (0x00007f9d9605e000)
+	libintlc.so.5 => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libintlc.so.5 (0x00007f9d95df2000)
+	libirng.so => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libirng.so (0x00007f9d95a7e000)
+	libkrb5support.so.0 => /usr/lib64/libkrb5support.so.0 (0x00007f9d9586f000)
+	libkeyutils.so.1 => /usr/lib64/libkeyutils.so.1 (0x00007f9d9566a000)
+	libresolv.so.2 => /usr/lib64/libresolv.so.2 (0x00007f9d95451000)
+	libsasl2.so.3 => /usr/lib64/libsasl2.so.3 (0x00007f9d95233000)
+	libselinux.so.1 => /usr/lib64/libselinux.so.1 (0x00007f9d9500c000)
+	libcrypt.so.1 => /usr/lib64/libcrypt.so.1 (0x00007f9d94dd4000)
+	libpcre.so.1 => /usr/lib64/libpcre.so.1 (0x00007f9d94b72000)
+	libfreebl3.so => /usr/lib64/libfreebl3.so (0x00007f9d9496f000)
+#################################################################################################
+
+Cannot find license.dat file in the TeraChem installation directory /global/software/TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176
+
+
+TRYING THE NETWORK LICENSE...
+Connecting to license server '54.208.252.40' port '8877'...
+Connected!
+Checking your license...
+
+**************************************************************
+  Greetings, Martinez Group! You have 1000 licenses in total
+  IN USE: 20
+  AVAILABLE: 980
+**************************************************************
+
+Jobname: 24
+Scratch directory: ./scr.24
+Random number seed: 1878659571
+
+XYZ coordinates 24.pdb
+Molden File Output: ./scr.24/24.molden
+Using basis set: 6-31gss
+dmrgstart not found
+Spin multiplicity: 1
+DIIS will use up to 10 vectors.
+Condition number limit for the DIIS overlap matrix is            0
+WF convergence threshold: 3.00e-05
+Using DIIS algorithm to converge WF
+Maximum number of SCF iterations: 100
+Incremental fock with rebuild every 8 iterations
+Will switch to conventional Fock if diffuse functions are detected
+X-matrix tolerance: 1.00e-04
+PRECISION: DYNAMIC
+DFT Functional requested: b3lyp
+Method: B3LYP  with dispersion correction
+  Hartree-Fock exact exchange:          0.20 
+  Slater exchange functional:           0.80 
+  Becke 1988 exchange functional:       0.72 
+  Lee-Yang-Parr correlation functional: 0.81 
+  VWN(I) correlation functional:        0.19 
+Wavefunction: RESTRICTED
+
+ DFT-D code reimplemented following the
+ code by S.Grimme, University Bonn 
+ based on DFTD3 V3.2 Rev 0         
+ 
+Please cite DFT-D3 work done with this code as:
+S. Grimme, J. Antony, S. Ehrlich and H. Krieg,
+J. Chem. Phys. 132 (2010), 154104
+If used with BJ-damping cite also
+S. Grimme, S. Ehrlich and L. Goerigk,
+J. Comput. Chem. 32 (2011), 1456-1465
+For DFT-D2 the reference is
+S. Grimme, J. Comput. Chem., 27 (2006), 1787-1799
+DFT grid type: 1
+Using dynamic DFT grids.
+Initial guess generated by maximum overlap
+
+********************************************
+**** SINGLE POINT GRADIENT CALCULATIONS ****
+********************************************
+SCF:   Initial guess is taken from previous step
+
+using 2 out of 2 CUDA devices
+   Device 0:  GeForce GTX 1080 Ti, 11178MB, CC 6.1 -- CPU THREAD 0
+   Device 1:  GeForce GTX 1080 Ti, 11178MB, CC 6.1 -- CPU THREAD 1
+-------------------------------------------------------------------
+Compiled with MAGMA support.  MAGMA parameters:
+    Matrices larger than 5000 square will be treated with MAGMA
+       (Change by setting the MagmaMinN environment variable)
+    Magma will use 1 out of 2 GPUs
+       (Change by setting the MagmaNGPUs environment variable)
+-------------------------------------------------------------------
+ CPU Memory Available: 96717.88 MegaWords 
+ GPU Memory Available: 1141.31 MegaWords 
+ Maximum recommended basis set size: 12200 basis functions
+ (limited by GPU memory)
+-------------------------------------------------------------------
+Using d-functions. Configuring GPUs accordingly.
+0: CUBLAS initialized, available GPU memory: 8271MB
+1: CUBLAS initialized, available GPU memory: 8271MB
+
+
+Basis set:       6-31gss
+Total atoms:     84
+Total charge:    0
+Total electrons: 316 (158-alpha, 158-beta)
+Number electrons modeled by ECPs: 0
+Total orbitals:  840
+Total AO shells: 378 (210 S-shells; 126 P-shells; 42 D-shells; 0 F-shells; 0 G-shells)
+Spin multiplicity: 1
+Nuclear repulsion energy (QM atoms): 5363.325273090648 a.u.
+
+DFTD Energy:    -0.1852348 hartree
+Setting up the DFT grid...
+time to set the grid = 0.04 s
+DFT grid points: 79028 (940 points/atom)
+Setting up the DFT grid...
+time to set the grid = 0.11 s
+DFT grid points: 221010 (2631 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+Purifying guess...Density matrix is not well-conditioned, rescale and purify
+Purification run on GPU (mixed precision)  using TC2 purification.
+Density matrix purification finished after a total of 24 matrix multiplies
+THRESPDP set to 1.00e+00
+                >>> SWITCHING TO GRID 1 <<<
+   1     0.2214236969   -2017.5054436789   315.9506080487  -216.6481071537   -2017.5054436789     1.22  
+                >>> SWITCHING TO GRID 0 <<<
+   2     0.3173184234      +2.9775968085   315.9834557277  -231.1676162600   -2014.5278468704     1.13  
+   3     0.4235815405      +2.7657484938   315.9836790830  -227.1794071046   -2011.7620983766     1.11  
+   4     0.1892145376     -10.8995708768   315.9804293764  -225.6191334608   -2022.6616692534     1.10  
+   5     0.0703891363      -6.7961478200   315.9799896901  -225.1759392484   -2029.4578170734     1.13  
+   6     0.0404279002      -0.5765181028   315.9799954219  -225.1222746343   -2030.0343351761     1.08  
+   7     0.0204701345      -0.1523966665   315.9800818527  -225.2653160392   -2030.1867318426     0.99  
+   8     0.0105714170      -0.0381027736   315.9798871718  -225.1259097700   -2030.2248346162     1.02  
+THRESPDP set to 7.07e-04
+   9     0.0042981336      -0.0108888305   315.9798691765  -225.1424452075   -2030.2357234468     1.41  
+  10     0.0032861896      -0.0014360793   315.9799136978  -225.1562154143   -2030.2371595260     1.03  
+                >>> SWITCHING TO GRID 1 <<<
+  11     0.0020855053      -0.0044804789   315.9993208061  -225.1681290748   -2030.2416400049     1.34  
+  12     0.0011912918      -0.0001771787   315.9993239953  -225.1636668278   -2030.2418171837     1.31  
+  13     0.0004393047      -0.0000443880   315.9993266446  -225.1614169479   -2030.2418615716     1.33  
+  14     0.0000813636      -0.0000250679   315.9993271262  -225.1632389755   -2030.2418866396     1.29  
+  15     0.0000432915      -0.0000012498   315.9993268856  -225.1622832309   -2030.2418878893     1.73  
+  16     0.0000188199      -0.0000001986   315.9993267798  -225.1623203628   -2030.2418880879     1.68  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -2030.2418880879 a.u.
+DISPERSION CONTRIBUTION TO ENERGY: -0.1852348392 a.u.
+HOMO-LUMO GAP: 2.254 eV
+CENTER OF MASS: {6.757995, 3.090125, 9.994564} ANGS
+DIPOLE MOMENT: {2.608846, -4.536623, -9.059110} (|D| = 10.462051) DEBYE
+
+Running Mulliken population analysis...
+
+Writing out molden info
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+    0.0171245759     0.0219431688     0.0337508563
+   -0.0381413202     0.0096085408    -0.0159120607
+    0.0205760241    -0.0011634133    -0.0107133724
+    0.0075476200     0.0287708866    -0.0002779065
+    0.0113477557    -0.0730459953    -0.0110478706
+    0.0263409569     0.0345409259    -0.0019408985
+   -0.0039911524     0.0133355336     0.0192416608
+   -0.0102798154    -0.0019296438     0.0101661198
+   -0.0279554397     0.0048960381    -0.0079041765
+    0.0120302405     0.0116277993    -0.0016857060
+    0.0006360769     0.0017137788    -0.0204316825
+    0.0236689075    -0.0160082860     0.0133055734
+   -0.0232877891     0.0169716546    -0.0122256171
+   -0.0101912997    -0.0050143501     0.0153214772
+    0.0059780949     0.0241293481    -0.0398436199
+    0.0282782505     0.0126399827     0.0714408910
+    0.0077513099    -0.0153712661    -0.0285827643
+    0.0445699579    -0.0315470722    -0.0096531957
+   -0.0239111867     0.0127315603     0.0263370134
+   -0.0366699341     0.0283318274    -0.0255609971
+    0.0009585846    -0.0017071805     0.0104059529
+    0.0192450973     0.0167460181    -0.0014198047
+    0.0190657835     0.0045625936     0.0001836937
+   -0.0112501583    -0.0345422285     0.0254003980
+   -0.0207900330     0.0017074551     0.0095386455
+    0.0214796905     0.0080088712    -0.0118503121
+   -0.0321708412    -0.0121318627    -0.0068387859
+    0.0111190768     0.0098221122     0.0063394682
+    0.0319590376    -0.0009959569     0.0167748599
+   -0.0199080841    -0.0057407906     0.0002721453
+   -0.0029003356     0.0061013175     0.0141770223
+    0.0194857939    -0.0216736289     0.0140108357
+    0.0180091222    -0.0086837714     0.0007543342
+   -0.0262590830     0.0080602330    -0.0069404508
+   -0.0054556266    -0.0019000601    -0.0081615560
+   -0.0065412771     0.0148546363    -0.0489195999
+    0.0199696103    -0.0017155498     0.0041645963
+   -0.0289344098     0.0092223540     0.0128790213
+   -0.0080259276    -0.0314887099    -0.0253237311
+   -0.0041470462    -0.0044018126    -0.0040728484
+    0.0260196881     0.0484351551     0.0115965012
+    0.0059938715    -0.0467239868    -0.0222762950
+   -0.0496267727    -0.0096125928     0.0076157530
+    0.0046084738    -0.0051838412    -0.0429000557
+    0.0050167495     0.0199165549     0.0054473808
+   -0.0230926816     0.0216981821     0.0188871173
+   -0.0060933633    -0.0156783310    -0.0368052161
+    0.0005279339    -0.0012463803     0.0215593863
+    0.0226925051     0.0010400593     0.0070556195
+    0.0033741109     0.0045998272    -0.0108474936
+    0.0261075854     0.0026650745     0.0159225378
+   -0.0241298187     0.0445229492    -0.0034093116
+    0.0176550952    -0.0143000004     0.0035528902
+   -0.0201010618    -0.0207958534     0.0052972124
+    0.0421086156     0.0019736550    -0.0043067711
+   -0.0176150556    -0.0285589435     0.0142664553
+    0.0109159762     0.0075383500    -0.0012602758
+   -0.0362423948    -0.0017769897     0.0264360604
+   -0.0152401663    -0.0198009472    -0.0005522714
+    0.0325454030    -0.0633214172     0.0162461186
+    0.0242802056    -0.0039415694    -0.0088912288
+   -0.0688094158     0.0318687186    -0.0228792629
+    0.0027902487     0.0048045947    -0.0081658027
+    0.0254516521    -0.0271237079     0.0011889278
+   -0.0113473332     0.0256888050    -0.0102190293
+    0.0039184250     0.0124922388    -0.0091579923
+    0.0034655333     0.0326489550    -0.0403527566
+    0.0331913807    -0.0339687631     0.0086618949
+   -0.0111422092     0.0195207169     0.0196436730
+   -0.0047327404    -0.0220439628     0.0170468345
+   -0.0127424927     0.0091533051     0.0826745503
+    0.0124145486     0.0095642316    -0.0387787375
+    0.0085804813     0.0108150461    -0.0129918197
+   -0.0649514996    -0.0402054345     0.0118885908
+   -0.0073010592    -0.0001200259    -0.0164528874
+    0.0539500065     0.0208538522    -0.0144492358
+    0.0068545065     0.0057663463    -0.0018713304
+   -0.0458454940    -0.0096276470     0.0122693564
+   -0.0263130597     0.0078623709     0.0083873317
+   -0.0068108400    -0.0196787843    -0.0099327589
+    0.0276560842     0.0018986312    -0.0171893794
+    0.0298219251     0.0069919207     0.0218803881
+    0.0058343574     0.0295139398     0.0039146830
+   -0.0099687123    -0.0293893605    -0.0129069592
+---------------------------------------------------
+Net gradient:  4.500406e-10 -1.524812e-09  4.614034e-10
+Net torque:    1.627267e-03  8.637805e-03 -1.696640e-03
+
+Total processing time: 24.68 sec 
+
+ Job finished: Mon Nov 29 22:12:06 2021
+
