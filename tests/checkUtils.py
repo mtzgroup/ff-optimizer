@@ -1,6 +1,8 @@
 import numpy as np
 
 def checkFloat(f1, f2, thresh = 0.000001):
+    f1 = float(f1)
+    f2 = float(f2)
     return abs(f1 - f2) < thresh
 
 def checkArray(a1, a2, thresh = 0.000001):

@@ -2,41 +2,16 @@ import os
 import subprocess
 from tccloud import TCClient
 from tccloud.models import AtomicInput, Molecule
-from utils import convertPDBtoXYZ
-import units
+from . import utils, units
+from math import ceil
+from time import sleep
+import numpy as np
 
 class QMEngine():
 
     def __init__(self,inputFile:str,backupInputFile:str):
         self.inputSettings = self.readInputFile(inputFile)
         self.backupInputSettings = self.readInputFile(backupInputFile)
-
-    def readGradFromTCout(self,outFile:str):
-        inGradient = False
-        gradCounter = 0
-        molSize = 0
-        grads = []
-        energy = 0
-        finished = False
-        with open(outFile, "r") as f:
-            for line in f.readlines():
-                if "Total atoms" in line:
-                    molSize = int(line.split()[2])
-                if "FINAL ENERGY" in line:
-                    energy = float(line.split()[2])
-                if "Gradient units" in line:
-                    inGradient = True
-                if gradCounter < molSize + 3 and gradCounter > 2:
-                    for token in line.split():
-                        grads.append(token)
-                if inGradient:
-                    gradCounter = gradCounter + 1
-                if "Job finished" in line:
-                    finished = True
-        if not finished:
-            print("File %s did not complete calculation" % outFile)
-            grads = -1
-        return energy, grads
 
     def readInputFile(self,inputFile:str):
         settings = []
@@ -67,29 +42,19 @@ class QMEngine():
                     f.write(f"{token} ")
                 f.write("\n")
 
-    def readPDB(self,pdb:str):
-        coords = []
-        with open(pdb, 'r') as f:
-            for line in f.readlines():
-                if line.startswith("ATOM") or line.startswith("HETATM"):
-                    splitLine = line.split()
-                    coords.append(splitLine[5])
-                    coords.append(splitLine[6])
-                    coords.append(splitLine[7])
-        return coords
 
-    def writeFBdata(self,energies:list, grads:list, coords:list):
+    def writeFBdata(self, energies:list, grads:list, coords:list):
         with open("qdata.txt",'w') as f:
             for i in range(len(energies)):
                 f.write(f"JOB {i+1}\n")
                 coordLine = "COORDS "
                 for coord in coords[i]:
-                    coordLine = coordLine + str(coord) + " "
+                    coordLine = coordLine + str(round(float(coord),3)) + " "
                 gradLine = "FORCES "
                 for grad in grads[i]:
-                    gradLine = gradLine + str(grad) + " "
+                    gradLine = gradLine + str(round(float(grad),5)) + " "
                 f.write(coordLine + "\n")
-                f.write(f"ENERGY {str(energies[i])}\n")
+                f.write(f"ENERGY {str(round(float(energies[i]),6))}\n")
                 f.write(gradLine + "\n\n")
 
         with open("all.mdcrd",'w') as f:
@@ -106,6 +71,24 @@ class QMEngine():
                 if tokenCounter != 1:
                     f.write("\n")
 
+    def readQMRefData(self):
+        coords = []
+        energies = []
+        grads = []
+        for f in os.listdir():
+            if f.endswith(".pdb"):
+                coord = utils.readPDB(f)
+                name = f.split('.')[0]
+                tcOut = f"tc_{name}.out"
+                energy, grad = utils.readGradFromTCout(tcOut)
+                if type(grad) == int:
+                    if grad == -1:
+                        raise RuntimeError(f"Terachem job {tcOut} in {os.getcwd()} did not succeed!")
+                energies.append(energy)
+                grads.append(grad)
+                coords.append(coord)
+        return energies, grads, coords
+
     def getQMRefData(self, pdbs:list, calcDir:str):
         pass
 
@@ -115,8 +98,12 @@ class QMEngine():
         for f in os.listdir():
             if f.endswith(".pdb"):
                 name = f.split('.')[0]
-                energy, status = self.readGradFromTCout(f"tc_{name}.out")
-                if status == -1:
+                tcOut = f"tc_{name}.out"
+                if os.path.isfile(tcOut):
+                    energy, status = utils.readGradFromTCout(f"tc_{name}.out")
+                    if status == -1:
+                        pdbs.append(f)
+                else:
                     pdbs.append(f)
         self.getQMRefData(pdbs, ".") 
 
@@ -193,29 +180,14 @@ class SbatchEngine(QMEngine):
         while len(jobIDs) > 0:
             runningIDs = []
             sleep(10)
-            status = slurmCommand(["squeue","-o","%.12i","-u",self.user])
+            status = self.slurmCommand(["squeue","-o","%.12i","-u",self.user])
             for runningID in status.replace(b" ", b"").replace(b'"', b"").split(b"\n")[1:]:
                 for submitID in jobIDs:
                     if runningID == submitID:
                         runningIDs.append(runningID)
             jobIDs = runningIDs
 
-        allPdbs = []
-        for f in os.listdir():
-            if f.endswith(".pdb"):
-                allPdbs.append(f)
-        energies = []
-        grads = []
-        coords = []
-        for pdb in allPdbs:
-            name = pdb.split('.')[0]
-            energy, grad = super().readGradFromTCout(f"tc_{name}.out")
-            if grad == -1:
-                raise RuntimeError("TC job " + os.path.join(calcDir,f"tc_{name}.out") + " failed")
-            coord = super().readPDB(pdb)
-            energies.append(energy)
-            grads.append(grad)
-            coords.append(coord)
+        energies, grads, coords = super().readQMRefData()
         super().writeFBdata(energies,grads,coords)
 
 class DebugEngine(QMEngine):
@@ -232,22 +204,16 @@ class DebugEngine(QMEngine):
             name = pdb.split('.')[0]
             super().writeInputFile(self.inputSettings, pdb, f"tc_{name}.in")
             os.system(f"terachem tc_{name}.in > tc_{name}.out")
-            energy, grad = super().readGradFromTCout(f"tc_{name}.out")
+            energy, grad = utils.readGradFromTCout(f"tc_{name}.out")
             if grad == -1:  
                 super().writeInputFile(self.backupInputSettings, pdb, f"tc_{name}_backup.in")
                 os.system(f"terachem tc_{name}_backup.in > tc_{name}.out")
-                energy, grad = super().readGradFromTCout(f"tc_{name}.out")
-                if grad == -1:
-                    raise RuntimeError("TC job " + os.path.join(calcDir,f"tc_{name}.out") + " failed")
-            coord = super().readPDB(pdb)
-            energies.append(energy)
-            grads.append(grad)
-            coords.append(coord)
+        energies, grads, coords = super().readQMRefData()
         super().writeFBdata(energies,grads,coords)
 
 class TCCloudEngine(QMEngine):
     
-    def __init__(self, inputFile:str, backInputFile:str, batchSize = None):
+    def __init__(self, inputFile:str, backupInputFile:str, batchSize = None):
         self.batchSize = batchSize
         self.client = TCClient()
         super().__init__(inputFile, backupInputFile)
@@ -261,19 +227,20 @@ class TCCloudEngine(QMEngine):
             else:
                 keyword = ""
                 for token in setting[1:]:
-                    keyword += f"token "
+                    keyword += f"{token} "
                 self.keywords[setting[0]] = keyword
-        for setting in self.backupSettings:
+        for setting in self.backupInputSettings:
             if setting[0] == 'method' or setting[0] == 'basis':
                 pass
             else:
                 keyword = ""
                 for token in setting[1:]:
-                    keyword += f"token "
+                    keyword += f"{token} "
                 self.backupKeywords[setting[0]] = keyword
                     
-        
     def computeBatch(self, atomicInputs:list):
+        print("Submitting jobs to TCCloud")
+        status = 0
         if self.batchSize == None:
             batchSize = len(atomicInputs)
         else:
@@ -286,17 +253,21 @@ class TCCloudEngine(QMEngine):
                 if i * batchSize + j < len(atomicInputs):
                     atomicInputsBatch.append(atomicInputs[i * batchSize + j])
             try:
-                futureResultBatch = client.compute(atomicInputsBatch,engine="terachem_pbs")
+                futureResultBatch = self.client.compute(atomicInputsBatch,engine="terachem_pbs")
                 resultsBatch = futureResultBatch.get()
             except:
-                sleep(40)
                 self.batchSize = int(batchSize/2)
+                print(f"Submission failed; resubmitting with batch size {str(self.batchSize)}")
+                sleep(30)
                 if self.batchSize < 2:
-                    raise RuntimeError("Batch resubmission reached size 1")
-                resultsBatch = computeBatch(atomicInputsBatch)
+                    status = -1
+                    break
+                tempStatus, resultsBatch = self.computeBatch(atomicInputsBatch)
+                if tempStatus == -1:
+                    status = -1
             for result in resultsBatch:
                 results.append(result)
-        return results
+        return status, results
 
     def createAtomicInputs(self, pdbs:list):
         mod = {}
@@ -304,38 +275,39 @@ class TCCloudEngine(QMEngine):
         mod["basis"] = self.basis
         atomicInputs = []
         for pdb in pdbs:
-            xyz = convertPDBtoXYZ(pdb)
+            jobId = pdb.split('.')[0]
+            xyz = utils.convertPDBtoXYZ(pdb)
             mol = Molecule.from_file(xyz)
-            atomicInput = AtomicInput(molecule=mol,model=mod,driver="gradient",keywords=self.keywords)
+            atomicInput = AtomicInput(molecule=mol,model=mod,driver="gradient",keywords=self.keywords,id=jobId)
             atomicInputs.append(atomicInput)
         return atomicInputs
+
+    def writeResult(self, result):
+        np.savetxt(f"tc_{str(result.id)}.out",np.asarray(result.return_result,dtype=np.float32),header=f"TCCloud gradient output file. Energy = {str(result.properties.return_energy)}")
         
     def getQMRefData(self, pdbs:list, calcDir:str):
         atomicInputs = self.createAtomicInputs(pdbs)
-        results = self.computeBatch(atomicInputs)
+        status, results  = self.computeBatch(atomicInputs)
         retryInputs = []
         failedIndices = []
         for i in range(len(results)):
-            if not results[i].success:
-                retryInput = AtomicInput(molecule=atomicInputs[i].molecule,model=atomicInputs[i].model,driver="gradient",keywords=self.backupKeywords)
+            if results[i].success:
+                self.writeResult(results[i]) 
+            else:
+                retryInput = AtomicInput(molecule=atomicInputs[i].molecule,model=atomicInputs[i].model,driver="gradient",keywords=self.backupKeywords,id=atomicInputs[i].id)
                 retryInputs.append(retryInput)
                 failedIndices.append(i)
-        retryResults = self.computeBatch(retryInputs)
-        for i, result = zip(failedIndices, retryResults):
-            if not result.success:
-                raise RuntimeError(f"Gradient calculation for {pdbs[i]} failed")
-            results[i] = result
-        coords = []
-        grads = []
-        energies = []
-        for result in results:
-            coords.append([])
-            grads.append([])
-            for atom in result.molecule.geometry:
-                for coord in atom:
-                    coords[-1].append(coord / units.ANGSTROM_TO_AU)
-            for atom in result.return_result:
-                for grad in atom:
-                    grads[-1].append(grad)
-            energies.append(result.properties.return_energy)
-       super().writeFBdata(energies,grads,coords) 
+        if status == -1:
+            raise RuntimeError("Batch resubmission reached size 1; QM calculations incomplete")
+        if len(failedIndices) > 0:
+            failedIndex = -1
+            status, retryResults = self.computeBatch(retryInputs)
+            for result in retryResults:
+                if result.success:
+                    self.writeResult(result)
+                else:
+                    failedIndex = result.id
+            if status == -1:
+                raise RuntimeError("Batch resubmission reached size 1; QM calculations incomplete")
+        energies, grads, coords = super().readQMRefData()
+        super().writeFBdata(energies,grads,coords) 

@@ -1,8 +1,21 @@
-from ff_optimizer import qmengine
+from ff_optimizer import qmengine, utils
 import numpy as np
-from . import utils
+from . import checkUtils
 import os
 import sys
+from tccloud.models import AtomicResult
+
+class MonkeyProperties():
+    def __init__(self, energy):
+        self.return_energy = energy
+
+class MonkeyResult():
+    
+    def __init__(self, id, energy, grad):
+        self.id = id
+        self.return_result = grad
+        self.properties = MonkeyProperties(energy)
+        self.success = True
 
 class TestQMEngine:
         
@@ -29,23 +42,13 @@ class TestQMEngine:
         os.remove(testPath)
         assert readSettings == inputSettings
 
-    # check that grads and energies are being read in correctly
-    def test_readGrads(self):
-        os.chdir(os.path.dirname(__file__))
-        qmEngine = qmengine.QMEngine("qmengine/tc.in","qmengine/tc_backup.in")
-        testEnergy, testGrads = qmEngine.readGradFromTCout("qmengine/test.out")
-        energy = np.loadtxt("qmengine/energy.txt")
-        grads = np.loadtxt("qmengine/grads.txt").flatten()
-        assert utils.checkFloat(energy, testEnergy)
-        assert utils.checkArray(grads, testGrads)
-
     # check that pdbs are read in correctly
     def test_readPDB(self):
         os.chdir(os.path.dirname(__file__))
         qmEngine = qmengine.QMEngine("qmengine/tc.in","qmengine/tc_backup.in")
-        testCoords = qmEngine.readPDB("qmengine/test.pdb")
+        testCoords = utils.readPDB("qmengine/test.pdb")
         coords = np.loadtxt("qmengine/coords.txt").flatten()
-        assert utils.checkArray(coords, testCoords)
+        assert checkUtils.checkArray(coords, testCoords)
     
     # check that FB data is written correctly
     def test_writeFBdata(self):
@@ -56,8 +59,8 @@ class TestQMEngine:
         energies = []
         grads = []
         for i in range(1,26):
-            coords.append(qmEngine.readPDB(f"qmengine/test/{str(i)}.pdb"))
-            energy, grad = qmEngine.readGradFromTCout(f"qmengine/test/tc_{str(i)}.out")
+            coords.append(utils.readPDB(f"qmengine/test/{str(i)}.pdb"))
+            energy, grad = utils.readGradFromTCout(f"qmengine/test/tc_{str(i)}.out")
             energies.append(energy)
             grads.append(grad)
         qmEngine.writeFBdata(energies,grads,coords)
@@ -86,7 +89,42 @@ class TestQMEngine:
                     testLines.append(line)
         assert len(refLines) == len(testLines)
         for i in range(len(refLines)):
-            assert refLines[i] == testLines[i]
+            refLine = refLines[i].split()
+            testLine = testLines[i].split()
+            assert len(refLine) == len(testLine)
+            for j in range(len(refLine)):
+                try:
+                    assert checkUtils.checkFloat(refLine[j],testLine[j],0.0001)
+                except:
+                    assert refLine[j] == testLine[j]
         os.remove("qdata.txt")
         os.remove("all.mdcrd")
+
+    def test_writeResult(self):
+        os.chdir(os.path.dirname(__file__))
+        tccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in","qmengine/tc_backup.in")
+        energy = np.loadtxt(os.path.join("qmengine","energy.txt"))
+        grads = np.loadtxt(os.path.join("qmengine","grads.txt"))
+        result = MonkeyResult(10,energy,grads)
+        tccloudEngine.writeResult(result)
+        refLines = []
+        testLines = []
+        with open(os.path.join("qmengine","result.txt"),'r') as refF:
+            for line in refF.readlines():
+                refLines.append(line)
+        with open("tc_10.out",'r') as testF:
+            for line in testF.readlines():
+                testLines.append(line)
+        assert len(refLines) == len(testLines)
+        for i in range(len(refLines)):
+            refLine = refLines[i].split()
+            testLine = testLines[i].split()
+            assert len(refLine) == len(testLine)
+            for j in range(len(refLine)):
+                try:
+                    check = checkUtils.checkFloat(refLine[j],testLine[j])
+                except:
+                    check = (refLine[j] == testLine[j])
+                assert check
+        #os.remove("tc_10.out")
 

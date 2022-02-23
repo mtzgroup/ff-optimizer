@@ -684,7 +684,7 @@ coordIndex = []
 with open(os.path.join(args.dynamicsdir, args.coors), "r") as f:
     for line in f.readlines():
         if "frame" in line:
-            coordIndex.append(int(line.split()[2]))
+            coordIndex.append(int(line.split()[2])+1)
 startIndex = 0
 if args.start != None:
     while coordIndex[startIndex] < args.start:
@@ -699,7 +699,7 @@ if args.split != None:
         splitIndex += 1
     if splitIndex == 0:
         raise RuntimeError("There must be frames before " + args.split)
-    elif splitIndex == len(coordIndex) - 1:
+    elif splitIndex >= len(coordIndex):
         raise RuntimeError("There must be frames after " + args.split)
 
 # Make validation input for initial MM parameters
@@ -830,11 +830,11 @@ for i in range(1, args.maxcycles + 1):
             rstCount += 1
     if rstCount < 2:
         if args.split != None:
-            coor1 = randint(startIndex, splitIndex)
-            coor2 = randint(splitIndex+1, endIndex)
+            coor1 = coordIndex[randint(startIndex, splitIndex-1)]
+            coor2 = coordIndex[randint(splitIndex, endIndex)]
         else:
-            coor1 = randint(startIndex, endIndex)
-            coor2 = randint(startIndex, endIndex)
+            coor1 = coordIndex[randint(startIndex, endIndex)]
+            coor2 = coordIndex[randint(startIndex, endIndex)]
         getFrame(coor1, os.path.join(args.dynamicsdir, args.coors), samplePath)
         getFrame(coor2, os.path.join(args.dynamicsdir, args.coors), samplePath)
 
