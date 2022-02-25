@@ -9,9 +9,10 @@ import numpy as np
 
 class QMEngine():
 
-    def __init__(self,inputFile:str,backupInputFile:str):
+    def __init__(self,inputFile:str,backupInputFile:str,doResp=False):
         self.inputSettings = self.readInputFile(inputFile)
         self.backupInputSettings = self.readInputFile(backupInputFile)
+        self.doResp = doResp
 
     def readInputFile(self,inputFile:str):
         settings = []
@@ -20,7 +21,7 @@ class QMEngine():
                 splitLine = line.split()
                 # ignore commented lines, the coordinates specification, and run gradient
                 if len(splitLine) > 0:
-                    if splitLine[0][0] != '#' and splitLine[0].lower() != 'coordinates' and splitLine[0].lower() != 'run':
+                    if splitLine[0][0] != '#' and splitLine[0].lower() != 'coordinates' and splitLine[0].lower() != 'run' and splitLine[0].lower() != "resp":
                         setting = []
                         # for options > 2 tokens long
                         for token in splitLine:
@@ -36,6 +37,8 @@ class QMEngine():
         with open(fileName,'w') as f:
             f.write(f"coordinates {coordinates}\n")
             f.write(f"run gradient\n")
+            if self.doResp:
+                f.write(f"resp yes\n")
             for setting in settings:
                 # reassemble setting (if > 2 tokens long)
                 for token in setting:
@@ -43,7 +46,7 @@ class QMEngine():
                 f.write("\n")
 
 
-    def writeFBdata(self, energies:list, grads:list, coords:list):
+    def writeFBdata(self, energies:list, grads:list, coords:list, espXYZs = None, esps = None):
         with open("qdata.txt",'w') as f:
             for i in range(len(energies)):
                 f.write(f"JOB {i+1}\n")
@@ -55,7 +58,18 @@ class QMEngine():
                     gradLine = gradLine + str(round(float(grad),5)) + " "
                 f.write(coordLine + "\n")
                 f.write(f"ENERGY {str(round(float(energies[i]),6))}\n")
-                f.write(gradLine + "\n\n")
+                f.write(gradLine + "\n")
+                if espXYZs is not None:
+                    espXYZLine = "ESPXYZ "
+                    for xyz in espXYZs[i]:
+                        espXYZLine = espXYZLine + str(round(float(espXYZ),5)) + " "
+                    f.write(espXYZLine + "\n")
+                    espLine = "ESPVAL "
+                    for val in esps[i]:
+                        espLine = espLine + str(round(float(val),5)) + " "
+                    f.write(espLine + "\n\n")
+                else:
+                    f.write("\n")
 
         with open("all.mdcrd",'w') as f:
             f.write("Converted from pdb by QMEngine\n")
@@ -75,6 +89,12 @@ class QMEngine():
         coords = []
         energies = []
         grads = []
+        if self.doResp:
+            espXYZs = []
+            esps = []
+        else:
+            espXYZs = None
+            esps = None
         for f in os.listdir():
             if f.endswith(".pdb"):
                 coord = utils.readPDB(f)
@@ -87,25 +107,12 @@ class QMEngine():
                 energies.append(energy)
                 grads.append(grad)
                 coords.append(coord)
-        return energies, grads, coords
-
-    def getQMRefData(self, pdbs:list, calcDir:str):
-        pass
-
-    def restart(self, calcDir:str):
-        pdbs = []
-        os.chdir(calcDir)
-        for f in os.listdir():
-            if f.endswith(".pdb"):
-                name = f.split('.')[0]
-                tcOut = f"tc_{name}.out"
-                if os.path.isfile(tcOut):
-                    energy, status = utils.readGradFromTCout(f"tc_{name}.out")
-                    if status == -1:
-                        pdbs.append(f)
-                else:
-                    pdbs.append(f)
-        self.getQMRefData(pdbs, ".") 
+                if self.doResp:
+                    espXYZ, esp = utils.readEsp(f"esp_{name}.xyz")
+                    espXYZs.append(espXYZ)
+                    esps.append(esp)
+        return energies, grads, coords, espXYZs, espreadQMRefData()
+        super().writeFBdata(energies,grads,coords)
 
 class SbatchEngine(QMEngine):
 
@@ -140,7 +147,10 @@ class SbatchEngine(QMEngine):
             f.write("#!/bin/bash\n\n")
             f.write(f"#SBATCH -J FB_ref_gradient_{index}\n")
             f.write(f"#SBATCH --fin=tc_{index}.in,{index}.pdb,tc_{index}_backup.in\n")
-            f.write(f"#SBATCH --fout=tc_{index}.out\n")
+            if self.doResp:
+                f.write(f"#SBATCH --fout=tc_{index}.out,esp_{index}.xyz\n")
+            else:
+                f.write(f"#SBATCH --fout=tc_{index}.out\n")
             for line in self.sbatchOptions:
                 f.write(line)
             f.write("cd $SCRATCH\n\n")
@@ -150,6 +160,8 @@ class SbatchEngine(QMEngine):
             f.write("then\n")
             f.write(f"  terachem tc_{index}_backup.in > tc_{index}.out\n")
             f.write("fi\n")
+            if self.doResp:
+                f.write(f"mv scr.{index}/esp.xyz esp_{index}.xyz\n")
 
     def slurmCommand(self,command:list):
         maxTries = 100
@@ -187,8 +199,8 @@ class SbatchEngine(QMEngine):
                         runningIDs.append(runningID)
             jobIDs = runningIDs
 
-        energies, grads, coords = super().readQMRefData()
-        super().writeFBdata(energies,grads,coords)
+        energies, grads, coords, espXYZs, esps = super().readQMRefData()
+        super().writeFBdata(energies,grads,coords, espXYZs, esps)
 
 class DebugEngine(QMEngine):
 
@@ -208,8 +220,10 @@ class DebugEngine(QMEngine):
             if grad == -1:  
                 super().writeInputFile(self.backupInputSettings, pdb, f"tc_{name}_backup.in")
                 os.system(f"terachem tc_{name}_backup.in > tc_{name}.out")
-        energies, grads, coords = super().readQMRefData()
-        super().writeFBdata(energies,grads,coords)
+            if self.doResp:
+                espXYZ, esps = utils.readEsp(f"scr.{name}/esp.xyz")
+        energies, grads, coords, espXYZs, esps = super().readQMRefData()
+        super().writeFBdata(energies,grads,coords,espXYZs,esps)
 
 class TCCloudEngine(QMEngine):
     
@@ -309,5 +323,5 @@ class TCCloudEngine(QMEngine):
                     failedIndex = result.id
             if status == -1:
                 raise RuntimeError("Batch resubmission reached size 1; QM calculations incomplete")
-        energies, grads, coords = super().readQMRefData()
-        super().writeFBdata(energies,grads,coords) 
+        energies, grads, coords, espXYZs, esps = super().readQMRefData()
+        super().writeFBdata(energies,grads,coords,espXYZs,esps) 
