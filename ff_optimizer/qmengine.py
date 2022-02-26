@@ -62,11 +62,11 @@ class QMEngine():
                 if espXYZs is not None:
                     espXYZLine = "ESPXYZ "
                     for xyz in espXYZs[i]:
-                        espXYZLine = espXYZLine + str(round(float(espXYZ),5)) + " "
+                        espXYZLine = espXYZLine + str(round(float(xyz),6)) + " "
                     f.write(espXYZLine + "\n")
                     espLine = "ESPVAL "
                     for val in esps[i]:
-                        espLine = espLine + str(round(float(val),5)) + " "
+                        espLine = espLine + str(round(float(val),6)) + " "
                     f.write(espLine + "\n\n")
                 else:
                     f.write("\n")
@@ -116,10 +116,11 @@ class QMEngine():
 
 class SbatchEngine(QMEngine):
 
-    def __init__(self, inputFile:str, backupInputFile:str, sbatchFile:str, user:str):
+    def __init__(self, inputFile:str, backupInputFile:str, sbatchFile:str, user:str, doResp=False):
         self.user = user
         self.readSbatchFile(sbatchFile)
-        QMEngine.__init__(self,inputFile,backupInputFile)
+        super().__init__(self,inputFile,backupInputFile,doResp)
+
 
     def readSbatchFile(self, sbatchFile:str):
         tcVersion = "TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176"
@@ -204,8 +205,8 @@ class SbatchEngine(QMEngine):
 
 class DebugEngine(QMEngine):
 
-    def __init__(self, inputFile, backupInputFile):
-        super().__init__(inputFile, backupInputFile)
+    def __init__(self, inputFile, backupInputFile, doResp=False):
+        super().__init__(inputFile, backupInputFile, doResp)
 
     def getQMRefData(self, pdbs:list, calcDir:str):
         os.chdir(calcDir)
