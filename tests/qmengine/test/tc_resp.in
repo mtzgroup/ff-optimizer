@@ -1,0 +1,7 @@
+basis 6-31gss
+dftd d3
+method b3lyp
+run energy
+resp yes
+charge 0
+coordinates 9.pdb

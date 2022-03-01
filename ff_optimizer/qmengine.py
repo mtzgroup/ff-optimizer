@@ -111,20 +111,34 @@ class QMEngine():
                     espXYZ, esp = utils.readEsp(f"esp_{name}.xyz")
                     espXYZs.append(espXYZ)
                     esps.append(esp)
-        return energies, grads, coords, espXYZs, espreadQMRefData()
-        super().writeFBdata(energies,grads,coords)
+        return energies, grads, coords, espXYZs, esps
+
+    def restart(self, calcDir:str):
+        pdbs = []
+        os.chdir(calcDir)
+        for f in os.listdir():
+            if f.endswith(".pdb"):
+                name = f.split('.')[0]
+                tcOut = f"tc_{name}.out"
+                if os.path.isfile(tcOut):
+                    energy, status = utils.readGradFromTCout(f"tc_{name}.out")
+                    if status == -1:
+                        pdbs.append(f)
+                else:
+                    pdbs.append(f)
+        self.getQMRefData(pdbs, ".") 
 
 class SbatchEngine(QMEngine):
 
     def __init__(self, inputFile:str, backupInputFile:str, sbatchFile:str, user:str, doResp=False):
         self.user = user
         self.readSbatchFile(sbatchFile)
-        super().__init__(self,inputFile,backupInputFile,doResp)
+        super().__init__(inputFile,backupInputFile,doResp)
 
 
     def readSbatchFile(self, sbatchFile:str):
-        tcVersion = "TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176"
-        sbatchOptions = []
+        tcVersion = None #"TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176"
+        sbatchLines = []
         with open(sbatchFile,'r') as f:
             for line in f.readlines():
                 if line.startswith("#SBATCH"):
@@ -132,30 +146,33 @@ class SbatchEngine(QMEngine):
                     option = line.split()[1].split('=')[0]
                     # exclude options we're setting ourselves
                     if option != '--fin' and option != '--fout' and option != '-J':
-                        sbatchOptions.append(line)
+                        sbatchLines.append(line)
+                    self.optionsEnd = len(sbatchLines)
                 # get TC version from ml line
-                if "TeraChem" in line and not line.startswith('#'):  
+                elif "TeraChem" in line and not line.startswith('#'):  
                     if "ml" in line or "module load" in line:
-                        for token in line:
+                        for token in line.split():
                             if token.startswith("TeraChem"):
                                 tcVersion = token
-        self.tcVersion = tcVersion
-        self.sbatchOptions = sbatchOptions
+                                sbatchLines.append(line)
+                                break
+                else:
+                    sbatchLines.append(line)
+        if tcVersion == None:
+            sbatchLines.append("module load TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176\n")
+        self.sbatchLines = sbatchLines
 
     def writeSbatchFile(self, index:str, fileName:str):
         index = str(index)
+        if self.doResp:
+            self.sbatchLines.insert(self.optionsEnd,f"#SBATCH --fout=tc_{index}.out,esp_{index}.xyz\n")
+        else:
+            self.sbatchLines.insert(self.optionsEnd,f"#SBATCH --fout=tc_{index}.out\n")
+        self.sbatchLines.insert(self.optionsEnd,f"#SBATCH --fin=tc_{index}.in,{index}.pdb,tc_{index}_backup.in\n")
+        self.sbatchLines.insert(self.optionsEnd,f"#SBATCH -J FB_ref_gradient_{index}\n")
         with open(fileName,'w') as f:
-            f.write("#!/bin/bash\n\n")
-            f.write(f"#SBATCH -J FB_ref_gradient_{index}\n")
-            f.write(f"#SBATCH --fin=tc_{index}.in,{index}.pdb,tc_{index}_backup.in\n")
-            if self.doResp:
-                f.write(f"#SBATCH --fout=tc_{index}.out,esp_{index}.xyz\n")
-            else:
-                f.write(f"#SBATCH --fout=tc_{index}.out\n")
-            for line in self.sbatchOptions:
+            for line in self.sbatchLines:
                 f.write(line)
-            f.write("cd $SCRATCH\n\n")
-            f.write(f"module load {self.tcVersion}\n")
             f.write(f"terachem tc_{index}.in > tc_{index}.out\n")
             f.write(f"if [ $(grep -c \"Job finished\" tc_{index}.out) -ne 1 ]\n")
             f.write("then\n")
