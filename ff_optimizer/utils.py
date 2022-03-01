@@ -113,3 +113,17 @@ def readOpt(filename):
     results["labels"] = labels
     results["initialParams"] = initialParams
     return status, results
+
+def readEsp(filename):
+    lineCounter = 1
+    espXYZ = []
+    esp = []
+    with open(filename, "r") as f:
+        for line in f.readlines():
+            splitLine = line.split()
+            if lineCounter > 2 and len(splitLine) > 0:
+                for i in range(1,4):
+                    espXYZ.append(splitLine[i])
+                esp.append(splitLine[4])
+            lineCounter += 1
+    return espXYZ, esp

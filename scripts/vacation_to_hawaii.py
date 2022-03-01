@@ -453,6 +453,12 @@ parser.add_argument(
     help="Restart partially complete forcefield optimization",
     action="store_true",
 )
+parser.add_argument(
+    "--resp",
+    help="Restart partially complete forcefield optimization",
+    action="store_true",
+    default=False,
+)
 args = parser.parse_args()
 
 # Set up the calculation
@@ -620,17 +626,35 @@ if restartCycle < 0:
 # Set some miscellaneous variables
 home = os.getcwd()
 targetLines = []
+validTargetLines = []
 validInitialTargetLines = []
 inTarget = False
 with open(os.path.join(args.optdir, args.opt0), "r") as f:
     for line in f.readlines():
+        if len(line.split()) == 0:
+            continue
         if "$target" in line:
             inTarget = True
         if inTarget:
             targetLines.append(line)
-            if "amber_leapcmd" in line:
+            if line.split()[0] == "resp":
+                continue
+            validTargetLines.append(line)
+            if line.split()[0] == "amber_leapcmd":
                 line = line.replace(line.split()[1], "setup_valid_initial.leap")
             validInitialTargetLines.append(line)
+if args.resp:
+    respAdded = False
+    respWeightAdded = False
+    for line in targetLines:
+        if line.split()[0] == "resp":
+            respAdded = True
+        if line.split()[0] == "w_resp":
+            respWeightAdded = True
+    if not respWeightAdded:
+        targetLines.insert(1, "w_resp 1\n")
+    if not respAdded:
+        targetLines.insert(1, "resp 1\n")
 with open(os.path.join(args.optdir, "setup.leap"), "r") as leapRead:
     with open(os.path.join(args.optdir, "setup_valid_initial.leap"), "w") as leapWrite:
         for line in leapRead.readlines():
@@ -717,11 +741,11 @@ if not os.path.isfile(os.path.join(args.optdir, "valid_0_initial.in")):
 
 # Initialize QMEngine
 if args.engine == 'debug':
-    qmEngine = qmengine.DebugEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long))
+    qmEngine = qmengine.DebugEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),args.resp)
 elif args.engine == 'queue':
-    qmEngine = qmengine.SbatchEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),os.path.join(args.sampledir,args.sbatch),os.getenv('USER'))
+    qmEngine = qmengine.SbatchEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),os.path.join(args.sampledir,args.sbatch),os.getenv('USER'),args.resp)
 elif args.engine == 'tccloud':
-    qmEngine = qmengine.TCCloudEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long))
+    qmEngine = qmengine.TCCloudEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),args.resp)
 
 # First optimization cycle is not necessary if restarting from somewhere later
 if restartCycle < 0:
@@ -1053,7 +1077,7 @@ for i in range(1, args.maxcycles + 1):
     )
     addTargetLines(
         os.path.join(args.optdir, "valid_" + str(i) + ".in"),
-        targetLines,
+        validTargetLines,
         initialTarget,
         "valid_" + str(i),
     )

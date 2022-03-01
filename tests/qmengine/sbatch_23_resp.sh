@@ -6,7 +6,7 @@
 #SBATCH --exclude=fire-11-01
 #SBATCH -J FB_ref_gradient_23
 #SBATCH --fin=tc_23.in,23.pdb,tc_23_backup.in
-#SBATCH --fout=tc_23.out
+#SBATCH --fout=tc_23.out,esp_23.xyz
 cd $SCRATCH
 
 module unload MPICH2
@@ -17,3 +17,4 @@ if [ $(grep -c "Job finished" tc_23.out) -ne 1 ]
 then
   terachem tc_23_backup.in > tc_23.out
 fi
+mv scr.23/esp.xyz esp_23.xyz

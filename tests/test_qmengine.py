@@ -28,6 +28,14 @@ class TestQMEngine:
         assert qmEngine.inputSettings == inputSettings
         assert qmEngine.backupInputSettings == backupInputSettings
         
+    def test_readInputResp(self):
+        os.chdir(os.path.dirname(__file__))
+        qmEngine = qmengine.QMEngine("qmengine/tcResp.in","qmengine/tc_backup.in",doResp=True)
+        inputSettings = [['basis','6-31gss'],['method','b3lyp'],['charge','0'],['dftd','d3']]
+        backupInputSettings = [['basis','6-31gss'],['method','b3lyp'],['charge','0'],['dftd','d3'],['threall','1.0e-14'],['diismaxvecs','40'],['maxit','200']] 
+        assert qmEngine.inputSettings == inputSettings
+        assert qmEngine.backupInputSettings == backupInputSettings
+        
     # check that settings are written out correctly
     def test_writeInputFile(self):
         os.chdir(os.path.dirname(__file__))
@@ -38,6 +46,56 @@ class TestQMEngine:
         with open(testPath,'r') as f:
             assert "coordinates coors.xyz" in f.readline()
             assert "run gradient" in f.readline()
+        readSettings = qmEngine.readInputFile(testPath)
+        os.remove(testPath)
+        assert readSettings == inputSettings
+
+    def test_writeInputFileResp(self):
+        os.chdir(os.path.dirname(__file__))
+        qmEngine = qmengine.QMEngine("qmengine/tc.in","qmengine/tc_backup.in",doResp=True)
+        inputSettings = [['basis','6-31gss'],['method','b3lyp'],['charge','0'],['dftd','d3']]
+        testPath = "qmengine/testResp.in"
+        qmEngine.writeInputFile(inputSettings, "coors.xyz", testPath)
+        with open(testPath,'r') as f:
+            assert "coordinates coors.xyz" in f.readline()
+            assert "run gradient" in f.readline()
+            assert "resp yes" in f.readline()
+        readSettings = qmEngine.readInputFile(testPath)
+        os.remove(testPath)
+        assert readSettings == inputSettings
+
+    # check that pdbs are read in correctly
+    def test_readPDB(self):
+        os.chdir(os.path.dirname(__file__))
+        qmEngine = qmengine.QMEngine("qmengine/tc.in","qmengine/tc_backup.in")
+        testCoords = utils.readPDB("qmengine/test.pdb")
+        coords = np.loadtxt("qmengine/coords.txt").flatten()
+        assert checkUtils.checkArray(coords, testCoords)
+    
+    # check that settings are written out correctly
+    def test_writeInputFile(self):
+        os.chdir(os.path.dirname(__file__))
+        qmEngine = qmengine.QMEngine("qmengine/tc.in","qmengine/tc_backup.in")
+        inputSettings = [['basis','6-31gss'],['method','b3lyp'],['charge','0'],['dftd','d3']]
+        testPath = "qmengine/test.in"
+        qmEngine.writeInputFile(inputSettings, "coors.xyz", testPath)
+        with open(testPath,'r') as f:
+            assert "coordinates coors.xyz" in f.readline()
+            assert "run gradient" in f.readline()
+        readSettings = qmEngine.readInputFile(testPath)
+        os.remove(testPath)
+        assert readSettings == inputSettings
+
+    def test_writeInputFileResp(self):
+        os.chdir(os.path.dirname(__file__))
+        qmEngine = qmengine.QMEngine("qmengine/tc.in","qmengine/tc_backup.in",doResp=True)
+        inputSettings = [['basis','6-31gss'],['method','b3lyp'],['charge','0'],['dftd','d3']]
+        testPath = "qmengine/testResp.in"
+        qmEngine.writeInputFile(inputSettings, "coors.xyz", testPath)
+        with open(testPath,'r') as f:
+            assert "coordinates coors.xyz" in f.readline()
+            assert "run gradient" in f.readline()
+            assert "resp yes" in f.readline()
         readSettings = qmEngine.readInputFile(testPath)
         os.remove(testPath)
         assert readSettings == inputSettings
@@ -99,6 +157,48 @@ class TestQMEngine:
                     assert refLine[j] == testLine[j]
         os.remove("qdata.txt")
         os.remove("all.mdcrd")
+
+    def test_writeFBdataResp(self):
+        os.chdir(os.path.dirname(__file__))
+        qmEngine = qmengine.QMEngine("qmengine/tc.in","qmengine/tc_backup.in",doResp=True)
+
+        coords = []
+        energies = []
+        grads = []
+        espXYZs = []
+        esps = []
+        for i in range(1,26):
+            coords.append(utils.readPDB(f"qmengine/test/{str(i)}.pdb"))
+            energy, grad = utils.readGradFromTCout(f"qmengine/test/tc_{str(i)}.out")
+            energies.append(energy)
+            grads.append(grad)
+            espXYZ, esp = utils.readEsp(f"qmengine/test/esp_{str(i)}.xyz")
+            espXYZs.append(espXYZ)
+            esps.append(esp)
+        qmEngine.writeFBdata(energies,grads,coords,espXYZs,esps)
+        refLines = []
+        with open("qmengine/qdataResp.txt",'r') as refF:
+            for line in refF.readlines():
+                if len(line.split()) > 0:
+                    refLines.append(line)
+        testLines = []
+        with open("qdata.txt",'r') as testF:
+            for line in testF.readlines():
+                if len(line.split()) > 0:
+                    testLines.append(line)
+        assert len(refLines) == len(testLines)
+        for i in range(len(refLines)):
+            refLine = refLines[i].split()
+            testLine = testLines[i].split()
+            assert len(refLine) == len(testLine)
+            for j in range(len(refLine)):
+                try:
+                    assert checkUtils.checkFloat(refLine[j],testLine[j],0.0001)
+                except:
+                    assert refLine[j] == testLine[j]
+        os.remove("qdata.txt")
+        os.remove("all.mdcrd")
+
 
     def test_writeResult(self):
         os.chdir(os.path.dirname(__file__))

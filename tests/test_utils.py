@@ -25,3 +25,11 @@ def test_readGradFromTCout_TCCloud():
 
 def test_readOpt():
     pass
+
+def test_readEsp():
+    os.chdir(os.path.dirname(__file__))
+    testEspXYZ, testEsp = utils.readEsp(os.path.join("utils","esp.xyz"))
+    refEspXYZ = np.loadtxt(os.path.join("utils","espXYZ.txt")).flatten()
+    refEsp = np.loadtxt(os.path.join("utils","esp.txt"))
+    assert checkUtils.checkArray(testEspXYZ,refEspXYZ,0.00001)
+    assert checkUtils.checkArray(testEsp,refEsp,0.00001)
