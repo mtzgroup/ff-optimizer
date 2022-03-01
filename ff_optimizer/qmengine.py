@@ -21,7 +21,7 @@ class QMEngine():
                 splitLine = line.split()
                 # ignore commented lines, the coordinates specification, and run gradient
                 if len(splitLine) > 0:
-                    if splitLine[0][0] != '#' and splitLine[0].lower() != 'coordinates' and splitLine[0].lower() != 'run' and splitLine[0].lower() != "resp":
+                    if splitLine[0][0] != '#' and splitLine[0].lower() != 'coordinates' and splitLine[0].lower() != 'run' and splitLine[0].lower() != "resp" and splitLine[0].lower() != "esp_restraint_a" and splitLine[0].lower() != "esp_restraint_b":
                         setting = []
                         # for options > 2 tokens long
                         for token in splitLine:
@@ -38,7 +38,9 @@ class QMEngine():
             f.write(f"coordinates {coordinates}\n")
             f.write(f"run gradient\n")
             if self.doResp:
-                f.write(f"resp yes\n")
+                f.write("resp yes\n")
+                f.write("esp_restraint_a 0\n")
+                f.write("esp_restraint_b 0\n")
             for setting in settings:
                 # reassemble setting (if > 2 tokens long)
                 for token in setting:
@@ -163,15 +165,16 @@ class SbatchEngine(QMEngine):
         self.sbatchLines = sbatchLines
 
     def writeSbatchFile(self, index:str, fileName:str):
+        sbatchLines = self.sbatchLines.copy()
         index = str(index)
         if self.doResp:
-            self.sbatchLines.insert(self.optionsEnd,f"#SBATCH --fout=tc_{index}.out,esp_{index}.xyz\n")
+            sbatchLines.insert(self.optionsEnd,f"#SBATCH --fout=tc_{index}.out,esp_{index}.xyz\n")
         else:
-            self.sbatchLines.insert(self.optionsEnd,f"#SBATCH --fout=tc_{index}.out\n")
-        self.sbatchLines.insert(self.optionsEnd,f"#SBATCH --fin=tc_{index}.in,{index}.pdb,tc_{index}_backup.in\n")
-        self.sbatchLines.insert(self.optionsEnd,f"#SBATCH -J FB_ref_gradient_{index}\n")
+            sbatchLines.insert(self.optionsEnd,f"#SBATCH --fout=tc_{index}.out\n")
+        sbatchLines.insert(self.optionsEnd,f"#SBATCH --fin=tc_{index}.in,{index}.pdb,tc_{index}_backup.in\n")
+        sbatchLines.insert(self.optionsEnd,f"#SBATCH -J FB_ref_gradient_{index}\n")
         with open(fileName,'w') as f:
-            for line in self.sbatchLines:
+            for line in sbatchLines:
                 f.write(line)
             f.write(f"terachem tc_{index}.in > tc_{index}.out\n")
             f.write(f"if [ $(grep -c \"Job finished\" tc_{index}.out) -ne 1 ]\n")
@@ -202,7 +205,7 @@ class SbatchEngine(QMEngine):
         for pdb in pdbs:
             name = pdb.split('.')[0]
             super().writeInputFile(self.inputSettings, pdb, f"tc_{name}.in")
-            super().writeInputFile(self.backupInputSettings, pdb, f"tc_{name}.in")
+            super().writeInputFile(self.backupInputSettings, pdb, f"tc_{name}_backup.in")
             self.writeSbatchFile(name,f"sbatch_{name}.sh")
             job = self.slurmCommand(["sbatch",f"sbatch_{name}.sh"])
             jobIDs.append(job.split()[3])
