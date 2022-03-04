@@ -701,8 +701,10 @@ if restartCycle < 0:
             + " is not in "
             + args.optdir
         )
-mdFiles = os.listdir(args.sampledir)
-
+mdFiles = []
+for f in os.listdir(args.sampledir):
+    if os.path.isfile(os.path.join(args.sampledir,f)):
+        mdFiles.append(f)
 # Set start, split, end indices for sampling from QM trajectory
 coordIndex = []
 with open(os.path.join(args.dynamicsdir, args.coors), "r") as f:
@@ -741,11 +743,13 @@ if not os.path.isfile(os.path.join(args.optdir, "valid_0_initial.in")):
 
 # Initialize QMEngine
 if args.engine == 'debug':
-    qmEngine = qmengine.DebugEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),args.resp)
+    qmEngine = qmengine.DebugEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),doResp=args.resp)
 elif args.engine == 'queue':
-    qmEngine = qmengine.SbatchEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),os.path.join(args.sampledir,args.sbatch),os.getenv('USER'),args.resp)
+    qmEngine = qmengine.SbatchEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),os.path.join(args.sampledir,args.sbatch),os.getenv('USER'),doResp=args.resp)
 elif args.engine == 'tccloud':
-    qmEngine = qmengine.TCCloudEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),args.resp)
+    qmEngine = qmengine.TCCloudEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long))
+    if args.resp == True:
+        print("WARNING! RESP not implemented for this QM engine")
 
 # First optimization cycle is not necessary if restarting from somewhere later
 if restartCycle < 0:
@@ -822,11 +826,11 @@ os.rename(
 )
 os.rename(os.path.join(args.optdir, args.opt0), os.path.join(args.optdir, "opt_0.in"))
 
+print("%7s%15s%20s%23s" % ("Epoch","Validation","Current-Previous","Current-last Current"))
 for i in range(1, args.maxcycles + 1):
 
     if i <= restartCycle:
         continue
-    print("Beginning optimization cycle " + str(i))
 
     # Make sampling directory and copy files into it
     sampleName = str(i) + "_cycle_" + str(i)
@@ -1091,10 +1095,12 @@ for i in range(1, args.maxcycles + 1):
     # Run ForceBalance on each input
     os.chdir(args.optdir)
     # TODO: valid_previous calculation broken on restart
+
+    #What is this code doing?
     if len(validPrevious) <= i:
         if i > 1:
-            src = os.path.join(args.optdir, "result", "opt_" + str(i - 1), "*")
-            dest = os.path.join(args.optdir, "forcefield")
+            src = os.path.join("result", "opt_" + str(i - 1), "*")
+            dest = os.path.join("forcefield",".")
             os.system(f"cp {src} {dest}")
         os.system(
             "ForceBalance.py valid_"
@@ -1133,6 +1139,11 @@ for i in range(1, args.maxcycles + 1):
         )
         validInitial.append(readValid("valid_" + str(i) + "_initial.out"))
     os.chdir(home)
+
+    if i == 1:
+        print("%7d%15.8f%20.8f" % (i,valid[-1],valid[-1]-validPrevious[-1]))
+    else:
+        print("%7d%15.8f%20.8f%23.8f" % (i,valid[-1],valid[-1]-validPrevious[-1],valid[-1]-valid[-2]))
 
     # Graph results so far
     x = range(1, i + 1)
