@@ -9,7 +9,7 @@ import numpy as np
 
 class QMEngine():
 
-    def __init__(self,inputFile:str,backupInputFile:str,doResp=False):
+    def __init__(self,inputFile:str,backupInputFile:str,doResp:bool):
         self.inputSettings = self.readInputFile(inputFile)
         self.backupInputSettings = self.readInputFile(backupInputFile)
         self.doResp = doResp
@@ -251,7 +251,7 @@ class TCCloudEngine(QMEngine):
     def __init__(self, inputFile:str, backupInputFile:str, batchSize = None):
         self.batchSize = batchSize
         self.client = TCClient()
-        super().__init__(inputFile, backupInputFile)
+        super().__init__(inputFile, backupInputFile, False)
         self.keywords = {}
         self.backupKeywords = {}
         for setting in self.inputSettings:
@@ -274,7 +274,6 @@ class TCCloudEngine(QMEngine):
                 self.backupKeywords[setting[0]] = keyword
                     
     def computeBatch(self, atomicInputs:list):
-        print("Submitting jobs to TCCloud")
         status = 0
         if self.batchSize == None:
             batchSize = len(atomicInputs)
