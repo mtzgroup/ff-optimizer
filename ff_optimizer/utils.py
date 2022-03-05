@@ -65,7 +65,7 @@ def readGradFromTCout(outFile:str):
                     finished = True
         if not finished:
             print("File %s did not complete calculation" % outFile)
-            grads = -1
+            grads = None
     return energy, grads
 
 def readOpt(filename):

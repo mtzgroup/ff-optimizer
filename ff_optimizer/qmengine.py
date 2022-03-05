@@ -124,7 +124,7 @@ class QMEngine():
                 tcOut = f"tc_{name}.out"
                 if os.path.isfile(tcOut):
                     energy, status = utils.readGradFromTCout(f"tc_{name}.out")
-                    if status == -1:
+                    if status is None:
                         pdbs.append(f)
                 else:
                     pdbs.append(f)
