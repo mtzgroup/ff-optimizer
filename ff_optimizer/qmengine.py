@@ -275,6 +275,9 @@ class TCCloudEngine(QMEngine):
                     
     def computeBatch(self, atomicInputs:list):
         status = 0
+        # If there are no jobs to run after restart
+        if len(atomicInputs) == 0:
+            return status, []
         if self.batchSize == None:
             batchSize = len(atomicInputs)
         else:
