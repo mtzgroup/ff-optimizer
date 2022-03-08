@@ -521,6 +521,10 @@ if args.restart:
                         )
                     except:
                         print("valids didn't complete")
+                        # Chop valid lists to the size before trying to append
+                        valid = valid[:i]
+                        validPrevious = validPrevious[:i]
+                        validInitial = validInitial[:i]
                         break
                 for j in range(len(results["labels"])):
                     if labels[j] == results["labels"][j]:
