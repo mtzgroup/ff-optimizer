@@ -4,6 +4,7 @@ from . import checkUtils
 import os
 import sys
 from tccloud.models import AtomicResult
+from qcelemental.util.serialization import json_loads
 
 class MonkeyProperties():
     def __init__(self, energy):
@@ -16,6 +17,9 @@ class MonkeyResult():
         self.return_result = grad
         self.properties = MonkeyProperties(energy)
         self.success = True
+
+    def json(self):
+        return "test"
 
 class TestQMEngine:
         
@@ -199,32 +203,36 @@ class TestQMEngine:
         os.remove("qdata.txt")
         os.remove("all.mdcrd")
 
-
     def test_writeResult(self):
+        qmEngine = qmengine.QMEngine("qmengine/tc.in","qmengine/tc_backup.in")
         os.chdir(os.path.dirname(__file__))
-        tccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in","qmengine/tc_backup.in")
-        energy = np.loadtxt(os.path.join("qmengine","energy.txt"))
-        grads = np.loadtxt(os.path.join("qmengine","grads.txt"))
-        result = MonkeyResult(10,energy,grads)
-        tccloudEngine.writeResult(result)
-        refLines = []
-        testLines = []
-        with open(os.path.join("qmengine","result.txt"),'r') as refF:
-            for line in refF.readlines():
-                refLines.append(line)
-        with open("tc_10.out",'r') as testF:
-            for line in testF.readlines():
-                testLines.append(line)
-        assert len(refLines) == len(testLines)
-        for i in range(len(refLines)):
-            refLine = refLines[i].split()
-            testLine = testLines[i].split()
-            assert len(refLine) == len(testLine)
-            for j in range(len(refLine)):
-                try:
-                    check = checkUtils.checkFloat(refLine[j],testLine[j])
-                except:
-                    check = (refLine[j] == testLine[j])
-                assert check
-        #os.remove("tc_10.out")
+        with open(os.path.join("qmengine","tc_1_ref.json"),'r') as f:
+            refResult = AtomicResult(**json_loads(f.read()))
+        qmEngine.writeResult(os.path.join("qmengine","tc_1.out"),os.path.join("qmengine","1.pdb"))
+        with open(os.path.join("qmengine","tc_1.json"),'r') as f:
+            testResult = AtomicResult(**json_loads(f.read()))
+        os.remove(os.path.join("qmengine","tc_1.json"))
+        assert checkUtils.checkFloat(refResult.properties.return_energy,testResult.properties.return_energy,0.00001)
+        assert checkUtils.checkArray(refResult.return_result,testResult.return_result,0.00001)
 
+    def test_restart(self, monkeypatch):
+        os.chdir(os.path.dirname(__file__))
+        qmEngine = qmengine.QMEngine("qmengine/tc.in","qmengine/tc_backup.in")
+
+        def monkeyCompute(pdbs, folder):
+            pdbs = sorted(pdbs)
+            with open("pdbs.txt",'w') as f:
+                for pdb in pdbs:
+                    f.write(str(pdb) + "\n")
+            return pdbs
+        monkeypatch.setattr(qmEngine,"getQMRefData",monkeyCompute)
+        qmEngine.restart(os.path.join("qmengine","restart"))
+        testPdbs = []
+        with open("pdbs.txt",'r') as f:
+            for line in f.readlines():
+                testPdbs.append(line.replace("\n",''))
+        os.remove("pdbs.txt")
+        refPdbs = ["3.pdb", "6.pdb", "9.pdb"]
+        assert len(testPdbs) == len(refPdbs)
+        for i in range(len(testPdbs)):
+            assert testPdbs[i] == refPdbs[i]
