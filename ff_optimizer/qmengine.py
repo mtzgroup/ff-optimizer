@@ -336,7 +336,7 @@ class TCCloudEngine(QMEngine):
             sleep(30)
             if self.batchSize < 2:
                 status = -1
-                return
+                return status, results
             tempStatus, results = self.computeBatch(atomicInputs)
             if tempStatus == -1:
                 status = -1
