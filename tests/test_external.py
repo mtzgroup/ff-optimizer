@@ -55,10 +55,10 @@ def test_debug_full():
     os.system("vacation_to_hawaii.py --stride 1 --split 2 --maxcycles 1 --engine debug")
     compareQdata(os.path.join("3_ref","qdata.txt"),os.path.join("1_opt","targets","train_1","qdata.txt"))
     #compareOpt(os.path.join("3_ref","opt_1.out"),os.path.join("1_opt","opt_1.out"))
-    os.chdir("../../")
     os.system("./clean.sh")
 
 @pytest.mark.external
+@pytest.mark.tccloud
 def test_tccloud_full():
     os.chdir(os.path.join(os.path.dirname(__file__),"full"))
     os.system("./clean.sh")
