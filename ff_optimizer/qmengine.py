@@ -1,15 +1,18 @@
 import os
 import subprocess
 from tccloud import TCClient
-from tccloud.models import AtomicInput, Molecule
+from tccloud.models import AtomicInput, Molecule, AtomicResult
 from . import utils, units
 from math import ceil
 from time import sleep
 import numpy as np
+from qcelemental.util.serialization import json_loads
+from qcelemental.models.results import AtomicResultProperties
+from qcelemental.models import Provenance
 
 class QMEngine():
 
-    def __init__(self,inputFile:str,backupInputFile:str,doResp:bool):
+    def __init__(self,inputFile:str,backupInputFile:str,doResp=False):
         self.inputSettings = self.readInputFile(inputFile)
         self.backupInputSettings = self.readInputFile(backupInputFile)
         self.doResp = doResp
@@ -46,7 +49,6 @@ class QMEngine():
                 for token in setting:
                     f.write(f"{token} ")
                 f.write("\n")
-
 
     def writeFBdata(self, energies:list, grads:list, coords:list, espXYZs = None, esps = None):
         with open("qdata.txt",'w') as f:
@@ -87,6 +89,31 @@ class QMEngine():
                 if tokenCounter != 1:
                     f.write("\n")
 
+    def writeResult(self, tcOut, pdb):
+        energy, grad = utils.readGradFromTCout(tcOut)
+        mol = utils.convertPDBtoMolecule(pdb)
+        properties = AtomicResultProperties()
+        model = {"method" : "see tc.in", "basis" : "see tc.in"}
+        provenance = Provenance(**{"creator" : "ffoptimizer (file-based)"})
+        name = tcOut.split('.')[0]
+        jobId = name.replace('tc_','')
+        if type(grad) == int:
+            if grad == -1:
+                result = AtomicResult(**{"molecule" : mol, "driver" : "gradient", "model" : model, "provenance" : provenance, "properties" : properties, "return_result" : np.zeros(mol.geometry.shape), "success" : False, "id" : jobId})
+                with open(f"{name}.json",'w') as f:
+                    f.write(result.json())
+                return
+        properties = AtomicResultProperties(**{"return_energy" : energy})
+        result = AtomicResult(**{"molecule" : mol, "driver" : "gradient", "model" : model, "provenance" : provenance, "properties" : properties, "return_result" : grad, "success" : True, "id" : jobId})
+        #os.remove(tcOut)
+        with open(f"{name}.json",'w') as f:
+            f.write(result.json())
+
+    def readResult(self, json):
+        with open(json,'r') as f:
+            result = AtomicResult(**json_loads(f.read()))
+        return result
+        
     def readQMRefData(self):
         coords = []
         energies = []
@@ -101,13 +128,12 @@ class QMEngine():
             if f.endswith(".pdb"):
                 coord = utils.readPDB(f)
                 name = f.split('.')[0]
-                tcOut = f"tc_{name}.out"
-                energy, grad = utils.readGradFromTCout(tcOut)
-                if type(grad) == int:
-                    if grad == -1:
-                        raise RuntimeError(f"Terachem job {tcOut} in {os.getcwd()} did not succeed!")
-                energies.append(energy)
-                grads.append(grad)
+                json = f"tc_{name}.json"
+                result = self.readResult(json)
+                if not result.success:
+                    raise RuntimeError(f"Terachem job {json} in {os.getcwd()} did not succeed!")
+                energies.append(result.properties.return_energy)
+                grads.append(result.return_result.flatten())
                 coords.append(coord)
                 if self.doResp:
                     espXYZ, esp = utils.readEsp(f"esp_{name}.xyz")
@@ -121,14 +147,22 @@ class QMEngine():
         for f in os.listdir():
             if f.endswith(".pdb"):
                 name = f.split('.')[0]
-                tcOut = f"tc_{name}.out"
-                if os.path.isfile(tcOut):
-                    energy, status = utils.readGradFromTCout(f"tc_{name}.out")
-                    if status is None:
+                json = f"tc_{name}.json"
+                if os.path.isfile(json):
+                    try:
+                        with open(json, 'r') as j:
+                            result = AtomicResult(**json_loads(j.read()))
+                    except:
+                        pdbs.append(f)
+                    if not result.success:
                         pdbs.append(f)
                 else:
                     pdbs.append(f)
         self.getQMRefData(pdbs, ".") 
+
+    # This is the function which must be implemented by inherited classes
+    def getQMRefData(self, pdbs:list, calcDir:str):
+        pass
 
 class SbatchEngine(QMEngine):
 
@@ -136,7 +170,6 @@ class SbatchEngine(QMEngine):
         self.user = user
         self.readSbatchFile(sbatchFile)
         super().__init__(inputFile,backupInputFile,doResp)
-
 
     def readSbatchFile(self, sbatchFile:str):
         tcVersion = None #"TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176"
@@ -220,6 +253,10 @@ class SbatchEngine(QMEngine):
                         runningIDs.append(runningID)
             jobIDs = runningIDs
 
+        for pdb in pdbs:
+            name = pdb.split('.')[0]
+            super().writeResult(f"tc_{name}.out",pdb)
+
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies,grads,coords, espXYZs, esps)
 
@@ -243,6 +280,8 @@ class DebugEngine(QMEngine):
                 os.system(f"terachem tc_{name}_backup.in > tc_{name}.out")
             if self.doResp:
                 espXYZ, esps = utils.readEsp(f"scr.{name}/esp.xyz")
+            super().writeResult(f"tc_{name}.out",pdb)
+
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies,grads,coords,espXYZs,esps)
 
@@ -283,27 +322,24 @@ class TCCloudEngine(QMEngine):
         else:
             batchSize = self.batchSize
         results = []
-        for i in range(ceil(1.0*len(atomicInputs)/batchSize)):
-            resultsBatch = []
-            atomicInputsBatch = []
-            for j in range(batchSize):
-                if i * batchSize + j < len(atomicInputs):
-                    atomicInputsBatch.append(atomicInputs[i * batchSize + j])
-            try:
-                futureResultBatch = self.client.compute(atomicInputsBatch,engine="terachem_pbs")
-                resultsBatch = futureResultBatch.get()
-            except:
-                self.batchSize = int(batchSize/2)
-                print(f"Submission failed; resubmitting with batch size {str(self.batchSize)}")
-                sleep(30)
-                if self.batchSize < 2:
-                    status = -1
-                    break
-                tempStatus, resultsBatch = self.computeBatch(atomicInputsBatch)
-                if tempStatus == -1:
-                    status = -1
-            for result in resultsBatch:
-                results.append(result)
+        stride = int(len(atomicInputs) / batchSize)
+        try:
+            # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION
+            futureResults = [self.client.compute(atomicInputs[i::stride],engine="terachem_pbs") for i in range(stride)]
+            resultBatches = [futureResults[i].get() for i in range(stride)]
+            for batch in resultBatches:
+                for result in batch:
+                    results.append(result)
+        except:
+            self.batchSize = int(batchSize/2)
+            print(f"Submission failed; resubmitting with batch size {str(self.batchSize)}")
+            sleep(30)
+            if self.batchSize < 2:
+                status = -1
+                return
+            tempStatus, results = self.computeBatch(atomicInputs)
+            if tempStatus == -1:
+                status = -1
         return status, results
 
     def createAtomicInputs(self, pdbs:list):
@@ -313,14 +349,14 @@ class TCCloudEngine(QMEngine):
         atomicInputs = []
         for pdb in pdbs:
             jobId = pdb.split('.')[0]
-            xyz = utils.convertPDBtoXYZ(pdb)
-            mol = Molecule.from_file(xyz)
+            mol = utils.convertPDBtoMolecule(pdb)
             atomicInput = AtomicInput(molecule=mol,model=mod,driver="gradient",keywords=self.keywords,id=jobId)
             atomicInputs.append(atomicInput)
         return atomicInputs
 
     def writeResult(self, result):
-        np.savetxt(f"tc_{str(result.id)}.out",np.asarray(result.return_result,dtype=np.float32),header=f"TCCloud gradient output file. Energy = {str(result.properties.return_energy)}")
+        with open(f"tc_{str(result.id)}.json",'w') as f:
+            f.write(result.json())
         
     def getQMRefData(self, pdbs:list, calcDir:str):
         atomicInputs = self.createAtomicInputs(pdbs)

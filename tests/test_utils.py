@@ -2,9 +2,7 @@ from ff_optimizer import utils
 import os
 import numpy as np
 from . import checkUtils
-
-def test_convertPDBtoXYZ():
-    pass
+from tccloud.models import Molecule
 
 # check that grads and energies are being read in correctly
 def test_readGradFromTCout():
@@ -33,3 +31,12 @@ def test_readEsp():
     refEsp = np.loadtxt(os.path.join("utils","esp.txt"))
     assert checkUtils.checkArray(testEspXYZ,refEspXYZ,0.00001)
     assert checkUtils.checkArray(testEsp,refEsp,0.00001)
+
+def test_convertPDBtoMolecule():
+    os.chdir(os.path.dirname(__file__))
+    testMol = utils.convertPDBtoMolecule(os.path.join("utils","test.pdb"))
+    refMol = Molecule.from_file(os.path.join("utils","test.xyz"))
+    assert checkUtils.checkArray(testMol.geometry, refMol.geometry)
+    assert len(testMol.symbols) == len(refMol.symbols)
+    for i in range(len(testMol.symbols)):
+        assert testMol.symbols[i] == refMol.symbols[i]

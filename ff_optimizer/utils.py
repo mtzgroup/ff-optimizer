@@ -1,4 +1,6 @@
 import numpy as np
+from qcelemental.models import Molecule
+from . import units
 
 def readPDB(pdb:str):
     coords = []
@@ -10,6 +12,21 @@ def readPDB(pdb:str):
                 coords.append(splitLine[6])
                 coords.append(splitLine[7])
     return coords
+
+def convertPDBtoMolecule(pdb:str):
+    coords = []
+    symbols = []
+    with open(pdb, 'r') as f:
+        for line in f.readlines():
+            if line.startswith("ATOM") or line.startswith("HETATM"):
+                splitLine = line.split()
+                coords.append([splitLine[5], splitLine[6], splitLine[7]])
+                symbols.append(splitLine[-1])
+    coords = np.asarray(coords, dtype=np.float32)
+    # Molecule class by default has coordinates in bohr
+    coords *= units.ANGSTROM_TO_AU
+    mol = Molecule(**{"symbols": symbols, "geometry": coords})
+    return mol
 
 def convertPDBtoXYZ(pdb):
     name = pdb.replace(".pdb",".xyz")
