@@ -147,14 +147,22 @@ class QMEngine():
         for f in os.listdir():
             if f.endswith(".pdb"):
                 name = f.split('.')[0]
-                tcOut = f"tc_{name}.out"
-                if os.path.isfile(tcOut):
-                    energy, status = utils.readGradFromTCout(f"tc_{name}.out")
-                    if status is None:
+                json = f"tc_{name}.json"
+                if os.path.isfile(json):
+                    try:
+                        with open(json, 'r') as j:
+                            result = AtomicResult(**json_loads(j.read()))
+                    except:
+                        pdbs.append(f)
+                    if not result.success:
                         pdbs.append(f)
                 else:
                     pdbs.append(f)
         self.getQMRefData(pdbs, ".") 
+
+    # This is the function which must be implemented by inherited classes
+    def getQMRefData(self, pdbs:list, calcDir:str):
+        pass
 
 class SbatchEngine(QMEngine):
 
@@ -162,7 +170,6 @@ class SbatchEngine(QMEngine):
         self.user = user
         self.readSbatchFile(sbatchFile)
         super().__init__(inputFile,backupInputFile,doResp)
-
 
     def readSbatchFile(self, sbatchFile:str):
         tcVersion = None #"TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176"
