@@ -160,10 +160,10 @@ i = totalCycles
 if totalCycles <= 0:
     raise RuntimeError("No opts completed!")
 
-print("%7s%15s%20s%23s" % ("Epoch","Validation","Current-Previous","Current-last Current"))
-print("%7d%15.8f%20.8f" % (1,valid[0],valid[0]-validPrevious[0]))
+print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
+print("%7d%15.8f%15.8f%20.8f" % (1,valid[0],valid[0]/validInitial[0],valid[0]-validPrevious[0]))
 for i in range(1,totalCycles):
-    print("%7d%15.8f%20.8f%23.8f" % (i+1,valid[i],valid[i]-validPrevious[i],valid[i]-valid[i-1]))
+    print("%7d%15.8f%15.8f%20.8f%23.8f" % (i+1,valid[i],valid[i]/validInitial[i],valid[i]-validPrevious[i],valid[i]-valid[i-1]))
 
 if args.final:
     for i in range(totalCycles + 1):
