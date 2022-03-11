@@ -830,7 +830,7 @@ os.rename(
 )
 os.rename(os.path.join(args.optdir, args.opt0), os.path.join(args.optdir, "opt_0.in"))
 
-print("%7s%15s%20s%23s" % ("Epoch","Validation","Current-Previous","Current-last Current"))
+print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
 for i in range(1, args.maxcycles + 1):
 
     if i <= restartCycle:
@@ -1145,9 +1145,9 @@ for i in range(1, args.maxcycles + 1):
     os.chdir(home)
 
     if i == 1:
-        print("%7d%15.8f%20.8f" % (i,valid[-1],valid[-1]-validPrevious[-1]))
+        print("%7d%15.8f%15.8f%20.8f" % (i,valid[-1],valid[-1]/validInitial[-1],valid[-1]-validPrevious[-1]))
     else:
-        print("%7d%15.8f%20.8f%23.8f" % (i,valid[-1],valid[-1]-validPrevious[-1],valid[-1]-valid[-2]))
+        print("%7d%15.8f%15.8f%20.8f%23.8f" % (i,valid[-1],valid[-1]/validInitial[-1],valid[-1]-validPrevious[-1],valid[-1]-valid[-2]))
 
     # Graph results so far
     x = range(1, i + 1)
