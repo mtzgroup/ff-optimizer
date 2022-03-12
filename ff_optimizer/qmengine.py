@@ -373,13 +373,14 @@ class TCCloudEngine(QMEngine):
         if status == -1:
             raise RuntimeError("Batch resubmission reached size 1; QM calculations incomplete")
         if len(failedIndices) > 0:
-            failedIndex = -1
+            failedIndices = []
             status, retryResults = self.computeBatch(retryInputs)
             for result in retryResults:
-                if result.success:
-                    self.writeResult(result)
-                else:
-                    failedIndex = result.id
+                self.writeResult(result)
+                if not result.success
+                    failedIndices.append(result.id)
+            if len(failedIndices) > 0:
+                raise RuntimeError("Job ids {str(failedIndices)} in {os.getcwd()} failed twice!")
             if status == -1:
                 raise RuntimeError("Batch resubmission reached size 1; QM calculations incomplete")
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
