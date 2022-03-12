@@ -377,7 +377,7 @@ class TCCloudEngine(QMEngine):
             status, retryResults = self.computeBatch(retryInputs)
             for result in retryResults:
                 self.writeResult(result)
-                if not result.success
+                if not result.success:
                     failedIndices.append(result.id)
             if len(failedIndices) > 0:
                 raise RuntimeError("Job ids {str(failedIndices)} in {os.getcwd()} failed twice!")

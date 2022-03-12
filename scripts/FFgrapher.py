@@ -121,26 +121,14 @@ for i in range(optCounter + 1):
                 params[0, :] = results["initialParams"]
             else:
                 try:
-                    valid.append(
-                        readValid(os.path.join(args.optdir, "valid_" + str(i) + ".out"))
-                    )
-                    validPrevious.append(
-                        readValid(
-                            os.path.join(
-                                args.optdir, "valid_" + str(i) + "_previous.out"
-                            )
-                        )
-                    )
-                    validInitial.append(
-                        readValid(
-                            os.path.join(
-                                args.optdir, "valid_" + str(i) + "_initial.out"
-                            )
-                        )
-                    )
+                    v = readValid(os.path.join(args.optdir, f"valid_{str(i)}.out"))
+                    vPrev = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous.out"))
+                    vInitial = readValid(os.path.join(args.optdir, f"valid_{str(i)}_initial.out")
                 except:
-                    print("valids didn't complete")
                     break
+                valid.append(v)
+                validPrevious.append(vPrev)
+                validInitial.append(vInitial)
             train.append(results["obj"])
             for j in range(len(results["labels"])):
                 if labels[j] == results["labels"][j]:
