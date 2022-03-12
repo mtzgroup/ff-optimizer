@@ -123,7 +123,7 @@ for i in range(optCounter + 1):
                 try:
                     v = readValid(os.path.join(args.optdir, f"valid_{str(i)}.out"))
                     vPrev = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous.out"))
-                    vInitial = readValid(os.path.join(args.optdir, f"valid_{str(i)}_initial.out")
+                    vInitial = readValid(os.path.join(args.optdir, f"valid_{str(i)}_initial.out"))
                 except:
                     break
                 valid.append(v)
