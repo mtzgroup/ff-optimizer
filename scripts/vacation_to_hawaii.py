@@ -493,39 +493,21 @@ if args.restart:
         if os.path.isfile(optOutput):
             status, results = readOpt(optOutput)
             if status == 0:
-                train.append(results["obj"])
                 if i == 0:
                     params = np.zeros((args.maxcycles + 2, len(results["labels"])))
                     labels = results["labels"]
                     params[0, :] = results["initialParams"]
                 else:
                     try:
-                        valid.append(
-                            readValid(
-                                os.path.join(args.optdir, "valid_" + str(i) + ".out")
-                            )
-                        )
-                        validPrevious.append(
-                            readValid(
-                                os.path.join(
-                                    args.optdir, "valid_" + str(i) + "_previous.out"
-                                )
-                            )
-                        )
-                        validInitial.append(
-                            readValid(
-                                os.path.join(
-                                    args.optdir, "valid_" + str(i) + "_initial.out"
-                                )
-                            )
-                        )
+                        v = readValid(os.path.join(args.optdir, f"valid_{str(i)}.out"))
+                        vPrev = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous.out"))
+                        vInitial = readValid(os.path.join(args.optdir, f"valid_{str(i)}_initial.out")
                     except:
-                        print("valids didn't complete")
-                        # Chop valid lists to the size before trying to append
-                        valid = valid[:i]
-                        validPrevious = validPrevious[:i]
-                        validInitial = validInitial[:i]
                         break
+                    valid.append(v)
+                    validPrevious.append(vPrev)
+                    validInitial.append(vInitial)
+                train.append(results["obj"])
                 for j in range(len(results["labels"])):
                     if labels[j] == results["labels"][j]:
                         params[i + 1, j] = results["params"][j]
