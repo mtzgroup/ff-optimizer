@@ -111,7 +111,10 @@ class QMEngine():
 
     def readResult(self, json):
         with open(json,'r') as f:
-            result = AtomicResult(**json_loads(f.read()))
+            try:
+                result = AtomicResult(**json_loads(f.read()))
+            except:
+                raise RuntimeError(f"Corrupted json {json} could not be read in at {os.getcwd}")
         return result
         
     def readQMRefData(self):
@@ -154,6 +157,7 @@ class QMEngine():
                             result = AtomicResult(**json_loads(j.read()))
                     except:
                         pdbs.append(f)
+                        continue
                     if not result.success:
                         pdbs.append(f)
                 else:
@@ -299,18 +303,24 @@ class TCCloudEngine(QMEngine):
             elif setting[0] == 'basis':
                 self.basis = setting[1]
             else:
-                keyword = ""
-                for token in setting[1:]:
-                    keyword += f"{token} "
-                self.keywords[setting[0]] = keyword
+                if len(setting) == 2:
+                    self.keywords[setting[0]] = setting[1]
+                else:
+                    keyword = setting[1]
+                    for token in setting[2:]:
+                        keyword += f" {token}"
+                    self.keywords[setting[0]] = keyword
         for setting in self.backupInputSettings:
             if setting[0] == 'method' or setting[0] == 'basis':
                 pass
             else:
-                keyword = ""
-                for token in setting[1:]:
-                    keyword += f"{token} "
-                self.backupKeywords[setting[0]] = keyword
+                if len(setting) == 2:
+                    self.backupKeywords[setting[0]] = setting[1]
+                else:
+                    keyword = setting[1]
+                    for token in setting[2:]:
+                        keyword += f" {token}"
+                    self.backupKeywords[setting[0]] = keyword
                     
     def computeBatch(self, atomicInputs:list):
         status = 0
@@ -359,20 +369,21 @@ class TCCloudEngine(QMEngine):
             f.write(result.json())
         
     def getQMRefData(self, pdbs:list, calcDir:str):
+        cwd = os.getcwd()
+        os.chdir(calcDir)
         atomicInputs = self.createAtomicInputs(pdbs)
         status, results  = self.computeBatch(atomicInputs)
         retryInputs = []
-        failedIndices = []
         for i in range(len(results)):
             if results[i].success:
                 self.writeResult(results[i]) 
             else:
-                retryInput = AtomicInput(molecule=atomicInputs[i].molecule,model=atomicInputs[i].model,driver="gradient",keywords=self.backupKeywords,id=atomicInputs[i].id)
+                print(f"Retrying job {str(results[i].id)}")
+                retryInput = AtomicInput(molecule=results[i].molecule,model=results[i].model,driver="gradient",keywords=self.backupKeywords,id=results[i].id)
                 retryInputs.append(retryInput)
-                failedIndices.append(i)
         if status == -1:
             raise RuntimeError("Batch resubmission reached size 1; QM calculations incomplete")
-        if len(failedIndices) > 0:
+        if len(retryInputs) > 0:
             failedIndices = []
             status, retryResults = self.computeBatch(retryInputs)
             for result in retryResults:
@@ -385,3 +396,4 @@ class TCCloudEngine(QMEngine):
                 raise RuntimeError("Batch resubmission reached size 1; QM calculations incomplete")
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies,grads,coords,espXYZs,esps) 
+        os.chdir(cwd)
