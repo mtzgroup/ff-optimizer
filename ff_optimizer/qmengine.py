@@ -362,17 +362,16 @@ class TCCloudEngine(QMEngine):
         atomicInputs = self.createAtomicInputs(pdbs)
         status, results  = self.computeBatch(atomicInputs)
         retryInputs = []
-        failedIndices = []
         for i in range(len(results)):
             if results[i].success:
                 self.writeResult(results[i]) 
             else:
-                retryInput = AtomicInput(molecule=atomicInputs[i].molecule,model=atomicInputs[i].model,driver="gradient",keywords=self.backupKeywords,id=atomicInputs[i].id)
+                print(f"Retrying job {str(results[i].id)}")
+                retryInput = AtomicInput(molecule=results[i].molecule,model=results[i].model,driver="gradient",keywords=self.backupKeywords,id=results[i].id)
                 retryInputs.append(retryInput)
-                failedIndices.append(i)
         if status == -1:
             raise RuntimeError("Batch resubmission reached size 1; QM calculations incomplete")
-        if len(failedIndices) > 0:
+        if len(retryInputs) > 0:
             failedIndices = []
             status, retryResults = self.computeBatch(retryInputs)
             for result in retryResults:
