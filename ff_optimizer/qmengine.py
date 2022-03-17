@@ -352,15 +352,19 @@ class TCCloudEngine(QMEngine):
                 status = -1
         return status, results
 
-    def createAtomicInputs(self, pdbs:list):
+    def createAtomicInputs(self, pdbs:list, useBackup=False):
         mod = {}
         mod["method"] = self.method
         mod["basis"] = self.basis
         atomicInputs = []
-        for pdb in pdbs:
+        if useBackup:
+            keywords = self.backupKeywords
+        else:
+            keywords = self.keywords
+        for pdb in sorted(pdbs):
             jobId = pdb.split('.')[0]
             mol = utils.convertPDBtoMolecule(pdb)
-            atomicInput = AtomicInput(molecule=mol,model=mod,driver="gradient",keywords=self.keywords,id=jobId)
+            atomicInput = AtomicInput(molecule=mol,model=mod,driver="gradient",keywords=keywords,id=jobId)
             atomicInputs.append(atomicInput)
         return atomicInputs
 
@@ -373,25 +377,27 @@ class TCCloudEngine(QMEngine):
         os.chdir(calcDir)
         atomicInputs = self.createAtomicInputs(pdbs)
         status, results  = self.computeBatch(atomicInputs)
-        retryInputs = []
-        for i in range(len(results)):
-            if results[i].success:
-                self.writeResult(results[i]) 
+        retryPdbs = []
+        for result in results:
+            if result.success:
+                self.writeResult(result) 
             else:
-                print(f"Retrying job {str(results[i].id)}")
-                retryInput = AtomicInput(molecule=results[i].molecule,model=results[i].model,driver="gradient",keywords=self.backupKeywords,id=results[i].id)
-                retryInputs.append(retryInput)
+                retryPdbs.append(f"{result.input_data['id']}.pdb")
         if status == -1:
             raise RuntimeError("Batch resubmission reached size 1; QM calculations incomplete")
-        if len(retryInputs) > 0:
+        if len(retryPdbs) > 0:
             failedIndices = []
+            retryInputs = self.createAtomicInputs(retryPdbs, useBackup=True)
             status, retryResults = self.computeBatch(retryInputs)
             for result in retryResults:
-                self.writeResult(result)
-                if not result.success:
-                    failedIndices.append(result.id)
+                if result.success:
+                    self.writeResult(result)
+                else:
+                    failedIndices.append(result.input_data['id'])
+                    print(f"Job id {result.input_data['id']} suffered a {result.error.error_type}")
+                    print(result.error.error_message)
             if len(failedIndices) > 0:
-                raise RuntimeError("Job ids {str(failedIndices)} in {os.getcwd()} failed twice!")
+                raise RuntimeError(f"Job ids {str(failedIndices)} in {os.getcwd()} failed twice!")
             if status == -1:
                 raise RuntimeError("Batch resubmission reached size 1; QM calculations incomplete")
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
