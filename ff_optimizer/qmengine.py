@@ -292,7 +292,10 @@ class DebugEngine(QMEngine):
 class TCCloudEngine(QMEngine):
     
     def __init__(self, inputFile:str, backupInputFile:str, batchSize = None):
-        self.batchSize = batchSize
+        if batchSize is None:
+            self.batchSize = 100
+        else:
+            self.batchSize = batchSize
         self.client = TCClient()
         super().__init__(inputFile, backupInputFile, False)
         self.keywords = {}
@@ -327,10 +330,7 @@ class TCCloudEngine(QMEngine):
         # If there are no jobs to run after restart
         if len(atomicInputs) == 0:
             return status, []
-        if self.batchSize == None:
-            batchSize = len(atomicInputs)
-        else:
-            batchSize = self.batchSize
+        batchSize = min(self.batchSize, len(atomicInputs))
         results = []
         stride = int(len(atomicInputs) / batchSize)
         try:
@@ -343,7 +343,7 @@ class TCCloudEngine(QMEngine):
         except:
             self.batchSize = int(batchSize/2)
             print(f"Submission failed; resubmitting with batch size {str(self.batchSize)}")
-            sleep(30)
+            #sleep(30)
             if self.batchSize < 2:
                 status = -1
                 return status, results
@@ -388,7 +388,9 @@ class TCCloudEngine(QMEngine):
         if len(retryPdbs) > 0:
             failedIndices = []
             retryInputs = self.createAtomicInputs(retryPdbs, useBackup=True)
+            batchSize = self.batchSize
             status, retryResults = self.computeBatch(retryInputs)
+            self.batchSize = batchSize
             for result in retryResults:
                 if result.success:
                     self.writeResult(result)
