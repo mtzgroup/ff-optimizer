@@ -335,12 +335,13 @@ class TCCloudEngine(QMEngine):
         stride = int(len(atomicInputs) / batchSize)
         try:
             # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION
-            futureResults = [self.client.compute(atomicInputs[i::stride],engine="terachem_pbs") for i in range(stride)]
+            futureResults = [self.client.compute(atomicInputs[i::stride],engine="terachem_fe") for i in range(stride)]
             resultBatches = [futureResults[i].get() for i in range(stride)]
             for batch in resultBatches:
                 for result in batch:
                     results.append(result)
-        except:
+        except Exception as e:
+            print(e)
             self.batchSize = int(batchSize/2)
             print(f"Submission failed; resubmitting with batch size {str(self.batchSize)}")
             #sleep(30)
