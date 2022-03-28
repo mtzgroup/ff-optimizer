@@ -91,7 +91,7 @@ dependencies:
     - qcelemental==0.23.0
     - rfc3986==1.5.0
     - sniffio==1.2.0
-    - tccloud==0.2.4
+    - tccloud==0.3.1
     - typing-extensions==3.10.0.2
 prefix: /home/curtie/.conda/envs/forcebalance
 
