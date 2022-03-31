@@ -22,7 +22,7 @@ class QMEngine():
         with open(inputFile,'r') as f:
             for line in f.readlines():
                 splitLine = line.split()
-                # ignore commented lines, the coordinates specification, and run gradient
+                # ignore commented lines, the coordinates specification, run gradient, and resp keywords
                 if len(splitLine) > 0:
                     if splitLine[0][0] != '#' and splitLine[0].lower() != 'coordinates' and splitLine[0].lower() != 'run' and splitLine[0].lower() != "resp" and splitLine[0].lower() != "esp_restraint_a" and splitLine[0].lower() != "esp_restraint_b":
                         setting = []
@@ -291,13 +291,14 @@ class DebugEngine(QMEngine):
 
 class TCCloudEngine(QMEngine):
     
-    def __init__(self, inputFile:str, backupInputFile:str, batchSize = None):
+
+    def __init__(self, inputFile:str, backupInputFile:str, batchSize = None, doResp = False):
         if batchSize is None:
             self.batchSize = 100
         else:
             self.batchSize = batchSize
         self.client = TCClient()
-        super().__init__(inputFile, backupInputFile, False)
+        super().__init__(inputFile, backupInputFile, doResp)
         self.keywords = {}
         self.backupKeywords = {}
         for setting in self.inputSettings:
@@ -324,6 +325,14 @@ class TCCloudEngine(QMEngine):
                     for token in setting[2:]:
                         keyword += f" {token}"
                     self.backupKeywords[setting[0]] = keyword
+        if doResp:
+            self.keywords["resp"] = "yes"
+            self.keywords["esp_restraint_a"] = "0"
+            self.keywords["esp_restraint_b"] = "0"
+            self.backupKeywords["resp"] = "yes"
+            self.backupKeywords["esp_restraint_a"] = "0"
+            self.backupKeywords["esp_restraint_b"] = "0"
+
                     
     def computeBatch(self, atomicInputs:list):
         status = 0
@@ -365,13 +374,23 @@ class TCCloudEngine(QMEngine):
         for pdb in sorted(pdbs):
             jobId = pdb.split('.')[0]
             mol = utils.convertPDBtoMolecule(pdb)
-            atomicInput = AtomicInput(molecule=mol,model=mod,driver="gradient",keywords=keywords,id=jobId)
+            if self.doResp:
+                atomicInput = AtomicInput(molecule=mol,model=mod,driver="gradient",keywords=keywords,id=jobId,protocols={"native_files" : "all"},extras={"tcfe:keywords" : {"native_files" : ["esp.xyz"]}})
+            else:
+                atomicInput = AtomicInput(molecule=mol,model=mod,driver="gradient",keywords=keywords,id=jobId)
             atomicInputs.append(atomicInput)
         return atomicInputs
 
     def writeResult(self, result):
         with open(f"tc_{str(result.id)}.json",'w') as f:
             f.write(result.json())
+        if self.doResp:
+            with open(f"esp_{str(result.id)}.xyz",'w') as f:
+                try:
+                    f.write(result.native_files["esp.xyz"])
+                except:
+                    print("Job {str(result.id)} in {os.getcwd()} is missing esp file!")
+                    pass
         
     def getQMRefData(self, pdbs:list, calcDir:str):
         cwd = os.getcwd()
