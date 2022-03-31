@@ -204,10 +204,7 @@ if args.final:
 # Graph results so far
 x = range(1, i + 2)
 x0 = np.arange(i + 2)
-if i < 25:
-    xticks = x0
-else:
-    xticks = np.arange(0, i + 1, 2)
+xticks = np.arange(0, i + 1, int(i/12))
 fig, ax = plt.subplots(figsize=(9, 6))
 ax.plot(x, valid, label="Validation, current parameters", marker="o")
 ax.plot(x, validPrevious, label="Validation, previous parameters", marker="o")

@@ -74,6 +74,7 @@ def testGetQMRefData(monkeypatch):
     monkeypatch.setattr(qmengine.QMEngine,"writeFBdata",monkeyWrite)
     tccloudEngine.getQMRefData(pdbs,calcDir)
 
+
 def test_createAtomicInputsResp():
     os.chdir(os.path.dirname(__file__))
     tccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in","qmengine/tc_backup.in",doResp=True)
@@ -82,3 +83,95 @@ def test_createAtomicInputsResp():
     ainput = atomicInputs[0]
     assert ainput.protocols.native_files.all == "all"
     assert ainput.extras["tcfe:keywords"]["native_files"] == ["esp.xyz"]
+
+def test_computeBatch(monkeypatch):
+    os.chdir(os.path.dirname(__file__))
+    tccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in","qmengine/tc_backup.in")
+    
+    class MonkeyFutureResult():
+        
+        def __init__(self, atomicInputs):
+            self.ids = []
+            for atomicInput in atomicInputs:
+                self.ids.append(atomicInput.id)
+
+        def get(self):
+            results = []
+            for id in self.ids:
+                with open(f"tc_{str(id)}.json",'r') as f:
+                    data = f.read()
+                    try:
+                        result = AtomicResult(**json_loads(data))
+                    except:
+                        result = FailedOperation(**json_loads(data))
+                results.append(result)
+            return results
+
+    def monkeyCompute(atomicInputs,engine):
+        return MonkeyFutureResult(atomicInputs)
+
+    os.chdir("tccloudengine")
+    pdbs = []
+    for f in os.listdir():
+        if f.endswith("pdb"):
+            pdbs.append(f)
+    inputs = tccloudEngine.createAtomicInputs(pdbs)
+    monkeypatch.setattr(tccloudEngine.client,"compute",monkeyCompute)
+
+    # Check default batch size
+    status, results = tccloudEngine.computeBatch(inputs)
+    assert status == 0
+    assert len(results) == 10
+
+    # Check small batch size
+    tccloudEngine.batchsize = 3
+    status, results = tccloudEngine.computeBatch(inputs)
+    assert status == 0
+    assert len(results) == 10
+
+    # Check large batch size
+    tccloudEngine.batchsize = 77
+    status, results = tccloudEngine.computeBatch(inputs)
+    assert status == 0
+    assert len(results) == 10
+
+    # Check that batch resizing works
+    class MonkeyResultFail():
+        
+        def __init__(self, atomicInputs):
+            pass
+
+        def get(self):
+            raise RuntimeError("oops")
+
+    def monkeyComputeFailOnce(atomicInputs,engine):
+        if len(atomicInputs) > 5:
+            return MonkeyResultFail(atomicInputs)
+        else:
+            return MonkeyFutureResult(atomicInputs)
+
+    monkeypatch.setattr(tccloudEngine.client,"compute",monkeyComputeFailOnce)
+    tccloudEngine.batchSize = 6
+    status, results = tccloudEngine.computeBatch(inputs)
+    assert status == 0
+    assert len(results) == 10
+    assert tccloudEngine.batchSize == 3
+
+    tccloudEngine.batchSize = 12 
+    status, results = tccloudEngine.computeBatch(inputs)
+    assert status == 0
+    assert len(results) == 10
+    assert tccloudEngine.batchSize == 5
+
+    # Check failure
+    def monkeyComputeFail(atomicInputs, engine):
+        return MonkeyResultFail(atomicInputs)
+
+    monkeypatch.setattr(tccloudEngine.client,"compute",monkeyComputeFail)
+    status, results = tccloudEngine.computeBatch(inputs)
+    assert status == -1
+    assert len(results) == 0
+
+
+    os.chdir("..")
+
