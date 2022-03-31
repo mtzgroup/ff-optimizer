@@ -15,6 +15,16 @@ def test_init():
     assert tccloudEngine.backupKeywords['diismaxvecs'] == '40'
     assert tccloudEngine.backupKeywords['maxit'] == '200'
 
+def test_initResp():
+    os.chdir(os.path.dirname(__file__))
+    tccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in","qmengine/tc_backup.in",doResp=True)
+    assert tccloudEngine.keywords["resp"] == "yes"
+    assert tccloudEngine.keywords["esp_restraint_a"] == "0"
+    assert tccloudEngine.keywords["esp_restraint_b"] == "0"
+    assert tccloudEngine.backupKeywords["resp"] == "yes"
+    assert tccloudEngine.backupKeywords["esp_restraint_a"] == "0"
+    assert tccloudEngine.backupKeywords["esp_restraint_b"] == "0"
+
 def testGetQMRefData(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     tccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in","qmengine/tc_backup.in")
@@ -63,3 +73,12 @@ def testGetQMRefData(monkeypatch):
     monkeypatch.setattr(qmengine.QMEngine,"readQMRefData",monkeyRead)
     monkeypatch.setattr(qmengine.QMEngine,"writeFBdata",monkeyWrite)
     tccloudEngine.getQMRefData(pdbs,calcDir)
+
+def test_createAtomicInputsResp():
+    os.chdir(os.path.dirname(__file__))
+    tccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in","qmengine/tc_backup.in",doResp=True)
+    pdbs = ["qmengine/test.pdb"]
+    atomicInputs = tccloudEngine.createAtomicInputs(pdbs)
+    ainput = atomicInputs[0]
+    assert ainput.protocols.native_files.all == "all"
+    assert ainput.extras["tcfe:keywords"]["native_files"] == ["esp.xyz"]

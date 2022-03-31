@@ -387,6 +387,7 @@ class TCCloudEngine(QMEngine):
                 try:
                     f.write(result.native_files["esp.xyz"])
                 except:
+                    print("Job {str(result.id)} in {os.getcwd()} is missing esp file!")
                     pass
         
     def getQMRefData(self, pdbs:list, calcDir:str):
