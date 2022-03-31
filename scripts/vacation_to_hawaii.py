@@ -733,9 +733,7 @@ if args.engine == 'debug':
 elif args.engine == 'queue':
     qmEngine = qmengine.SbatchEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),os.path.join(args.sampledir,args.sbatch),os.getenv('USER'),doResp=args.resp)
 elif args.engine == 'tccloud':
-    qmEngine = qmengine.TCCloudEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long))
-    if args.resp == True:
-        print("WARNING! RESP not implemented for this QM engine")
+    qmEngine = qmengine.TCCloudEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),doResp=args.resp)
 
 # First optimization cycle is not necessary if restarting from somewhere later
 if restartCycle < 0:
