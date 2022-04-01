@@ -2,9 +2,6 @@
 
 import argparse
 import os
-import subprocess
-from textwrap import dedent
-from time import sleep
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -59,6 +56,7 @@ def readOpt(filename):
     results["initialParams"] = initialParams
     return status, results
 
+
 def readValid(filename):
     with open(filename, "r") as f:
         for line in f.readlines():
@@ -68,6 +66,7 @@ def readValid(filename):
             "ForceBalance single-point evaluation of " + filename + " did not converge"
         )
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--optdir",
@@ -75,7 +74,12 @@ parser.add_argument(
     type=str,
     default="1_opt",
 )
-parser.add_argument('--final', help="Compute performance of parameters from each epoch on the final validation set",action="store_true",default=False)
+parser.add_argument(
+    "--final",
+    help="Compute performance of parameters from each epoch on the final validation set",
+    action="store_true",
+    default=False,
+)
 args = parser.parse_args()
 
 # Set up the calculation
@@ -122,8 +126,12 @@ for i in range(optCounter + 1):
             else:
                 try:
                     v = readValid(os.path.join(args.optdir, f"valid_{str(i)}.out"))
-                    vPrev = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous.out"))
-                    vInitial = readValid(os.path.join(args.optdir, f"valid_{str(i)}_initial.out"))
+                    vPrev = readValid(
+                        os.path.join(args.optdir, f"valid_{str(i)}_previous.out")
+                    )
+                    vInitial = readValid(
+                        os.path.join(args.optdir, f"valid_{str(i)}_initial.out")
+                    )
                 except:
                     break
                 valid.append(v)
@@ -148,10 +156,25 @@ i = totalCycles
 if totalCycles <= 0:
     raise RuntimeError("No opts completed!")
 
-print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
-print("%7d%15.8f%15.8f%20.8f" % (1,valid[0],valid[0]/validInitial[0],valid[0]-validPrevious[0]))
-for i in range(1,totalCycles):
-    print("%7d%15.8f%15.8f%20.8f%23.8f" % (i+1,valid[i],valid[i]/validInitial[i],valid[i]-validPrevious[i],valid[i]-valid[i-1]))
+print(
+    "%7s%15s%15s%20s%23s"
+    % ("Epoch", "Validation", "Valid ratio", "Current-Previous", "Current-last Current")
+)
+print(
+    "%7d%15.8f%15.8f%20.8f"
+    % (1, valid[0], valid[0] / validInitial[0], valid[0] - validPrevious[0])
+)
+for i in range(1, totalCycles):
+    print(
+        "%7d%15.8f%15.8f%20.8f%23.8f"
+        % (
+            i + 1,
+            valid[i],
+            valid[i] / validInitial[i],
+            valid[i] - validPrevious[i],
+            valid[i] - valid[i - 1],
+        )
+    )
 
 if args.final:
     for i in range(totalCycles + 1):
@@ -161,7 +184,9 @@ if args.final:
             try:
                 validFinalTarget.append(
                     readValid(
-                        os.path.join(args.optdir, "valid_" + str(i) + "_final_target.out")
+                        os.path.join(
+                            args.optdir, "valid_" + str(i) + "_final_target.out"
+                        )
                     )
                 )
             except:
@@ -179,7 +204,9 @@ if args.final:
                 os.chdir("..")
                 validFinalTarget.append(
                     readValid(
-                        os.path.join(args.optdir, "valid_" + str(i) + "_final_target.out")
+                        os.path.join(
+                            args.optdir, "valid_" + str(i) + "_final_target.out"
+                        )
                     )
                 )
         else:
@@ -204,7 +231,7 @@ if args.final:
 # Graph results so far
 x = range(1, i + 2)
 x0 = np.arange(i + 2)
-xticks = np.arange(0, i + 1, int(i/12))
+xticks = np.arange(0, i + 1, int(i / 12))
 fig, ax = plt.subplots(figsize=(9, 6))
 ax.plot(x, valid, label="Validation, current parameters", marker="o")
 ax.plot(x, validPrevious, label="Validation, previous parameters", marker="o")
@@ -220,7 +247,9 @@ plt.close()
 
 if args.final:
     fig, ax = plt.subplots(figsize=(9, 6))
-    ax.plot(x0, validFinalTarget, label="Performance on final validation set", marker="o")
+    ax.plot(
+        x0, validFinalTarget, label="Performance on final validation set", marker="o"
+    )
     ax.set_xlabel("Optimization cycle", size=17)
     ax.set_ylabel("Objective function", size=17)
     ax.set_xticks(xticks)

@@ -10,7 +10,6 @@ from shutil import rmtree
 
 mpl.use("Agg")
 import matplotlib.pyplot as plt
-from time import sleep
 from textwrap import dedent
 
 # Some helper functions
@@ -188,7 +187,6 @@ def changeParameter(inputFile, prmName, prmValue):
             lines.append(line)
         if not changed:
             lines.insert(1, f"{prmName} {prmValue}")
-            pass
 
     with open("temp.txt", "w") as f:
         for line in lines:
@@ -264,8 +262,6 @@ def determineAdaptiveDamping(
             changeParameter(testFile, "adaptive_damping", str(adaptiveDamping))
         else:
             return adaptiveDamping
-
-
 
 
 def readRst(filename):
@@ -500,8 +496,12 @@ if args.restart:
                 else:
                     try:
                         v = readValid(os.path.join(args.optdir, f"valid_{str(i)}.out"))
-                        vPrev = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous.out"))
-                        vInitial = readValid(os.path.join(args.optdir, f"valid_{str(i)}_initial.out"))
+                        vPrev = readValid(
+                            os.path.join(args.optdir, f"valid_{str(i)}_previous.out")
+                        )
+                        vInitial = readValid(
+                            os.path.join(args.optdir, f"valid_{str(i)}_initial.out")
+                        )
                     except:
                         break
                     valid.append(v)
@@ -693,14 +693,14 @@ if restartCycle < 0:
         )
 mdFiles = []
 for f in os.listdir(args.sampledir):
-    if os.path.isfile(os.path.join(args.sampledir,f)):
+    if os.path.isfile(os.path.join(args.sampledir, f)):
         mdFiles.append(f)
 # Set start, split, end indices for sampling from QM trajectory
 coordIndex = []
 with open(os.path.join(args.dynamicsdir, args.coors), "r") as f:
     for line in f.readlines():
         if "frame" in line:
-            coordIndex.append(int(line.split()[2])+1)
+            coordIndex.append(int(line.split()[2]) + 1)
 startIndex = 0
 if args.start != None:
     while coordIndex[startIndex] < args.start:
@@ -732,12 +732,26 @@ if not os.path.isfile(os.path.join(args.optdir, "valid_0_initial.in")):
                     break
 
 # Initialize QMEngine
-if args.engine == 'debug':
-    qmEngine = qmengine.DebugEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),doResp=doResp)
-elif args.engine == 'queue':
-    qmEngine = qmengine.SbatchEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),os.path.join(args.sampledir,args.sbatch),os.getenv('USER'),doResp=doResp)
-elif args.engine == 'tccloud':
-    qmEngine = qmengine.TCCloudEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),doResp=doResp)
+if args.engine == "debug":
+    qmEngine = qmengine.DebugEngine(
+        os.path.join(args.sampledir, args.tctemplate),
+        os.path.join(args.sampledir, args.tctemplate_long),
+        doResp=doResp,
+    )
+elif args.engine == "queue":
+    qmEngine = qmengine.SbatchEngine(
+        os.path.join(args.sampledir, args.tctemplate),
+        os.path.join(args.sampledir, args.tctemplate_long),
+        os.path.join(args.sampledir, args.sbatch),
+        os.getenv("USER"),
+        doResp=doResp,
+    )
+elif args.engine == "tccloud":
+    qmEngine = qmengine.TCCloudEngine(
+        os.path.join(args.sampledir, args.tctemplate),
+        os.path.join(args.sampledir, args.tctemplate_long),
+        doResp=doResp,
+    )
 
 # First optimization cycle is not necessary if restarting from somewhere later
 if restartCycle < 0:
@@ -814,7 +828,10 @@ os.rename(
 )
 os.rename(os.path.join(args.optdir, args.opt0), os.path.join(args.optdir, "opt_0.in"))
 
-print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
+print(
+    "%7s%15s%15s%20s%23s"
+    % ("Epoch", "Validation", "Valid ratio", "Current-Previous", "Current-last Current")
+)
 for i in range(1, args.maxcycles + 1):
 
     if i <= restartCycle:
@@ -846,7 +863,7 @@ for i in range(1, args.maxcycles + 1):
             rstCount += 1
     if rstCount < 2:
         if args.split != None:
-            coor1 = coordIndex[randint(startIndex, splitIndex-1)]
+            coor1 = coordIndex[randint(startIndex, splitIndex - 1)]
             coor2 = coordIndex[randint(splitIndex, endIndex)]
         else:
             coor1 = coordIndex[randint(startIndex, endIndex)]
@@ -945,18 +962,18 @@ for i in range(1, args.maxcycles + 1):
         files = os.listdir()
         pdbs = []
         for f in files:
-            if '.pdb' in f:
+            if ".pdb" in f:
                 if len(f.split(".")) > 2:
                     label = f.split(".")[2]
-                    fName = label + '.pdb'
+                    fName = label + ".pdb"
                     os.system(f"mv {f} {fName}")
                     pdbs.append(fName)
                 else:
                     pdbs.append(f)
         if i == restartCycle + 1:
-            qmEngine.restart('.')
+            qmEngine.restart(".")
         else:
-            qmEngine.getQMRefData(pdbs,'.')
+            qmEngine.getQMRefData(pdbs, ".")
         os.chdir(home)
         os.chdir(samplePath)
     os.chdir(home)
@@ -1084,11 +1101,11 @@ for i in range(1, args.maxcycles + 1):
     os.chdir(args.optdir)
     # TODO: valid_previous calculation broken on restart
 
-    #What is this code doing?
+    # What is this code doing?
     if len(validPrevious) <= i:
         if i > 1:
             src = os.path.join("result", "opt_" + str(i - 1), "*")
-            dest = os.path.join("forcefield",".")
+            dest = os.path.join("forcefield", ".")
             os.system(f"cp {src} {dest}")
         os.system(
             "ForceBalance.py valid_"
@@ -1129,9 +1146,26 @@ for i in range(1, args.maxcycles + 1):
     os.chdir(home)
 
     if i == 1:
-        print("%7d%15.8f%15.8f%20.8f" % (i,valid[-1],valid[-1]/validInitial[-1],valid[-1]-validPrevious[-1]))
+        print(
+            "%7d%15.8f%15.8f%20.8f"
+            % (
+                i,
+                valid[-1],
+                valid[-1] / validInitial[-1],
+                valid[-1] - validPrevious[-1],
+            )
+        )
     else:
-        print("%7d%15.8f%15.8f%20.8f%23.8f" % (i,valid[-1],valid[-1]/validInitial[-1],valid[-1]-validPrevious[-1],valid[-1]-valid[-2]))
+        print(
+            "%7d%15.8f%15.8f%20.8f%23.8f"
+            % (
+                i,
+                valid[-1],
+                valid[-1] / validInitial[-1],
+                valid[-1] - validPrevious[-1],
+                valid[-1] - valid[-2],
+            )
+        )
 
     # Graph results so far
     x = range(1, i + 1)
