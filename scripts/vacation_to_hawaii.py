@@ -455,9 +455,9 @@ parser.add_argument(
 )
 parser.add_argument(
     "--resp",
-    help="Restart partially complete forcefield optimization",
-    action="store_true",
-    default=False,
+    help="Weight of RESP in the objective function. If 0, don't do RESP. Default is 0.",
+    type=float,
+    default=0,
 )
 args = parser.parse_args()
 
@@ -629,7 +629,11 @@ with open(os.path.join(args.optdir, args.opt0), "r") as f:
             if line.split()[0] == "amber_leapcmd":
                 line = line.replace(line.split()[1], "setup_valid_initial.leap")
             validInitialTargetLines.append(line)
-if args.resp:
+if args.resp == 0:
+    doResp = False
+else:
+    doResp = True
+if doResp:
     respAdded = False
     respWeightAdded = False
     for line in targetLines:
@@ -638,7 +642,7 @@ if args.resp:
         if line.split()[0] == "w_resp":
             respWeightAdded = True
     if not respWeightAdded:
-        targetLines.insert(1, "w_resp 1\n")
+        targetLines.insert(1, f"w_resp {str(args.resp)}\n")
     if not respAdded:
         targetLines.insert(1, "resp 1\n")
 with open(os.path.join(args.optdir, "setup.leap"), "r") as leapRead:
@@ -729,11 +733,11 @@ if not os.path.isfile(os.path.join(args.optdir, "valid_0_initial.in")):
 
 # Initialize QMEngine
 if args.engine == 'debug':
-    qmEngine = qmengine.DebugEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),doResp=args.resp)
+    qmEngine = qmengine.DebugEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),doResp=doResp)
 elif args.engine == 'queue':
-    qmEngine = qmengine.SbatchEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),os.path.join(args.sampledir,args.sbatch),os.getenv('USER'),doResp=args.resp)
+    qmEngine = qmengine.SbatchEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),os.path.join(args.sampledir,args.sbatch),os.getenv('USER'),doResp=doResp)
 elif args.engine == 'tccloud':
-    qmEngine = qmengine.TCCloudEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),doResp=args.resp)
+    qmEngine = qmengine.TCCloudEngine(os.path.join(args.sampledir,args.tctemplate),os.path.join(args.sampledir,args.tctemplate_long),doResp=doResp)
 
 # First optimization cycle is not necessary if restarting from somewhere later
 if restartCycle < 0:
