@@ -7,35 +7,43 @@ from tccloud.models import Molecule
 # check that grads and energies are being read in correctly
 def test_readGradFromTCout():
     os.chdir(os.path.dirname(__file__))
-    testEnergy, testGrads = utils.readGradFromTCout(os.path.join("qmengine","test.out"))
-    energy = np.loadtxt(os.path.join("qmengine","energy.txt"))
-    grads = np.loadtxt(os.path.join("qmengine","grads.txt")).flatten()
+    testEnergy, testGrads = utils.readGradFromTCout(
+        os.path.join("qmengine", "test.out")
+    )
+    energy = np.loadtxt(os.path.join("qmengine", "energy.txt"))
+    grads = np.loadtxt(os.path.join("qmengine", "grads.txt")).flatten()
     assert checkUtils.checkFloat(energy, testEnergy)
     assert checkUtils.checkArray(grads, testGrads)
 
+
 def test_readGradFromTCout_TCCloud():
     os.chdir(os.path.dirname(__file__))
-    testEnergy, testGrads = utils.readGradFromTCout(os.path.join("qmengine","result.txt"))
-    energy = np.loadtxt(os.path.join("qmengine","energy.txt"))
-    grads = np.loadtxt(os.path.join("qmengine","grads.txt")).flatten()
+    testEnergy, testGrads = utils.readGradFromTCout(
+        os.path.join("qmengine", "result.txt")
+    )
+    energy = np.loadtxt(os.path.join("qmengine", "energy.txt"))
+    grads = np.loadtxt(os.path.join("qmengine", "grads.txt")).flatten()
     assert checkUtils.checkFloat(energy, testEnergy)
     assert checkUtils.checkArray(grads, testGrads)
+
 
 def test_readOpt():
     pass
 
+
 def test_readEsp():
     os.chdir(os.path.dirname(__file__))
-    testEspXYZ, testEsp = utils.readEsp(os.path.join("utils","esp.xyz"))
-    refEspXYZ = np.loadtxt(os.path.join("utils","espXYZ.txt")).flatten()
-    refEsp = np.loadtxt(os.path.join("utils","esp.txt"))
-    assert checkUtils.checkArray(testEspXYZ,refEspXYZ,0.00001)
-    assert checkUtils.checkArray(testEsp,refEsp,0.00001)
+    testEspXYZ, testEsp = utils.readEsp(os.path.join("utils", "esp.xyz"))
+    refEspXYZ = np.loadtxt(os.path.join("utils", "espXYZ.txt")).flatten()
+    refEsp = np.loadtxt(os.path.join("utils", "esp.txt"))
+    assert checkUtils.checkArray(testEspXYZ, refEspXYZ, 0.00001)
+    assert checkUtils.checkArray(testEsp, refEsp, 0.00001)
+
 
 def test_convertPDBtoMolecule():
     os.chdir(os.path.dirname(__file__))
-    testMol = utils.convertPDBtoMolecule(os.path.join("utils","test.pdb"))
-    refMol = Molecule.from_file(os.path.join("utils","test.xyz"))
+    testMol = utils.convertPDBtoMolecule(os.path.join("utils", "test.pdb"))
+    refMol = Molecule.from_file(os.path.join("utils", "test.xyz"))
     assert checkUtils.checkArray(testMol.geometry, refMol.geometry)
     assert len(testMol.symbols) == len(refMol.symbols)
     for i in range(len(testMol.symbols)):
