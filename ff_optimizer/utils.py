@@ -2,9 +2,10 @@ import numpy as np
 from qcelemental.models import Molecule
 from . import units
 
-def readPDB(pdb:str):
+
+def readPDB(pdb: str):
     coords = []
-    with open(pdb, 'r') as f:
+    with open(pdb, "r") as f:
         for line in f.readlines():
             if line.startswith("ATOM") or line.startswith("HETATM"):
                 splitLine = line.split()
@@ -13,10 +14,11 @@ def readPDB(pdb:str):
                 coords.append(splitLine[7])
     return coords
 
-def convertPDBtoMolecule(pdb:str):
+
+def convertPDBtoMolecule(pdb: str):
     coords = []
     symbols = []
-    with open(pdb, 'r') as f:
+    with open(pdb, "r") as f:
         for line in f.readlines():
             if line.startswith("ATOM") or line.startswith("HETATM"):
                 splitLine = line.split()
@@ -28,24 +30,28 @@ def convertPDBtoMolecule(pdb:str):
     mol = Molecule(**{"symbols": symbols, "geometry": coords})
     return mol
 
+
 def convertPDBtoXYZ(pdb):
-    name = pdb.replace(".pdb",".xyz")
+    name = pdb.replace(".pdb", ".xyz")
     xyzLines = []
-    with open(pdb,'r') as f:
+    with open(pdb, "r") as f:
         for line in f.readlines():
             splitLine = line.split()
             if len(splitLine) == 0:
                 continue
             if splitLine[0] == "ATOM" or splitLine[0] == "HETATM":
-                xyzLines.append(f"{splitLine[10]}\t{splitLine[5]}\t{splitLine[6]}\t{splitLine[7]}\n")
-    with open(name,'w') as f:
+                xyzLines.append(
+                    f"{splitLine[10]}\t{splitLine[5]}\t{splitLine[6]}\t{splitLine[7]}\n"
+                )
+    with open(name, "w") as f:
         f.write(f"{str(len(xyzLines))}\n")
         f.write("Converted from {pdb}\n")
         for line in xyzLines:
             f.write(line)
     return name
 
-def readGradFromTCout(outFile:str):
+
+def readGradFromTCout(outFile: str):
     isTCCloud = False
     with open(outFile, "r") as f:
         line = f.readline()
@@ -84,6 +90,7 @@ def readGradFromTCout(outFile:str):
             print("File %s did not complete calculation" % outFile)
             grads = None
     return energy, grads
+
 
 def readOpt(filename):
     inInitialParams = False
@@ -131,6 +138,7 @@ def readOpt(filename):
     results["initialParams"] = initialParams
     return status, results
 
+
 def readEsp(filename):
     lineCounter = 1
     espXYZ = []
@@ -139,7 +147,7 @@ def readEsp(filename):
         for line in f.readlines():
             splitLine = line.split()
             if lineCounter > 2 and len(splitLine) > 0:
-                for i in range(1,4):
+                for i in range(1, 4):
                     espXYZ.append(splitLine[i])
                 esp.append(splitLine[4])
             lineCounter += 1
