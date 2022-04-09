@@ -152,3 +152,13 @@ def readEsp(filename):
                 esp.append(splitLine[4])
             lineCounter += 1
     return espXYZ, esp
+
+def writeRst(frame, index, natoms, dest):
+    fileName = os.path.join(dest, str(index) + ".rst7")
+    with open(fileName, "w") as f:
+        f.write(f"Sampled from frame {str(index)}\n")
+        f.write(f"{str(natoms)}\n")
+        for i in range(len(frame)):
+            f.write("%12.7f%12.7f%12.7f" % (float(frame[i][0]), float(frame[i][1]), float(frame[i][2])))
+            if int(i / 2) * 2 != i:
+                f.write("\n")
