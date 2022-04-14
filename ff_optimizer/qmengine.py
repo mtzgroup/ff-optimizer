@@ -474,13 +474,11 @@ class TCCloudEngine(QMEngine):
             if result.success:
                 self.writeResult(result)
             else:
-                #retryPdbs.append(f"{result.input_data['id']}.pdb")
                 id = result.input_data['id']
                 if id is None:
-                    print("Oops")
                     id = result.input_data['input_data']['id']
                 retryPdbs.append(f"{id}.pdb")
-                    #import pdb; pdb.set_trace()
+
         if status == -1:
             raise RuntimeError(
                 "Batch resubmission reached size 1; QM calculations incomplete"
