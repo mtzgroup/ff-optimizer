@@ -7,6 +7,7 @@ import matplotlib as mpl
 import numpy as np
 from ff_optimizer import qmengine
 from shutil import rmtree
+from time import perf_counter
 
 mpl.use("Agg")
 import matplotlib.pyplot as plt
@@ -829,14 +830,15 @@ os.rename(
 os.rename(os.path.join(args.optdir, args.opt0), os.path.join(args.optdir, "opt_0.in"))
 
 print(
-    "%7s%15s%15s%20s%23s"
-    % ("Epoch", "Validation", "Valid ratio", "Current-Previous", "Current-last Current")
+    "%7s%15s%15s%20s%23s%8s%8s%8s"
+    % ("Epoch", "Validation", "Valid ratio", "Current-Previous", "Current-last Current", "MM time", "QM time", "FB time")
 )
 for i in range(1, args.maxcycles + 1):
 
     if i <= restartCycle:
         continue
 
+    mmStart = perf_counter()
     # Make sampling directory and copy files into it
     sampleName = str(i) + "_cycle_" + str(i)
     samplePath = os.path.join(args.sampledir, sampleName)
@@ -957,6 +959,8 @@ for i in range(1, args.maxcycles + 1):
                     destIn.write(line.replace("XXX", name + "_sample"))
         os.chdir(calcPath)
         os.system(f"cpptraj -p ../{prmtop} -i cpptraj.in > cpptraj.out")
+        mmEnd = perf_counter()
+        mmTime = mmEnd - mmStart
 
         # Run QM calculations
         files = os.listdir()
@@ -977,6 +981,8 @@ for i in range(1, args.maxcycles + 1):
         os.chdir(home)
         os.chdir(samplePath)
     os.chdir(home)
+    qmEnd = perf_counter()
+    qmTime = qmEnd - mmEnd
 
     # Set up new ForceBalance optimization
 
@@ -1144,26 +1150,35 @@ for i in range(1, args.maxcycles + 1):
         )
         validInitial.append(readValid("valid_" + str(i) + "_initial.out"))
     os.chdir(home)
+    fbEnd = perf_counter()
+    fbTime = fbEnd - qmEnd
 
     if i == 1:
         print(
-            "%7d%15.8f%15.8f%20.8f"
+            "%7d%15.8f%15.8f%20.8f%23s%8.1f%8.1f%8.1f"
             % (
                 i,
                 valid[-1],
                 valid[-1] / validInitial[-1],
                 valid[-1] - validPrevious[-1],
+                "",
+                mmTime,
+                qmTime,
+                fbTime,
             )
         )
     else:
         print(
-            "%7d%15.8f%15.8f%20.8f%23.8f"
+            "%7d%15.8f%15.8f%20.8f%23.8f%8.1f%8.1f%8.1f"
             % (
                 i,
                 valid[-1],
                 valid[-1] / validInitial[-1],
                 valid[-1] - validPrevious[-1],
                 valid[-1] - valid[-2],
+                mmTime,
+                qmTime,
+                fbTime,
             )
         )
 
