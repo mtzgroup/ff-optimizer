@@ -7,7 +7,7 @@ import matplotlib as mpl
 import numpy as np
 from ff_optimizer import qmengine
 from shutil import rmtree
-from time import perf_counter()
+from time import perf_counter
 
 mpl.use("Agg")
 import matplotlib.pyplot as plt

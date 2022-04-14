@@ -475,10 +475,12 @@ class TCCloudEngine(QMEngine):
                 self.writeResult(result)
             else:
                 #retryPdbs.append(f"{result.input_data['id']}.pdb")
-                try:
-                    retryPdbs.append(f"{result.input_data['input_data']['id']}.pdb")
-                except:
-                    import pdb; pdb.set_trace()
+                id = result.input_data['id']
+                if id is None:
+                    print("Oops")
+                    id = result.input_data['input_data']['id']
+                retryPdbs.append(f"{id}.pdb")
+                    #import pdb; pdb.set_trace()
         if status == -1:
             raise RuntimeError(
                 "Batch resubmission reached size 1; QM calculations incomplete"
@@ -501,7 +503,7 @@ class TCCloudEngine(QMEngine):
                     print(result.error.error_message)
             if len(failedIndices) > 0:
                 raise RuntimeError(
-                    f"Job ids {str(failedIndices)} in {os.getcwd()} failed twice!"
+                    f"Job ids {str(sorted(failedIndices))} in {os.getcwd()} failed twice!"
                 )
             if status == -1:
                 raise RuntimeError(
