@@ -1,0 +1,191 @@
+
+          -------------------------------------------------------
+          Amber 20 PMEMD                              2020
+          -------------------------------------------------------
+
+| PMEMD implementation of SANDER, Release 18
+
+|  Compiled date/time: Fri Feb  4 14:22:07 2022
+| Run on 04/22/2022 at 16:04:32
+
+|   Executable path: pmemd
+| Working directory: /home/curtie/7_FF_fitting/0_ff-optimizer/1_mm_engine/ff-optimizer/tests/mmengine/ref
+|          Hostname: fire-09-06
+
+  [-O]verwriting output
+
+File Assignments:
+|   MDIN: ../md.in                                                              
+|  MDOUT: mdout                                                                 
+| INPCRD: ../1.rst7                                                             
+|   PARM: ../water.prmtop                                                       
+| RESTRT: md.rst7                                                               
+|   REFC: refc                                                                  
+|  MDVEL: mdvel                                                                 
+|   MDEN: mden                                                                  
+|  MDCRD: mdcrd                                                                 
+| MDINFO: mdinfo                                                                
+|  MDFRC: mdfrc                                                                 
+
+
+ Here is the input file:
+
+test                                                                           
+ &cntrl                                                                        
+  imin=0,irest=0,ntx=1,ntxo=1,                                                 
+  nstlim=10,dt=0.001,                                                          
+  ntc=1,ntf=1,                                                                 
+  cut=999, ntb=0,                                                              
+  ntpr=10000, ntwx=0,                                                          
+  ntwv=0,                                                                      
+  ntt=3, gamma_ln=10.00,                                                       
+  tempi=200.0, temp0=200.0,                                                    
+  ntr=0,                                                                       
+  nmropt=0,                                                                    
+  ig=123456,                                                                   
+  igb=6,                                                                       
+/                                                                              
+
+
+| irandom = 1, using AMBER's internal random number generator (default).
+ 
+| Conditional Compilation Defines Used:
+| PUBFFT
+| BINTRAJ
+| EMIL
+
+| New format PARM file being parsed.
+| Version =    1.000 Date = 02/17/22 Time = 16:24:02
+
+| Note: 1-4 EEL scale factors are being read from the topology file.
+
+| Note: 1-4 VDW scale factors are being read from the topology file.
+| INFO:    Reading atomic numbers from topology file.
+| Duplicated    0 dihedrals
+
+| Duplicated    0 dihedrals
+
+--------------------------------------------------------------------------------
+   1.  RESOURCE   USE: 
+--------------------------------------------------------------------------------
+
+ NATOM  =       6 NTYPES =       2 NBONH =       4 MBONA  =       0
+ NTHETH =       0 MTHETA =       0 NPHIH =       0 MPHIA  =       0
+ NHPARM =       0 NPARM  =       0 NNB   =       8 NRES   =       2
+ NBONA  =       0 NTHETA =       0 NPHIA =       0 NUMBND =       1
+ NUMANG =       0 NPTRA  =       0 NATYP =       2 NPHB   =       0
+ IFBOX  =       0 NMXRS  =       3 IFCAP =       0 NEXTRA =       0
+ NCOPY  =       0
+
+ Implicit solvent radii are modified Bondi radii (mbondi)                                                   
+--------------------------------------------------------------------------------
+   2.  CONTROL  DATA  FOR  THE  RUN
+--------------------------------------------------------------------------------
+
+default_name                                                                    
+
+General flags:
+     imin    =       0, nmropt  =       0
+
+Nature and format of input:
+     ntx     =       1, irest   =       0, ntrx    =       1
+
+Nature and format of output:
+     ntxo    =       1, ntpr    =   10000, ntrx    =       1, ntwr    =      10
+     iwrap   =       0, ntwx    =       0, ntwv    =       0, ntwe    =       0
+     ioutfm  =       1, ntwprt  =       0, idecomp =       0, rbornstat=      0
+
+Potential function:
+     ntf     =       1, ntb     =       0, igb     =       6, nsnb    =      25
+     ipol    =       0, gbsa    =       0, iesp    =       0
+     dielc   =   1.00000, cut     = 999.00000, intdiel =   1.00000
+
+Frozen or restrained atoms:
+     ibelly  =       0, ntr     =       0
+
+Molecular dynamics:
+     nstlim  =        10, nscm    =      1000, nrespa  =         1
+     t       =   0.00000, dt      =   0.00100, vlimit  =  20.00000
+
+Langevin dynamics temperature regulation:
+     ig      =  123456
+     temp0   = 200.00000, tempi   = 200.00000, gamma_ln=  10.00000
+
+| Intermolecular bonds treatment:
+|     no_intermolecular_bonds =       1
+
+| Energy averages sample interval:
+|     ene_avg_sampling =   10000
+
+--------------------------------------------------------------------------------
+   3.  ATOMIC COORDINATES AND VELOCITIES
+--------------------------------------------------------------------------------
+
+sampled from frame 1                                                            
+ begin time read from input coords =     0.000 ps
+
+ 
+ Number of triangulated 3-point waters found:        0
+| Dynamic Memory, Types Used:
+| Reals                 129
+| Integers               96
+
+--------------------------------------------------------------------------------
+   4.  RESULTS
+--------------------------------------------------------------------------------
+
+
+ NSTEP =        0   TIME(PS) =       0.000  TEMP(K) =   193.11  PRESS =     0.0
+ Etot   =         3.0037  EKtot   =         3.4538  EPtot      =        -0.4501
+ BOND   =         0.7903  ANGLE   =         0.0000  DIHED      =         0.0000
+ 1-4 NB =         0.0000  1-4 EEL =         0.0000  VDWAALS    =         3.1840
+ EELEC  =        -4.4244  EGB     =         0.0000  RESTRAINT  =         0.0000
+ ------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+   5.  TIMINGS
+--------------------------------------------------------------------------------
+
+|  NonSetup CPU Time in Major Routines:
+|
+|     Routine           Sec        %
+|     ------------------------------
+|     Nonbond           0.00    0.67
+|     Bond              0.00    0.15
+|     Angle             0.00    0.00
+|     Dihedral          0.00    0.07
+|     Shake             0.00    0.00
+|     RunMD             0.00   98.07
+|     Other             0.00    1.04
+|     ------------------------------
+|     Total             0.00
+
+|  Generalized Born CPU Time:
+|
+|     Routine                 Sec        %
+|     ------------------------------------
+|     Radii Calc              0.00    0.00
+|     Diagonal Calc           0.00    0.00
+|     Off Diagonal Calc       0.00    0.44
+|     GBSA LCPO Calc          0.00    0.00
+|     ---------------------------------
+|     Total                   0.00    0.44
+
+|  Final Performance Info:
+|     -----------------------------------------------------
+|     Average timings for last      10 steps:
+|     Elapsed(s) =       0.00 Per Step(ms) =       0.49
+|         ns/day =     177.34   seconds/ns =     487.21
+|
+|     Average timings for all steps:
+|     Elapsed(s) =       0.00 Per Step(ms) =       0.49
+|         ns/day =     177.34   seconds/ns =     487.21
+|     -----------------------------------------------------
+
+|  Setup CPU time:            0.00 seconds
+|  NonSetup CPU time:         0.00 seconds
+|  Total CPU time:            0.00 seconds     0.00 hours
+
+|  Setup wall time:           0    seconds
+|  NonSetup wall time:        0    seconds
+|  Total wall time:           0    seconds     0.00 hours

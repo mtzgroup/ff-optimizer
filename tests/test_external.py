@@ -50,7 +50,8 @@ def compareOpt(outRef, outTest):
 # Just check qdata.txt for now
 
 
-@pytest.mark.external
+@pytest.mark.gpu
+@pytest.mark.full
 def test_debug_full():
     print(os.path.dirname(__file__))
     os.chdir(os.path.join(os.path.dirname(__file__), "full"))
@@ -64,7 +65,7 @@ def test_debug_full():
     os.system("./clean.sh")
 
 
-@pytest.mark.external
+@pytest.mark.full
 @pytest.mark.tccloud
 def test_tccloud_full():
     os.chdir(os.path.join(os.path.dirname(__file__), "full"))
@@ -80,7 +81,7 @@ def test_tccloud_full():
     os.system("./clean.sh")
 
 
-@pytest.mark.external
+@pytest.mark.full
 def test_queue_full():
     os.chdir(os.path.join(os.path.dirname(__file__), "full"))
     os.system("./clean.sh")
