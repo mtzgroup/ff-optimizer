@@ -91,6 +91,3 @@ def test_sample(monkeypatch):
         for i in range(len(testLines)):
             assert refLines[i] == testLines[i]
     rmtree("928")
-
-def test_restart():
-    pass

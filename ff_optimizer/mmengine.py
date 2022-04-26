@@ -7,7 +7,7 @@ from subprocess import check_output
 from .utils import writeRst
 import os
 import GPUtil
-from shutil import copyfile
+from shutil import copyfile, rmtree
 
 
 class MMEngine():
@@ -19,6 +19,8 @@ class MMEngine():
         pass
 
     # 0-indexed
+    # TODO: figure out what to do with this awful function
+    # It really shouldn't be my responsibility to untangle an awful coors.xyz file
     def getIndices(self):
         start = self.options['start']
         end = self.options['end']
@@ -110,12 +112,15 @@ class MMEngine():
         writeRst(frame, natoms, dest)
             
     def getMMSamples(self):
+        self.setup()
         frames = self.getFrames()
         name = frames[0].split('.')[0]
         if not os.path.isdir(name):
             os.mkdir(f"train_{name}")
         os.chdir(f"train_{name}")
         self.sample(frames[0], self.options["trainMdin"])
+        with open("MMFinished.txt",'w') as f:
+            f.write("MM sampling finished")
         os.chdir("..")
         for i in frames[1:]:
             name = frames[i].split('.')[0]
@@ -123,6 +128,8 @@ class MMEngine():
                 os.mkdir(f"valid_{name}")
             os.chdir(f"valid_{name}")
             self.sample(frames[i], self.options["validMdin"])
+            with open("MMFinished.txt",'w') as f:
+                f.write("MM sampling finished")
             os.chdir("..")
             
     # This is the function that has to be implemented for every MMEngine
@@ -143,38 +150,64 @@ class MMEngine():
         for f in os.listdir(): 
             if f.endswith(".rst7"): 
                 rsts.append(f)
-        if len(rsts) < self.options['nvalids'] + 1:
+        # Check to make sure we have the right number of ICs
+        print(len(rsts))
+        if len(rsts) != self.options['nvalids'] + 1:
             for rst in rsts:
                 os.remove(rst)
+            for f in os.listdir():
+                if os.path.isdir(f):
+                    rmtree(f)
             self.getMMSamples()
-        else:
-            rsts = sorted(rsts)
-            for i in range(len(rsts)):
-                name = rst.split('.')[0]
-                if i == 0:
-                    folder = f"train_{name}"
-                else:
-                    folder = f"valid_{name}"
-                if not os.path.isfile(os.path.join(folder,f"{name}.nc")):
-                    if not os.isdir(folder):
-                        os.mkdir(folder)
-                    os.chdir(folder)
+            return
+
+        rsts = sorted(rsts)
+        for i in range(len(rsts)):
+            name = rsts[i].split('.')[0]
+            folder = "."
+            for f in os.listdir():
+                if f.endswith(f"_{name}"):
+                    folder = f
+            # Skip finished jobs
+            if os.path.isfile(os.path.join(folder,"MMFinished.txt")):
+                continue
+            if not os.path.isfile(os.path.join(folder,f"{name}.nc")):
+                if folder == ".":
                     if i == 0:
-                        self.sample(rst, self.options['trainMdin'])
+                        isValid = False
+                        for f in os.listdir():
+                            if f.startswith("train"):
+                                isValid = True
                     else:
-                        self.sample(rst, self.options['validMdin'])
-                    os.chdir("..")
+                        isValid = True
+                    if isValid:
+                        folder = f"valid_{str(name)}"
+                    else:
+                        folder = f"train_{str(name)}"
+                    os.mkdir(folder)
+                elif folder.startswith("train"):
+                    isValid = False
                 else:
-                    os.chdir(folder)
-                    with open("cpptraj.in",'w') as f:
-                        f.write(f"loadcrd {name}.nc coors\n")
-                        f.write(f"crdout coors {name}.pdb multi\n")
-                        f.write("exit\n")
-                    try:
-                        os.system(f"cpptraj -p {self.prmtop} -i cpptraj.in > cpptraj.out")
-                    except:
-                        raise RuntimeError("Error in trajectory postprocessing in {os.getcwd()}")
-                    os.chdir("..")
+                    isValid = True
+                os.chdir(folder)
+                if not isValid:
+                    self.sample(rsts[i], self.options['trainMdin'])
+                else:
+                    self.sample(rsts[i], self.options['validMdin'])
+                os.chdir("..")
+            # TODO: should distinguish between restarting from MD and from cpptraj
+            else:
+                os.chdir(folder)
+                with open("cpptraj.in",'w') as f:
+                    f.write(f"loadcrd {name}.nc coors\n")
+                    f.write(f"crdout coors {name}.pdb multi\n")
+                    f.write("exit\n")
+                try:
+                    os.system(f"cpptraj -p {self.prmtop} -i cpptraj.in > cpptraj.out")
+                except Exception as e:
+                    print(e)
+                    raise RuntimeError(f"Error in trajectory postprocessing in {os.getcwd()}")
+                os.chdir("..")
                         
 class AmberEngine(MMEngine):
     
@@ -222,8 +255,9 @@ class ExternalAmberEngine(MMEngine):
             f.write("exit\n")
         try:
             os.system(f"cpptraj -p {os.path.join('..',self.prmtop)} -i cpptraj.in > cpptraj.out")
-        except:
-            raise RuntimeError("Error in trajectory postprocessing in {os.getcwd()}")
+        except Exception as e:
+            print(e)
+            raise RuntimeError(f"Error in trajectory postprocessing in {os.getcwd()}")
         for f in os.listdir():
             if ".pdb" in f and len(f.split(".")) > 2:
                 label = f.split(".")[2]
