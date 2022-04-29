@@ -14,7 +14,8 @@ class MMEngine():
 
     def __init__(self, options):
         self.options = options
-        self.coordPath = os.path.join(options['coordsDir'], options['coords'])
+        # Account for being in basedir/sampledir/x_cycle_x/
+        self.coordPath = os.path.join("..","..",options['coordPath'])
         self.startIndex, self.endIndex, self.splitIndex = self.getIndices()
         pass
 
@@ -27,7 +28,8 @@ class MMEngine():
         split = self.options['split']
         self.coordIndex = []
         terachemFormat = True
-        with open(self.coordPath, "r") as f:
+        print(os.getcwd())
+        with open(self.options['coordPath'], "r") as f:
             try:
                 natoms = int(f.readline())
                 if f.readline().split()[1] != "frame":
@@ -38,17 +40,17 @@ class MMEngine():
                 raise RuntimeError("XYZ coordinates file {self.options['coords']} is not correctly formatted")
         if terachemFormat:
             splitIndex = None
-            with open(self.coordPath, "r") as f:
+            with open(self.options['coordPath'], "r") as f:
                 try:
                     for line in f.readlines():
                         if "frame" in line:
-                            self.coordIndex.append(int(line.split()[2])+1)
+                            self.coordIndex.append(int(line.split()[2]))
                 except:
                     raise RuntimeError("XYZ coordinates file {self.options['coords']} is not correctly formatted")
             nframes = len(self.coordIndex)
             startIndex = 0
             if start != None:
-                while self.coordIndex[startIndex] < start and startIndex < nframes:
+                while self.coordIndex[startIndex] < start and startIndex < nframes - 1:
                     startIndex += 1
             if startIndex == nframes:
                 raise ValueError("No frames after start index!")
@@ -60,7 +62,7 @@ class MMEngine():
                 raise ValueError("No frames before end index!")
             splitIndex = 0
             if split != None:
-                while self.coordIndex[splitIndex] < split and splitIndex < nframes:
+                while self.coordIndex[splitIndex] < split and splitIndex < nframes - 1:
                     splitIndex += 1
                 if splitIndex == 0:
                     raise ValueError(f"There must be frames before {str(split)}")
@@ -79,8 +81,11 @@ class MMEngine():
                     raise RuntimeError("XYZ coordinates file {self.options['coords']} is not correctly formatted")
             if end > nframes:
                 end = nframes
-            if split > nframes:
-                raise ValueError("There must be frames after split")
+            if split is not None:
+                if split > nframes:
+                    raise ValueError("There must be frames after split")
+            if start > nframes:
+                raise ValueError("There must be frames after start")
             return start, end, split
             
     def getFrames(self, samplePath="."):
@@ -94,7 +99,8 @@ class MMEngine():
                 frames.append(self.coordIndex[randint(self.splitIndex, self.endIndex)])
 
         for frame in frames:
-            self.getFrame(index, os.path.join(samplePath,f"{str(index)}.rst7"))
+            self.getFrame(frame, os.path.join(samplePath,f"{str(frame)}.rst7"))
+        print(frames)
         return frames
 
     # 0-indexed 
@@ -102,19 +108,20 @@ class MMEngine():
         frame = []
         atoms = []
         inFrame = False
-        lineCounter = 0
-        frameCounter = 1
         with open(self.coordPath, "r") as f:
             natoms = int(f.readline())
-            for line in f.readlines():
-                if int(lineCounter / (natoms + 2)) == index:
-                    frame.append(line)
+            lines = f.readlines()
+            for i in range(len(lines)):
+                if int(i / (natoms + 2)) == index and (i + 1) % (natoms + 2) > 1:
+                    frame.append(lines[i].split()[1:])
+                elif int((i + 1) / (natoms + 2)) > index:
+                    break
         writeRst(frame, natoms, dest)
             
     def getMMSamples(self):
         self.setup()
         frames = self.getFrames()
-        name = frames[0].split('.')[0]
+        name = str(frames[0])
         if not os.path.isdir(name):
             os.mkdir(f"train_{name}")
         os.chdir(f"train_{name}")
@@ -123,13 +130,15 @@ class MMEngine():
             f.write("MM sampling finished")
         os.chdir("..")
         for i in frames[1:]:
-            name = frames[i].split('.')[0]
+            name = str(i)
             if not os.path.isdir(name):
                 os.mkdir(f"valid_{name}")
             os.chdir(f"valid_{name}")
-            self.sample(frames[i], self.options["validMdin"])
+            self.sample(i, self.options["validMdin"])
             with open("MMFinished.txt",'w') as f:
-                f.write("MM sampling finished")
+                f.write("MM sampling finished\n")
+                f.write("Remove this file and the .nc file\n")
+                f.write("If you want to force a recalculation of the MM sampling")
             os.chdir("..")
             
     # This is the function that has to be implemented for every MMEngine
@@ -142,7 +151,7 @@ class MMEngine():
         for f in os.listdir():
             if f.endswith(".prmtop"):
                 self.prmtop = f
-        if prmtop == None:
+        if self.prmtop == None:
             raise RuntimeError(f"Tleap failed to create a new .prmtop file, check {os.path.join(os.getcwd(),'leap.out')} for more information")
 
     def restart(self):
@@ -151,7 +160,6 @@ class MMEngine():
             if f.endswith(".rst7"): 
                 rsts.append(f)
         # Check to make sure we have the right number of ICs
-        print(len(rsts))
         if len(rsts) != self.options['nvalids'] + 1:
             for rst in rsts:
                 os.remove(rst)
@@ -222,10 +230,11 @@ class ExternalAmberEngine(MMEngine):
         self.options = options
         self.heatCounter = options['heatCounter']
         try:
-            deviceIDs = GPUtil.getAvailable()
+            deviceIDs = GPUtil.getAvailable(maxLoad=0.1)
             if len(deviceIDs) > 0:
                 print("Nvidia GPUs detected; defaulting to pmemd.cuda")
                 self.amberExe = "pmemd.cuda"
+                os.environ["CUDA_VISIBLE_DEVICES"] = str(deviceIDs[0])
             else:
                 print("No Nvidia GPUs available; defaulting to sander")
                 self.amberExe = "sander"
@@ -235,16 +244,21 @@ class ExternalAmberEngine(MMEngine):
         super().__init__(options)
 
     def runSander(self, prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=None):
+        if not os.path.isfile(prmtop):
+            raise RuntimeError(f"Cannot find prmtop {prmtop} in {os.getcwd()}")
+        if not os.path.isfile(mdin):
+            raise RuntimeError(f"Cannot find mdin {mdin} in {os.getcwd()}")
+        if not os.path.isfile(mdcrd):
+            raise RuntimeError(f"Cannot find input crd {mdcrd} in {os.getcwd()}")
         if mdvels is None:
             os.system(f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart}")
+            print(f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart}")
         else:
             os.system(f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart} -v {mdvels}")
             
-    def sample(self, rst, mdin):
-        name = rst.split(".")[0]
-        if not os.path.isdir(name):
-            os.mkdir(name)
-        os.chdir(name)
+    def sample(self, index, mdin):
+        name = str(index)
+        rst = f"{name}.rst7"
         copyfile(os.path.join("..",rst),f"{name}_heat0.rst7")
         for j in range(1, self.heatCounter + 1):
             self.runSander(os.path.join("..",self.prmtop), os.path.join("..",f"heat{str(j)}.in"), f"{name}_heat{str(j)}.out", f"{name}_heat{str(j-1)}.rst7", f"{name}_heat{str(j)}.nc", f"{name}_heat{str(j)}.rst7")
@@ -262,9 +276,8 @@ class ExternalAmberEngine(MMEngine):
             if ".pdb" in f and len(f.split(".")) > 2:
                 label = f.split(".")[2]
                 os.system(f"mv {f} {label}.pdb")
-        os.chdir("../")
 
 class ExternalOpenMMEngine(MMEngine):
     
     def __init__():
-        uper().__init__()
+        super().__init__()

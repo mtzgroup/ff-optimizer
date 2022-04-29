@@ -156,7 +156,7 @@ def readEsp(filename):
 # frame is a 2D list
 def writeRst(frame, natoms, dest):
     with open(dest, "w") as f:
-        f.write(f"Written by ff_optimizer")
+        f.write(f"Written by ff_optimizer\n")
         f.write(f"{str(natoms)}\n")
         for i in range(len(frame)):
             f.write("%12.7f%12.7f%12.7f" % (float(frame[i][0]), float(frame[i][1]), float(frame[i][2])))

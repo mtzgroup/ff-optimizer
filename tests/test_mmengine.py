@@ -9,13 +9,14 @@ from shutil import rmtree
 options = {}
 options['start'] = 33
 options['end'] = 2000
-options['split'] = 1000
+options['split'] = 777
 options['stride'] = 50
-options['coordsDir'] = "mmengine"
-options['coords'] = "coors.xyz"
 options['nvalids'] = 1
 options['trainMdin'] = "md.in"
 options['validMdin'] = "md.in"
+
+def monkeyGetIndices(self):
+    return 1,2,3
 
 def test_getIndices():
     pass
@@ -24,10 +25,13 @@ def test_getFrames():
     pass
 
 # Also tests utils.writeRst()
-def test_getFrame():
+def test_getFrame(monkeypatch):
+    monkeypatch.setattr(mmengine.MMEngine,"getIndices",monkeyGetIndices)
+    options['coordPath'] = os.path.join("ff-optimizer","tests","mmengine","coors.xyz")
     os.chdir(os.path.dirname(__file__))
     options['start'] = None
     mmEngine = mmengine.MMEngine(options)
+
     mmEngine.getFrame(23, "23.rst7")
     testCoors = []
     with open("23.rst7",'r') as f:
@@ -39,6 +43,7 @@ def test_getFrame():
         for line in f.readlines()[2:]:
             refCoors.append(line.split())
     checkUtils.checkArray(testCoors, refCoors)
+
 
 def monkeyGetSamples(self):
     self.test[0] = -1
@@ -54,7 +59,9 @@ def monkeySample(self, rst, mdin):
     
 # Tests restarting a completed directory
 def test_restart1(monkeypatch):
-    options['coordsDir'] = ".."
+    monkeypatch.setattr(mmengine.MMEngine,"getIndices",monkeyGetIndices)
+    coordPath = os.path.join("mmengine","coors.xyz")
+    options['coordPath'] = coordPath
     os.chdir(os.path.join(os.path.dirname(__file__),"mmengine","restart1"))
     mmEngine = mmengine.MMEngine(options)
     mmEngine.prmtop = "water.prmtop"
@@ -77,7 +84,7 @@ def test_restart1(monkeypatch):
 
 # Tests restarting a directory with one IC complete
 def test_restart2(monkeypatch):
-    options['coordsDir'] = ".."
+    monkeypatch.setattr(mmengine.MMEngine,"getIndices",monkeyGetIndices)
     os.chdir(os.path.join(os.path.dirname(__file__),"mmengine","restart2"))
     mmEngine = mmengine.MMEngine(options)
     mmEngine.prmtop = "water.prmtop"
@@ -99,9 +106,9 @@ def test_restart2(monkeypatch):
 
 # Tests restarting a directory with a partially complete IC
 def test_restart3(monkeypatch):
+    monkeypatch.setattr(mmengine.MMEngine,"getIndices",monkeyGetIndices)
     options['trainMdin'] = "train.in"
     options['validMdin'] = "md.in"
-    options['coordsDir'] = ".."
     os.chdir(os.path.join(os.path.dirname(__file__),"mmengine","restart3"))
     mmEngine = mmengine.MMEngine(options)
     mmEngine.prmtop = "water.prmtop"
@@ -121,9 +128,9 @@ def test_restart3(monkeypatch):
 
 # Tests restarting a directory with the wrong number of rsts
 def test_restart4(monkeypatch):
+    monkeypatch.setattr(mmengine.MMEngine,"getIndices",monkeyGetIndices)
     options['trainMdin'] = "train.in"
     options['validMdin'] = "md.in"
-    options['coordsDir'] = ".."
     os.chdir(os.path.join(os.path.dirname(__file__),"mmengine","restart4"))
     mmEngine = mmengine.MMEngine(options)
     mmEngine.prmtop = "water.prmtop"
