@@ -63,5 +63,3 @@ def test_writeRst():
         for line in f.readlines()[2:]:
             refCoors.append(line.split())
     checkUtils.checkArray(testCoors, refCoors)
-    
-

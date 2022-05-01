@@ -1,7 +1,8 @@
 Note: Failed to import the optional openff.evaluator package. 
 Note: Failed to import the optional openff-toolkit package. 
 Note: Failed to import the optional openff.recharge package.
-#======================================================================#
+
+#======================================================================#
 #| [1m            Welcome to ForceBalance version 1.8.1! =D             [0m |#
 #| [1m                 Force Field Optimization System                  [0m |#
 #| [1m                                                                  [0m |#
@@ -58,13 +59,15 @@ Note: Failed to import the optional openff.recharge package.
                              [44m  [0m                                         
 
 Reading options from file: opt_1.in
-#========================================================#
+
+#========================================================#
 #| [95m  Options at their default values are not printed   [0m |#
 #| [95m        Use 'verbose_options True' to Enable        [0m |#
 #========================================================#
 Reading force field from file: sol.mol2
 Reading force field from file: sol.frcmod
-#=========================================================#
+
+#=========================================================#
 #| [92m Starting parameter indices, physical values and IDs [0m |#
 #=========================================================#
    0 [ -6.5120e-01 ] : COUL:SOL-1
@@ -74,7 +77,8 @@ Reading force field from file: sol.frcmod
    4 [  1.7564e+00 ] : VDWS/OW
    5 [  2.9777e-01 ] : VDWT/OW
 -----------------------------------------------------------
-#=========================================================#
+
+#=========================================================#
 #| [91m Rescaling Factors by Type (Lower Takes Precedence): [0m |#
 #=========================================================#
    COUL                                 : 1.00000e+00
@@ -83,7 +87,8 @@ Reading force field from file: sol.frcmod
    VDWS                                 : 5.29177e-02
    VDWT                                 : 2.47896e+00
 -----------------------------------------------------------
-#========================================================#
+
+#========================================================#
 #| [91m   Rescaling Types / Factors by Parameter Number:   [0m |#
 #========================================================#
    0 [    COUL                          : 1.00000e+00 ] : COUL:SOL-1
@@ -96,7 +101,8 @@ Reading force field from file: sol.frcmod
 Building charge constraints...
 Parameter 0 occurs 1 times in molecule SOL in locations [0] (COUL:SOL-1)
 Parameter 1 occurs 2 times in molecule SOL in locations [1, 2] (COUL:SOL-2 COUL:SOL-3)
-#========================================================#
+
+#========================================================#
 #| [92m               Setup for force field                [0m |#
 #========================================================#
 fnms                      ['sol.mol2', 'sol.frcmod'] 
@@ -115,7 +121,8 @@ pmemd.cuda gave a nonzero returncode; CUDA environment variables likely missing
 Cannot find a unique file with extension .mdin in /home/curtie/7_FF_fitting/1_ForceBalance/2_playground/4_small_ref/4_ff-opt_test-full/1_opt/targets/dynamics (0 found; )
 [91mWriting amber-all.crd file with no periodic box information[0m
 Fitting the forces on all atoms
-#========================================================#
+
+#========================================================#
 #| [92m            Setup for target dynamics :             [0m |#
 #========================================================#
 leapcmd                   setup.leap 
@@ -137,7 +144,8 @@ pmemd.cuda gave a nonzero returncode; CUDA environment variables likely missing
 [1;91mPress Enter or wait 10 seconds (I assume no responsibility for what happens after this!)[0m
 [91mWriting amber-all.crd file with no periodic box information[0m
 Fitting the forces on all atoms
-#========================================================#
+
+#========================================================#
 #| [92m             Setup for target train_1 :             [0m |#
 #========================================================#
 leapcmd                   setup.leap 
@@ -149,12 +157,14 @@ writelevel                1
 shots                     10 
 ----------------------------------------------------------
 Using parabolic regularization (Gaussian prior) with strength 1.0e-02 (+), 0.0e+00 (x)
-#========================================================#
+
+#========================================================#
 #| [92m           Setup for objective function :           [0m |#
 #========================================================#
 penalty_additive          0.01 
 ----------------------------------------------------------
-#========================================================#
+
+#========================================================#
 #| [92m                Setup for optimizer                 [0m |#
 #========================================================#
 jobtype                   BFGS 
@@ -165,7 +175,8 @@ input_file                opt_1.in
 criteria                  2 
 ----------------------------------------------------------
 Calculation started at 2022-04-28 08:47 PM
-#========================================================#
+
+#========================================================#
 #| [1m                  Main Optimizer                    [0m |#
 #| [1m       BFGS Method (Hessian Diagonal Search)        [0m |#
 #| [1m                                                    [0m |#
@@ -174,18 +185,43 @@ Calculation started at 2022-04-28 08:47 PM
 #| [1m          [0mNorm of Gradient    : 1.000e-03           [0m |#
 #| [1m          [0mParameter step size : 1.000e-04           [0m |#
 #========================================================#
-#========================================================#
+
+#========================================================#
 #|       Color Key for Objective Function -=X2=-        |#
 #|  [1mBold[0m = Initial step                                 |#
 #|  [92mGreen = Current lowest value of objective function[0m  |#
 #|  [91mRed = Objective function rises, step rejected[0m       |#
 #|  [0mNo color = Not at the lowest value                  |#
 #========================================================#
-#========================================================#
+
+#========================================================#
 #| [94m     Iteration 0: Evaluating objective function     [0m |#
 #| [94m        and derivatives through first order         [0m |#
 #========================================================#
-fdwrap: callM [0] = -1.0e-03                                                   fdwrap: callM [0] =  1.0e-03                                                   fdwrap: callM [1] = -1.0e-03                                                   fdwrap: callM [1] =  1.0e-03                                                   fdwrap: callM [2] = -1.0e-03                                                   fdwrap: callM [2] =  1.0e-03                                                   fdwrap: callM [3] = -1.0e-03                                                   fdwrap: callM [3] =  1.0e-03                                                   fdwrap: callM [4] = -1.0e-03                                                   fdwrap: callM [4] =  1.0e-03                                                   fdwrap: callM [5] = -1.0e-03                                                   fdwrap: callM [5] =  1.0e-03                                                   
+
+fdwrap: callM [0] = -1.0e-03                                                   
+
+fdwrap: callM [0] =  1.0e-03                                                   
+
+fdwrap: callM [1] = -1.0e-03                                                   
+
+fdwrap: callM [1] =  1.0e-03                                                   
+
+fdwrap: callM [2] = -1.0e-03                                                   
+
+fdwrap: callM [2] =  1.0e-03                                                   
+
+fdwrap: callM [3] = -1.0e-03                                                   
+
+fdwrap: callM [3] =  1.0e-03                                                   
+
+fdwrap: callM [4] = -1.0e-03                                                   
+
+fdwrap: callM [4] =  1.0e-03                                                   
+
+fdwrap: callM [5] = -1.0e-03                                                   
+
+fdwrap: callM [5] =  1.0e-03                                                   
 #================================================================================================#
 #|               Target: dynamics  Type: AbInitio_AMBER  Objective = 5.00115e-01                |#
 #|                        Difference   Denominator     Percent                                  |#
@@ -195,7 +231,30 @@ Calculation started at 2022-04-28 08:47 PM
     Gradient (kJ/mol/A)      49.5965      146.9576     33.7489%     0.1139    1.000     0.1139 
 --------------------------------------------------------------------------------------------------
 Maximum force difference on atom 4 (H), frame 1,  79.9516 kJ/mol/A
-fdwrap: callM [0] = -1.0e-03                                                   fdwrap: callM [0] =  1.0e-03                                                   fdwrap: callM [1] = -1.0e-03                                                   fdwrap: callM [1] =  1.0e-03                                                   fdwrap: callM [2] = -1.0e-03                                                   fdwrap: callM [2] =  1.0e-03                                                   fdwrap: callM [3] = -1.0e-03                                                   fdwrap: callM [3] =  1.0e-03                                                   fdwrap: callM [4] = -1.0e-03                                                   fdwrap: callM [4] =  1.0e-03                                                   fdwrap: callM [5] = -1.0e-03                                                   fdwrap: callM [5] =  1.0e-03                                                   
+
+fdwrap: callM [0] = -1.0e-03                                                   
+
+fdwrap: callM [0] =  1.0e-03                                                   
+
+fdwrap: callM [1] = -1.0e-03                                                   
+
+fdwrap: callM [1] =  1.0e-03                                                   
+
+fdwrap: callM [2] = -1.0e-03                                                   
+
+fdwrap: callM [2] =  1.0e-03                                                   
+
+fdwrap: callM [3] = -1.0e-03                                                   
+
+fdwrap: callM [3] =  1.0e-03                                                   
+
+fdwrap: callM [4] = -1.0e-03                                                   
+
+fdwrap: callM [4] =  1.0e-03                                                   
+
+fdwrap: callM [5] = -1.0e-03                                                   
+
+fdwrap: callM [5] =  1.0e-03                                                   
 #================================================================================================#
 #|                Target: train_1  Type: AbInitio_AMBER  Objective = 2.00204e+00                |#
 #|                        Difference   Denominator     Percent                                  |#
@@ -205,7 +264,8 @@ Maximum force difference on atom 4 (H), frame 1,  79.9516 kJ/mol/A
     Gradient (kJ/mol/A)   11085.3496    11079.6024    100.0519%     1.0010    1.000     1.0010 
 --------------------------------------------------------------------------------------------------
 Maximum force difference on atom 1 (H), frame 9, 55522.0656 kJ/mol/A
-#====================================================================#
+
+#====================================================================#
 #| [94m                  Objective Function Breakdown                  [0m |#
 #| [94m  Target Name              Residual  x  Weight  =  Contribution [0m |#
 #====================================================================#
@@ -218,7 +278,8 @@ Total                                             [94m     1.25108e+00[0m
   Step       |k|        |dk|       |grad|       -=X2=-     Delta(X2)    StepQual
      0   0.000e+00   0.000e+00   8.624e-03[1m   1.25108e+00[0m   0.000e+00      0.000
 
-#========================================================#
+
+#========================================================#
 #| [94m                   Total Gradient                   [0m |#
 #========================================================#
    0 [  0.00000000e+00 ] : COUL:SOL-1
@@ -247,7 +308,8 @@ Hessian diagonal search: H+0.6033*I, length 5.3124e-03, result -2.2913e-05
 Hessian diagonal search: H+0.6031*I, length 5.3133e-03, result -2.2913e-05
 Hessian diagonal search: H+0.6039*I, length 5.3106e-03, result -2.2913e-05
 Optimization step found (length 5.3124e-03)
-#========================================================#
+
+#========================================================#
 #| [95m  Mathematical Parameters (Current + Step = Next)   [0m |#
 #========================================================#
    0 [  0.0000e+00 + 0.0000e+00 =  0.0000e+00 ] : COUL:SOL-1
@@ -257,7 +319,8 @@ Optimization step found (length 5.3124e-03)
    4 [  0.0000e+00 - 1.2429e-04 = -1.2429e-04 ] : VDWS/OW
    5 [  0.0000e+00 - 2.4461e-03 = -2.4461e-03 ] : VDWT/OW
 ----------------------------------------------------------
-#========================================================#
+
+#========================================================#
 #| [95m    Physical Parameters (Current + Step = Next)     [0m |#
 #========================================================#
    0 [ -6.5120e-01 + 1.8856e-03 = -6.4931e-01 ] : COUL:SOL-1
@@ -269,11 +332,35 @@ Optimization step found (length 5.3124e-03)
 ----------------------------------------------------------
 Input file with saved parameters: opt_1.sav
 Setting finite difference step to 5.3124e-04
-#========================================================#
+
+#========================================================#
 #| [94m     Iteration 1: Evaluating objective function     [0m |#
 #| [94m        and derivatives through first order         [0m |#
 #========================================================#
-fdwrap: callM [0] = -5.3e-04                                                   fdwrap: callM [0] =  5.3e-04                                                   fdwrap: callM [1] = -5.3e-04                                                   fdwrap: callM [1] =  5.3e-04                                                   fdwrap: callM [2] = -5.3e-04                                                   fdwrap: callM [2] =  5.3e-04                                                   fdwrap: callM [3] = -5.3e-04                                                   fdwrap: callM [3] =  5.3e-04                                                   fdwrap: callM [4] = -5.3e-04                                                   fdwrap: callM [4] =  5.3e-04                                                   fdwrap: callM [5] = -5.3e-04                                                   fdwrap: callM [5] =  5.3e-04                                                   
+
+fdwrap: callM [0] = -5.3e-04                                                   
+
+fdwrap: callM [0] =  5.3e-04                                                   
+
+fdwrap: callM [1] = -5.3e-04                                                   
+
+fdwrap: callM [1] =  5.3e-04                                                   
+
+fdwrap: callM [2] = -5.3e-04                                                   
+
+fdwrap: callM [2] =  5.3e-04                                                   
+
+fdwrap: callM [3] = -5.3e-04                                                   
+
+fdwrap: callM [3] =  5.3e-04                                                   
+
+fdwrap: callM [4] = -5.3e-04                                                   
+
+fdwrap: callM [4] =  5.3e-04                                                   
+
+fdwrap: callM [5] = -5.3e-04                                                   
+
+fdwrap: callM [5] =  5.3e-04                                                   
 #================================================================================================#
 #|               Target: dynamics  Type: AbInitio_AMBER  Objective = 5.00092e-01                |#
 #|                        Difference   Denominator     Percent                                  |#
@@ -283,7 +370,30 @@ Setting finite difference step to 5.3124e-04
     Gradient (kJ/mol/A)      49.2776      146.9576     33.5318%     0.1124    1.000     0.1124 
 --------------------------------------------------------------------------------------------------
 Maximum force difference on atom 4 (H), frame 1,  79.9759 kJ/mol/A
-fdwrap: callM [0] = -5.3e-04                                                   fdwrap: callM [0] =  5.3e-04                                                   fdwrap: callM [1] = -5.3e-04                                                   fdwrap: callM [1] =  5.3e-04                                                   fdwrap: callM [2] = -5.3e-04                                                   fdwrap: callM [2] =  5.3e-04                                                   fdwrap: callM [3] = -5.3e-04                                                   fdwrap: callM [3] =  5.3e-04                                                   fdwrap: callM [4] = -5.3e-04                                                   fdwrap: callM [4] =  5.3e-04                                                   fdwrap: callM [5] = -5.3e-04                                                   fdwrap: callM [5] =  5.3e-04                                                   
+
+fdwrap: callM [0] = -5.3e-04                                                   
+
+fdwrap: callM [0] =  5.3e-04                                                   
+
+fdwrap: callM [1] = -5.3e-04                                                   
+
+fdwrap: callM [1] =  5.3e-04                                                   
+
+fdwrap: callM [2] = -5.3e-04                                                   
+
+fdwrap: callM [2] =  5.3e-04                                                   
+
+fdwrap: callM [3] = -5.3e-04                                                   
+
+fdwrap: callM [3] =  5.3e-04                                                   
+
+fdwrap: callM [4] = -5.3e-04                                                   
+
+fdwrap: callM [4] =  5.3e-04                                                   
+
+fdwrap: callM [5] = -5.3e-04                                                   
+
+fdwrap: callM [5] =  5.3e-04                                                   
 #================================================================================================#
 #|                Target: train_1  Type: AbInitio_AMBER  Objective = 2.00201e+00                |#
 #|                        Difference   Denominator     Percent                                  |#
@@ -293,7 +403,7 @@ Maximum force difference on atom 4 (H), frame 1,  79.9759 kJ/mol/A
     Gradient (kJ/mol/A)   11085.3544    11079.6024    100.0519%     1.0010    1.000     1.0010 
 --------------------------------------------------------------------------------------------------
 Maximum force difference on atom 1 (H), frame 9, 55522.0694 kJ/mol/A
-#===================================================================================#
+#===================================================================================#
 #| [94m                         Objective Function Breakdown                          [0m |#
 #| [94m  Target Name              Residual  x  Weight  =  Contribution (Current-Prev) [0m |#
 #===================================================================================#
@@ -303,7 +413,8 @@ Regularization                 0.00000      1.000 [91m     2.82214e-07[0m ( +2
 Total                                             [92m     1.25105e+00[0m ( -2.291e-05 ) 
 -------------------------------------------------------------------------------------
 Creating the directory /home/curtie/7_FF_fitting/1_ForceBalance/2_playground/4_small_ref/4_ff-opt_test-full/1_opt/result/opt_1 to print the force field
-#=====================================================================#
+
+#=====================================================================#
 #|  The force field has been written to the result/opt_1 directory.  |#
 #|    Input file with optimization parameters saved to opt_1.sav.    |#
 #=====================================================================#
@@ -311,7 +422,8 @@ Creating the directory /home/curtie/7_FF_fitting/1_ForceBalance/2_playground/4_s
   Step       |k|        |dk|       |grad|       -=X2=-     Delta(X2)    StepQual
      1   5.312e-03   5.312e-03   1.634e-02[92m   1.25105e+00[0m  -2.291e-05      1.000
 
-#========================================================#
+
+#========================================================#
 #| [94m                   Total Gradient                   [0m |#
 #========================================================#
    0 [  0.00000000e+00 ] : COUL:SOL-1
@@ -357,7 +469,8 @@ Hessian diagonal search: H+0.0000*I, length 3.4346e-02, result -2.1316e-04
 Hessian diagonal search: H+0.0000*I, length 3.4346e-02, result -2.1316e-04
 Hessian diagonal search: H+0.0000*I, length 3.4346e-02, result -2.1316e-04
 Optimization step found (length 3.4346e-02)
-#========================================================#
+
+#========================================================#
 #| [95m  Mathematical Parameters (Current + Step = Next)   [0m |#
 #========================================================#
    0 [  0.0000e+00 + 0.0000e+00 =  0.0000e+00 ] : COUL:SOL-1
@@ -367,7 +480,8 @@ Optimization step found (length 3.4346e-02)
    4 [ -1.2429e-04 - 2.2425e-05 = -1.4671e-04 ] : VDWS/OW
    5 [ -2.4461e-03 + 2.1687e-04 = -2.2292e-03 ] : VDWT/OW
 ----------------------------------------------------------
-#========================================================#
+
+#========================================================#
 #| [95m    Physical Parameters (Current + Step = Next)     [0m |#
 #========================================================#
    0 [ -6.4931e-01 + 1.3738e-02 = -6.3557e-01 ] : COUL:SOL-1
@@ -379,11 +493,34 @@ Optimization step found (length 3.4346e-02)
 ----------------------------------------------------------
 Input file with saved parameters: opt_1.sav
 Setting finite difference step to 1.0000e-03
-#========================================================#
+
+#========================================================#
 #| [94m     Iteration 2: Evaluating objective function     [0m |#
 #| [94m        and derivatives through first order         [0m |#
 #========================================================#
-fdwrap: callM [0] = -1.0e-03                                                   fdwrap: callM [0] =  1.0e-03                                                   fdwrap: callM [1] = -1.0e-03                                                   fdwrap: callM [1] =  1.0e-03                                                   fdwrap: callM [2] = -1.0e-03                                                   fdwrap: callM [2] =  1.0e-03                                                   fdwrap: callM [3] = -1.0e-03                                                   fdwrap: callM [3] =  1.0e-03                                                   fdwrap: callM [4] = -1.0e-03                                                   fdwrap: callM [4] =  1.0e-03                                                   fdwrap: callM [5] = -1.0e-03                                                   fdwrap: callM [5] =  1.0e-03                                                   
+fdwrap: callM [0] = -1.0e-03                                                   
+
+fdwrap: callM [0] =  1.0e-03                                                   
+
+fdwrap: callM [1] = -1.0e-03                                                   
+
+fdwrap: callM [1] =  1.0e-03                                                   
+
+fdwrap: callM [2] = -1.0e-03                                                   
+
+fdwrap: callM [2] =  1.0e-03                                                   
+
+fdwrap: callM [3] = -1.0e-03                                                   
+
+fdwrap: callM [3] =  1.0e-03                                                   
+
+fdwrap: callM [4] = -1.0e-03                                                   
+
+fdwrap: callM [4] =  1.0e-03                                                   
+
+fdwrap: callM [5] = -1.0e-03                                                   
+
+fdwrap: callM [5] =  1.0e-03                                                   
 #================================================================================================#
 #|               Target: dynamics  Type: AbInitio_AMBER  Objective = 4.99648e-01                |#
 #|                        Difference   Denominator     Percent                                  |#
@@ -393,7 +530,30 @@ Setting finite difference step to 1.0000e-03
     Gradient (kJ/mol/A)      49.6734      146.9576     33.8011%     0.1143    1.000     0.1143 
 --------------------------------------------------------------------------------------------------
 Maximum force difference on atom 4 (H), frame 1,  80.1511 kJ/mol/A
-fdwrap: callM [0] = -1.0e-03                                                   fdwrap: callM [0] =  1.0e-03                                                   fdwrap: callM [1] = -1.0e-03                                                   fdwrap: callM [1] =  1.0e-03                                                   fdwrap: callM [2] = -1.0e-03                                                   fdwrap: callM [2] =  1.0e-03                                                   fdwrap: callM [3] = -1.0e-03                                                   fdwrap: callM [3] =  1.0e-03                                                   fdwrap: callM [4] = -1.0e-03                                                   fdwrap: callM [4] =  1.0e-03                                                   fdwrap: callM [5] = -1.0e-03                                                   fdwrap: callM [5] =  1.0e-03                                                   
+
+fdwrap: callM [0] = -1.0e-03                                                   
+
+fdwrap: callM [0] =  1.0e-03                                                   
+
+fdwrap: callM [1] = -1.0e-03                                                   
+
+fdwrap: callM [1] =  1.0e-03                                                   
+
+fdwrap: callM [2] = -1.0e-03                                                   
+
+fdwrap: callM [2] =  1.0e-03                                                   
+
+fdwrap: callM [3] = -1.0e-03                                                   
+
+fdwrap: callM [3] =  1.0e-03                                                   
+
+fdwrap: callM [4] = -1.0e-03                                                   
+
+fdwrap: callM [4] =  1.0e-03                                                   
+
+fdwrap: callM [5] = -1.0e-03                                                   
+
+fdwrap: callM [5] =  1.0e-03                                                   
 #================================================================================================#
 #|                Target: train_1  Type: AbInitio_AMBER  Objective = 2.00200e+00                |#
 #|                        Difference   Denominator     Percent                                  |#
@@ -403,7 +563,9 @@ Maximum force difference on atom 4 (H), frame 1,  80.1511 kJ/mol/A
     Gradient (kJ/mol/A)   11085.3670    11079.6024    100.0520%     1.0010    1.000     1.0010 
 --------------------------------------------------------------------------------------------------
 Maximum force difference on atom 1 (H), frame 9, 55522.0972 kJ/mol/A
-#===================================================================================#
+
+
+#===================================================================================#
 #| [94m                         Objective Function Breakdown                          [0m |#
 #| [94m  Target Name              Residual  x  Weight  =  Contribution (Current-Prev) [0m |#
 #===================================================================================#
@@ -412,7 +574,8 @@ train_1                        2.00200      0.500 [92m     1.00100e+00[0m ( -6
 Regularization                 0.00002      1.000 [91m     1.53060e-05[0m ( +1.502e-05 ) 
 Total                                             [92m     1.25084e+00[0m ( -2.132e-04 ) 
 -------------------------------------------------------------------------------------
-#=====================================================================#
+
+#=====================================================================#
 #|  The force field has been written to the result/opt_1 directory.  |#
 #|    Input file with optimization parameters saved to opt_1.sav.    |#
 #=====================================================================#
@@ -420,7 +583,8 @@ Total                                             [92m     1.25084e+00[0m ( -2
   Step       |k|        |dk|       |grad|       -=X2=-     Delta(X2)    StepQual
      2   3.912e-02   3.435e-02   1.023e-02[92m   1.25084e+00[0m  -2.132e-04      1.000
 
-#========================================================#
+
+#========================================================#
 #| [94m                   Total Gradient                   [0m |#
 #========================================================#
    0 [  0.00000000e+00 ] : COUL:SOL-1
@@ -470,7 +634,8 @@ Hessian diagonal search: H+0.0000*I, length 5.8591e-02, result -1.4731e-04
 Hessian diagonal search: H+0.0000*I, length 5.8593e-02, result -1.4731e-04
 Hessian diagonal search: H+0.0000*I, length 5.8593e-02, result -1.4731e-04
 Optimization step found (length 5.8593e-02)
-#========================================================#
+
+#========================================================#
 #| [95m  Mathematical Parameters (Current + Step = Next)   [0m |#
 #========================================================#
    0 [  0.0000e+00 + 0.0000e+00 =  0.0000e+00 ] : COUL:SOL-1
@@ -480,7 +645,8 @@ Optimization step found (length 5.8593e-02)
    4 [ -1.4671e-04 - 3.9791e-05 = -1.8650e-04 ] : VDWS/OW
    5 [ -2.2292e-03 + 3.4029e-04 = -1.8889e-03 ] : VDWT/OW
 ----------------------------------------------------------
-#========================================================#
+
+#========================================================#
 #| [95m    Physical Parameters (Current + Step = Next)     [0m |#
 #========================================================#
    0 [ -6.3557e-01 + 2.3437e-02 = -6.1214e-01 ] : COUL:SOL-1
@@ -491,11 +657,35 @@ Optimization step found (length 5.8593e-02)
    5 [  2.9224e-01 + 8.4356e-04 =  2.9308e-01 ] : VDWT/OW
 ----------------------------------------------------------
 Input file with saved parameters: opt_1.sav
-#========================================================#
+
+#========================================================#
 #| [94m     Iteration 3: Evaluating objective function     [0m |#
 #| [94m        and derivatives through first order         [0m |#
 #========================================================#
-fdwrap: callM [0] = -1.0e-03                                                   fdwrap: callM [0] =  1.0e-03                                                   fdwrap: callM [1] = -1.0e-03                                                   fdwrap: callM [1] =  1.0e-03                                                   fdwrap: callM [2] = -1.0e-03                                                   fdwrap: callM [2] =  1.0e-03                                                   fdwrap: callM [3] = -1.0e-03                                                   fdwrap: callM [3] =  1.0e-03                                                   fdwrap: callM [4] = -1.0e-03                                                   fdwrap: callM [4] =  1.0e-03                                                   fdwrap: callM [5] = -1.0e-03                                                   fdwrap: callM [5] =  1.0e-03                                                   
+
+fdwrap: callM [0] = -1.0e-03                                                   
+
+fdwrap: callM [0] =  1.0e-03                                                   
+
+fdwrap: callM [1] = -1.0e-03                                                   
+
+fdwrap: callM [1] =  1.0e-03                                                   
+
+fdwrap: callM [2] = -1.0e-03                                                   
+
+fdwrap: callM [2] =  1.0e-03                                                   
+
+fdwrap: callM [3] = -1.0e-03                                                   
+
+fdwrap: callM [3] =  1.0e-03                                                   
+
+fdwrap: callM [4] = -1.0e-03                                                   
+
+fdwrap: callM [4] =  1.0e-03                                                   
+
+fdwrap: callM [5] = -1.0e-03                                                   
+
+fdwrap: callM [5] =  1.0e-03                                                   
 #================================================================================================#
 #|               Target: dynamics  Type: AbInitio_AMBER  Objective = 4.99214e-01                |#
 #|                        Difference   Denominator     Percent                                  |#
@@ -505,7 +695,30 @@ Input file with saved parameters: opt_1.sav
     Gradient (kJ/mol/A)      50.3808      146.9576     34.2825%     0.1175    1.000     0.1175 
 --------------------------------------------------------------------------------------------------
 Maximum force difference on atom 4 (H), frame 1,  80.4439 kJ/mol/A
-fdwrap: callM [0] = -1.0e-03                                                   fdwrap: callM [0] =  1.0e-03                                                   fdwrap: callM [1] = -1.0e-03                                                   fdwrap: callM [1] =  1.0e-03                                                   fdwrap: callM [2] = -1.0e-03                                                   fdwrap: callM [2] =  1.0e-03                                                   fdwrap: callM [3] = -1.0e-03                                                   fdwrap: callM [3] =  1.0e-03                                                   fdwrap: callM [4] = -1.0e-03                                                   fdwrap: callM [4] =  1.0e-03                                                   fdwrap: callM [5] = -1.0e-03                                                   fdwrap: callM [5] =  1.0e-03                                                   
+
+fdwrap: callM [0] = -1.0e-03                                                   
+
+fdwrap: callM [0] =  1.0e-03                                                   
+
+fdwrap: callM [1] = -1.0e-03                                                   
+
+fdwrap: callM [1] =  1.0e-03                                                   
+
+fdwrap: callM [2] = -1.0e-03                                                   
+
+fdwrap: callM [2] =  1.0e-03                                                   
+
+fdwrap: callM [3] = -1.0e-03                                                   
+
+fdwrap: callM [3] =  1.0e-03                                                   
+
+fdwrap: callM [4] = -1.0e-03                                                   
+
+fdwrap: callM [4] =  1.0e-03                                                   
+
+fdwrap: callM [5] = -1.0e-03                                                   
+
+fdwrap: callM [5] =  1.0e-03                                                   
 #================================================================================================#
 #|                Target: train_1  Type: AbInitio_AMBER  Objective = 2.00198e+00                |#
 #|                        Difference   Denominator     Percent                                  |#
@@ -515,7 +728,8 @@ Maximum force difference on atom 4 (H), frame 1,  80.4439 kJ/mol/A
     Gradient (kJ/mol/A)   11085.3883    11079.6024    100.0522%     1.0010    1.000     1.0010 
 --------------------------------------------------------------------------------------------------
 Maximum force difference on atom 1 (H), frame 9, 55522.1432 kJ/mol/A
-#===================================================================================#
+
+#===================================================================================#
 #| [94m                         Objective Function Breakdown                          [0m |#
 #| [94m  Target Name              Residual  x  Weight  =  Contribution (Current-Prev) [0m |#
 #===================================================================================#
@@ -524,7 +738,8 @@ train_1                        2.00198      0.500 [92m     1.00099e+00[0m ( -1
 Regularization                 0.00010      1.000 [91m     9.53938e-05[0m ( +8.009e-05 ) 
 Total                                             [92m     1.25069e+00[0m ( -1.473e-04 ) 
 -------------------------------------------------------------------------------------
-#=====================================================================#
+
+#=====================================================================#
 #|  The force field has been written to the result/opt_1 directory.  |#
 #|    Input file with optimization parameters saved to opt_1.sav.    |#
 #=====================================================================#
@@ -532,7 +747,8 @@ Total                                             [92m     1.25069e+00[0m ( -1
   Step       |k|        |dk|       |grad|       -=X2=-     Delta(X2)    StepQual
      3   9.767e-02   5.859e-02   3.398e-04[92m   1.25069e+00[0m  -1.473e-04      1.000
 
-#========================================================#
+
+#========================================================#
 #| [94m                   Total Gradient                   [0m |#
 #========================================================#
    0 [  0.00000000e+00 ] : COUL:SOL-1
@@ -544,12 +760,14 @@ Total                                             [92m     1.25069e+00[0m ( -1
 ----------------------------------------------------------
 Convergence criterion reached for gradient norm (1.00e-03)
 Convergence criterion reached for objective function (1.00e-03)
-#========================================================#
+
+#========================================================#
 #| [92m               [0m[1mOptimization Converged[0m               [0m |#
 #| [92m           Final objective function value           [0m |#
 #| [92m  Full:  1.250692e+00  Un-penalized:  1.250596e+00  [0m |#
 #========================================================#
-#========================================================#
+
+#========================================================#
 #| [94m           Final optimization parameters:           [0m |#
 #========================================================#
    0 [  0.0000e+00 ] : COUL:SOL-1
@@ -558,7 +776,8 @@ Convergence criterion reached for objective function (1.00e-03)
    3 [ -3.5152e-20 ] : ANGLESB/HW-OW-HW
    4 [ -1.8650e-04 ] : VDWS/OW
    5 [ -1.8889e-03 ] : VDWT/OW
-#========================================================#
+
+#========================================================#
 #| [94m             Final physical parameters:             [0m |#
 #========================================================#
    0 [ -6.1214e-01 ] : COUL:SOL-1
@@ -568,12 +787,14 @@ Convergence criterion reached for objective function (1.00e-03)
    4 [  1.7564e+00 ] : VDWS/OW
    5 [  2.9308e-01 ] : VDWT/OW
 ----------------------------------------------------------
-#=====================================================================#
+
+#=====================================================================#
 #|  The force field has been written to the result/opt_1 directory.  |#
 #|    Input file with optimization parameters saved to opt_1.sav.    |#
 #=====================================================================#
 Wall time since calculation start: 8.6 seconds
-#========================================================#
+
+#========================================================#
 #| [1;44;93m               Calculation Finished.                [0m |#
 #| [1;44;93m     ---==(  May the Force be with you!  )==---     [0m |#
 #========================================================#

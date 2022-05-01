@@ -5,9 +5,11 @@ import argparse
 from random import randint
 import matplotlib as mpl
 import numpy as np
+
 from ff_optimizer import qmengine, mmengine
 from shutil import rmtree, copyfile
 import errno
+from time import perf_counter
 
 mpl.use("Agg")
 import matplotlib.pyplot as plt
@@ -420,10 +422,12 @@ parser.add_argument(
     type=float,
     default=0,
 )
+
 parser.add_argument("--mmengine",help="Package for running MM sampling. Default is amber.",type=str.lower,default="amber")
 parser.add_argument("--nvalids",help="Number of validation sets to create. Default is 1.",type=int,default=1)
 parser.add_argument("--trainMdin",help="MD input file for MM sampling for training set. Default is md.in",type=str,default="md.in")
 parser.add_argument("--validMdin",help="MD input file for MM sampling for validation set. Default is md.in",type=str,default="md.in")
+
 args = parser.parse_args()
 
 # Set up the calculation
@@ -493,6 +497,7 @@ if args.restart:
     print("Restarting optimization at cycle " + str(restartCycle + 1))
 
 # Check for necessary folders and files
+
 # TODO: Make these the proper errors, and just put it in a function
 if restartCycle < 0:
     if not os.path.isdir(args.dynamicsdir):
@@ -553,6 +558,7 @@ if restartCycle < 0:
         )
     if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
         raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
+
     if args.qmengine != "queue" and args.qmengine != "debug" and args.qmengine != "tccloud":
         raise RuntimeError("Engine " + args.qmengine + " is not implemented")
     if args.qmengine == "queue":
@@ -577,6 +583,7 @@ if restartCycle < 0:
                 + " does not exist in "
                 + args.sampledir
             )
+
     if args.mmengine != "amber":
         raise ValueError(f"MM Engine {args.mmengine} is unsupported!")
     if args.nvalids < 1:
@@ -670,12 +677,14 @@ if restartCycle < 0:
             + args.optdir
         )
 mdFiles = []
+
 heatCounter = 0
 for f in os.listdir(args.sampledir):
     if os.path.isfile(os.path.join(args.sampledir, f)):
         mdFiles.append(f)
         if f.startswith("heat"):
             heatCounter += 1
+
 # Make validation input for initial MM parameters
 if not os.path.isfile(os.path.join(args.optdir, "valid_0_initial.in")):
     with open(os.path.join(args.optdir, args.valid0), "r") as srcValid:
@@ -801,14 +810,15 @@ os.rename(
 os.rename(os.path.join(args.optdir, args.opt0), os.path.join(args.optdir, "opt_0.in"))
 
 print(
-    "%7s%15s%15s%20s%23s"
-    % ("Epoch", "Validation", "Valid ratio", "Current-Previous", "Current-last Current")
+    "%7s%15s%15s%20s%23s%8s%8s%8s"
+    % ("Epoch", "Validation", "Valid ratio", "Current-Previous", "Current-last Current", "MM time", "QM time", "FB time")
 )
 for i in range(1, args.maxcycles + 1):
 
     if i <= restartCycle:
         continue
 
+    mmStart = perf_counter()
     # Make sampling directory and copy files into it
     sampleName = str(i) + "_cycle_" + str(i)
     samplePath = os.path.join(args.sampledir, sampleName)
@@ -833,7 +843,9 @@ for i in range(1, args.maxcycles + 1):
         mmEngine.restart()
     else:
         mmEngine.getMMSamples()
-
+    mmEnd = perf_counter()
+    mmTime = mmEnd - mmStart
+    
     # Run QM calculations for each sampling trajectory
     for f in os.listdir():
         if (f.startswith("train") or f.startswith("valid")) and os.path.isdir(f): 
@@ -848,6 +860,8 @@ for i in range(1, args.maxcycles + 1):
                 qmEngine.getQMRefData(pdbs, ".")
             os.chdir("..")
     os.chdir(home)
+    qmEnd = perf_counter()
+    qmTime = qmEnd - mmEnd
 
     # Set up new ForceBalance optimization
 
@@ -974,26 +988,35 @@ for i in range(1, args.maxcycles + 1):
         )
         validInitial.append(readValid("valid_" + str(i) + "_initial.out"))
     os.chdir(home)
+    fbEnd = perf_counter()
+    fbTime = fbEnd - qmEnd
 
     if i == 1:
         print(
-            "%7d%15.8f%15.8f%20.8f"
+            "%7d%15.8f%15.8f%20.8f%23s%8.1f%8.1f%8.1f"
             % (
                 i,
                 valid[-1],
                 valid[-1] / validInitial[-1],
                 valid[-1] - validPrevious[-1],
+                "",
+                mmTime,
+                qmTime,
+                fbTime,
             )
         )
     else:
         print(
-            "%7d%15.8f%15.8f%20.8f%23.8f"
+            "%7d%15.8f%15.8f%20.8f%23.8f%8.1f%8.1f%8.1f"
             % (
                 i,
                 valid[-1],
                 valid[-1] / validInitial[-1],
                 valid[-1] - validPrevious[-1],
                 valid[-1] - valid[-2],
+                mmTime,
+                qmTime,
+                fbTime,
             )
         )
 
