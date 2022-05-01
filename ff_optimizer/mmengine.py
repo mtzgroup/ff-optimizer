@@ -2,51 +2,56 @@ try:
     import sander
 except:
     pass
-from random import randint
-from subprocess import check_output
-from .utils import writeRst
 import os
-import GPUtil
+from random import randint
 from shutil import copyfile, rmtree
 
+import GPUtil
 
-class MMEngine():
+from .utils import writeRst
 
+
+class MMEngine:
     def __init__(self, options):
         self.options = options
         # Account for being in basedir/sampledir/x_cycle_x/
-        self.coordPath = os.path.join("..","..",options['coordPath'])
+        self.coordPath = os.path.join("..", "..", options["coordPath"])
         self.startIndex, self.endIndex, self.splitIndex = self.getIndices()
-        pass
 
     # 0-indexed
     # TODO: figure out what to do with this awful function
     # It really shouldn't be my responsibility to untangle an awful coors.xyz file
     def getIndices(self):
-        start = self.options['start']
-        end = self.options['end']
-        split = self.options['split']
+        start = self.options["start"]
+        end = self.options["end"]
+        split = self.options["split"]
         self.coordIndex = []
         terachemFormat = True
         print(os.getcwd())
-        with open(self.options['coordPath'], "r") as f:
+        with open(self.options["coordPath"], "r") as f:
             try:
                 natoms = int(f.readline())
                 if f.readline().split()[1] != "frame":
                     terachemFormat = False
-                    print("Warning: coordinates file {self.options['coords']} does not have TeraChem formatted comment lines")
+                    print(
+                        "Warning: coordinates file {self.options['coords']} does not have TeraChem formatted comment lines"
+                    )
                     print("Assuming coordinates are contiguous and 0-indexed")
             except:
-                raise RuntimeError("XYZ coordinates file {self.options['coords']} is not correctly formatted")
+                raise RuntimeError(
+                    "XYZ coordinates file {self.options['coords']} is not correctly formatted"
+                )
         if terachemFormat:
             splitIndex = None
-            with open(self.options['coordPath'], "r") as f:
+            with open(self.options["coordPath"], "r") as f:
                 try:
                     for line in f.readlines():
                         if "frame" in line:
                             self.coordIndex.append(int(line.split()[2]))
                 except:
-                    raise RuntimeError("XYZ coordinates file {self.options['coords']} is not correctly formatted")
+                    raise RuntimeError(
+                        "XYZ coordinates file {self.options['coords']} is not correctly formatted"
+                    )
             nframes = len(self.coordIndex)
             startIndex = 0
             if start != None:
@@ -78,7 +83,9 @@ class MMEngine():
                         lineCounter += 1
                     nframes = int(lineCounter / (natoms + 2))
                 except:
-                    raise RuntimeError("XYZ coordinates file {self.options['coords']} is not correctly formatted")
+                    raise RuntimeError(
+                        "XYZ coordinates file {self.options['coords']} is not correctly formatted"
+                    )
             if end > nframes:
                 end = nframes
             if split is not None:
@@ -87,27 +94,27 @@ class MMEngine():
             if start > nframes:
                 raise ValueError("There must be frames after start")
             return start, end, split
-            
+
     def getFrames(self, samplePath="."):
         frames = []
         if self.splitIndex is None:
-            for i in range(self.options['nvalids']+1):
+            for i in range(self.options["nvalids"] + 1):
                 frames.append(self.coordIndex[randint(self.startIndex, self.endIndex)])
         else:
-            frames.append(self.coordIndex[randint(self.startIndex, self.splitIndex - 1)])
-            for i in range(self.options['nvalids']):
+            frames.append(
+                self.coordIndex[randint(self.startIndex, self.splitIndex - 1)]
+            )
+            for i in range(self.options["nvalids"]):
                 frames.append(self.coordIndex[randint(self.splitIndex, self.endIndex)])
 
         for frame in frames:
-            self.getFrame(frame, os.path.join(samplePath,f"{str(frame)}.rst7"))
+            self.getFrame(frame, os.path.join(samplePath, f"{str(frame)}.rst7"))
         print(frames)
         return frames
 
-    # 0-indexed 
+    # 0-indexed
     def getFrame(self, index, dest):
         frame = []
-        atoms = []
-        inFrame = False
         with open(self.coordPath, "r") as f:
             natoms = int(f.readline())
             lines = f.readlines()
@@ -117,7 +124,7 @@ class MMEngine():
                 elif int((i + 1) / (natoms + 2)) > index:
                     break
         writeRst(frame, natoms, dest)
-            
+
     def getMMSamples(self):
         self.setup()
         frames = self.getFrames()
@@ -126,7 +133,7 @@ class MMEngine():
             os.mkdir(f"train_{name}")
         os.chdir(f"train_{name}")
         self.sample(frames[0], self.options["trainMdin"])
-        with open("MMFinished.txt",'w') as f:
+        with open("MMFinished.txt", "w") as f:
             f.write("MM sampling finished")
         os.chdir("..")
         for i in frames[1:]:
@@ -135,12 +142,12 @@ class MMEngine():
                 os.mkdir(f"valid_{name}")
             os.chdir(f"valid_{name}")
             self.sample(i, self.options["validMdin"])
-            with open("MMFinished.txt",'w') as f:
+            with open("MMFinished.txt", "w") as f:
                 f.write("MM sampling finished\n")
                 f.write("Remove this file and the .nc file\n")
                 f.write("If you want to force a recalculation of the MM sampling")
             os.chdir("..")
-            
+
     # This is the function that has to be implemented for every MMEngine
     def sample(self, rst, mdin):
         pass
@@ -152,15 +159,17 @@ class MMEngine():
             if f.endswith(".prmtop"):
                 self.prmtop = f
         if self.prmtop == None:
-            raise RuntimeError(f"Tleap failed to create a new .prmtop file, check {os.path.join(os.getcwd(),'leap.out')} for more information")
+            raise RuntimeError(
+                f"Tleap failed to create a new .prmtop file, check {os.path.join(os.getcwd(),'leap.out')} for more information"
+            )
 
     def restart(self):
         rsts = []
-        for f in os.listdir(): 
-            if f.endswith(".rst7"): 
+        for f in os.listdir():
+            if f.endswith(".rst7"):
                 rsts.append(f)
         # Check to make sure we have the right number of ICs
-        if len(rsts) != self.options['nvalids'] + 1:
+        if len(rsts) != self.options["nvalids"] + 1:
             for rst in rsts:
                 os.remove(rst)
             for f in os.listdir():
@@ -171,15 +180,15 @@ class MMEngine():
 
         rsts = sorted(rsts)
         for i in range(len(rsts)):
-            name = rsts[i].split('.')[0]
+            name = rsts[i].split(".")[0]
             folder = "."
             for f in os.listdir():
                 if f.endswith(f"_{name}"):
                     folder = f
             # Skip finished jobs
-            if os.path.isfile(os.path.join(folder,"MMFinished.txt")):
+            if os.path.isfile(os.path.join(folder, "MMFinished.txt")):
                 continue
-            if not os.path.isfile(os.path.join(folder,f"{name}.nc")):
+            if not os.path.isfile(os.path.join(folder, f"{name}.nc")):
                 if folder == ".":
                     if i == 0:
                         isValid = False
@@ -199,14 +208,14 @@ class MMEngine():
                     isValid = True
                 os.chdir(folder)
                 if not isValid:
-                    self.sample(rsts[i], self.options['trainMdin'])
+                    self.sample(rsts[i], self.options["trainMdin"])
                 else:
-                    self.sample(rsts[i], self.options['validMdin'])
+                    self.sample(rsts[i], self.options["validMdin"])
                 os.chdir("..")
             # TODO: should distinguish between restarting from MD and from cpptraj
             else:
                 os.chdir(folder)
-                with open("cpptraj.in",'w') as f:
+                with open("cpptraj.in", "w") as f:
                     f.write(f"loadcrd {name}.nc coors\n")
                     f.write(f"crdout coors {name}.pdb multi\n")
                     f.write("exit\n")
@@ -214,21 +223,23 @@ class MMEngine():
                     os.system(f"cpptraj -p {self.prmtop} -i cpptraj.in > cpptraj.out")
                 except Exception as e:
                     print(e)
-                    raise RuntimeError(f"Error in trajectory postprocessing in {os.getcwd()}")
+                    raise RuntimeError(
+                        f"Error in trajectory postprocessing in {os.getcwd()}"
+                    )
                 os.chdir("..")
-                        
+
+
 class AmberEngine(MMEngine):
-    
     def __init__(self, options):
         super().__init__(options)
         inputs = sander.gas_input()
-        sander.setup(prmtop, options['coordinates'], None, inputs)
-    
-class ExternalAmberEngine(MMEngine):
+        sander.setup(prmtop, options["coordinates"], None, inputs)
 
+
+class ExternalAmberEngine(MMEngine):
     def __init__(self, options):
         self.options = options
-        self.heatCounter = options['heatCounter']
+        self.heatCounter = options["heatCounter"]
         try:
             deviceIDs = GPUtil.getAvailable(maxLoad=0.1)
             if len(deviceIDs) > 0:
@@ -251,24 +262,47 @@ class ExternalAmberEngine(MMEngine):
         if not os.path.isfile(mdcrd):
             raise RuntimeError(f"Cannot find input crd {mdcrd} in {os.getcwd()}")
         if mdvels is None:
-            os.system(f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart}")
-            print(f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart}")
+            os.system(
+                f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart}"
+            )
+            print(
+                f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart}"
+            )
         else:
-            os.system(f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart} -v {mdvels}")
-            
+            os.system(
+                f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart} -v {mdvels}"
+            )
+
     def sample(self, index, mdin):
         name = str(index)
         rst = f"{name}.rst7"
-        copyfile(os.path.join("..",rst),f"{name}_heat0.rst7")
+        copyfile(os.path.join("..", rst), f"{name}_heat0.rst7")
         for j in range(1, self.heatCounter + 1):
-            self.runSander(os.path.join("..",self.prmtop), os.path.join("..",f"heat{str(j)}.in"), f"{name}_heat{str(j)}.out", f"{name}_heat{str(j-1)}.rst7", f"{name}_heat{str(j)}.nc", f"{name}_heat{str(j)}.rst7")
-        self.runSander(os.path.join("..",self.prmtop), os.path.join("..",mdin), f"{name}_.out", f"{name}_heat{str(self.heatCounter)}.rst7", f"{name}.nc", f"{name}_md.rst7", mdvels=f"{name}_vel.nc")
-        with open("cpptraj.in",'w') as f:
+            self.runSander(
+                os.path.join("..", self.prmtop),
+                os.path.join("..", f"heat{str(j)}.in"),
+                f"{name}_heat{str(j)}.out",
+                f"{name}_heat{str(j-1)}.rst7",
+                f"{name}_heat{str(j)}.nc",
+                f"{name}_heat{str(j)}.rst7",
+            )
+        self.runSander(
+            os.path.join("..", self.prmtop),
+            os.path.join("..", mdin),
+            f"{name}_.out",
+            f"{name}_heat{str(self.heatCounter)}.rst7",
+            f"{name}.nc",
+            f"{name}_md.rst7",
+            mdvels=f"{name}_vel.nc",
+        )
+        with open("cpptraj.in", "w") as f:
             f.write(f"loadcrd {name}.nc coors\n")
             f.write(f"crdout coors {name}.pdb multi\n")
             f.write("exit\n")
         try:
-            os.system(f"cpptraj -p {os.path.join('..',self.prmtop)} -i cpptraj.in > cpptraj.out")
+            os.system(
+                f"cpptraj -p {os.path.join('..',self.prmtop)} -i cpptraj.in > cpptraj.out"
+            )
         except Exception as e:
             print(e)
             raise RuntimeError(f"Error in trajectory postprocessing in {os.getcwd()}")
@@ -277,8 +311,7 @@ class ExternalAmberEngine(MMEngine):
                 label = f.split(".")[2]
                 os.system(f"mv {f} {label}.pdb")
 
+
 class ExternalOpenMMEngine(MMEngine):
-    
     def __init__():
         super().__init__()
-

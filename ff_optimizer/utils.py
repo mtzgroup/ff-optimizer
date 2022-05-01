@@ -1,5 +1,6 @@
 import numpy as np
 from qcelemental.models import Molecule
+
 from . import units
 
 
@@ -153,12 +154,16 @@ def readEsp(filename):
             lineCounter += 1
     return espXYZ, esp
 
+
 # frame is a 2D list
 def writeRst(frame, natoms, dest):
     with open(dest, "w") as f:
         f.write(f"Written by ff_optimizer\n")
         f.write(f"{str(natoms)}\n")
         for i in range(len(frame)):
-            f.write("%12.7f%12.7f%12.7f" % (float(frame[i][0]), float(frame[i][1]), float(frame[i][2])))
+            f.write(
+                "%12.7f%12.7f%12.7f"
+                % (float(frame[i][0]), float(frame[i][1]), float(frame[i][2]))
+            )
             if int(i / 2) * 2 != i:
                 f.write("\n")

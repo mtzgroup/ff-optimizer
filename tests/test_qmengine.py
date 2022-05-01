@@ -1,9 +1,12 @@
-from ff_optimizer import qmengine, utils
-import numpy as np
-from . import checkUtils
 import os
-from tccloud.models import AtomicResult
+
+import numpy as np
 from qcelemental.util.serialization import json_loads
+from tccloud.models import AtomicResult
+
+from ff_optimizer import qmengine, utils
+
+from . import checkUtils
 
 
 class MonkeyProperties:
