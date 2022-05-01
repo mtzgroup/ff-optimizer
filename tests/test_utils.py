@@ -48,3 +48,18 @@ def test_convertPDBtoMolecule():
     assert len(testMol.symbols) == len(refMol.symbols)
     for i in range(len(testMol.symbols)):
         assert testMol.symbols[i] == refMol.symbols[i]
+
+def test_writeRst():
+    os.chdir(os.path.dirname(__file__))
+    coords = np.loadtxt(os.path.join("mmengine","23.xyz"),skiprows=2, usecols=(1,2,3))
+    utils.writeRst(list(coords),coords.shape[0],"23.rst7")
+    testCoors = []
+    with open("23.rst7",'r') as f:
+        for line in f.readlines()[2:]:
+            testCoors.append(line.split())
+    os.remove("23.rst7")
+    refCoors = []
+    with open(os.path.join("mmengine","23.rst7"),'r') as f:
+        for line in f.readlines()[2:]:
+            refCoors.append(line.split())
+    checkUtils.checkArray(testCoors, refCoors)

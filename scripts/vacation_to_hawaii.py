@@ -5,8 +5,10 @@ import argparse
 from random import randint
 import matplotlib as mpl
 import numpy as np
-from ff_optimizer import qmengine
-from shutil import rmtree
+
+from ff_optimizer import qmengine, mmengine
+from shutil import rmtree, copyfile
+import errno
 from time import perf_counter
 
 mpl.use("Agg")
@@ -287,42 +289,6 @@ def readValid(filename):
         )
 
 
-def writeRst(frame, index, molSize, dest):
-    fileName = os.path.join(dest, str(index) + ".rst7")
-    with open(fileName, "w") as f:
-        f.write("sampled from frame " + str(index) + "\n")
-        f.write(str(molSize) + "\n")
-        for i in range(len(frame)):
-            f.write(
-                "%12.7f%12.7f%12.7f"
-                % (float(frame[i][0]), float(frame[i][1]), float(frame[i][2]))
-            )
-            if int(i / 2) * 2 != i:
-                f.write("\n")
-
-
-def getFrame(index, coordFile, dest):
-    frame = []
-    atoms = []
-    inFrame = False
-    lineCounter = 1
-    frameCounter = 1
-    with open(coordFile, "r") as f:
-        molSize = int(f.readline())
-        for line in f.readlines():
-            if inFrame:
-                atoms.append(line.split()[0])
-                frame.append(line.split()[1:])
-                lineCounter = lineCounter + 1
-            if "frame " in line:
-                if frameCounter == index:
-                    inFrame = True
-                frameCounter += 1
-            if lineCounter > molSize:
-                inFrame = False
-    writeRst(frame, index, molSize, dest)
-
-
 # Summary stuff
 summary = dedent(
     """\
@@ -422,10 +388,10 @@ parser.add_argument(
     default="valid_0.in",
 )
 parser.add_argument(
-    "--engine",
+    "--qmengine",
     help="Engine for performing QM calculations, either queue, debug, or tccloud",
-    type=str,
-    default="queue",
+    type=str.lower,
+    default="tccloud",
 )
 parser.add_argument(
     "--sbatch",
@@ -456,6 +422,12 @@ parser.add_argument(
     type=float,
     default=0,
 )
+
+parser.add_argument("--mmengine",help="Package for running MM sampling. Default is amber.",type=str.lower,default="amber")
+parser.add_argument("--nvalids",help="Number of validation sets to create. Default is 1.",type=int,default=1)
+parser.add_argument("--trainMdin",help="MD input file for MM sampling for training set. Default is md.in",type=str,default="md.in")
+parser.add_argument("--validMdin",help="MD input file for MM sampling for validation set. Default is md.in",type=str,default="md.in")
+
 args = parser.parse_args()
 
 # Set up the calculation
@@ -525,6 +497,8 @@ if args.restart:
     print("Restarting optimization at cycle " + str(restartCycle + 1))
 
 # Check for necessary folders and files
+
+# TODO: Make these the proper errors, and just put it in a function
 if restartCycle < 0:
     if not os.path.isdir(args.dynamicsdir):
         raise RuntimeError("Dynamics directory " + args.dynamicsdir + " does not exist")
@@ -584,9 +558,10 @@ if restartCycle < 0:
         )
     if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
         raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
-    if args.engine != "queue" and args.engine != "debug" and args.engine != "tccloud":
-        raise RuntimeError("Engine " + args.engine + " is not implemented")
-    if args.engine == "queue":
+
+    if args.qmengine != "queue" and args.qmengine != "debug" and args.qmengine != "tccloud":
+        raise RuntimeError("Engine " + args.qmengine + " is not implemented")
+    if args.qmengine == "queue":
         if not os.path.isfile(os.path.join(args.sampledir, args.sbatch)):
             raise RuntimeError(
                 "Sbatch template "
@@ -608,6 +583,15 @@ if restartCycle < 0:
                 + " does not exist in "
                 + args.sampledir
             )
+
+    if args.mmengine != "amber":
+        raise ValueError(f"MM Engine {args.mmengine} is unsupported!")
+    if args.nvalids < 1:
+        raise ValueError(f"Must use at least one validation set for now")
+    if not os.path.isfile(os.path.join(args.sampledir, args.trainMdin)):
+        raise FileNotFoundError(errno.ENOENT, os.srterror(errno.ENOENT),os.path.join(args.sampledir, args.trainMdin))
+    if not os.path.isfile(os.path.join(args.sampledir, args.validMdin)):
+        raise FileNotFoundError(errno.ENOENT, os.srterror(errno.ENOENT),os.path.join(args.sampledir, args.validMdin))
 
 
 # Set some miscellaneous variables
@@ -693,31 +677,13 @@ if restartCycle < 0:
             + args.optdir
         )
 mdFiles = []
+
+heatCounter = 0
 for f in os.listdir(args.sampledir):
     if os.path.isfile(os.path.join(args.sampledir, f)):
         mdFiles.append(f)
-# Set start, split, end indices for sampling from QM trajectory
-coordIndex = []
-with open(os.path.join(args.dynamicsdir, args.coors), "r") as f:
-    for line in f.readlines():
-        if "frame" in line:
-            coordIndex.append(int(line.split()[2]) + 1)
-startIndex = 0
-if args.start != None:
-    while coordIndex[startIndex] < args.start:
-        startIndex += 1
-endIndex = len(coordIndex) - 1
-if args.end != None:
-    while coordIndex[endIndex] > args.end:
-        endIndex -= 1
-splitIndex = 0
-if args.split != None:
-    while coordIndex[splitIndex] < args.split:
-        splitIndex += 1
-    if splitIndex == 0:
-        raise RuntimeError("There must be frames before " + args.split)
-    elif splitIndex >= len(coordIndex):
-        raise RuntimeError("There must be frames after " + args.split)
+        if f.startswith("heat"):
+            heatCounter += 1
 
 # Make validation input for initial MM parameters
 if not os.path.isfile(os.path.join(args.optdir, "valid_0_initial.in")):
@@ -733,13 +699,13 @@ if not os.path.isfile(os.path.join(args.optdir, "valid_0_initial.in")):
                     break
 
 # Initialize QMEngine
-if args.engine == "debug":
+if args.qmengine == "debug":
     qmEngine = qmengine.DebugEngine(
         os.path.join(args.sampledir, args.tctemplate),
         os.path.join(args.sampledir, args.tctemplate_long),
         doResp=doResp,
     )
-elif args.engine == "queue":
+elif args.qmengine == "queue":
     qmEngine = qmengine.SbatchEngine(
         os.path.join(args.sampledir, args.tctemplate),
         os.path.join(args.sampledir, args.tctemplate_long),
@@ -747,12 +713,26 @@ elif args.engine == "queue":
         os.getenv("USER"),
         doResp=doResp,
     )
-elif args.engine == "tccloud":
+elif args.qmengine == "tccloud":
     qmEngine = qmengine.TCCloudEngine(
         os.path.join(args.sampledir, args.tctemplate),
         os.path.join(args.sampledir, args.tctemplate_long),
         doResp=doResp,
     )
+
+# Initialize MMEngine
+mmOptions = {}
+mmOptions['start'] = args.start
+mmOptions['end'] = args.end
+mmOptions['split'] = args.split
+mmOptions['coordPath'] = os.path.join(args.dynamicsdir, args.coors)
+mmOptions['nvalids'] = args.nvalids
+mmOptions['trainMdin'] = args.trainMdin
+mmOptions['validMdin'] = args.validMdin
+mmOptions['leap'] = "setup.leap"
+mmOptions['heatCounter'] = heatCounter
+if args.mmengine == "amber":
+    mmEngine = mmengine.ExternalAmberEngine(mmOptions)
 
 # First optimization cycle is not necessary if restarting from somewhere later
 if restartCycle < 0:
@@ -857,129 +837,28 @@ for i in range(1, args.maxcycles + 1):
     for f in mdFiles:
         src = os.path.join(args.sampledir, f)
         os.system(f"cp {src} {dest}")
-
-    # Get new .rst7 files for MM sampling initial conditions
-    rstCount = 0
-    for f in os.listdir(samplePath):
-        if ".rst7" in f:
-            rstCount += 1
-    if rstCount < 2:
-        if args.split != None:
-            coor1 = coordIndex[randint(startIndex, splitIndex - 1)]
-            coor2 = coordIndex[randint(splitIndex, endIndex)]
-        else:
-            coor1 = coordIndex[randint(startIndex, endIndex)]
-            coor2 = coordIndex[randint(startIndex, endIndex)]
-        getFrame(coor1, os.path.join(args.dynamicsdir, args.coors), samplePath)
-        getFrame(coor2, os.path.join(args.dynamicsdir, args.coors), samplePath)
-
-    # Setup MM dynamics, get some important file names
     os.chdir(samplePath)
-    os.system("tleap -f setup.leap > leap.out")
-    os.chdir(home)
-    files = os.listdir(samplePath)
-    rsts = []
-    heatCounter = 0
-    prmtop = None
-    for f in files:
-        if ".rst7" in f and "heat" not in f:
-            rsts.append(f)
-        if "heat" in f and ".in" in f:
-            heatCounter += 1
-        if ".prmtop" in f:
-            prmtop = f
-        if ".frcmod" in f:
-            frcmod = f
-    if prmtop == None:
-        raise RuntimeError(
-            "Tleap failed to create a new .prmtop file, check "
-            + os.path.join(samplePath, "leap.out")
-            + " for more information"
-        )
-
-    # Run sander
-    os.chdir(samplePath)
-    for rst in rsts:
-        name = rst.split(".")[0]
-        if not os.path.isfile(name + "_sample.nc"):
-            src = rst
-            dest = name + "_heat0.rst7"
-            os.system(f"cp {src} {dest}")
-            for j in range(1, heatCounter + 1):
-                os.system(
-                    "sander -O -p "
-                    + prmtop
-                    + " -i heat"
-                    + str(j)
-                    + ".in -o "
-                    + name
-                    + "_heat"
-                    + str(j)
-                    + ".out -c "
-                    + name
-                    + "_heat"
-                    + str(j - 1)
-                    + ".rst7 -x "
-                    + name
-                    + "_heat"
-                    + str(j)
-                    + ".nc -r "
-                    + name
-                    + "_heat"
-                    + str(j)
-                    + ".rst7"
-                )
-            os.system(
-                "sander -O -p "
-                + prmtop
-                + " -c "
-                + name
-                + "_heat"
-                + str(heatCounter)
-                + ".rst7 -x "
-                + name
-                + "_sample.nc -v "
-                + name
-                + "_vel.nc -i md.in -o "
-                + name
-                + ".out"
-            )
-
-        # Set up QM calculations
-        calcPath = name
-        if not os.path.isdir(calcPath):
-            os.mkdir(calcPath)
-        src = name + "_sample.nc"
-        dest = os.path.join(calcPath, ".")
-        os.system(f"cp {src} {dest}")
-
-        with open("../cpptraj.in", "r") as srcIn:
-            with open(os.path.join(calcPath, "cpptraj.in"), "w") as destIn:
-                for line in srcIn.readlines():
-                    destIn.write(line.replace("XXX", name + "_sample"))
-        os.chdir(calcPath)
-        os.system(f"cpptraj -p ../{prmtop} -i cpptraj.in > cpptraj.out")
-        mmEnd = perf_counter()
-        mmTime = mmEnd - mmStart
-
-        # Run QM calculations
-        files = os.listdir()
-        pdbs = []
-        for f in files:
-            if ".pdb" in f:
-                if len(f.split(".")) > 2:
-                    label = f.split(".")[2]
-                    fName = label + ".pdb"
-                    os.system(f"mv {f} {fName}")
-                    pdbs.append(fName)
-                else:
-                    pdbs.append(f)
-        if i == restartCycle + 1:
-            qmEngine.restart(".")
-        else:
-            qmEngine.getQMRefData(pdbs, ".")
-        os.chdir(home)
-        os.chdir(samplePath)
+    # Do MM sampling
+    if i == restartCycle + 1:
+        mmEngine.restart()
+    else:
+        mmEngine.getMMSamples()
+    mmEnd = perf_counter()
+    mmTime = mmEnd - mmStart
+    
+    # Run QM calculations for each sampling trajectory
+    for f in os.listdir():
+        if (f.startswith("train") or f.startswith("valid")) and os.path.isdir(f): 
+            os.chdir(f)
+            if i == restartCycle + 1:
+                qmEngine.restart(".")
+            else:
+                pdbs = []
+                for g in os.listdir():
+                    if g.endswith(".pdb"):
+                        pdbs.append(g)
+                qmEngine.getQMRefData(pdbs, ".")
+            os.chdir("..")
     os.chdir(home)
     qmEnd = perf_counter()
     qmTime = qmEnd - mmEnd
@@ -999,78 +878,37 @@ for i in range(1, args.maxcycles + 1):
     dest = os.path.join(args.optdir, "targets", "valid_" + str(i), ".")
     os.system(f"cp {src} {dest}")
 
-    rstNumber = int(rsts[0].split(".")[0])
-    rstNumber2 = int(rsts[1].split(".")[0])
-    if args.split is not None:
-        if rstNumber < args.split:
-            src = os.path.join(
-                args.sampledir, str(i) + "_cycle_" + str(i), str(rstNumber), "all.mdcrd"
-            )
-            dest = os.path.join(args.optdir, "targets", "train_" + str(i), ".")
-            os.system(f"cp {src} {dest}")
-            src = os.path.join(
-                args.sampledir, str(i) + "_cycle_" + str(i), str(rstNumber), "qdata.txt"
-            )
-            os.system(f"cp {src} {dest}")
-            src = os.path.join(
-                args.sampledir,
-                str(i) + "_cycle_" + str(i),
-                str(rstNumber2),
-                "all.mdcrd",
-            )
-            dest = os.path.join(args.optdir, "targets", "valid_" + str(i), ".")
-            os.system(f"cp {src} {dest}")
-            src = os.path.join(
-                args.sampledir,
-                str(i) + "_cycle_" + str(i),
-                str(rstNumber2),
-                "qdata.txt",
-            )
-            os.system(f"cp {src} {dest}")
-        else:
-            src = os.path.join(
-                args.sampledir, str(i) + "_cycle_" + str(i), str(rstNumber), "all.mdcrd"
-            )
-            dest = os.path.join(args.optdir, "targets", "valid_" + str(i), ".")
-            os.system(f"cp {src} {dest}")
-            src = os.path.join(
-                args.sampledir, str(i) + "_cycle_" + str(i), str(rstNumber), "qdata.txt"
-            )
-            os.system(f"cp {src} {dest}")
-            src = os.path.join(
-                args.sampledir,
-                str(i) + "_cycle_" + str(i),
-                str(rstNumber2),
-                "all.mdcrd",
-            )
-            dest = os.path.join(args.optdir, "targets", "train_" + str(i), ".")
-            os.system(f"cp {src} {dest}")
-            src = os.path.join(
-                args.sampledir,
-                str(i) + "_cycle_" + str(i),
-                str(rstNumber2),
-                "qdata.txt",
-            )
-            os.system(f"cp {src} {dest}")
-    else:
-        src = os.path.join(
-            args.sampledir, str(i) + "_cycle_" + str(i), str(rstNumber), "all.mdcrd"
-        )
-        dest = os.path.join(args.optdir, "targets", "train_" + str(i), ".")
-        os.system(f"cp {src} {dest}")
-        src = os.path.join(
-            args.sampledir, str(i) + "_cycle_" + str(i), str(rstNumber), "qdata.txt"
-        )
-        os.system(f"cp {src} {dest}")
-        src = os.path.join(
-            args.sampledir, str(i) + "_cycle_" + str(i), str(rstNumber2), "all.mdcrd"
-        )
-        dest = os.path.join(args.optdir, "targets", "valid_" + str(i), ".")
-        os.system(f"cp {src} {dest}")
-        src = os.path.join(
-            args.sampledir, str(i) + "_cycle_" + str(i), str(rstNumber2), "qdata.txt"
-        )
-        os.system(f"cp {src} {dest}")
+    valids = [] 
+    for f in os.listdir(os.path.join(args.sampledir, f"{str(i)}_cycle_{str(i)}")):
+        if f.startswith("train_") and os.path.isdir(os.path.join(args.sampledir, f"{str(i)}_cycle_{str(i)}",f)):
+            trainFolder = f
+        elif f.startswith("valid_") and os.path.isdir(os.path.join(args.sampledir, f"{str(i)}_cycle_{str(i)}", f)):
+            valids.append(f)
+
+    src = os.path.join(
+        args.sampledir, str(i) + "_cycle_" + str(i), trainFolder, "all.mdcrd"
+    )
+    dest = os.path.join(args.optdir, "targets", "train_" + str(i), ".")
+    os.system(f"cp {src} {dest}")
+    src = os.path.join(
+        args.sampledir, str(i) + "_cycle_" + str(i), trainFolder, "qdata.txt"
+    )
+    os.system(f"cp {src} {dest}")
+    src = os.path.join(
+        args.sampledir,
+        str(i) + "_cycle_" + str(i),
+        valids[0],
+        "all.mdcrd",
+    )
+    dest = os.path.join(args.optdir, "targets", "valid_" + str(i), ".")
+    os.system(f"cp {src} {dest}")
+    src = os.path.join(
+        args.sampledir,
+        str(i) + "_cycle_" + str(i),
+        valids[0],
+        "qdata.txt",
+    )
+    os.system(f"cp {src} {dest}")
 
     # Copy previous validation and optimization FB input files to current ones
     src = os.path.join(args.optdir, "valid_" + str(i - 1) + ".in")
