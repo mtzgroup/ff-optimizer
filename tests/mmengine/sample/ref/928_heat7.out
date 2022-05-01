@@ -1,0 +1,237 @@
+
+          -------------------------------------------------------
+          Amber 20 SANDER                              2020
+          -------------------------------------------------------
+
+| Run on 02/27/2022 at 18:07:33
+
+|   Executable path: sander
+| Working directory: /home/curtie/7_FF_fitting/1_ForceBalance/2_playground/1_practice_h2o/2_sampling/3_cycle_3
+|          Hostname: fire-09-06
+
+  [-O]verwriting output
+
+File Assignments:
+|  MDIN: heat7.in                                                              
+| MDOUT: 928_heat7.out                                                         
+|INPCRD: 928_heat6.rst7                                                        
+|  PARM: water.prmtop                                                          
+|RESTRT: 928_heat7.rst7                                                        
+|  REFC: refc                                                                  
+| MDVEL: mdvel                                                                 
+| MDFRC: mdfrc                                                                 
+|  MDEN: mden                                                                  
+| MDCRD: 928_heat7.nc                                                          
+|MDINFO: mdinfo                                                                
+|  MTMD: mtmd                                                                  
+|INPDIP: inpdip                                                                
+|RSTDIP: rstdip                                                                
+|INPTRA: inptraj                                                               
+
+
+ Here is the input file:
+
+heat DASA                                                                      
+ &cntrl                                                                        
+  imin=0,irest=1,ntx=5,                                                        
+  nstlim=10000,dt=0.001,                                                       
+  ntc=1,ntf=1,                                                                 
+  cut=999, ntb=0,                                                              
+  ntpr=10000, ntwx=0,                                                          
+  ntwv=0,                                                                      
+  ntt=3, gamma_ln=10.00,                                                       
+  tempi=300.0, temp0=350.0,                                                    
+  ntr=0,                                                                       
+  nmropt=0                                                                     
+/                                                                              
+
+--------------------------------------------------------------------------------
+   1.  RESOURCE   USE: 
+--------------------------------------------------------------------------------
+
+| Flags:                                                                        
+|    NONPERIODIC   ntb=0 and igb=0: Setting up nonperiodic simulation
+|  *** cutoff > system size, list only builds once
+|Largest sphere to fit in unit cell has radius =    32.431
+| New format PARM file being parsed.
+| Version =    1.000 Date = 02/27/22 Time = 18:07:30
+ NATOM  =      18 NTYPES =       2 NBONH =      12 MBONA  =       0
+ NTHETH =       0 MTHETA =       0 NPHIH =       0 MPHIA  =       0
+ NHPARM =       0 NPARM  =       0 NNB   =      24 NRES   =       6
+ NBONA  =       0 NTHETA =       0 NPHIA =       0 NUMBND =       1
+ NUMANG =       0 NPTRA  =       0 NATYP =       2 NPHB   =       0
+ IFBOX  =       0 NMXRS  =       3 IFCAP =       0 NEXTRA =       0
+ NCOPY  =       0
+
+
+|     Memory Use     Allocated
+|     Real              504007
+|     Hollerith             62
+|     Integer            20387
+|     Max Pairs            153
+|     nblistReal           216
+|     nblist Int        923929
+|       Total             7628 kbytes
+
+| Note: 1-4 EEL scale factors are being read from the topology file.
+
+| Note: 1-4 VDW scale factors are being read from the topology file.
+| Duplicated    0 dihedrals
+| Duplicated    0 dihedrals
+
+--------------------------------------------------------------------------------
+   2.  CONTROL  DATA  FOR  THE  RUN
+--------------------------------------------------------------------------------
+
+default_name                                                                    
+
+General flags:
+     imin    =       0, nmropt  =       0
+
+Nature and format of input:
+     ntx     =       5, irest   =       1, ntrx    =       1
+
+Nature and format of output:
+     ntxo    =       2, ntpr    =   10000, ntrx    =       1, ntwr    =   10000
+     iwrap   =       0, ntwx    =       0, ntwv    =       0, ntwe    =       0
+     ioutfm  =       1, ntwprt  =       0, idecomp =       0, rbornstat=      0
+
+Potential function:
+     ntf     =       1, ntb     =       0, igb     =       0, nsnb    =      25
+     ipol    =       0, gbsa    =       0, iesp    =       0
+     dielc   =   1.00000, cut     = 999.00000, intdiel =   1.00000
+
+Frozen or restrained atoms:
+     ibelly  =       0, ntr     =       0
+
+Molecular dynamics:
+     nstlim  =     10000, nscm    =      1000, nrespa  =         1
+     t       =   0.00000, dt      =   0.00100, vlimit  =  20.00000
+
+Langevin dynamics temperature regulation:
+     ig      =   71277
+     temp0   = 350.00000, tempi   = 300.00000, gamma_ln=  10.00000
+|  INFO: Old style inpcrd file read
+
+
+--------------------------------------------------------------------------------
+   3.  ATOMIC COORDINATES AND VELOCITIES
+--------------------------------------------------------------------------------
+
+default_name                                                                    
+ begin time read from input coords =    60.000 ps
+
+ Number of triangulated 3-point waters found:        0
+
+     Sum of charges from parm topology file =  -0.00000001
+     Forcing neutrality...
+
+--------------------------------------------------------------------------------
+   4.  RESULTS
+--------------------------------------------------------------------------------
+
+|  # of SOLUTE  degrees of freedom (RNDFP):      54.
+|  # of SOLVENT degrees of freedom (RNDFS):       0.
+|  NDFMIN =      54.     NUM_NOSHAKE =      0     CORRECTED RNDFP =      54.
+|  TOTAL # of degrees of freedom (RNDF) =      54.
+ ---------------------------------------------------
+
+     eedmeth=4: Setting switch to one everywhere
+
+ ---------------------------------------------------
+| Local SIZE OF NONBOND LIST =        141
+| TOTAL SIZE OF NONBOND LIST =        141
+| RE_POSITION Moving by   0.680260  0.143149 -0.168136
+| RE_POSITION Moving by   0.439276  1.476697 -0.764681
+| RE_POSITION Moving by  -0.055605 -1.408873  0.051203
+| RE_POSITION Moving by   0.709014  0.943833  0.853935
+| RE_POSITION Moving by   0.673287 -0.251008  0.813106
+| RE_POSITION Moving by   0.859652 -0.509574 -1.352993
+| RE_POSITION Moving by  -1.768580  0.908496 -0.590602
+| RE_POSITION Moving by  -0.248706 -0.040352  0.368479
+| RE_POSITION Moving by  -0.028989 -1.202409 -0.581833
+| RE_POSITION Moving by   1.107055 -0.150197 -0.254117
+
+ NSTEP =    10000   TIME(PS) =      70.000  TEMP(K) =   385.69  PRESS =     0.0
+ Etot   =       218.8995  EKtot   =        20.6941  EPtot      =       198.2054
+ BOND   =         7.6507  ANGLE   =         0.0000  DIHED      =         0.0000
+ 1-4 NB =         0.0000  1-4 EEL =         0.0000  VDWAALS    =        -0.1440
+ EELEC  =       190.6987  EHBOND  =         0.0000  RESTRAINT  =         0.0000
+ ------------------------------------------------------------------------------
+
+
+      A V E R A G E S   O V E R   10000 S T E P S
+
+
+ NSTEP =    10000   TIME(PS) =      70.000  TEMP(K) =   357.85  PRESS =     0.0
+ Etot   =       211.6909  EKtot   =        19.2000  EPtot      =       192.4908
+ BOND   =         6.9834  ANGLE   =         0.0000  DIHED      =         0.0000
+ 1-4 NB =         0.0000  1-4 EEL =         0.0000  VDWAALS    =         0.8106
+ EELEC  =       184.6969  EHBOND  =         0.0000  RESTRAINT  =         0.0000
+ ------------------------------------------------------------------------------
+
+
+      R M S  F L U C T U A T I O N S
+
+
+ NSTEP =    10000   TIME(PS) =      70.000  TEMP(K) =    67.51  PRESS =     0.0
+ Etot   =         6.0693  EKtot   =         3.6220  EPtot      =         4.8117
+ BOND   =         2.6345  ANGLE   =         0.0000  DIHED      =         0.0000
+ 1-4 NB =         0.0000  1-4 EEL =         0.0000  VDWAALS    =         1.6966
+ EELEC  =         6.2870  EHBOND  =         0.0000  RESTRAINT  =         0.0000
+ ------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+   5.  TIMINGS
+--------------------------------------------------------------------------------
+
+|    Read coords time           0.00 ( 0.36% of Total)
+|                Build the list             0.00 (25.31% of List )
+|                Other                      0.00 (74.69% of List )
+|             List time                  0.00 ( 0.27% of Nonbo)
+|                   Short_ene time             0.36 (98.77% of Direc)
+|                   Other                      0.00 ( 1.23% of Direc)
+|                Direct Ewald time          0.37 (98.75% of Ewald)
+|                Force Adjust               0.00 ( 0.15% of Ewald)
+|                Virial junk                0.00 ( 0.24% of Ewald)
+|                Start synchronizatio       0.00 ( 0.25% of Ewald)
+|                Other                      0.00 ( 0.61% of Ewald)
+|             Ewald time                 0.37 (99.07% of Nonbo)
+|             IPS excludes               0.00 ( 0.11% of Nonbo)
+|             Other                      0.00 ( 0.55% of Nonbo)
+|          Nonbond force              0.38 (97.59% of Force)
+|          Bond/Angle/Dihedral        0.00 ( 1.30% of Force)
+|          Other                      0.00 ( 1.11% of Force)
+|       Force time                 0.38 (82.68% of Runmd)
+|       Verlet update time         0.08 (16.79% of Runmd)
+|       Other                      0.00 ( 0.53% of Runmd)
+|    Runmd Time                 0.47 (98.01% of Total)
+|    Other                      0.01 ( 1.63% of Total)
+| Total time                 0.47 (100.0% of ALL  )
+
+| Number of list builds   :          1
+
+| Highest rstack allocated:         80
+| Highest istack allocated:         16
+
+| Final Performance Info:
+| -----------------------------------------------------
+| Average timings for all steps:
+|     Elapsed(s) =       0.47 Per Step(ms) =       0.05
+|         ns/day =    1854.54   seconds/ns =      46.59
+| -----------------------------------------------------
+
+|           Job began  at 18:07:33.587  on 02/27/2022
+|           Setup done at 18:07:33.597  on 02/27/2022
+|           Run   done at 18:07:34.063  on 02/27/2022
+|     wallclock() was called  270016 times
+
+|3D-RISM memory allocation summary
+|Type          Maximum        Current   
+|Integer       0.00000 GB     0.00000 GB
+|Real          0.00000 GB     0.00000 GB
+|Logical       0.00000 GB     0.00000 GB
+|Character     0.00000 GB     0.00000 GB
+|---------------------------------------
+|Total         0.00000 GB     0.00000 GB
