@@ -1,5 +1,6 @@
-from ff_optimizer import qmengine
 import os
+
+from ff_optimizer import qmengine
 
 
 class TestSbatchEngine:

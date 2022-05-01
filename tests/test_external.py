@@ -1,6 +1,9 @@
-import pytest
 import os
+
+import pytest
+
 from ff_optimizer import utils
+
 from . import checkUtils
 
 

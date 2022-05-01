@@ -1,13 +1,15 @@
 import os
 import subprocess
+from time import sleep
+
+import numpy as np
+from qcelemental.models import Provenance
+from qcelemental.models.results import AtomicResultProperties
+from qcelemental.util.serialization import json_loads
 from tccloud import TCClient
 from tccloud.models import AtomicInput, AtomicResult
+
 from . import utils
-from time import sleep
-import numpy as np
-from qcelemental.util.serialization import json_loads
-from qcelemental.models.results import AtomicResultProperties
-from qcelemental.models import Provenance
 
 
 class QMEngine:
@@ -474,9 +476,9 @@ class TCCloudEngine(QMEngine):
             if result.success:
                 self.writeResult(result)
             else:
-                id = result.input_data['id']
+                id = result.input_data["id"]
                 if id is None:
-                    id = result.input_data['input_data']['id']
+                    id = result.input_data["input_data"]["id"]
                 retryPdbs.append(f"{id}.pdb")
 
         if status == -1:

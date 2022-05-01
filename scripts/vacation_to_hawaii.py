@@ -1,19 +1,21 @@
 #!/usr/bin/env python
 
-import os
 import argparse
-from random import randint
+import errno
+import os
+from shutil import rmtree
+from time import perf_counter
+
 import matplotlib as mpl
 import numpy as np
 
-from ff_optimizer import qmengine, mmengine
-from shutil import rmtree, copyfile
-import errno
-from time import perf_counter
+from ff_optimizer import mmengine, qmengine
 
 mpl.use("Agg")
-import matplotlib.pyplot as plt
 from textwrap import dedent
+
+import matplotlib.pyplot as plt
+
 
 # Some helper functions
 def die():
@@ -423,10 +425,30 @@ parser.add_argument(
     default=0,
 )
 
-parser.add_argument("--mmengine",help="Package for running MM sampling. Default is amber.",type=str.lower,default="amber")
-parser.add_argument("--nvalids",help="Number of validation sets to create. Default is 1.",type=int,default=1)
-parser.add_argument("--trainMdin",help="MD input file for MM sampling for training set. Default is md.in",type=str,default="md.in")
-parser.add_argument("--validMdin",help="MD input file for MM sampling for validation set. Default is md.in",type=str,default="md.in")
+parser.add_argument(
+    "--mmengine",
+    help="Package for running MM sampling. Default is amber.",
+    type=str.lower,
+    default="amber",
+)
+parser.add_argument(
+    "--nvalids",
+    help="Number of validation sets to create. Default is 1.",
+    type=int,
+    default=1,
+)
+parser.add_argument(
+    "--trainMdin",
+    help="MD input file for MM sampling for training set. Default is md.in",
+    type=str,
+    default="md.in",
+)
+parser.add_argument(
+    "--validMdin",
+    help="MD input file for MM sampling for validation set. Default is md.in",
+    type=str,
+    default="md.in",
+)
 
 args = parser.parse_args()
 
@@ -559,7 +581,11 @@ if restartCycle < 0:
     if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
         raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
 
-    if args.qmengine != "queue" and args.qmengine != "debug" and args.qmengine != "tccloud":
+    if (
+        args.qmengine != "queue"
+        and args.qmengine != "debug"
+        and args.qmengine != "tccloud"
+    ):
         raise RuntimeError("Engine " + args.qmengine + " is not implemented")
     if args.qmengine == "queue":
         if not os.path.isfile(os.path.join(args.sampledir, args.sbatch)):
@@ -589,9 +615,17 @@ if restartCycle < 0:
     if args.nvalids < 1:
         raise ValueError(f"Must use at least one validation set for now")
     if not os.path.isfile(os.path.join(args.sampledir, args.trainMdin)):
-        raise FileNotFoundError(errno.ENOENT, os.srterror(errno.ENOENT),os.path.join(args.sampledir, args.trainMdin))
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.srterror(errno.ENOENT),
+            os.path.join(args.sampledir, args.trainMdin),
+        )
     if not os.path.isfile(os.path.join(args.sampledir, args.validMdin)):
-        raise FileNotFoundError(errno.ENOENT, os.srterror(errno.ENOENT),os.path.join(args.sampledir, args.validMdin))
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.srterror(errno.ENOENT),
+            os.path.join(args.sampledir, args.validMdin),
+        )
 
 
 # Set some miscellaneous variables
@@ -722,15 +756,15 @@ elif args.qmengine == "tccloud":
 
 # Initialize MMEngine
 mmOptions = {}
-mmOptions['start'] = args.start
-mmOptions['end'] = args.end
-mmOptions['split'] = args.split
-mmOptions['coordPath'] = os.path.join(args.dynamicsdir, args.coors)
-mmOptions['nvalids'] = args.nvalids
-mmOptions['trainMdin'] = args.trainMdin
-mmOptions['validMdin'] = args.validMdin
-mmOptions['leap'] = "setup.leap"
-mmOptions['heatCounter'] = heatCounter
+mmOptions["start"] = args.start
+mmOptions["end"] = args.end
+mmOptions["split"] = args.split
+mmOptions["coordPath"] = os.path.join(args.dynamicsdir, args.coors)
+mmOptions["nvalids"] = args.nvalids
+mmOptions["trainMdin"] = args.trainMdin
+mmOptions["validMdin"] = args.validMdin
+mmOptions["leap"] = "setup.leap"
+mmOptions["heatCounter"] = heatCounter
 if args.mmengine == "amber":
     mmEngine = mmengine.ExternalAmberEngine(mmOptions)
 
@@ -811,7 +845,16 @@ os.rename(os.path.join(args.optdir, args.opt0), os.path.join(args.optdir, "opt_0
 
 print(
     "%7s%15s%15s%20s%23s%8s%8s%8s"
-    % ("Epoch", "Validation", "Valid ratio", "Current-Previous", "Current-last Current", "MM time", "QM time", "FB time")
+    % (
+        "Epoch",
+        "Validation",
+        "Valid ratio",
+        "Current-Previous",
+        "Current-last Current",
+        "MM time",
+        "QM time",
+        "FB time",
+    )
 )
 for i in range(1, args.maxcycles + 1):
 
@@ -845,10 +888,10 @@ for i in range(1, args.maxcycles + 1):
         mmEngine.getMMSamples()
     mmEnd = perf_counter()
     mmTime = mmEnd - mmStart
-    
+
     # Run QM calculations for each sampling trajectory
     for f in os.listdir():
-        if (f.startswith("train") or f.startswith("valid")) and os.path.isdir(f): 
+        if (f.startswith("train") or f.startswith("valid")) and os.path.isdir(f):
             os.chdir(f)
             if i == restartCycle + 1:
                 qmEngine.restart(".")
@@ -878,11 +921,15 @@ for i in range(1, args.maxcycles + 1):
     dest = os.path.join(args.optdir, "targets", "valid_" + str(i), ".")
     os.system(f"cp {src} {dest}")
 
-    valids = [] 
+    valids = []
     for f in os.listdir(os.path.join(args.sampledir, f"{str(i)}_cycle_{str(i)}")):
-        if f.startswith("train_") and os.path.isdir(os.path.join(args.sampledir, f"{str(i)}_cycle_{str(i)}",f)):
+        if f.startswith("train_") and os.path.isdir(
+            os.path.join(args.sampledir, f"{str(i)}_cycle_{str(i)}", f)
+        ):
             trainFolder = f
-        elif f.startswith("valid_") and os.path.isdir(os.path.join(args.sampledir, f"{str(i)}_cycle_{str(i)}", f)):
+        elif f.startswith("valid_") and os.path.isdir(
+            os.path.join(args.sampledir, f"{str(i)}_cycle_{str(i)}", f)
+        ):
             valids.append(f)
 
     src = os.path.join(
