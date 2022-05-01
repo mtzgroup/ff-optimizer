@@ -1,8 +1,9 @@
+from math import ceil
+from os import listdir
+from time import sleep
+
 from tccloud import TCClient
 from tccloud.models import AtomicInput, Molecule
-from os import listdir
-from math import ceil
-from time import sleep
 
 
 def computeBatch(atomicInputs, batchSize):
