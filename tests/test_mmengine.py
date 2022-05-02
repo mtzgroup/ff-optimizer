@@ -157,4 +157,5 @@ def test_restart4(monkeypatch):
 
     assert not os.path.isdir("valid_828")
     os.mkdir("valid_828")
+    os.system(f"cp ../restart1/828.rst7 .")
     assert mmEngine.test[0] == -1
