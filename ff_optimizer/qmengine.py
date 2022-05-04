@@ -443,7 +443,7 @@ class TCCloudEngine(QMEngine):
                     keywords=keywords,
                     id=jobId,
                     protocols={"native_files": "all"},
-                    extras={"tcfe:keywords": {"native_files": ["esp.xyz"]}},
+                    extras={"tcfe:keywords": {"native_files": ["esp.xyz", "tc.out"]}},
                 )
             else:
                 atomicInput = AtomicInput(
