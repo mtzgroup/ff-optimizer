@@ -179,6 +179,7 @@ class MMEngine:
             return
 
         rsts = sorted(rsts)
+        self.setup()
         for i in range(len(rsts)):
             name = rsts[i].split(".")[0]
             folder = "."
@@ -208,9 +209,9 @@ class MMEngine:
                     isValid = True
                 os.chdir(folder)
                 if not isValid:
-                    self.sample(rsts[i], self.options["trainMdin"])
+                    self.sample(name, self.options["trainMdin"])
                 else:
-                    self.sample(rsts[i], self.options["validMdin"])
+                    self.sample(name, self.options["validMdin"])
                 os.chdir("..")
             # TODO: should distinguish between restarting from MD and from cpptraj
             else:
