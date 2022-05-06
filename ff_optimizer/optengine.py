@@ -3,14 +3,20 @@ import os
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+from shutil import rmtree, copyfile
 
 mpl.use("Agg")
 
 class OptEngine():
 
+    # We assume __init__ and all the functions it calls run from the top directory in the optimization
     def __init__(self, options):
         self.optdir = options['optdir']
         self.resp = options['resp']
+        if options['resp'] != 0:
+            self.doResp = True
+        else:
+            self.doResp = False
         self.maxCycles = options['maxCycles']
 
         self.train = []
@@ -33,25 +39,16 @@ class OptEngine():
                 if "$target" in line:
                     inTarget = True
                 if inTarget:
-                    targetLines.append(line)
-                    if line.split()[0] == "resp":
+                    if line.split()[0] == "resp" or line.split()[0] == "w_resp":
                         continue
-                    validTargetLines.append(line)
+                    self.targetLines.append(line)
+                    self.validTargetLines.append(line)
                     if line.split()[0] == "amber_leapcmd":
                         line = line.replace(line.split()[1], "setup_valid_initial.leap")
-                    validInitialTargetLines.append(line)
+                    self.validInitialTargetLines.append(line)
         if self.doResp:
-            respAdded = False
-            respWeightAdded = False
-            for line in targetLines:
-                if line.split()[0] == "resp":
-                    respAdded = True
-                if line.split()[0] == "w_resp":
-                    respWeightAdded = True
-            if not respWeightAdded:
-                targetLines.insert(1, f"w_resp {str(self.resp)}\n")
-            if not respAdded:
-                targetLines.insert(1, "resp 1\n")
+            self.targetLines.insert(1, f"w_resp {str(self.resp)}\n")
+            self.targetLines.insert(1, "resp 1\n")
         with open(os.path.join(self.optdir, "setup.leap"), "r") as leapRead:
             with open(os.path.join(self.optdir, "setup_valid_initial.leap"), "w") as leapWrite:
                 for line in leapRead.readlines():
@@ -88,42 +85,28 @@ class OptEngine():
             raise RuntimeError("No frcmod file specified for optimization in opt_0.in")
         if not os.path.isfile(os.path.join(self.optdir, self.mol2)):
             raise RuntimeError(
-                f"Mol2 {mol2} specified in opt_0.in is not in {self.optdir}"
+                f"Mol2 {self.mol2} specified in opt_0.in is not in {self.optdir}"
             )
         if not os.path.isfile(os.path.join(self.optdir, self.frcmod)):
             raise RuntimeError(
-                f"Frcmod {frcmod} specified in opt_0.in is not in {self.optdir}"
+                f"Frcmod {self.frcmod} specified in opt_0.in is not in {self.optdir}"
             )
-        src = os.path.join(self.optdir, "setup.leap")
-        dest = os.path.join(path, ".")
-        os.system(f"cp {src} {dest}")
-        src = os.path.join(self.optdir, "conf.pdb")
-        os.system(f"cp {src} {dest}")
-        src = os.path.join(self.optdir, "setup_valid_initial.leap")
-        os.system(f"mv {src} {dest}")
-        if restartCycle == -1:
-            src = os.path.join(self.optdir, self.frcmod)
-            dest = os.path.join(self.optdir, "forcefield", ".")
-            os.system(f"cp {src} {dest}")
-            dest = os.path.join(self.optdir, "forcefield", "initial_" + self.frcmod)
-            os.system(f"cp {src} {dest}")
-            src = os.path.join(self.optdir, self.mol2)
-            dest = os.path.join(self.optdir, "forcefield", ".")
-            os.system(f"cp {src} {dest}")
-            dest = os.path.join(self.optdir, "forcefield", "initial_" + mol2)
-            os.system(f"cp {src} {dest}")
+        if self.restartCycle == -1:
+            copyfile(os.path.join(self.optdir, self.frcmod),os.path.join(self.optdir, "forcefield", self.frcmod))
+            copyfile(os.path.join(self.optdir, self.frcmod),os.path.join(self.optdir, "forcefield", f"initial_{self.frcmod}"))
+            copyfile(os.path.join(self.optdir, self.mol2),os.path.join(self.optdir, "forcefield", self.mol2))
+            copyfile(os.path.join(self.optdir, self.mol2),os.path.join(self.optdir, "forcefield", f"initial_{self.mol2}"))
         # Make validation input for initial MM parameters
-        if not os.path.isfile(os.path.join(self.optdir, "valid_0_initial.in")):
-            with open(os.path.join(self.optdir, "valid_0.in"), "r") as srcValid:
-                with open(os.path.join(self.optdir, "valid_0_initial.in"), "w") as destValid:
-                    for line in srcValid.readlines():
-                        destValid.write(
-                            line.replace(frcmod, "initial_" + frcmod).replace(
-                                mol2, "initial_" + mol2
-                            )
+        with open(os.path.join(self.optdir, "valid_0.in"), "r") as srcValid:
+            with open(os.path.join(self.optdir, "valid_0_initial.in"), "w") as destValid:
+                for line in srcValid.readlines():
+                    if "$target" in line:
+                        break
+                    destValid.write(
+                        line.replace(self.frcmod, f"initial_{self.frcmod}").replace(
+                            self.mol2, f"initial_{self.mol2}"
                         )
-                        if "$target" in line:
-                            break
+                    )
 
     def readOpt(self, filename):
         inInitialParams = False
@@ -168,6 +151,7 @@ class OptEngine():
         results["initialParams"] = initialParams
         return status, results
 
+    # Unused and untested
     def changeParameter(self, inputFile, prmName, prmValue):
         changed = False
         lines = []
@@ -199,6 +183,7 @@ class OptEngine():
                 for line in targetLines:
                     f.write(line.replace(self.initialTarget, newTarget))
 
+    # Unused and untested
     def determineAdaptiveDamping(
         self, testFile, upperThreshold=0.3, lowerThreshold=0.01, adaptiveDamping=0.5
     ):
@@ -227,43 +212,26 @@ class OptEngine():
                 if "Objective Function Single Point" in line:
                     return float(line.split()[6])
             raise RuntimeError(
-                "ForceBalance single-point evaluation of " + filename + " did not converge"
+                f"ForceBalance single-point evaluation of {filename} did not converge"
             )
 
     def setupInputFiles(self, i):
         # Copy previous validation and optimization FB input files to current ones
-        src = os.path.join(self.optdir, "valid_" + str(i - 1) + ".in")
-        dest = os.path.join(self.optdir, "valid_" + str(i) + ".in")
-        os.system(f"cp {src} {dest}")
-        src = os.path.join(self.optdir, "valid_" + str(i - 1) + "_initial.in")
-        dest = os.path.join(self.optdir, "valid_" + str(i) + "_initial.in")
-        os.system(f"cp {src} {dest}")
-        src = os.path.join(self.optdir, "opt_" + str(i - 1) + ".in")
-        dest = os.path.join(self.optdir, "opt_" + str(i) + ".in")
-        os.system(f"cp {src} {dest}")
+        copyfile(f"valid_{str(i - 1)}.in", f"valid_{str(i)}.in")
+        copyfile(f"valid_{str(i - 1)}_initial.in", f"valid_{str(i)}_initial.in")
+        copyfile(f"opt_{str(i - 1)}.in", f"opt_{str(i)}.in")
 
         # Add new targets section to each FB input file
-        self.addTargetLines(
-            os.path.join(self.optdir, "opt_" + str(i) + ".in"),
-            self.targetLines,
-            "train_" + str(i),
-        )
-        addTargetLines(
-            os.path.join(self.optdir, "valid_" + str(i) + ".in"),
-            self.validTargetLines,
-            "valid_" + str(i),
-        )
-        addTargetLines(
-            os.path.join(self.optdir, "valid_" + str(i) + "_initial.in"),
-            self.validInitialTargetLines,
-            "valid_" + str(i),
-        )
+        self.addTargetLines(f"opt_{str(i)}.in",self.targetLines,f"train_{str(i)}",)
+        self.addTargetLines(f"valid_{str(i)}.in",self.validTargetLines,f"valid_{str(i)}")
+        self.addTargetLines(f"valid_{str(i)}_initial.in",self.validInitialTargetLines,f"valid_{str(i)}")
 
     def graphResults(self, i):
         # Graph results so far
         x = range(1, i + 2)
         x0 = np.arange(i + 2)
-        xticks = np.arange(0, i + 1, int(i / 12))
+        tickInterval = max(int(i / 12), 1)
+        xticks = np.arange(0, i + 1, tickInterval)
         fig, ax = plt.subplots(figsize=(9, 6))
         ax.plot(x, self.valid, label="Validation, current parameters", marker="o")
         ax.plot(x, self.validPrevious, label="Validation, previous parameters", marker="o")
@@ -298,15 +266,6 @@ class OptEngine():
             "lightskyblue",
             "olive",
         ]
-        name = "opt_" + str(i) + ".out"
-        for j in range(len(results["labels"])):
-            if labels[j] == results["labels"][j]:
-                params[i + 1, j] = results["params"][j]
-            else:
-                for k in range(j + 1, len(labels)):
-                    if labels[k] == results["labels"][j]:
-                        params[i + 1, k] = results["params"][j]
-                        break
         adds = []
         scs = []
         legendLabels = []
@@ -318,7 +277,7 @@ class OptEngine():
         for k in range(len(labels)):
             for j in range(len(types)):
                 if types[j] in labels[k]:
-                    sortedParams[j].append(params[:, k])
+                    sortedParams[j].append(self.params[:, k])
                     # sc = ax.scatter(range(1,i + 1),relError[:,i],label=types[j],c=colors[j])
                     if not adds[j]:
                         # scs.append(sc)
@@ -355,74 +314,60 @@ class OptEngine():
         plt.savefig("ParameterChange.png", bbox_inches="tight")
         plt.close()
 
+    def sortParams(self, results, i):
+        self.params[i + 1,:] = self.params[i,:]
+        for j in range(len(results["labels"])):
+            if self.labels[j] == results["labels"][j]:
+                self.params[i + 1, j] = results["params"][j]
+            else:
+                for k in range(len(self.labels)):
+                    if self.labels[k] == results["labels"][j]:
+                        self.params[i + 1, k] = results["params"][j]
+                        break
+
     # TODO: make each optimization occur in a separate directory
+    # We assume that optimizeForcefield and all the functions it calls run in the args.optdir directory
     def optimizeForcefield(self, i):
         if i > 0:
             self.setupInputFiles(i)
-            # What is this code doing?
+            # If we're just restarting, skip if this calculation finished
             if len(self.validPrevious) <= i:
                 if i > 1:
-                    src = os.path.join("result", "opt_" + str(i - 1), "*")
-                    dest = os.path.join("forcefield", ".")
-                    os.system(f"cp {src} {dest}")
-                os.system(
-                    "ForceBalance.py valid_"
-                    + str(i)
-                    + ".in > valid_"
-                    + str(i)
-                    + "_previous.out"
-                )
-                self.validPrevious.append(readValid("valid_" + str(i) + "_previous.out"))
-            if (len(self.train)) <= i:
-                os.system("ForceBalance.py opt_" + str(i) + ".in > opt_" + str(i) + ".out")
-                status, results = readOpt("opt_" + str(i) + ".out")
+                    copyfile(os.path.join("result", f"opt_{str(i - 1)}", self.frcmod),os.path.join("forcefield",self.frcmod))
+                    copyfile(os.path.join("result", f"opt_{str(i - 1)}", self.mol2),os.path.join("forcefield",self.mol2))
+                os.system(f"ForceBalance.py valid_{str(i)}.in > valid_{str(i)}_previous.out")
+                self.validPrevious.append(self.readValid(f"valid_{str(i)}_previous.out"))
+            if len(self.train) <= i:
+                os.system(f"ForceBalance.py opt_{str(i)}.in > opt_{str(i)}.out")
+                status, results = self.readOpt(f"opt_{str(i)}.out")
                 if status == -1:
-                    raise RuntimeError(
-                        "ForceBalance optimization of "
-                        + os.path.join(self.optdir, "opt_" + str(i) + ".in")
-                        + " failed"
-                    )
+                    raise RuntimeError(f"ForceBalance optimization of {os.path.join(self.optdir, f'opt_{str(i)}.in')} failed")
                 if status == 1:
                     print("WARNING: large change in one of the parameters")
                     print("Ethan should implement adaptive changing of adaptive_damping")
-                src = os.path.join("result", "opt_" + str(i), "*")
-                dest = os.path.join("forcefield", ".")
-                os.system(f"cp {src} {dest}")
+                copyfile(os.path.join("result", f"opt_{str(i)}", self.frcmod),os.path.join("forcefield",self.frcmod))
+                copyfile(os.path.join("result", f"opt_{str(i)}", self.mol2),os.path.join("forcefield",self.mol2))
                 self.train.append(results["obj"])
             if len(self.valid) <= i:
-                os.system("ForceBalance.py valid_" + str(i) + ".in > valid_" + str(i) + ".out")
-                self.valid.append(readValid("valid_" + str(i) + ".out"))
+                os.system(f"ForceBalance.py valid_{str(i)}.in > valid_{str(i)}.out")
+                self.valid.append(self.readValid(f"valid_{str(i)}.out"))
             if len(self.validInitial) <= i:
-                os.system(
-                    "ForceBalance.py valid_"
-                    + str(i)
-                    + "_initial.in > valid_"
-                    + str(i)
-                    + "_initial.out"
-                )
-                self.validInitial.append(readValid("valid_" + str(i) + "_initial.out"))
+                os.system(f"ForceBalance.py valid_{str(i)}_initial.in > valid_{str(i)}_initial.out")
+                self.validInitial.append(self.readValid(f"valid_{str(i)}_initial.out"))
+            self.sortParams(results, i)
             self.graphResults(i)
         else:
             os.system("ForceBalance.py opt_0.in > opt_0.out")
-            src = os.path.join("result", "opt_0", "*")
-            dest = os.path.join("forcefield", ".")
-            os.system(f"cp {src} {dest}")
-            status, results = readOpt(os.path.join(self.optdir, "opt_0.out"))
+            copyfile(os.path.join("result", "opt_0", self.frcmod),os.path.join("forcefield",self.frcmod))
+            copyfile(os.path.join("result", "opt_0", self.mol2),os.path.join("forcefield",self.mol2))
+            status, results = self.readOpt("opt_0.out")
             if status != 0:
                 raise RuntimeError("ForceBalance optimization of opt_0.in failed")
             self.train.append(results["obj"])
             self.labels = results["labels"]
-            self.params = np.zeros((self.maxCycles + 2, len(labels)))
+            self.params = np.zeros((self.maxCycles + 2, len(self.labels)))
             self.params[0, :] = np.asarray(results["initialParams"])
-            for j in range(len(results["labels"])):
-                if self.labels[j] == results["labels"][j]:
-                    self.params[1, j] = results["params"][j]
-                else:
-                    for k in range(j + 1, len(self.labels)):
-                        if self.labels[k] == results["labels"][j]:
-                            params[1, k] = results["params"][j]
-                            break
-
+            self.sortParams(results, i)
 
 
     def determineRestart(self):
@@ -431,35 +376,24 @@ class OptEngine():
         for i in range(self.maxCycles + 2):
             optOutput = os.path.join(self.optdir, "opt_" + str(i) + ".out")
             if os.path.isfile(optOutput):
-                status, results = readOpt(optOutput)
+                status, results = self.readOpt(optOutput)
                 if status == 0:
                     if i == 0:
                         self.params = np.zeros((self.maxCycles + 2, len(results["labels"])))
-                        labels = results["labels"]
+                        self.labels = results["labels"]
                         self.params[0, :] = results["initialParams"]
                     else:
                         try:
-                            v = readValid(os.path.join(self.optdir, f"valid_{str(i)}.out"))
-                            vPrev = readValid(
-                                os.path.join(self.optdir, f"valid_{str(i)}_previous.out")
-                            )
-                            vInitial = readValid(
-                                os.path.join(self.optdir, f"valid_{str(i)}_initial.out")
-                            )
+                            v = self.readValid(os.path.join(self.optdir, f"valid_{str(i)}.out"))
+                            vPrev = self.readValid(os.path.join(self.optdir, f"valid_{str(i)}_previous.out"))
+                            vInitial = self.readValid(os.path.join(self.optdir, f"valid_{str(i)}_initial.out"))
                         except:
                             break
                         self.valid.append(v)
                         self.validPrevious.append(vPrev)
                         self.validInitial.append(vInitial)
                     self.train.append(results["obj"])
-                    for j in range(len(results["labels"])):
-                        if labels[j] == results["labels"][j]:
-                            self.params[i + 1, j] = results["params"][j]
-                        else:
-                            for k in range(j + 1, len(labels)):
-                                if labels[k] == results["labels"][j]:
-                                    self.params[i + 1, k] = results["params"][j]
-                                    break
+                    self.sortParams(results, i)
                 else:
                     break
             else:

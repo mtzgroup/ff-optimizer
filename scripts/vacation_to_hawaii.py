@@ -3,7 +3,7 @@
 import argparse
 import errno
 import os
-from shutil import rmtree
+from shutil import rmtree, copyfile
 from time import perf_counter
 
 import matplotlib as mpl
@@ -516,6 +516,8 @@ if restartCycle < 0:
         os.path.join(path, "qdata.txt"),
         os.path.join(path, "all.mdcrd"),
     )
+    for f in ["setup.leap", "conf.pdb", "setup_valid_initial.leap"]:
+        copyfile(os.path.join(args.optdir,f),os.path.join(path,f))
 
     os.chdir(args.optdir)
     optEngine.optimizeForcefield(0)
