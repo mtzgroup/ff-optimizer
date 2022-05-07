@@ -226,12 +226,13 @@ class OptEngine():
         self.addTargetLines(f"valid_{str(i)}.in",self.validTargetLines,f"valid_{str(i)}")
         self.addTargetLines(f"valid_{str(i)}_initial.in",self.validInitialTargetLines,f"valid_{str(i)}")
 
-    def graphResults(self, i):
+    def graphResults(self):
         # Graph results so far
-        x = range(1, i + 2)
-        x0 = np.arange(i + 2)
-        tickInterval = max(int(i / 12), 1)
-        xticks = np.arange(0, i + 1, tickInterval)
+        cycles = len(self.valid)
+        x = np.arange(cycles) + 1
+        x0 = np.arange(cycles + 1)
+        tickInterval = max(int(cycles / 12), 1)
+        xticks = np.arange(0, cycles + 1, tickInterval)
         fig, ax = plt.subplots(figsize=(9, 6))
         ax.plot(x, self.valid, label="Validation, current parameters", marker="o")
         ax.plot(x, self.validPrevious, label="Validation, previous parameters", marker="o")
@@ -242,7 +243,7 @@ class OptEngine():
         ax.set_xticks(xticks)
         fig.set_dpi(200)
         plt.legend(fontsize=14)
-        plt.savefig("ObjectiveFunction.png", bbox_inches="tight")
+        plt.savefig(os.path.join("..","ObjectiveFunction.png"), bbox_inches="tight")
         plt.close()
         
         types = ["BONDSK", "BONDSB", "ANGLESK", "ANGLESB", "DIHS", "VDWS", "VDWT", "COUL"]
@@ -274,9 +275,9 @@ class OptEngine():
             adds.append(False)
             sortedParams.append([])
         fig, ax = plt.subplots(figsize=(9, 6))
-        for k in range(len(labels)):
+        for k in range(len(self.labels)):
             for j in range(len(types)):
-                if types[j] in labels[k]:
+                if types[j] in self.labels[k]:
                     sortedParams[j].append(self.params[:, k])
                     # sc = ax.scatter(range(1,i + 1),relError[:,i],label=types[j],c=colors[j])
                     if not adds[j]:
@@ -299,19 +300,19 @@ class OptEngine():
             weights = np.maximum(
                 np.abs(sortedParams[j]), np.roll(np.abs(sortedParams[j]), 1, axis=1)
             )[:, 1:]
-            normalizedDiff = np.zeros(i)
-            mrc = np.zeros(i + 1)
-            for k in range(i + 1):
+            #normalizedDiff = np.zeros(i)
+            mrc = np.zeros(cycles + 1)
+            for k in range(cycles + 1):
                 # normalizedDiff[j] = np.sqrt(np.dot(diff[:,j],diff[:,j]) / np.dot(sortedParams[i][:,j],sortedParams[i][:,j]))
                 mrc[k] = np.mean(np.abs(diff[:, k]) / weights[:, k]) * 100
             # plt.plot(range(1,i+1),normalizedDiff,label=aliases[i],marker='o')
-            plt.plot(range(i + 1), mrc, label=aliases[j], marker="o")
+            plt.plot(range(cycles + 1), mrc, label=aliases[j], marker="o")
         plt.legend(fontsize=14)
         ax.tick_params(labelsize=14)
         ax.set_xlabel("Optimization Cycle", size=17)
         # ax.set_ylabel('Normalized RMS parameter change',size=17)
         ax.set_ylabel("Mean relative parameter change / %", size=17)
-        plt.savefig("ParameterChange.png", bbox_inches="tight")
+        plt.savefig(os.path.join("..","ParameterChange.png"), bbox_inches="tight")
         plt.close()
 
     def sortParams(self, results, i):
@@ -355,7 +356,7 @@ class OptEngine():
                 os.system(f"ForceBalance.py valid_{str(i)}_initial.in > valid_{str(i)}_initial.out")
                 self.validInitial.append(self.readValid(f"valid_{str(i)}_initial.out"))
             self.sortParams(results, i)
-            self.graphResults(i)
+            self.graphResults()
         else:
             os.system("ForceBalance.py opt_0.in > opt_0.out")
             copyfile(os.path.join("result", "opt_0", self.frcmod),os.path.join("forcefield",self.frcmod))

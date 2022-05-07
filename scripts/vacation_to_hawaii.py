@@ -447,6 +447,10 @@ for f in os.listdir(args.sampledir):
         mdFiles.append(f)
         if f.startswith("heat"):
             heatCounter += 1
+if args.resp != 0:
+    doResp = True
+else:
+    doResp = False
 
 
 # Initialize OptEngine
@@ -454,7 +458,9 @@ optOptions = {}
 optOptions['optdir'] = args.optdir
 optOptions['resp'] = args.resp
 optOptions['maxCycles'] = args.maxcycles
+optOptions['restart'] = args.restart
 optEngine = optengine.OptEngine(optOptions)
+restartCycle = optEngine.restartCycle
 
 # Initialize QMEngine
 if args.qmengine == "debug":

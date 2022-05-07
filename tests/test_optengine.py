@@ -283,7 +283,6 @@ def monkeyForceBalance(command):
             if len(splitLine) > 0:
                 if splitLine[0] == "forcefield":
                     ffFiles = splitLine[1:]
-    print(name)
     if not os.path.isfile(inp):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), inp)
     if not os.path.isfile(os.path.join("ref",out)):
@@ -327,7 +326,7 @@ def test_optimizeForcefield0(monkeypatch):
 
 def test_optimizeForcefield1(monkeypatch):
 
-    def monkeyGraph(i):
+    def monkeyGraph():
         pass
 
     os.chdir(os.path.join(os.path.dirname(__file__),"optengine"))
@@ -335,7 +334,7 @@ def test_optimizeForcefield1(monkeypatch):
     options['optdir'] = "restart1"
     cleanOptDir(options['optdir'])
     options['resp'] = 0
-    options['restart'] = False
+    options['restart'] = True
     options['maxCycles'] = 10
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForceBalance)
