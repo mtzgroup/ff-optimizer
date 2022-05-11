@@ -3,23 +3,21 @@
 import argparse
 import errno
 import os
-from shutil import rmtree, copyfile
+from shutil import copyfile, rmtree
 from time import perf_counter
 
 import matplotlib as mpl
-import numpy as np
 
-from ff_optimizer import mmengine, qmengine, optengine
+from ff_optimizer import mmengine, optengine, qmengine
 
 mpl.use("Agg")
 from textwrap import dedent
-
-import matplotlib.pyplot as plt
 
 
 # Some helper functions
 def die():
     raise RuntimeError("die here")
+
 
 def convertTCtoFB(
     tcout, coors, stride, start=None, end=None, qdata="qdata.txt", mdcrd="all.mdcrd"
@@ -163,6 +161,7 @@ def convertTCtoFB(
             if tokenCounter != 1:
                 f.write("\n")
     return jobCounter
+
 
 # Summary stuff
 summary = dedent(
@@ -322,7 +321,12 @@ parser.add_argument(
     type=str,
     default="md.in",
 )
-parser.add_argument("--respPriors", help="Use RESP to compute priors for the charges. Mode 1: RESP st. dev. Mode 2: Uses ESP-RESP difference. Default is not.", type=int, default=0)
+parser.add_argument(
+    "--respPriors",
+    help="Use RESP to compute priors for the charges. Mode 1: RESP st. dev. Mode 2: Uses ESP-RESP difference. Default is not.",
+    type=int,
+    default=0,
+)
 
 args = parser.parse_args()
 
@@ -354,9 +358,7 @@ if not os.path.isfile(os.path.join(args.optdir, "conf.pdb")):
         "Prototype PDB coordinates conf.pdb does not exist in " + args.optdir
     )
 if not os.path.isfile(os.path.join(args.optdir, "setup.leap")):
-    raise RuntimeError(
-        "Tleap input file setup.leap does not exist in " + args.optdir
-    )
+    raise RuntimeError("Tleap input file setup.leap does not exist in " + args.optdir)
 if not os.path.isfile(os.path.join(args.optdir, args.opt0)):
     raise RuntimeError(
         "Initial ForceBalance optimization input file "
@@ -372,9 +374,7 @@ if not os.path.isfile(os.path.join(args.optdir, args.valid0)):
         + args.optdir
     )
 if not os.path.isdir(args.sampledir):
-    raise RuntimeError(
-        "MM sampling directory " + args.sampledir + " does not exist"
-    )
+    raise RuntimeError("MM sampling directory " + args.sampledir + " does not exist")
 if not os.path.isfile(os.path.join(args.sampledir, "heat1.in")):
     raise RuntimeError(
         "No sander input file for equilibration named heat1.in provided in "
@@ -382,25 +382,17 @@ if not os.path.isfile(os.path.join(args.sampledir, "heat1.in")):
     )
 if not os.path.isfile(os.path.join(args.sampledir, "md.in")):
     raise RuntimeError(
-        "No sander input file for sampling named md.in provided in "
-        + args.sampledir
+        "No sander input file for sampling named md.in provided in " + args.sampledir
     )
 if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
     raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
 
-if (
-    args.qmengine != "queue"
-    and args.qmengine != "debug"
-    and args.qmengine != "tccloud"
-):
+if args.qmengine != "queue" and args.qmengine != "debug" and args.qmengine != "tccloud":
     raise RuntimeError("Engine " + args.qmengine + " is not implemented")
 if args.qmengine == "queue":
     if not os.path.isfile(os.path.join(args.sampledir, args.sbatch)):
         raise RuntimeError(
-            "Sbatch template "
-            + args.sbatch
-            + " does not exist in "
-            + args.sampledir
+            "Sbatch template " + args.sbatch + " does not exist in " + args.sampledir
         )
     if not os.path.isfile(os.path.join(args.sampledir, args.tctemplate)):
         raise RuntimeError(
@@ -434,7 +426,9 @@ if not os.path.isfile(os.path.join(args.sampledir, args.validMdin)):
         os.path.join(args.sampledir, args.validMdin),
     )
 if args.respPriors != 0 and args.respPriors != 1 and args.respPriors != 2:
-    raise ValueError("Invalid mode for RESP priors, must be 0 (none), 1 (RESP st. dev.), or 2 (determined using ESP-RESP difference)")
+    raise ValueError(
+        "Invalid mode for RESP priors, must be 0 (none), 1 (RESP st. dev.), or 2 (determined using ESP-RESP difference)"
+    )
 
 
 # Set some miscellaneous variables
@@ -457,12 +451,12 @@ else:
 
 # Initialize OptEngine
 optOptions = {}
-optOptions['optdir'] = args.optdir
-optOptions['sampledir'] = args.sampledir
-optOptions['respPriors'] = args.respPriors
-optOptions['resp'] = args.resp
-optOptions['maxCycles'] = args.maxcycles
-optOptions['restart'] = args.restart
+optOptions["optdir"] = args.optdir
+optOptions["sampledir"] = args.sampledir
+optOptions["respPriors"] = args.respPriors
+optOptions["resp"] = args.resp
+optOptions["maxCycles"] = args.maxcycles
+optOptions["restart"] = args.restart
 optEngine = optengine.OptEngine(optOptions)
 restartCycle = optEngine.restartCycle
 
@@ -527,7 +521,7 @@ if restartCycle < 0:
         os.path.join(path, "all.mdcrd"),
     )
     for f in ["setup.leap", "conf.pdb", "setup_valid_initial.leap"]:
-        copyfile(os.path.join(args.optdir,f),os.path.join(path,f))
+        copyfile(os.path.join(args.optdir, f), os.path.join(path, f))
 
     os.chdir(args.optdir)
     optEngine.optimizeForcefield(0)
@@ -684,4 +678,3 @@ for i in range(1, args.maxcycles + 1):
                 fbTime,
             )
         )
-

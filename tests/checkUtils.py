@@ -16,6 +16,7 @@ def checkArray(a1, a2, thresh=0.000001):
         return False
     return np.max(np.abs(a1 - a2)) < thresh
 
+
 def checkLists(list1, list2):
     if len(list1) != len(list2):
         print(len(list1), len(list2))
@@ -27,6 +28,7 @@ def checkLists(list1, list2):
             return False
     return True
 
+
 def checkListsFloats(list1, list2, thresh=0.000001):
     if len(list1) != len(list2):
         print(len(list1), len(list2))
@@ -35,17 +37,18 @@ def checkListsFloats(list1, list2, thresh=0.000001):
         try:
             isSame = checkFloat(float(list1[i]), float(list2[i]), thresh=thresh)
         except:
-            isSame = (list1[i] == list2[i])
+            isSame = list1[i] == list2[i]
         if not isSame:
             print(f"List 1: {list1[i]}")
             print(f"List 2: {list2[i]}")
             return False
     return True
 
+
 def checkFileFloatsNoWhitespace(f1, f2, thresh=0.000001):
-    with open(f1, 'r') as f:
+    with open(f1, "r") as f:
         lines1 = f.readlines()
-    with open(f2, 'r') as f:
+    with open(f2, "r") as f:
         lines2 = f.readlines()
     if len(lines1) != len(lines2):
         return False
