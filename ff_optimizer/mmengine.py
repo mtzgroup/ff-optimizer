@@ -5,11 +5,8 @@ except:
 import os
 from random import randint
 from shutil import copyfile, rmtree
-
 import GPUtil
-
 from .utils import writeRst
-
 
 class MMEngine:
     def __init__(self, options):
@@ -179,6 +176,7 @@ class MMEngine:
             return
 
         rsts = sorted(rsts)
+        self.setup()
         for i in range(len(rsts)):
             name = rsts[i].split(".")[0]
             folder = "."
@@ -208,9 +206,9 @@ class MMEngine:
                     isValid = True
                 os.chdir(folder)
                 if not isValid:
-                    self.sample(rsts[i], self.options["trainMdin"])
+                    self.sample(name, self.options["trainMdin"])
                 else:
-                    self.sample(rsts[i], self.options["validMdin"])
+                    self.sample(name, self.options["validMdin"])
                 os.chdir("..")
             # TODO: should distinguish between restarting from MD and from cpptraj
             else:
@@ -235,7 +233,6 @@ class AmberEngine(MMEngine):
         inputs = sander.gas_input()
         sander.setup(prmtop, options["coordinates"], None, inputs)
 
-
 class ExternalAmberEngine(MMEngine):
     def __init__(self, options):
         self.options = options
@@ -248,7 +245,7 @@ class ExternalAmberEngine(MMEngine):
                 os.environ["CUDA_VISIBLE_DEVICES"] = str(deviceIDs[0])
             else:
                 print("No Nvidia GPUs available; defaulting to sander")
-                self.amberExe = "sander"
+                self.amberExe = "pmemd"
         except:
             print("No Nvidia GPUs available; defaulting to sander")
             self.amberExe = "pmemd"
@@ -265,13 +262,17 @@ class ExternalAmberEngine(MMEngine):
             os.system(
                 f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart}"
             )
-            print(
-                f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart}"
-            )
         else:
             os.system(
                 f"{self.amberExe} -O -p {prmtop} -i {mdin} -o {mdout} -c {mdcrd} -x {mdtraj} -r {restart} -v {mdvels}"
             )
+        if not os.path.isfile(restart):
+            if self.amberExe == "pmemd.cuda":
+                print("pmemd.cuda failed; trying MM sampling with pmemd")
+                self.amberExe = "pmemd"
+                runSander(pmrtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=mdvels)
+            else:
+                raise RuntimeError(f"MM dynamics with input {mdin} failed in {os.getcwd()}")
 
     def sample(self, index, mdin):
         name = str(index)
