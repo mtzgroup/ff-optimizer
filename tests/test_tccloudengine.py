@@ -90,7 +90,7 @@ def test_createAtomicInputsResp():
     atomicInputs = tccloudEngine.createAtomicInputs(pdbs)
     ainput = atomicInputs[0]
     assert ainput.protocols.native_files.all == "all"
-    assert ainput.extras["tcfe:keywords"]["native_files"] == ["esp.xyz"]
+    assert ainput.extras["tcfe:keywords"]["native_files"] == ["esp.xyz", "tc.out"]
 
 
 def test_computeBatch(monkeypatch):

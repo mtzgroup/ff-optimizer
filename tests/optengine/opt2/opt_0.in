@@ -1,0 +1,24 @@
+$options
+jobtype               bfgs                  # Indicates L-BFGS optimization (most robust; best tested
+forcefield            sol.mol2 sol.frcmod   # Specify names of force field files (files with tunable constants)
+penalty_additive      0.01                  # Regularization prefactor
+penalty_type          L2
+trust0                -1                    # Trust radius. Negative indicates nonlinear trust radius search
+backup                false                 # Don't back up any files
+criteria              2                     # Number of convergence criteria to be met before stopping
+convergence_gradient  0.001                 # Gradient norm criterion
+convergence_objective 0.001                 # Objective function criterion (stdev over [objective_history] steps)
+convergence_step      0.0001                # Step size criterion
+constrain_charge      true                  # Hold total charge of system constant
+$end
+
+$target
+type                  abinitio_amber        # The target type; fitting ab initio data using Amber
+resp  1
+w_resp 0.5
+name stuff                       # Also the subdirectory containing data within "targets"
+weight                1.0                   # Weight of this target relative to others
+writelevel            1                     # Amount of data printed to temp directory
+amber_leapcmd         setup.leap
+$end
+

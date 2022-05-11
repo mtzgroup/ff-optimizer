@@ -4,4 +4,3 @@ forcefield          initial_sol.frcmod initial_sol.mol2
 backup              false
 $end
 
-$target

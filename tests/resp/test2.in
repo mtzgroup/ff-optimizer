@@ -1,0 +1,67 @@
+$options
+jobtype             NewtonRaphson
+forcefield          dasa.frcmod dasa.mol2
+penalty_additive    0.01
+penalty_type        L2
+verbose_options     true
+backup              false
+constrain_charge    true
+priors
+COUL:DAS-1 : 0.07885677367448807
+COUL:DAS-2 : 0.06783164292573929
+COUL:DAS-3 : 0.10162431746721268
+COUL:DAS-4 : 0.0605032742023468
+COUL:DAS-5 : 0.06145618483424187
+COUL:DAS-6 : 0.023796310648322105
+COUL:DAS-9 : 0.05901103466749191
+COUL:DAS-10 : 0.02357129380106926
+COUL:DAS-13 : 0.08730271458625793
+COUL:DAS-14 : 0.02960178628563881
+COUL:DAS-15 : 0.07451024651527405
+COUL:DAS-16 : 0.07895796746015549
+COUL:DAS-17 : 0.03420940041542053
+COUL:DAS-18 : 0.08896346390247345
+COUL:DAS-19 : 0.03485118970274925
+COUL:DAS-20 : 0.09955830872058868
+COUL:DAS-21 : 0.03593005985021591
+COUL:DAS-22 : 0.15224140882492065
+COUL:DAS-23 : 0.04543831944465637
+COUL:DAS-25 : 0.11526685208082199
+COUL:DAS-26 : 0.03184893727302551
+COUL:DAS-29 : 0.14505141973495483
+COUL:DAS-30 : 0.04037792608141899
+COUL:DAS-32 : 0.11532136797904968
+COUL:DAS-33 : 0.030226659029722214
+COUL:DAS-36 : 0.1254919022321701
+COUL:DAS-37 : 0.03563835099339485
+COUL:DAS-38 : 0.026355348527431488
+COUL:DAS-39 : 0.042655859142541885
+COUL:DAS-40 : 0.04280341789126396
+COUL:DAS-41 : 0.04940880089998245
+COUL:DAS-42 : 0.039113014936447144
+/priors
+$end
+
+$target
+type                abinitio_amber
+name                dynamics
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                train_1
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                train_2
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                train_3
+amber_leapcmd       setup.leap
+$end
