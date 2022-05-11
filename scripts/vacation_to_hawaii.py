@@ -3,38 +3,20 @@
 import argparse
 import errno
 import os
-from shutil import rmtree
+from shutil import copyfile, rmtree
 from time import perf_counter
 
 import matplotlib as mpl
-import numpy as np
 
-from ff_optimizer import mmengine, qmengine
+from ff_optimizer import mmengine, optengine, qmengine
 
 mpl.use("Agg")
 from textwrap import dedent
-
-import matplotlib.pyplot as plt
 
 
 # Some helper functions
 def die():
     raise RuntimeError("die here")
-
-
-def addTargetLines(inputFile, targetLines, initialTarget, newTarget):
-    addedLines = False
-    with open(inputFile, "r") as f:
-        for line in f.readlines():
-            splitLine = line.split()
-            if len(splitLine) > 1:
-                if splitLine[0] == "name" and splitLine[1] == newTarget:
-                    addedLines = True
-    if not addedLines:
-        with open(inputFile, "a") as f:
-            f.write("\n")
-            for line in targetLines:
-                f.write(line.replace(initialTarget, newTarget))
 
 
 def convertTCtoFB(
@@ -179,116 +161,6 @@ def convertTCtoFB(
             if tokenCounter != 1:
                 f.write("\n")
     return jobCounter
-
-
-def changeParameter(inputFile, prmName, prmValue):
-    changed = False
-    lines = []
-    with open(inputFile, "r") as f:
-        for line in f.readlines():
-            if prmName in line:
-                line = line.replace(line.split()[1], prmValue)
-                changed = True
-            lines.append(line)
-        if not changed:
-            lines.insert(1, f"{prmName} {prmValue}")
-
-    with open("temp.txt", "w") as f:
-        for line in lines:
-            f.write(line)
-    os.system(f"mv temp.txt {inputFile}")
-
-
-def readOpt(filename):
-    inInitialParams = False
-    inFinalParams = False
-    inFinalObj = False
-    params = []
-    initialParams = []
-    labels = []
-    results = {}
-    status = -1
-    with open(filename, "r") as f:
-        for line in f.readlines():
-            if "-------" in line:
-                inFinalParams = False
-                inInitialParams = False
-            if inFinalParams:
-                if "=======" not in line:
-                    splitLine = line.split()
-                    params.append(splitLine[2])
-                    labels.append(splitLine[5])
-            if inInitialParams:
-                if "=======" not in line:
-                    initialParams.append(line.split()[2])
-            if inFinalObj:
-                results["obj"] = float(line.split()[5])
-                inFinalObj = False
-            if "Final physical parameters" in line:
-                inFinalParams = True
-            if "Starting parameter indices" in line:
-                inInitialParams = True
-            if "Final objective function" in line:
-                inFinalObj = True
-            if "Optimization Converged" in line:
-                status = 0
-            if "Maximum number of optimization steps reached" in line:
-                status = 2
-
-    # if status == -1:
-    #    raise RuntimeError("ForceBalance optimization of " + filename + " failed")
-
-    params = np.asarray(params, dtype=np.float32)
-    initialParams = np.asarray(initialParams, dtype=np.float32)
-    results["params"] = params
-    results["labels"] = labels
-    results["initialParams"] = initialParams
-    return status, results
-
-
-def determineAdaptiveDamping(
-    testFile, upperThreshold=0.3, lowerThreshold=0.01, adaptiveDamping=0.5
-):
-    changeParameter(testFile, "adaptive_damping", str(adaptiveDamping))
-    maxCycles = 100
-    testOut = testFile.split(".")[0] + ".out"
-    for j in range(maxCycles):
-        os.system(f"ForceBalance.py {testFile} > {testOut}")
-        status, results = readOpt(testOut)
-        diff = np.abs(results["params"] - results["initialParams"]) / np.maximum(
-            results["params"], results["initialParams"]
-        )
-        print(diff)
-        if np.argwhere(diff > upperThreshold).shape[0] > 0:
-            adaptiveDamping *= 2
-            changeParameter(testFile, "adaptive_damping", str(adaptiveDamping))
-        elif np.argwhere(diff > lowerThreshold).shape[0] == 0:
-            adaptiveDamping *= 0.75
-            changeParameter(testFile, "adaptive_damping", str(adaptiveDamping))
-        else:
-            return adaptiveDamping
-
-
-def readRst(filename):
-    coords = []
-    lineCounter = 0
-    with open(filename, "r") as f:
-        for line in f.readlines():
-            if lineCounter > 1:
-                for coord in line.split():
-                    coords.append(coord)
-            lineCounter = lineCounter + 1
-    return coords
-
-
-def readValid(filename):
-    with open(filename, "r") as f:
-        for line in f.readlines():
-            if "Objective Function Single Point" in line:
-                return float(line.split()[6])
-        raise RuntimeError(
-            "ForceBalance single-point evaluation of " + filename + " did not converge"
-        )
 
 
 # Summary stuff
@@ -449,288 +321,144 @@ parser.add_argument(
     type=str,
     default="md.in",
 )
+parser.add_argument(
+    "--respPriors",
+    help="Use RESP to compute priors for the charges. Mode 1: RESP st. dev. Mode 2: Uses ESP-RESP difference. Default is not.",
+    type=int,
+    default=0,
+)
 
 args = parser.parse_args()
 
-# Set up the calculation
-train = []
-valid = []
-validInitial = []
-validPrevious = []
-
-# Determine cycle for restart, set restart variables
-restartCycle = -1
-if args.restart:
-    types = ["BONDSK", "BONDSB", "ANGLESK", "ANGLESB", "DIHS"]
-    aliases = [
-        "Bond strength",
-        "Bond length",
-        "Angle strength",
-        "Equilibrium angle",
-        "Dihedral strength",
-    ]
-    colors = [
-        "blue",
-        "green",
-        "firebrick",
-        "goldenrod",
-        "orange",
-        "purple",
-        "lightskyblue",
-        "olive",
-    ]
-    for i in range(args.maxcycles + 2):
-        optOutput = os.path.join(args.optdir, "opt_" + str(i) + ".out")
-        if os.path.isfile(optOutput):
-            status, results = readOpt(optOutput)
-            if status == 0:
-                if i == 0:
-                    params = np.zeros((args.maxcycles + 2, len(results["labels"])))
-                    labels = results["labels"]
-                    params[0, :] = results["initialParams"]
-                else:
-                    try:
-                        v = readValid(os.path.join(args.optdir, f"valid_{str(i)}.out"))
-                        vPrev = readValid(
-                            os.path.join(args.optdir, f"valid_{str(i)}_previous.out")
-                        )
-                        vInitial = readValid(
-                            os.path.join(args.optdir, f"valid_{str(i)}_initial.out")
-                        )
-                    except:
-                        break
-                    valid.append(v)
-                    validPrevious.append(vPrev)
-                    validInitial.append(vInitial)
-                train.append(results["obj"])
-                for j in range(len(results["labels"])):
-                    if labels[j] == results["labels"][j]:
-                        params[i + 1, j] = results["params"][j]
-                    else:
-                        for k in range(j + 1, len(labels)):
-                            if labels[k] == results["labels"][j]:
-                                params[i + 1, k] = results["params"][j]
-                                break
-            else:
-                break
-        else:
-            break
-    restartCycle = i - 1
-    print("Restarting optimization at cycle " + str(restartCycle + 1))
 
 # Check for necessary folders and files
-
 # TODO: Make these the proper errors, and just put it in a function
-if restartCycle < 0:
-    if not os.path.isdir(args.dynamicsdir):
-        raise RuntimeError("Dynamics directory " + args.dynamicsdir + " does not exist")
-    if not os.path.isfile(os.path.join(args.dynamicsdir, args.coors)):
+if not os.path.isdir(args.dynamicsdir):
+    raise RuntimeError("Dynamics directory " + args.dynamicsdir + " does not exist")
+if not os.path.isfile(os.path.join(args.dynamicsdir, args.coors)):
+    raise RuntimeError(
+        "XYZ coordinates (from QM dynamics) "
+        + args.coors
+        + " does not exist in "
+        + args.dynamicsdir
+    )
+if not os.path.isfile(os.path.join(args.dynamicsdir, args.tcout)):
+    raise RuntimeError(
+        "TC output file (from QM dynamics "
+        + args.tcout
+        + " does not exist in "
+        + args.dynamicsdir
+    )
+if not os.path.isdir(args.optdir):
+    raise RuntimeError(
+        "ForceBalance optimization directory " + args.optdir + " does not exist"
+    )
+if not os.path.isfile(os.path.join(args.optdir, "conf.pdb")):
+    raise RuntimeError(
+        "Prototype PDB coordinates conf.pdb does not exist in " + args.optdir
+    )
+if not os.path.isfile(os.path.join(args.optdir, "setup.leap")):
+    raise RuntimeError("Tleap input file setup.leap does not exist in " + args.optdir)
+if not os.path.isfile(os.path.join(args.optdir, args.opt0)):
+    raise RuntimeError(
+        "Initial ForceBalance optimization input file "
+        + args.opt0
+        + " does not exist in "
+        + args.optdir
+    )
+if not os.path.isfile(os.path.join(args.optdir, args.valid0)):
+    raise RuntimeError(
+        "Initial ForceBalance validation input file "
+        + args.valid0
+        + " does not exist in "
+        + args.optdir
+    )
+if not os.path.isdir(args.sampledir):
+    raise RuntimeError("MM sampling directory " + args.sampledir + " does not exist")
+if not os.path.isfile(os.path.join(args.sampledir, "heat1.in")):
+    raise RuntimeError(
+        "No sander input file for equilibration named heat1.in provided in "
+        + args.sampledir
+    )
+if not os.path.isfile(os.path.join(args.sampledir, "md.in")):
+    raise RuntimeError(
+        "No sander input file for sampling named md.in provided in " + args.sampledir
+    )
+if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
+    raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
+
+if args.qmengine != "queue" and args.qmengine != "debug" and args.qmengine != "tccloud":
+    raise RuntimeError("Engine " + args.qmengine + " is not implemented")
+if args.qmengine == "queue":
+    if not os.path.isfile(os.path.join(args.sampledir, args.sbatch)):
         raise RuntimeError(
-            "XYZ coordinates (from QM dynamics) "
-            + args.coors
+            "Sbatch template " + args.sbatch + " does not exist in " + args.sampledir
+        )
+    if not os.path.isfile(os.path.join(args.sampledir, args.tctemplate)):
+        raise RuntimeError(
+            "TC input template "
+            + args.tctemplate
             + " does not exist in "
-            + args.dynamicsdir
-        )
-    if not os.path.isfile(os.path.join(args.dynamicsdir, args.tcout)):
-        raise RuntimeError(
-            "TC output file (from QM dynamics "
-            + args.tcout
-            + " does not exist in "
-            + args.dynamicsdir
-        )
-    if not os.path.isdir(args.optdir):
-        raise RuntimeError(
-            "ForceBalance optimization directory " + args.optdir + " does not exist"
-        )
-    if not os.path.isfile(os.path.join(args.optdir, "conf.pdb")):
-        raise RuntimeError(
-            "Prototype PDB coordinates conf.pdb does not exist in " + args.optdir
-        )
-    if not os.path.isfile(os.path.join(args.optdir, "setup.leap")):
-        raise RuntimeError(
-            "Tleap input file setup.leap does not exist in " + args.optdir
-        )
-    if not os.path.isfile(os.path.join(args.optdir, args.opt0)):
-        raise RuntimeError(
-            "Initial ForceBalance optimization input file "
-            + args.opt0
-            + " does not exist in "
-            + args.optdir
-        )
-    if not os.path.isfile(os.path.join(args.optdir, args.valid0)):
-        raise RuntimeError(
-            "Initial ForceBalance validation input file "
-            + args.valid0
-            + " does not exist in "
-            + args.optdir
-        )
-    if not os.path.isdir(args.sampledir):
-        raise RuntimeError(
-            "MM sampling directory " + args.sampledir + " does not exist"
-        )
-    if not os.path.isfile(os.path.join(args.sampledir, "heat1.in")):
-        raise RuntimeError(
-            "No sander input file for equilibration named heat1.in provided in "
             + args.sampledir
         )
-    if not os.path.isfile(os.path.join(args.sampledir, "md.in")):
+    if not os.path.isfile(os.path.join(args.sampledir, args.tctemplate_long)):
         raise RuntimeError(
-            "No sander input file for sampling named md.in provided in "
+            "TC input template (for resubmitting jobs) "
+            + args.tctemplate_long
+            + " does not exist in "
             + args.sampledir
         )
-    if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
-        raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
 
-    if (
-        args.qmengine != "queue"
-        and args.qmengine != "debug"
-        and args.qmengine != "tccloud"
-    ):
-        raise RuntimeError("Engine " + args.qmengine + " is not implemented")
-    if args.qmengine == "queue":
-        if not os.path.isfile(os.path.join(args.sampledir, args.sbatch)):
-            raise RuntimeError(
-                "Sbatch template "
-                + args.sbatch
-                + " does not exist in "
-                + args.sampledir
-            )
-        if not os.path.isfile(os.path.join(args.sampledir, args.tctemplate)):
-            raise RuntimeError(
-                "TC input template "
-                + args.tctemplate
-                + " does not exist in "
-                + args.sampledir
-            )
-        if not os.path.isfile(os.path.join(args.sampledir, args.tctemplate_long)):
-            raise RuntimeError(
-                "TC input template (for resubmitting jobs) "
-                + args.tctemplate_long
-                + " does not exist in "
-                + args.sampledir
-            )
-
-    if args.mmengine != "amber":
-        raise ValueError(f"MM Engine {args.mmengine} is unsupported!")
-    if args.nvalids < 1:
-        raise ValueError(f"Must use at least one validation set for now")
-    if not os.path.isfile(os.path.join(args.sampledir, args.trainMdin)):
-        raise FileNotFoundError(
-            errno.ENOENT,
-            os.srterror(errno.ENOENT),
-            os.path.join(args.sampledir, args.trainMdin),
-        )
-    if not os.path.isfile(os.path.join(args.sampledir, args.validMdin)):
-        raise FileNotFoundError(
-            errno.ENOENT,
-            os.srterror(errno.ENOENT),
-            os.path.join(args.sampledir, args.validMdin),
-        )
+if args.mmengine != "amber":
+    raise ValueError(f"MM Engine {args.mmengine} is unsupported!")
+if args.nvalids < 1:
+    raise ValueError(f"Must use at least one validation set for now")
+if not os.path.isfile(os.path.join(args.sampledir, args.trainMdin)):
+    raise FileNotFoundError(
+        errno.ENOENT,
+        os.srterror(errno.ENOENT),
+        os.path.join(args.sampledir, args.trainMdin),
+    )
+if not os.path.isfile(os.path.join(args.sampledir, args.validMdin)):
+    raise FileNotFoundError(
+        errno.ENOENT,
+        os.srterror(errno.ENOENT),
+        os.path.join(args.sampledir, args.validMdin),
+    )
+if args.respPriors != 0 and args.respPriors != 1 and args.respPriors != 2:
+    raise ValueError(
+        "Invalid mode for RESP priors, must be 0 (none), 1 (RESP st. dev.), or 2 (determined using ESP-RESP difference)"
+    )
 
 
 # Set some miscellaneous variables
 home = os.getcwd()
-targetLines = []
-validTargetLines = []
-validInitialTargetLines = []
-inTarget = False
-with open(os.path.join(args.optdir, args.opt0), "r") as f:
-    for line in f.readlines():
-        if len(line.split()) == 0:
-            continue
-        if "$target" in line:
-            inTarget = True
-        if inTarget:
-            targetLines.append(line)
-            if line.split()[0] == "resp":
-                continue
-            validTargetLines.append(line)
-            if line.split()[0] == "amber_leapcmd":
-                line = line.replace(line.split()[1], "setup_valid_initial.leap")
-            validInitialTargetLines.append(line)
-if args.resp == 0:
-    doResp = False
-else:
-    doResp = True
-if doResp:
-    respAdded = False
-    respWeightAdded = False
-    for line in targetLines:
-        if line.split()[0] == "resp":
-            respAdded = True
-        if line.split()[0] == "w_resp":
-            respWeightAdded = True
-    if not respWeightAdded:
-        targetLines.insert(1, f"w_resp {str(args.resp)}\n")
-    if not respAdded:
-        targetLines.insert(1, "resp 1\n")
-with open(os.path.join(args.optdir, "setup.leap"), "r") as leapRead:
-    with open(os.path.join(args.optdir, "setup_valid_initial.leap"), "w") as leapWrite:
-        for line in leapRead.readlines():
-            if "loadamberparams" in line:
-                oldName = line.split()[1]
-                newName = "initial_" + oldName
-                line = line.replace(oldName, newName)
-            if "loadmol2" in line:
-                oldName = line.split()[3]
-                newName = "initial_" + oldName
-                line = line.replace(oldName, newName)
-            leapWrite.write(line)
-if not os.path.isdir(os.path.join(args.optdir, "forcefield")):
-    os.mkdir(os.path.join(args.optdir, "forcefield"))
-mol2 = None
-frcmod = None
-with open(os.path.join(args.optdir, args.opt0), "r") as f:
-    for line in f.readlines():
-        splitLine = line.split()
-        if len(splitLine) > 1:
-            if splitLine[0] == "forcefield":
-                for i in range(1, 3):
-                    if ".mol2" in splitLine[i]:
-                        mol2 = splitLine[i]
-                    elif ".frcmod" in splitLine[i]:
-                        frcmod = splitLine[i]
-            if splitLine[0] == "name":
-                initialTarget = splitLine[1]
-if mol2 == None:
-    raise RuntimeError("No mol2 file specified for optimization in " + args.opt0)
-if frcmod == None:
-    raise RuntimeError("No frcmod file specified for optimization in " + args.opt0)
-if restartCycle < 0:
-    if not os.path.isfile(os.path.join(args.optdir, mol2)):
-        raise RuntimeError(
-            "Mol2 " + mol2 + " specified in " + args.opt0 + " is not in " + args.optdir
-        )
-    if not os.path.isfile(os.path.join(args.optdir, frcmod)):
-        raise RuntimeError(
-            "Frcmod "
-            + frcmod
-            + " specified in "
-            + args.opt0
-            + " is not in "
-            + args.optdir
-        )
+os.rename(
+    os.path.join(args.optdir, args.valid0), os.path.join(args.optdir, "valid_0.in")
+)
+os.rename(os.path.join(args.optdir, args.opt0), os.path.join(args.optdir, "opt_0.in"))
 mdFiles = []
-
 heatCounter = 0
 for f in os.listdir(args.sampledir):
     if os.path.isfile(os.path.join(args.sampledir, f)):
         mdFiles.append(f)
         if f.startswith("heat"):
             heatCounter += 1
+if args.resp != 0 or args.respPriors != 0:
+    doResp = True
+else:
+    doResp = False
 
-# Make validation input for initial MM parameters
-if not os.path.isfile(os.path.join(args.optdir, "valid_0_initial.in")):
-    with open(os.path.join(args.optdir, args.valid0), "r") as srcValid:
-        with open(os.path.join(args.optdir, "valid_0_initial.in"), "w") as destValid:
-            for line in srcValid.readlines():
-                destValid.write(
-                    line.replace(frcmod, "initial_" + frcmod).replace(
-                        mol2, "initial_" + mol2
-                    )
-                )
-                if "$target" in line:
-                    break
+# Initialize OptEngine
+optOptions = {}
+optOptions["optdir"] = args.optdir
+optOptions["sampledir"] = args.sampledir
+optOptions["respPriors"] = args.respPriors
+optOptions["resp"] = args.resp
+optOptions["maxCycles"] = args.maxcycles
+optOptions["restart"] = args.restart
+optEngine = optengine.OptEngine(optOptions)
+restartCycle = optEngine.restartCycle
 
 # Initialize QMEngine
 if args.qmengine == "debug":
@@ -792,57 +520,14 @@ if restartCycle < 0:
         os.path.join(path, "qdata.txt"),
         os.path.join(path, "all.mdcrd"),
     )
-
-    src = os.path.join(args.optdir, "setup.leap")
-    dest = os.path.join(path, ".")
-    os.system(f"cp {src} {dest}")
-    src = os.path.join(args.optdir, "conf.pdb")
-    os.system(f"cp {src} {dest}")
-    src = os.path.join(args.optdir, "setup_valid_initial.leap")
-    os.system(f"mv {src} {dest}")
-    src = os.path.join(args.optdir, frcmod)
-    dest = os.path.join(args.optdir, "forcefield", ".")
-    os.system(f"cp {src} {dest}")
-    dest = os.path.join(args.optdir, "forcefield", "initial_" + frcmod)
-    os.system(f"cp {src} {dest}")
-    src = os.path.join(args.optdir, mol2)
-    dest = os.path.join(args.optdir, "forcefield", ".")
-    os.system(f"cp {src} {dest}")
-    dest = os.path.join(args.optdir, "forcefield", "initial_" + mol2)
-    os.system(f"cp {src} {dest}")
-    if args.opt0 != "opt_0.in":
-        src = os.path.join(args.optdir, args.opt0)
-        dest = os.path.join(args.optdir, "opt_0.in")
-        os.system(f"cp {src} {dest}")
+    for f in ["setup.leap", "conf.pdb", "setup_valid_initial.leap"]:
+        copyfile(os.path.join(args.optdir, f), os.path.join(path, f))
 
     os.chdir(args.optdir)
-    os.system("ForceBalance.py opt_0.in > opt_0.out")
-    src = os.path.join("result", "opt_0", "*")
-    dest = os.path.join("forcefield", ".")
-    os.system(f"cp {src} {dest}")
+    optEngine.optimizeForcefield(0)
     os.chdir(home)
-    status, results = readOpt(os.path.join(args.optdir, "opt_0.out"))
-    if status != 0:
-        raise RuntimeError("ForceBalance optimization of opt_0.in failed")
-    train.append(results["obj"])
-    labels = results["labels"]
-    params = np.zeros((args.maxcycles + 2, len(labels)))
-    params[0, :] = np.asarray(results["initialParams"])
-    for j in range(len(results["labels"])):
-        if labels[j] == results["labels"][j]:
-            params[1, j] = results["params"][j]
-        else:
-            for k in range(j + 1, len(labels)):
-                if labels[k] == results["labels"][j]:
-                    params[1, k] = results["params"][j]
-                    break
 
 # Begin sampling/optimization cycling
-os.rename(
-    os.path.join(args.optdir, args.valid0), os.path.join(args.optdir, "valid_0.in")
-)
-os.rename(os.path.join(args.optdir, args.opt0), os.path.join(args.optdir, "opt_0.in"))
-
 print(
     "%7s%15s%15s%20s%23s%8s%8s%8s"
     % (
@@ -921,6 +606,7 @@ for i in range(1, args.maxcycles + 1):
     dest = os.path.join(args.optdir, "targets", "valid_" + str(i), ".")
     os.system(f"cp {src} {dest}")
 
+    # NOTE: currently only supports a single validation set
     valids = []
     for f in os.listdir(os.path.join(args.sampledir, f"{str(i)}_cycle_{str(i)}")):
         if f.startswith("train_") and os.path.isdir(
@@ -957,83 +643,9 @@ for i in range(1, args.maxcycles + 1):
     )
     os.system(f"cp {src} {dest}")
 
-    # Copy previous validation and optimization FB input files to current ones
-    src = os.path.join(args.optdir, "valid_" + str(i - 1) + ".in")
-    dest = os.path.join(args.optdir, "valid_" + str(i) + ".in")
-    os.system(f"cp {src} {dest}")
-    src = os.path.join(args.optdir, "valid_" + str(i - 1) + "_initial.in")
-    dest = os.path.join(args.optdir, "valid_" + str(i) + "_initial.in")
-    os.system(f"cp {src} {dest}")
-    src = os.path.join(args.optdir, "opt_" + str(i - 1) + ".in")
-    dest = os.path.join(args.optdir, "opt_" + str(i) + ".in")
-    os.system(f"cp {src} {dest}")
-
-    # Add new targets section to each FB input file
-    addTargetLines(
-        os.path.join(args.optdir, "opt_" + str(i) + ".in"),
-        targetLines,
-        initialTarget,
-        "train_" + str(i),
-    )
-    addTargetLines(
-        os.path.join(args.optdir, "valid_" + str(i) + ".in"),
-        validTargetLines,
-        initialTarget,
-        "valid_" + str(i),
-    )
-    addTargetLines(
-        os.path.join(args.optdir, "valid_" + str(i) + "_initial.in"),
-        validInitialTargetLines,
-        initialTarget,
-        "valid_" + str(i),
-    )
-
     # Run ForceBalance on each input
     os.chdir(args.optdir)
-    # TODO: valid_previous calculation broken on restart
-
-    # What is this code doing?
-    if len(validPrevious) <= i:
-        if i > 1:
-            src = os.path.join("result", "opt_" + str(i - 1), "*")
-            dest = os.path.join("forcefield", ".")
-            os.system(f"cp {src} {dest}")
-        os.system(
-            "ForceBalance.py valid_"
-            + str(i)
-            + ".in > valid_"
-            + str(i)
-            + "_previous.out"
-        )
-        validPrevious.append(readValid("valid_" + str(i) + "_previous.out"))
-    if (len(train)) <= i:
-        os.system("ForceBalance.py opt_" + str(i) + ".in > opt_" + str(i) + ".out")
-        status, results = readOpt("opt_" + str(i) + ".out")
-        if status == -1:
-            raise RuntimeError(
-                "ForceBalance optimization of "
-                + os.path.join(args.optdir, "opt_" + str(i) + ".in")
-                + " failed"
-            )
-        if status == 1:
-            print("WARNING: large change in one of the parameters")
-            print("Ethan should implement adaptive changing of adaptive_damping")
-        src = os.path.join("result", "opt_" + str(i), "*")
-        dest = os.path.join("forcefield", ".")
-        os.system(f"cp {src} {dest}")
-        train.append(results["obj"])
-    if len(valid) <= i:
-        os.system("ForceBalance.py valid_" + str(i) + ".in > valid_" + str(i) + ".out")
-        valid.append(readValid("valid_" + str(i) + ".out"))
-    if len(validInitial) <= i:
-        os.system(
-            "ForceBalance.py valid_"
-            + str(i)
-            + "_initial.in > valid_"
-            + str(i)
-            + "_initial.out"
-        )
-        validInitial.append(readValid("valid_" + str(i) + "_initial.out"))
+    optEngine.optimizeForcefield(i)
     os.chdir(home)
     fbEnd = perf_counter()
     fbTime = fbEnd - qmEnd
@@ -1043,9 +655,9 @@ for i in range(1, args.maxcycles + 1):
             "%7d%15.8f%15.8f%20.8f%23s%8.1f%8.1f%8.1f"
             % (
                 i,
-                valid[-1],
-                valid[-1] / validInitial[-1],
-                valid[-1] - validPrevious[-1],
+                optEngine.valid[-1],
+                optEngine.valid[-1] / optEngine.validInitial[-1],
+                optEngine.valid[-1] - optEngine.validPrevious[-1],
                 "",
                 mmTime,
                 qmTime,
@@ -1057,108 +669,12 @@ for i in range(1, args.maxcycles + 1):
             "%7d%15.8f%15.8f%20.8f%23.8f%8.1f%8.1f%8.1f"
             % (
                 i,
-                valid[-1],
-                valid[-1] / validInitial[-1],
-                valid[-1] - validPrevious[-1],
-                valid[-1] - valid[-2],
+                optEngine.valid[-1],
+                optEngine.valid[-1] / optEngine.validInitial[-1],
+                optEngine.valid[-1] - optEngine.validPrevious[-1],
+                optEngine.valid[-1] - optEngine.valid[-2],
                 mmTime,
                 qmTime,
                 fbTime,
             )
         )
-
-    # Graph results so far
-    x = range(1, i + 1)
-    x0 = range(i + 1)
-    plt.close()
-    fig, ax = plt.subplots(figsize=(9, 6))
-    ax.plot(x, valid, label="Validation, current parameters", marker="o")
-    ax.plot(x, validPrevious, label="Validation, previous parameters", marker="o")
-    ax.plot(x, validInitial, label="Validation, initial parameters", marker="o")
-    ax.plot(x0, train, label="Training", marker="o")
-    ax.set_xlabel("Optimization cycle", size=17)
-    ax.set_ylabel("Objective function", size=17)
-    ax.set_xticks(x)
-    fig.set_dpi(200)
-    plt.legend(fontsize=14)
-    plt.savefig("ObjectiveFunction.png", bbox_inches="tight")
-    plt.close()
-
-    types = ["BONDSK", "BONDSB", "ANGLESK", "ANGLESB", "DIHS", "VDWS", "VDWT", "COUL"]
-    aliases = [
-        "Bond strength",
-        "Bond length",
-        "Angle strength",
-        "Equilibrium angle",
-        "Dihedral strength",
-        "LJ sigma",
-        "LJ epsilon",
-        "Atomic charge",
-    ]
-    colors = [
-        "blue",
-        "green",
-        "firebrick",
-        "goldenrod",
-        "orange",
-        "purple",
-        "lightskyblue",
-        "olive",
-    ]
-    name = "opt_" + str(i) + ".out"
-    for j in range(len(results["labels"])):
-        if labels[j] == results["labels"][j]:
-            params[i + 1, j] = results["params"][j]
-        else:
-            for k in range(j + 1, len(labels)):
-                if labels[k] == results["labels"][j]:
-                    params[i + 1, k] = results["params"][j]
-                    break
-    adds = []
-    scs = []
-    legendLabels = []
-    sortedParams = []
-    for k in range(len(types)):
-        adds.append(False)
-        sortedParams.append([])
-    for k in range(len(labels)):
-        label = labels[k]
-        for j in range(len(types)):
-            if types[j] in labels[k]:
-                sortedParams[j].append(params[:, k])
-                # sc = ax.scatter(range(1,i + 1),relError[:,i],label=types[j],c=colors[j])
-                if not adds[j]:
-                    # scs.append(sc)
-                    # legendLabels.append(types[j])
-                    adds[j] = True
-                break
-
-    # ax.set_ylim([-100,100])
-    # plt.legend(scs,legendLabels,fontsize=14)
-    # plt.savefig('params.png',bbox_inches='tight')
-
-    fig, ax = plt.subplots(figsize=(9, 6))
-    ax.set_xticks(range(0, i + 1))
-    for j in range(len(types)):
-        if len(sortedParams[j]) == 0:
-            continue
-        sortedParams[j] = np.asarray(sortedParams[j], dtype=np.float32)
-        diff = (sortedParams[j] - np.roll(sortedParams[j], 1, axis=1))[:, 1:]
-        weights = np.maximum(
-            np.abs(sortedParams[j]), np.roll(np.abs(sortedParams[j]), 1, axis=1)
-        )[:, 1:]
-        # normalizedDiff = np.zeros(i+1)
-        mrc = np.zeros(i + 1)
-        for k in range(i + 1):
-            # normalizedDiff[j] = np.sqrt(np.dot(diff[:,j],diff[:,j]) / np.dot(sortedParams[i][:,j],sortedParams[i][:,j]))
-            mrc[k] = np.mean(np.abs(diff[:, k]) / weights[:, k]) * 100
-        # plt.plot(range(1,i+1),normalizedDiff,label=aliases[i],marker='o')
-        # TODO: code crashes here after restarting at cycle 1
-        plt.plot(range(0, i + 1), mrc, label=aliases[j], marker="o")
-    plt.legend(fontsize=14)
-    ax.tick_params(labelsize=14)
-    ax.set_xlabel("Optimization Cycle", size=17)
-    # ax.set_ylabel('Normalized RMS parameter change',size=17)
-    ax.set_ylabel("Mean relative parameter change / %", size=17)
-    plt.savefig("ParameterChange.png", bbox_inches="tight")
-    plt.close()

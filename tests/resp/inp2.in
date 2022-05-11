@@ -1,0 +1,33 @@
+$options
+jobtype             NewtonRaphson
+forcefield          dasa.frcmod dasa.mol2
+penalty_additive    0.01
+penalty_type        L2
+verbose_options     true
+backup              false
+constrain_charge    true
+$end
+
+$target
+type                abinitio_amber
+name                dynamics
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                train_1
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                train_2
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                train_3
+amber_leapcmd       setup.leap
+$end

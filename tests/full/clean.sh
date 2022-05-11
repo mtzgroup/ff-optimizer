@@ -11,6 +11,7 @@ rm ParameterChange.png
 rm -rf 1_opt/forcefield
 rm -rf 1_opt/targets
 rm -rf 1_opt/result
+rm 1_opt/setup_valid_initial.leap
 mv 1_opt/opt_0.in temp
 rm -rf 1_opt/opt_0*
 mv temp 1_opt/opt_0.in
