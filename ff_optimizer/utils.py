@@ -32,7 +32,7 @@ def convertPDBtoMolecule(pdb: str):
     return mol
 
 
-def convertPDBtoXYZ(pdb):
+def convertPDBtoXYZ(pdb: str):
     name = pdb.replace(".pdb", ".xyz")
     xyzLines = []
     with open(pdb, "r") as f:

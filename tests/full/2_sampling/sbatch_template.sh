@@ -3,6 +3,8 @@
 #SBATCH -t 2:00:00
 #SBATCH -J FB_ref_gradient_XXX
 #SBATCH --gres gpu:2
+#SBATCH -p gpu_shortq
+#SBATCH --qos=gpu_short
 #SBATCH --mem=16GB
 #SBATCH --fin=tc_XXX.in,XXX.pdb,tc_XXX_long.in
 #SBATCH --fout=tc_XXX.out

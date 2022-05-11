@@ -5,11 +5,8 @@ except:
 import os
 from random import randint
 from shutil import copyfile, rmtree
-
 import GPUtil
-
 from .utils import writeRst
-
 
 class MMEngine:
     def __init__(self, options):
@@ -235,7 +232,6 @@ class AmberEngine(MMEngine):
         super().__init__(options)
         inputs = sander.gas_input()
         sander.setup(prmtop, options["coordinates"], None, inputs)
-
 
 class ExternalAmberEngine(MMEngine):
     def __init__(self, options):

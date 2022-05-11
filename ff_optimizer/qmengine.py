@@ -8,6 +8,7 @@ from qcelemental.models.results import AtomicResultProperties
 from qcelemental.util.serialization import json_loads
 from tccloud import TCClient
 from tccloud.models import AtomicInput, AtomicResult, to_file, from_file
+from tccloud.models import AtomicInput, AtomicResult
 
 from . import utils
 
@@ -30,8 +31,8 @@ class QMEngine:
                         and splitLine[0].lower() != "coordinates"
                         and splitLine[0].lower() != "run"
                         and splitLine[0].lower() != "resp"
-                        and splitLine[0].lower() != "esp_restraint_a"
-                        and splitLine[0].lower() != "esp_restraint_b"
+                        # and splitLine[0].lower() != "esp_restraint_a"
+                        # and splitLine[0].lower() != "esp_restraint_b"
                     ):
                         setting = []
                         # for options > 2 tokens long
@@ -50,8 +51,8 @@ class QMEngine:
             f.write(f"run gradient\n")
             if self.doResp:
                 f.write("resp yes\n")
-                f.write("esp_restraint_a 0\n")
-                f.write("esp_restraint_b 0\n")
+                # f.write("esp_restraint_a 0\n")
+                # f.write("esp_restraint_b 0\n")
             for setting in settings:
                 # reassemble setting (if > 2 tokens long)
                 for token in setting:
@@ -445,7 +446,7 @@ class TCCloudEngine(QMEngine):
                     keywords=keywords,
                     id=jobId,
                     protocols={"native_files": "all"},
-                    extras={"tcfe:keywords": {"native_files": ["esp.xyz"]}},
+                    extras={"tcfe:keywords": {"native_files": ["esp.xyz", "tc.out"]}},
                 )
             else:
                 atomicInput = AtomicInput(
@@ -458,7 +459,7 @@ class TCCloudEngine(QMEngine):
             atomicInputs.append(atomicInput)
         return atomicInputs
 
-    def writeResult(self, result):
+    def writeResult(self, result: AtomicResult):
         with open(f"tc_{str(result.id)}.json", "w") as f:
             f.write(result.json())
         if self.doResp:
