@@ -4,6 +4,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from shutil import rmtree, copyfile
+from . import resp_prior
 
 mpl.use("Agg")
 
@@ -13,11 +14,48 @@ class OptEngine():
     def __init__(self, options):
         self.optdir = options['optdir']
         self.resp = options['resp']
+        self.respPriors = None
         if options['resp'] != 0:
             self.doResp = True
         else:
             self.doResp = False
         self.maxCycles = options['maxCycles']
+        self.mol2 = None
+        self.frcmod = None
+        # test setting this
+        self.initialTarget = None
+        with open(os.path.join(self.optdir, "opt_0.in"), "r") as f:
+            for line in f.readlines():
+                splitLine = line.split()
+                if len(splitLine) > 1:
+                    if splitLine[0] == "forcefield":
+                        for i in range(1, 3):
+                            if ".mol2" in splitLine[i]:
+                                self.mol2 = splitLine[i]
+                            elif ".frcmod" in splitLine[i]:
+                                self.frcmod = splitLine[i]
+                    if splitLine[0] == "name":
+                        self.initialTarget = splitLine[1]
+        if self.mol2 == None:
+            raise RuntimeError("No mol2 file specified for optimization in opt_0.in")
+        if self.frcmod == None:
+            raise RuntimeError("No frcmod file specified for optimization in opt_0.in")
+        if not os.path.isfile(os.path.join(self.optdir, self.mol2)):
+            raise RuntimeError(
+                f"Mol2 {self.mol2} specified in opt_0.in is not in {self.optdir}"
+            )
+        if not os.path.isfile(os.path.join(self.optdir, self.frcmod)):
+            raise RuntimeError(
+                f"Frcmod {self.frcmod} specified in opt_0.in is not in {self.optdir}"
+            )
+
+        # Initialize RESP priors
+        if options['respPriors'] != 0:
+            respOptions = {}
+            respOptions['sampledir'] = options['sampledir']
+            respOptions['mol2'] = os.path.join(self.optdir,self.mol2)
+            respOptions['mode'] = options['respPriors']
+            self.respPriors = resp_prior.RespPriors(respOptions)
 
         self.train = []
         self.valid = []
@@ -63,34 +101,6 @@ class OptEngine():
                     leapWrite.write(line)
         if not os.path.isdir(os.path.join(self.optdir, "forcefield")):
             os.mkdir(os.path.join(self.optdir, "forcefield"))
-        self.mol2 = None
-        self.frcmod = None
-        # test setting this
-        self.initialTarget = None
-        with open(os.path.join(self.optdir, "opt_0.in"), "r") as f:
-            for line in f.readlines():
-                splitLine = line.split()
-                if len(splitLine) > 1:
-                    if splitLine[0] == "forcefield":
-                        for i in range(1, 3):
-                            if ".mol2" in splitLine[i]:
-                                self.mol2 = splitLine[i]
-                            elif ".frcmod" in splitLine[i]:
-                                self.frcmod = splitLine[i]
-                    if splitLine[0] == "name":
-                        self.initialTarget = splitLine[1]
-        if self.mol2 == None:
-            raise RuntimeError("No mol2 file specified for optimization in opt_0.in")
-        if self.frcmod == None:
-            raise RuntimeError("No frcmod file specified for optimization in opt_0.in")
-        if not os.path.isfile(os.path.join(self.optdir, self.mol2)):
-            raise RuntimeError(
-                f"Mol2 {self.mol2} specified in opt_0.in is not in {self.optdir}"
-            )
-        if not os.path.isfile(os.path.join(self.optdir, self.frcmod)):
-            raise RuntimeError(
-                f"Frcmod {self.frcmod} specified in opt_0.in is not in {self.optdir}"
-            )
         if self.restartCycle == -1:
             copyfile(os.path.join(self.optdir, self.frcmod),os.path.join(self.optdir, "forcefield", self.frcmod))
             copyfile(os.path.join(self.optdir, self.frcmod),os.path.join(self.optdir, "forcefield", f"initial_{self.frcmod}"))
@@ -107,6 +117,7 @@ class OptEngine():
                             self.mol2, f"initial_{self.mol2}"
                         )
                     )
+
 
     def readOpt(self, filename):
         inInitialParams = False
@@ -339,6 +350,8 @@ class OptEngine():
                 os.system(f"ForceBalance.py valid_{str(i)}.in > valid_{str(i)}_previous.out")
                 self.validPrevious.append(self.readValid(f"valid_{str(i)}_previous.out"))
             if len(self.train) <= i:
+                if self.respPriors is not None:
+                    self.respPriors.updateRespPriors(i, os.path.join("forcefield", self.mol2))
                 os.system(f"ForceBalance.py opt_{str(i)}.in > opt_{str(i)}.out")
                 status, results = self.readOpt(f"opt_{str(i)}.out")
                 if status == -1:
@@ -349,13 +362,13 @@ class OptEngine():
                 copyfile(os.path.join("result", f"opt_{str(i)}", self.frcmod),os.path.join("forcefield",self.frcmod))
                 copyfile(os.path.join("result", f"opt_{str(i)}", self.mol2),os.path.join("forcefield",self.mol2))
                 self.train.append(results["obj"])
+                self.sortParams(results, i)
             if len(self.valid) <= i:
                 os.system(f"ForceBalance.py valid_{str(i)}.in > valid_{str(i)}.out")
                 self.valid.append(self.readValid(f"valid_{str(i)}.out"))
             if len(self.validInitial) <= i:
                 os.system(f"ForceBalance.py valid_{str(i)}_initial.in > valid_{str(i)}_initial.out")
                 self.validInitial.append(self.readValid(f"valid_{str(i)}_initial.out"))
-            self.sortParams(results, i)
             self.graphResults()
         else:
             os.system("ForceBalance.py opt_0.in > opt_0.out")
@@ -393,6 +406,8 @@ class OptEngine():
                         self.valid.append(v)
                         self.validPrevious.append(vPrev)
                         self.validInitial.append(vInitial)
+                        if self.respPriors is not None:
+                            self.respPriors.getCharges(i)
                     self.train.append(results["obj"])
                     self.sortParams(results, i)
                 else:

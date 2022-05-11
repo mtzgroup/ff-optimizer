@@ -4,6 +4,7 @@ from ff_optimizer import optengine
 from . import checkUtils
 from shutil import rmtree, copyfile
 import errno
+import numpy as np
 
 def cleanOptDir(optdir):
     try:
@@ -18,6 +19,9 @@ def cleanOptDir(optdir):
         rmtree(os.path.join(optdir,"result"))
     except:
         pass
+    for f in os.listdir(optdir):
+        if f.startswith("prev"):
+            os.remove(os.path.join(optdir, f))
 
 def test_init1():
     os.chdir(os.path.dirname(__file__))
@@ -25,6 +29,7 @@ def test_init1():
     options['optdir'] = os.path.join("optengine","opt1")
     cleanOptDir(options['optdir'])
     options['resp'] = 0
+    options['respPriors'] = 0
     options['restart'] = False
     options['maxCycles'] = 10
     optEngine = optengine.OptEngine(options)
@@ -65,6 +70,7 @@ def test_init2():
     options['resp'] = 0
     options['restart'] = False
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     
     assert not optEngine.doResp
@@ -103,6 +109,7 @@ def test_init1_RESP():
     options['resp'] = 1
     options['restart'] = False
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     
     assert optEngine.doResp
@@ -140,6 +147,7 @@ def test_readOpt1():
     options['resp'] = 1
     options['restart'] = False
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
 
@@ -153,6 +161,7 @@ def test_readOpt2():
     options['resp'] = 1
     options['restart'] = False
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
 
@@ -166,6 +175,7 @@ def test_readOpt3():
     options['resp'] = 1
     options['restart'] = False
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
 
@@ -185,6 +195,7 @@ def test_addTargetLines1():
     options['resp'] = 1
     options['restart'] = False
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
     copyfile("opt_4.in", "opt_4_2.in")
@@ -203,6 +214,7 @@ def test_addTargetLines2():
     options['resp'] = 0
     options['restart'] = False
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
     copyfile("opt_4.in", "opt_5.in")
@@ -222,6 +234,7 @@ def test_readValid1():
     options['resp'] = 0
     options['restart'] = False
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
     test = optEngine.readValid("valid.out")
@@ -234,6 +247,7 @@ def test_readValid2():
     options['resp'] = 0
     options['restart'] = False
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
     try:
@@ -249,6 +263,7 @@ def test_setupInputFiles():
     options['resp'] = 0.5
     options['restart'] = False
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
     optEngine.optdir = "."
@@ -295,6 +310,8 @@ def monkeyForceBalance(command):
             os.mkdir(os.path.join("result",f"opt_{name}"))
         for f in ffFiles:
             copyfile(os.path.join("ref",f),os.path.join("result",f"opt_{name}",f))
+            if f.endswith(".mol2"):
+                copyfile(os.path.join("forcefield",f),f"prev_{f}")
 
 def test_optimizeForcefield0(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__),"optengine"))
@@ -304,6 +321,7 @@ def test_optimizeForcefield0(monkeypatch):
     options['resp'] = 0
     options['restart'] = False
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForceBalance)
     os.chdir("opt1")
@@ -336,6 +354,7 @@ def test_optimizeForcefield1(monkeypatch):
     options['resp'] = 0
     options['restart'] = True
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForceBalance)
     monkeypatch.setattr(optEngine, "graphResults",monkeyGraph)
@@ -374,6 +393,7 @@ def test_determineRestart1():
     options['resp'] = 0
     options['restart'] = True
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
     assert optEngine.restartCycle == 3
@@ -386,6 +406,7 @@ def test_determineRestart2():
     options['resp'] = 0
     options['restart'] = True
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
     assert optEngine.restartCycle == 2
@@ -398,6 +419,7 @@ def test_determineRestart3():
     options['resp'] = 0
     options['restart'] = True
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
     assert optEngine.restartCycle == 2
@@ -412,6 +434,7 @@ def test_sortParams1():
     options['resp'] = 0
     options['restart'] = True
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
     assert optEngine.labels[0] == "BONDSK/cy-c3"
@@ -428,7 +451,58 @@ def test_sortParams2():
     options['resp'] = 0
     options['restart'] = True
     options['maxCycles'] = 10
+    options['respPriors'] = 0
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options['optdir'])
     refParams = [1.6289e-01, 1.6289e-01, 1.4744e-01, 1.4744e-01, 1.4744e-01]
     checkUtils.checkArray(refParams, optEngine.params[:5,137])
+
+def test_respPriors(monkeypatch):
+    def monkeyGraph():
+        pass
+
+    os.chdir(os.path.join(os.path.dirname(__file__),"optengine"))
+    options = {}
+    options['sampledir'] = os.path.join("..","resp","sample")
+    options['respPriors'] = 1
+    options['optdir'] = "restart1"
+    cleanOptDir(options['optdir'])
+    options['resp'] = 0
+    options['restart'] = True
+    options['maxCycles'] = 10
+    optEngine = optengine.OptEngine(options)
+    optEngine.respPriors.allResp
+    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    monkeypatch.setattr(optEngine, "graphResults",monkeyGraph)
+    os.chdir("restart1")
+    if not os.path.isdir("result"):
+        os.mkdir("result")
+    if not os.path.isdir(os.path.join("result","opt_3")):
+        os.mkdir(os.path.join("result","opt_3"))
+    copyfile(os.path.join("ref","dasa_prev.mol2"),os.path.join("result","opt_3","dasa.mol2"))
+    copyfile(os.path.join("ref","dasa_prev.frcmod"),os.path.join("result","opt_3","dasa.frcmod"))
+    optEngine.optimizeForcefield(4)
+    copyfile("opt_4.in","priors.in")
+    assert checkUtils.checkFileFloatsNoWhitespace("opt_4.in", os.path.join("ref","opt_4_priors.in"))
+
+    assert checkUtils.checkFileFloatsNoWhitespace("prev_dasa.mol2",os.path.join("ref","dasa_priors.mol2"))
+    os.chdir("..")
+    cleanOptDir(options['optdir'])
+
+def test_restartResp():
+    os.chdir(os.path.join(os.path.dirname(__file__),"optengine"))
+    for f in os.listdir("restart1"):
+        if "4" in f:
+            os.remove(os.path.join("restart1",f))
+    options = {}
+    options['optdir'] = "restart1"
+    options['resp'] = 0
+    options['restart'] = True
+    options['maxCycles'] = 10
+    options['respPriors'] = 1
+    options['sampledir'] = os.path.join("..", "resp", "sample")
+    optEngine = optengine.OptEngine(options)
+    cleanOptDir(options['optdir'])
+    arr = np.asarray(optEngine.respPriors.allResp,dtype=np.float32)
+    assert checkUtils.checkFloat(arr[4,0],2.0)
+    assert checkUtils.checkFloat(arr[7,0],3.0)

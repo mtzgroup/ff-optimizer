@@ -10,7 +10,9 @@ from qcelemental.util.serialization import json_loads
 class RespPriors:
 
     def __init__(self, options:dict):
-        self.sampleDir = options['sampleDir']
+        # We run RespPriors from within optdir but initialize in the main directory
+        # getCharges will determine automatically where we are
+        self.sampledir = options['sampledir']
         self.allEsp = []
         self.allResp = []
         self.getRepeats(options['mol2'])
@@ -18,9 +20,9 @@ class RespPriors:
         self.getUnits()
 
     def getUnits(self):
-        for f in os.listdir(os.path.join(self.sampleDir, "1_cycle_1")):
+        for f in os.listdir(os.path.join(self.sampledir, "1_cycle_1")):
             if f.endswith(".prmtop"):
-                prmtop = os.path.join(self.sampleDir, "1_cycle_1", f)
+                prmtop = os.path.join(self.sampledir, "1_cycle_1", f)
         self.units = 0
         inResidues = False
         almostInResidues = False
@@ -79,12 +81,18 @@ class RespPriors:
     
     def getCharges(self, i:int):
         cycleDir = f"{str(i)}_cycle_{str(i)}"
+        # Determine if we're in main directory
+        if os.path.isdir(self.sampledir):
+            path = os.path.join(self.sampledir, cycleDir)
+        # Else we're in optdir
+        else:
+            path = os.path.join("..", self.sampledir, cycleDir)
         trainDir = ""
-        for f in os.listdir(os.path.join(self.sampleDir, cycleDir)):
-            if f.startswith("train") and os.path.isdir(os.path.join(self.sampleDir, cycleDir, f)):
-                trainDir = os.path.join(self.sampleDir, cycleDir, f)
+        for f in os.listdir(path):
+            if f.startswith("train") and os.path.isdir(os.path.join(path, f)):
+                trainDir = os.path.join(path, f)
         if trainDir == "":
-            raise RuntimeError(f"No training directory found in {os.path.join(self.sampleDir, cycleDir)}")
+            raise RuntimeError(f"No training directory found in {os.path.join(self.sampledir, cycleDir)}")
         for f in os.listdir(trainDir):
             if f.startswith("tc") and f.endswith("json"):
                 try:
@@ -230,10 +238,11 @@ class RespPriors:
                 if "@<TRIPOS>ATOM" in line:
                     inCharges = True
     
-    def updateRespPriors(self, i:int, mol2:str, inputFile:str):
+    def updateRespPriors(self, i:int, mol2:str):
         self.getCharges(i)
         self.computeChargeDistributions()
         priors = self.computePriors()
+        inputFile = f"opt_{str(i)}.in"
         self.setPriors(priors, inputFile)
         self.setMol2Charges(self.respMeans, mol2)
 

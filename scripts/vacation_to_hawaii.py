@@ -322,6 +322,7 @@ parser.add_argument(
     type=str,
     default="md.in",
 )
+parser.add_argument("--respPriors", help="Use RESP to compute priors for the charges. Mode 1: RESP st. dev. Mode 2: Uses ESP-RESP difference. Default is not.", type=int, default=0)
 
 args = parser.parse_args()
 
@@ -432,6 +433,8 @@ if not os.path.isfile(os.path.join(args.sampledir, args.validMdin)):
         os.srterror(errno.ENOENT),
         os.path.join(args.sampledir, args.validMdin),
     )
+if args.respPriors != 0 and args.respPriors != 1 and args.respPriors != 2:
+    raise ValueError("Invalid mode for RESP priors, must be 0 (none), 1 (RESP st. dev.), or 2 (determined using ESP-RESP difference)")
 
 
 # Set some miscellaneous variables
@@ -447,15 +450,16 @@ for f in os.listdir(args.sampledir):
         mdFiles.append(f)
         if f.startswith("heat"):
             heatCounter += 1
-if args.resp != 0:
+if args.resp != 0 or args.respPriors != 0:
     doResp = True
 else:
     doResp = False
 
-
 # Initialize OptEngine
 optOptions = {}
 optOptions['optdir'] = args.optdir
+optOptions['sampledir'] = args.sampledir
+optOptions['respPriors'] = args.respPriors
 optOptions['resp'] = args.resp
 optOptions['maxCycles'] = args.maxcycles
 optOptions['restart'] = args.restart
