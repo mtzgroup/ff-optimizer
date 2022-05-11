@@ -6,13 +6,9 @@ import os
 from shutil import copyfile, rmtree
 from time import perf_counter
 
-import matplotlib as mpl
-
 from ff_optimizer import mmengine, optengine, qmengine
 
-mpl.use("Agg")
 from textwrap import dedent
-
 
 # Some helper functions
 def die():
@@ -409,26 +405,51 @@ if args.qmengine == "queue":
             + args.sampledir
         )
 
-if args.mmengine != "amber":
-    raise ValueError(f"MM Engine {args.mmengine} is unsupported!")
-if args.nvalids < 1:
-    raise ValueError(f"Must use at least one validation set for now")
-if not os.path.isfile(os.path.join(args.sampledir, args.trainMdin)):
-    raise FileNotFoundError(
-        errno.ENOENT,
-        os.srterror(errno.ENOENT),
-        os.path.join(args.sampledir, args.trainMdin),
-    )
-if not os.path.isfile(os.path.join(args.sampledir, args.validMdin)):
-    raise FileNotFoundError(
-        errno.ENOENT,
-        os.srterror(errno.ENOENT),
-        os.path.join(args.sampledir, args.validMdin),
-    )
-if args.respPriors != 0 and args.respPriors != 1 and args.respPriors != 2:
-    raise ValueError(
-        "Invalid mode for RESP priors, must be 0 (none), 1 (RESP st. dev.), or 2 (determined using ESP-RESP difference)"
-    )
+    if (
+        args.qmengine != "queue"
+        and args.qmengine != "debug"
+        and args.qmengine != "tccloud"
+    ):
+        raise RuntimeError("Engine " + args.qmengine + " is not implemented")
+    if args.qmengine == "queue":
+        if not os.path.isfile(os.path.join(args.sampledir, args.sbatch)):
+            raise RuntimeError(
+                "Sbatch template "
+                + args.sbatch
+                + " does not exist in "
+                + args.sampledir
+            )
+        if not os.path.isfile(os.path.join(args.sampledir, args.tctemplate)):
+            raise RuntimeError(
+                "TC input template "
+                + args.tctemplate
+                + " does not exist in "
+                + args.sampledir
+            )
+        if not os.path.isfile(os.path.join(args.sampledir, args.tctemplate_long)):
+            raise RuntimeError(
+                "TC input template (for resubmitting jobs) "
+                + args.tctemplate_long
+                + " does not exist in "
+                + args.sampledir
+            )
+
+    if args.mmengine != "amber":
+        raise ValueError(f"MM Engine {args.mmengine} is unsupported!")
+    if args.nvalids < 1:
+        raise ValueError(f"Must use at least one validation set for now")
+    if not os.path.isfile(os.path.join(args.sampledir, args.trainMdin)):
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.srterror(errno.ENOENT),
+            os.path.join(args.sampledir, args.trainMdin),
+        )
+    if not os.path.isfile(os.path.join(args.sampledir, args.validMdin)):
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.srterror(errno.ENOENT),
+            os.path.join(args.sampledir, args.validMdin),
+        )
 
 
 # Set some miscellaneous variables
@@ -605,6 +626,7 @@ for i in range(1, args.maxcycles + 1):
     os.system(f"cp {src} {dest}")
     dest = os.path.join(args.optdir, "targets", "valid_" + str(i), ".")
     os.system(f"cp {src} {dest}")
+
 
     # NOTE: currently only supports a single validation set
     valids = []
