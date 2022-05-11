@@ -7,7 +7,7 @@ from qcelemental.models import Provenance
 from qcelemental.models.results import AtomicResultProperties
 from qcelemental.util.serialization import json_loads
 from tccloud import TCClient
-from tccloud.models import AtomicInput, AtomicResult
+from tccloud.models import AtomicInput, AtomicResult, to_file, from_file
 
 from . import utils
 
@@ -404,10 +404,12 @@ class TCCloudEngine(QMEngine):
                 self.client.compute(atomicInputs[i::stride], engine="terachem_fe")
                 for i in range(stride)
             ]
+            to_file(futureResults, "jobs.txt")
             resultBatches = [futureResults[i].get() for i in range(stride)]
             for batch in resultBatches:
                 for result in batch:
                     results.append(result)
+        # TODO: print full stack traceback
         except Exception as e:
             print(e)
             self.batchSize = int(batchSize / 2)
@@ -486,7 +488,7 @@ class TCCloudEngine(QMEngine):
                 "Batch resubmission reached size 1; QM calculations incomplete"
             )
         if len(retryPdbs) > 0:
-            print(f"Retrying inputs {str(retryPdbs)}")
+            print(f"Retrying inputs {str(sorted(retryPdbs))}")
             failedIndices = []
             retryInputs = self.createAtomicInputs(retryPdbs, useBackup=True)
             batchSize = self.batchSize
