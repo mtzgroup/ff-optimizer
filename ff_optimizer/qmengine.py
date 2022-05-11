@@ -456,7 +456,7 @@ class TCCloudEngine(QMEngine):
             atomicInputs.append(atomicInput)
         return atomicInputs
 
-    def writeResult(self, result):
+    def writeResult(self, result: AtomicResult):
         with open(f"tc_{str(result.id)}.json", "w") as f:
             f.write(result.json())
         if self.doResp:
