@@ -95,11 +95,12 @@ def test_createAtomicInputsResp():
 
 def test_computeBatch(monkeypatch):
     os.chdir(os.path.dirname(__file__))
-    tccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
+    tccloudEngine = qmengine.TCCloudEngine(os.path.join("qmengine","tc.in"), os.path.join("qmengine","tc_backup.in"))
 
     class MonkeyFutureResult:
         def __init__(self, atomicInputs):
             self.ids = []
+            self.id = 123
             for atomicInput in atomicInputs:
                 self.ids.append(atomicInput.id)
 
@@ -128,18 +129,24 @@ def test_computeBatch(monkeypatch):
 
     # Check default batch size
     status, results = tccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
+        os.remove(os.path.join("tccloudengine","jobs.txt"))
     assert status == 0
     assert len(results) == 10
 
     # Check small batch size
     tccloudEngine.batchsize = 3
     status, results = tccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
+        os.remove(os.path.join("tccloudengine","jobs.txt"))
     assert status == 0
     assert len(results) == 10
 
     # Check large batch size
     tccloudEngine.batchsize = 77
     status, results = tccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
+        os.remove(os.path.join("tccloudengine","jobs.txt"))
     assert status == 0
     assert len(results) == 10
 
@@ -160,12 +167,16 @@ def test_computeBatch(monkeypatch):
     monkeypatch.setattr(tccloudEngine.client, "compute", monkeyComputeFailOnce)
     tccloudEngine.batchSize = 6
     status, results = tccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
+        os.remove(os.path.join("tccloudengine","jobs.txt"))
     assert status == 0
     assert len(results) == 10
     assert tccloudEngine.batchSize == 3
 
     tccloudEngine.batchSize = 12
     status, results = tccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
+        os.remove(os.path.join("tccloudengine","jobs.txt"))
     assert status == 0
     assert len(results) == 10
     assert tccloudEngine.batchSize == 5
@@ -176,6 +187,8 @@ def test_computeBatch(monkeypatch):
 
     monkeypatch.setattr(tccloudEngine.client, "compute", monkeyComputeFail)
     status, results = tccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
+        os.remove(os.path.join("tccloudengine","jobs.txt"))
     assert status == -1
     assert len(results) == 0
 

@@ -97,20 +97,25 @@ class RespPriors:
             raise RuntimeError(
                 f"No training directory found in {os.path.join(self.sampledir, cycleDir)}"
             )
+        jsons = []
         for f in os.listdir(trainDir):
             if f.startswith("tc") and f.endswith("json"):
-                try:
-                    with open(os.path.join(trainDir, f), "r") as json:
-                        result = AtomicResult(**json_loads(json.read()))
-                    lines = result.stdout.split("\n")
-                    esp, resp = self.readCharges(lines)
-                except:
-                    name = f.split(".")[0]
-                    with open(os.path.join(trainDir, f"{name}.out"), "r") as tcout:
-                        lines = tcout.readlines()
-                    esp, resp = self.readCharges(lines)
-                self.allEsp.append(esp)
-                self.allResp.append(resp)
+                jsons.append(f)
+
+        jsons = sorted(jsons)
+        for j in jsons:
+            try:
+                with open(os.path.join(trainDir, j), "r") as js:
+                    result = AtomicResult(**json_loads(js.read()))
+                lines = result.stdout.split("\n")
+                esp, resp = self.readCharges(lines)
+            except:
+                name = j.split(".")[0]
+                with open(os.path.join(trainDir, f"{name}.out"), "r") as tcout:
+                    lines = tcout.readlines()
+                esp, resp = self.readCharges(lines)
+            self.allEsp.append(esp)
+            self.allResp.append(resp)
 
     def computeChargeDistributions(self):
         espArray = np.array(self.allEsp, dtype=np.float32, copy=True)

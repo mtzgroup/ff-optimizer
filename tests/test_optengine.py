@@ -649,5 +649,5 @@ def test_restartResp():
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     arr = np.asarray(optEngine.respPriors.allResp, dtype=np.float32)
-    assert checkUtils.checkFloat(arr[4, 0], 2.0)
-    assert checkUtils.checkFloat(arr[7, 0], 3.0)
+    assert checkUtils.checkFloat(arr[5, 0], 2.0)
+    assert checkUtils.checkFloat(arr[8, 0], 3.0)
