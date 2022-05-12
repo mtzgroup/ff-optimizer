@@ -9,6 +9,7 @@ from qcelemental.util.serialization import json_loads
 from tccloud import TCClient
 from tccloud.models import AtomicInput, AtomicResult, to_file, from_file
 from tccloud.models import AtomicInput, AtomicResult
+import traceback
 
 from . import utils
 
@@ -412,6 +413,7 @@ class TCCloudEngine(QMEngine):
                     results.append(result)
         # TODO: print full stack traceback
         except Exception as e:
+            traceback.print_exc()
             print(e)
             self.batchSize = int(batchSize / 2)
             print(
