@@ -72,6 +72,7 @@ def test_restart1(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     coordPath = os.path.join("mmengine", "coors.xyz")
     options["coordPath"] = coordPath
+    options["leap"] = "setup.leap"
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
     mmEngine = mmengine.MMEngine(options)
     mmEngine.prmtop = "water.prmtop"
