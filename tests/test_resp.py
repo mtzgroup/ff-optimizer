@@ -48,10 +48,10 @@ def test_getCharges(monkeypatch):
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     respPriors.getCharges(1)
-    assert respPriors.allResp[0][0] == 0.527414
-    assert respPriors.allEsp[0][-1] == 0.444999
-    assert respPriors.allResp[1][-1] == 0.415671
-    assert respPriors.allEsp[1][0] == 0.754497
+    assert respPriors.allResp[1][0] == 0.527414
+    assert respPriors.allEsp[1][-1] == 0.444999
+    assert respPriors.allResp[2][-1] == 0.415671
+    assert respPriors.allEsp[2][0] == 0.754497
 
 
 # incidentally also tests findRepeatIndex
