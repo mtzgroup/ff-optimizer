@@ -75,8 +75,10 @@ class RespPriors:
                 almostInResp = False
             if "ESP unrestraint charges:" in line:
                 almostInEsp = True
+                print("almost esp")
             if "ESP restraint charges:" in line:
                 almostInResp = True
+                print("almost resp")
         if len(esp) == 0 or len(resp) == 0:
             raise RuntimeError("No charges in lines")
         return esp, resp
