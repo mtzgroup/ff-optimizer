@@ -385,11 +385,11 @@ class TCCloudEngine(QMEngine):
                     self.backupKeywords[setting[0]] = keyword
         if doResp:
             self.keywords["resp"] = "yes"
-            self.keywords["esp_restraint_a"] = "0"
-            self.keywords["esp_restraint_b"] = "0"
+            #self.keywords["esp_restraint_a"] = "0"
+            #self.keywords["esp_restraint_b"] = "0"
             self.backupKeywords["resp"] = "yes"
-            self.backupKeywords["esp_restraint_a"] = "0"
-            self.backupKeywords["esp_restraint_b"] = "0"
+            #self.backupKeywords["esp_restraint_a"] = "0"
+            #self.backupKeywords["esp_restraint_b"] = "0"
 
     def computeBatch(self, atomicInputs: list):
         status = 0
@@ -446,7 +446,7 @@ class TCCloudEngine(QMEngine):
                     keywords=keywords,
                     id=jobId,
                     protocols={"native_files": "all"},
-                    extras={"tcfe:keywords": {"native_files": ["esp.xyz", "tc.out"]}},
+                    extras={"tcfe:keywords": {"native_files": ["esp.xyz"]}},
                 )
             else:
                 atomicInput = AtomicInput(
