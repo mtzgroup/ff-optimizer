@@ -469,6 +469,12 @@ if args.resp != 0 or args.respPriors != 0:
     doResp = True
 else:
     doResp = False
+with open(os.path.join(args.optdir, args.opt0)) as f:
+    for line in f.readlines():
+        splitLine = line.split()
+        if len(splitLine) > 1:
+            if splitLine[0] == "name":
+                initialTarget = splitLine[1]
 
 # Initialize OptEngine
 optOptions = {}
@@ -521,12 +527,6 @@ if args.mmengine == "amber":
 if restartCycle < 0:
 
     # Create initial target data from dynamics
-    with open(os.path.join(args.optdir, args.opt0)) as f:
-        for line in f.readlines():
-            splitLine = line.split()
-            if len(splitLine) > 1:
-                if splitLine[0] == "name":
-                    initialTarget = splitLine[1]
     if not os.path.isdir(os.path.join(args.optdir, "targets")):
         os.mkdir(os.path.join(args.optdir, "targets"))
     path = os.path.join(args.optdir, "targets", initialTarget)

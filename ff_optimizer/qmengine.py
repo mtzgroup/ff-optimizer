@@ -7,8 +7,8 @@ from qcelemental.models import Provenance
 from qcelemental.models.results import AtomicResultProperties
 from qcelemental.util.serialization import json_loads
 from tccloud import TCClient
-from tccloud.models import AtomicInput, AtomicResult, to_file, from_file
-from tccloud.models import AtomicInput, AtomicResult
+from tccloud.models import AtomicInput, AtomicResult, to_file, from_file, FailedOperation
+from tccloud.exceptions import TimeoutError
 import traceback
 
 from . import utils
@@ -143,14 +143,15 @@ class QMEngine:
         with open(f"{name}.json", "w") as f:
             f.write(result.json())
 
-    def readResult(self, json):
-        with open(json, "r") as f:
+    def readResult(self, js):
+        with open(js, "r") as f:
             try:
                 result = AtomicResult(**json_loads(f.read()))
-            except:
-                raise RuntimeError(
-                    f"Corrupted json {json} could not be read in at {os.getcwd}"
-                )
+            except Exception as e:
+                print(e)
+                import pdb; pdb.set_trace()
+                result = FailedOperation(**json_loads(f.read()))
+
         return result
 
     def readQMRefData(self):
@@ -353,9 +354,10 @@ class TCCloudEngine(QMEngine):
         self, inputFile: str, backupInputFile: str, batchSize=None, doResp=False
     ):
         if batchSize is None:
-            self.batchSize = 50
+            self.batchSize = 10
         else:
             self.batchSize = batchSize
+        self.retries = 5
         self.client = TCClient()
         super().__init__(inputFile, backupInputFile, doResp)
         self.keywords = {}
@@ -386,11 +388,11 @@ class TCCloudEngine(QMEngine):
                     self.backupKeywords[setting[0]] = keyword
         if doResp:
             self.keywords["resp"] = "yes"
-            self.keywords["esp_restraint_a"] = "0"
-            self.keywords["esp_restraint_b"] = "0"
+            #self.keywords["esp_restraint_a"] = "0"
+            #self.keywords["esp_restraint_b"] = "0"
             self.backupKeywords["resp"] = "yes"
-            self.backupKeywords["esp_restraint_a"] = "0"
-            self.backupKeywords["esp_restraint_b"] = "0"
+            #self.backupKeywords["esp_restraint_a"] = "0"
+            #self.backupKeywords["esp_restraint_b"] = "0"
 
     def computeBatch(self, atomicInputs: list):
         status = 0
@@ -411,7 +413,6 @@ class TCCloudEngine(QMEngine):
             for batch in resultBatches:
                 for result in batch:
                     results.append(result)
-        # TODO: print full stack traceback
         except Exception as e:
             traceback.print_exc()
             print(e)
@@ -448,7 +449,7 @@ class TCCloudEngine(QMEngine):
                     keywords=keywords,
                     id=jobId,
                     protocols={"native_files": "all"},
-                    extras={"tcfe:keywords": {"native_files": ["esp.xyz", "tc.out"]}},
+                    extras={"tcfe:keywords": {"native_files": ["esp.xyz"]}},
                 )
             else:
                 atomicInput = AtomicInput(
@@ -462,58 +463,56 @@ class TCCloudEngine(QMEngine):
         return atomicInputs
 
     def writeResult(self, result: AtomicResult):
-        with open(f"tc_{str(result.id)}.json", "w") as f:
+        if result.success:
+            json = f"tc_{str(result.id)}.json"
+        else:
+            json = f"tc_{str(result.input_data['id'])}.json"
+        with open(json, "w") as f:
             f.write(result.json())
-        if self.doResp:
+        if self.doResp and result.success:
             with open(f"esp_{str(result.id)}.xyz", "w") as f:
                 try:
                     f.write(result.native_files["esp.xyz"])
                 except:
-                    print("Job {str(result.id)} in {os.getcwd()} is missing esp file!")
+                    print(f"Job {str(result.id)} in {os.getcwd()} is missing esp file!")
 
-    def getQMRefData(self, pdbs: list, calcDir: str):
-        cwd = os.getcwd()
-        os.chdir(calcDir)
-        atomicInputs = self.createAtomicInputs(pdbs)
+    def runJobs(self, pdbs: list, useBackup=False):
+        atomicInputs = self.createAtomicInputs(pdbs, useBackup=useBackup)
         status, results = self.computeBatch(atomicInputs)
         retryPdbs = []
         for result in results:
-            if result.success:
-                self.writeResult(result)
-            else:
-                id = result.input_data["id"]
-                if id is None:
-                    id = result.input_data["input_data"]["id"]
-                retryPdbs.append(f"{id}.pdb")
+            self.writeResult(result)
+            if not result.success:
+                jobId = result.input_data["id"]
+                retryPdbs.append(f"{jobId}.pdb")
+                if jobId is None:
+                    print("Oops")
+                    jobId = result.input_data["input_data"]["id"]
 
         if status == -1:
             raise RuntimeError(
                 "Batch resubmission reached size 1; QM calculations incomplete"
             )
+        return retryPdbs
+
+    def getQMRefData(self, pdbs: list, calcDir: str):
+        cwd = os.getcwd()
+        os.chdir(calcDir)
+        retryPdbs = self.runJobs(pdbs)
+        for _ in range(self.retries):
+            if len(retryPdbs) == 0:
+                break
+            retryPdbs = self.runJobs(pdbs,useBackup=True)
+        #import pdb; pdb.set_trace()
         if len(retryPdbs) > 0:
-            print(f"Retrying inputs {str(sorted(retryPdbs))}")
-            failedIndices = []
-            retryInputs = self.createAtomicInputs(retryPdbs, useBackup=True)
-            batchSize = self.batchSize
-            status, retryResults = self.computeBatch(retryInputs)
-            self.batchSize = batchSize
-            for result in retryResults:
-                if result.success:
-                    self.writeResult(result)
-                else:
-                    failedIndices.append(result.input_data["id"])
-                    print(
-                        f"Job id {result.input_data['id']} suffered a {result.error.error_type}"
-                    )
-                    print(result.error.error_message)
-            if len(failedIndices) > 0:
-                raise RuntimeError(
-                    f"Job ids {str(sorted(failedIndices))} in {os.getcwd()} failed twice!"
-                )
-            if status == -1:
-                raise RuntimeError(
-                    "Batch resubmission reached size 1; QM calculations incomplete"
-                )
+            #for result in [self.readResult(f"tc_{pdb.split('.')[0]}.json") for pdb in retryPdbs]:
+            #    print(
+            #        f"Job id {result.input_data['id']} suffered a {result.error.error_type}"
+            #    )
+            #    print(result.error.error_message)
+            raise RuntimeError(
+                f"Job ids {[pdb.split('.')[0] for pdb in retryPdbs]} in {os.getcwd()} failed {str(self.retries)} times!"
+            )
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
         os.chdir(cwd)
