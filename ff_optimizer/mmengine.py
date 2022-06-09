@@ -24,7 +24,6 @@ class MMEngine:
         split = self.options["split"]
         self.coordIndex = []
         terachemFormat = True
-        print(os.getcwd())
         with open(self.options["coordPath"], "r") as f:
             try:
                 natoms = int(f.readline())
@@ -106,7 +105,6 @@ class MMEngine:
 
         for frame in frames:
             self.getFrame(frame, os.path.join(samplePath, f"{str(frame)}.rst7"))
-        print(frames)
         return frames
 
     # 0-indexed

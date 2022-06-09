@@ -168,8 +168,6 @@ class RespPriors:
         # the given value of the cdf occurs at the same charge for this distribution and the ESP distribution
         elif self.mode == 2:
             ppf = norm.ppf(cdf)
-            print(self.espStdevs[5])
-            print(np.abs(self.espMeans[5] - self.respMeans[5]))
             return np.abs(self.espMeans - self.respMeans) / ppf + self.espStdevs
 
     def setMol2Charges(self, charges: list, mol2: str):
