@@ -15,6 +15,8 @@ options["stride"] = 50
 options["nvalids"] = 1
 options["trainMdin"] = "md.in"
 options["validMdin"] = "md.in"
+options["leap"] = "setup.leap"
+options["conformers"] = 1
 
 
 def monkeyGetIndices(self):
@@ -24,10 +26,54 @@ def monkeyGetIndices(self):
 def test_getIndices():
     pass
 
+def monkeyGetFrame(self, frame, dest):
+    folder = dest.split('/')[0]
+    with open(os.path.join(folder,"frames.txt"),'a') as f:
+        f.write(str(frame) + "\n")
 
-def test_getFrames():
+def monkeyGetFrames(self):
+    return [i for i in range((options['nvalids'] + 1) * options['conformers'])] 
+
+def monkeySetup(self):
     pass
 
+def test_getFrames(monkeypatch):
+    coordPath = os.path.join("..", "coors.xyz")
+    options["coordPath"] = coordPath
+    os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
+    #monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
+    mmEngine = mmengine.MMEngine(options)
+    frames = mmEngine.getFrames()
+    assert len(frames) == 2
+    assert mmEngine.splitIndex > frames[0]
+    assert mmEngine.splitIndex <= frames[1]
+
+def test_getMMsamples(monkeypatch):
+    coordPath = os.path.join("..", "coors.xyz")
+    options["coordPath"] = coordPath
+    os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
+    if os.path.isdir("testSetup"):
+        rmtree("testSetup")
+    os.mkdir("testSetup")
+    os.chdir("testSetup")
+    
+    monkeypatch.setattr(mmengine.MMEngine, "getFrame", monkeyGetFrame)
+    monkeypatch.setattr(mmengine.MMEngine, "getFrames", monkeyGetFrames)
+    #monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
+    monkeypatch.setattr(mmengine.MMEngine, "setup", monkeySetup)
+    mmEngine = mmengine.MMEngine(options)
+    mmEngine.getMMSamples()
+
+    with open(os.path.join("train","frames.txt"),'r') as f:
+        trainCrds = f.readlines()
+
+    with open(os.path.join("valid_1","frames.txt"),'r') as f:
+        validCrds = f.readlines()
+
+    os.chdir("..")
+    #rmtree("testSetup")
+    assert trainCrds == ["0\n"]
+    assert validCrds == ["1\n"]
 
 # Also tests utils.writeRst()
 def test_getFrame(monkeypatch):
@@ -72,7 +118,6 @@ def test_restart1(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     coordPath = os.path.join("mmengine", "coors.xyz")
     options["coordPath"] = coordPath
-    options["leap"] = "setup.leap"
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
     mmEngine = mmengine.MMEngine(options)
     mmEngine.prmtop = "water.prmtop"
@@ -161,3 +206,48 @@ def test_restart4(monkeypatch):
     os.system(f"cp ../restart1/828.rst7 .")
 
     assert mmEngine.test[0] == -1
+
+def test_getFrames(monkeypatch):
+    options["conformers"] = 3
+    options["nvalids"] = 2
+    coordPath = os.path.join("..", "coors.xyz")
+    options["coordPath"] = coordPath
+    os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
+    #monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
+    mmEngine = mmengine.MMEngine(options)
+    frames = mmEngine.getFrames()
+    assert len(frames) == 9
+    for i in range(3):
+        assert mmEngine.splitIndex > frames[i]
+    for i in range(3,9):
+        assert mmEngine.splitIndex <= frames[i]
+
+def test_getMMsamples(monkeypatch):
+    coordPath = os.path.join("..", "coors.xyz")
+    options["coordPath"] = coordPath
+    os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
+    if os.path.isdir("testSetup"):
+        rmtree("testSetup")
+    os.mkdir("testSetup")
+    os.chdir("testSetup")
+    
+    monkeypatch.setattr(mmengine.MMEngine, "getFrame", monkeyGetFrame)
+    monkeypatch.setattr(mmengine.MMEngine, "getFrames", monkeyGetFrames)
+    #monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
+    monkeypatch.setattr(mmengine.MMEngine, "setup", monkeySetup)
+    mmEngine = mmengine.MMEngine(options)
+    mmEngine.getMMSamples()
+
+    with open(os.path.join("train","frames.txt"),'r') as f:
+        trainCrds = f.readlines()
+    validCrds = []
+    with open(os.path.join("valid_1","frames.txt"),'r') as f:
+        validCrds.append(f.readlines())
+    with open(os.path.join("valid_2","frames.txt"),'r') as f:
+        validCrds.append(f.readlines())
+
+    os.chdir("..")
+    rmtree("testSetup")
+    assert trainCrds == ["0\n", "1\n", "2\n"]
+    assert validCrds[0] == ["3\n", "4\n", "5\n"]
+    assert validCrds[1] == ["6\n", "7\n", "8\n"]
