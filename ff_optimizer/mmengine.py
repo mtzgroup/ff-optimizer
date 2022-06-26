@@ -24,7 +24,6 @@ class MMEngine:
         split = self.options["split"]
         self.coordIndex = []
         terachemFormat = True
-        print(os.getcwd())
         with open(self.options["coordPath"], "r") as f:
             try:
                 natoms = int(f.readline())
@@ -130,17 +129,17 @@ class MMEngine:
         for frame in trainFrames:
             self.getFrame(frame, os.path.join("train", f"{str(frame)}.rst7"))
         os.chdir("train")
-        self.sample(self.options["trainMdin"])
+        self.sample(trainFrames, self.options["trainMdin"])
         with open("MMFinished.txt", "w") as f:
             f.write("MM sampling finished")
         os.chdir("..")
-        for i in self.options["nvalids"]:
+        for i in range(1,self.options["nvalids"]+1):
             validName = f"valid_{str(i)}"
             if not os.path.isdir(validName):
                 os.mkdir(validName)
-            validFrames = frames[(i+1) * self.options['conformers'] : (i+2) * self.options['conformers']]
+            validFrames = frames[i * self.options['conformers'] : (i+1) * self.options['conformers']]
             for frame in validFrames:
-                self.getFrame(frame, os.path.join(validName),f"{str(frame)}.rst7")
+                self.getFrame(frame, os.path.join(validName,f"{str(frame)}.rst7"))
             os.chdir(validName)
             self.sample(validFrames, self.options["validMdin"])
             with open("MMFinished.txt", "w") as f:
@@ -312,11 +311,11 @@ class ExternalAmberEngine(MMEngine):
             except Exception as e:
                 print(e)
                 raise RuntimeError(f"Error in trajectory postprocessing in {os.getcwd()}")
-            for f in os.listdir():
-                if ".pdb" in f and len(f.split(".")) > 2:
-                    os.system(f"mv {f} {str(pdbIndex)}.pdb")
-                    pdbIndex += 1
-
+            newPdbIndex = 1
+            while os.path.isfile(f"{name}.pdb.{str(newPdbIndex)}"):
+                os.system(f"mv {name}.pdb.{str(newPdbIndex)} {str(pdbIndex)}.pdb")
+                pdbIndex += 1
+                newPdbIndex += 1
 
 class ExternalOpenMMEngine(MMEngine):
     def __init__():
