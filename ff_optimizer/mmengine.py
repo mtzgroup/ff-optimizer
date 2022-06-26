@@ -24,7 +24,6 @@ class MMEngine:
         split = self.options["split"]
         self.coordIndex = []
         terachemFormat = True
-        print(os.getcwd())
         with open(self.options["coordPath"], "r") as f:
             try:
                 natoms = int(f.readline())
@@ -95,18 +94,16 @@ class MMEngine:
     def getFrames(self, samplePath="."):
         frames = []
         if self.splitIndex is None:
-            for i in range(self.options["nvalids"] + 1):
+            for i in range((self.options["nvalids"] + 1) * self.options["conformers"]):
                 frames.append(self.coordIndex[randint(self.startIndex, self.endIndex)])
         else:
-            frames.append(
-                self.coordIndex[randint(self.startIndex, self.splitIndex - 1)]
-            )
-            for i in range(self.options["nvalids"]):
+            for i in range(self.options["conformers"]):
+                frames.append(
+                    self.coordIndex[randint(self.startIndex, self.splitIndex - 1)]
+                )
+            for i in range(self.options["nvalids"] * self.options["conformers"]):
                 frames.append(self.coordIndex[randint(self.splitIndex, self.endIndex)])
 
-        for frame in frames:
-            self.getFrame(frame, os.path.join(samplePath, f"{str(frame)}.rst7"))
-        print(frames)
         return frames
 
     # 0-indexed
@@ -126,19 +123,25 @@ class MMEngine:
         self.setup()
         frames = self.getFrames()
         name = str(frames[0])
-        if not os.path.isdir(name):
-            os.mkdir(f"train_{name}")
-        os.chdir(f"train_{name}")
-        self.sample(frames[0], self.options["trainMdin"])
+        if not os.path.isdir("train"):
+            os.mkdir("train")
+        trainFrames = frames[:self.options['conformers']]
+        for frame in trainFrames:
+            self.getFrame(frame, os.path.join("train", f"{str(frame)}.rst7"))
+        os.chdir("train")
+        self.sample(trainFrames, self.options["trainMdin"])
         with open("MMFinished.txt", "w") as f:
             f.write("MM sampling finished")
         os.chdir("..")
-        for i in frames[1:]:
-            name = str(i)
-            if not os.path.isdir(name):
-                os.mkdir(f"valid_{name}")
-            os.chdir(f"valid_{name}")
-            self.sample(i, self.options["validMdin"])
+        for i in range(1,self.options["nvalids"]+1):
+            validName = f"valid_{str(i)}"
+            if not os.path.isdir(validName):
+                os.mkdir(validName)
+            validFrames = frames[i * self.options['conformers'] : (i+1) * self.options['conformers']]
+            for frame in validFrames:
+                self.getFrame(frame, os.path.join(validName,f"{str(frame)}.rst7"))
+            os.chdir(validName)
+            self.sample(validFrames, self.options["validMdin"])
             with open("MMFinished.txt", "w") as f:
                 f.write("MM sampling finished\n")
                 f.write("Remove this file and the .nc file\n")
@@ -146,7 +149,7 @@ class MMEngine:
             os.chdir("..")
 
     # This is the function that has to be implemented for every MMEngine
-    def sample(self, rst, mdin):
+    def sample(self, frames, mdin):
         pass
 
     def setup(self):
@@ -274,44 +277,45 @@ class ExternalAmberEngine(MMEngine):
             else:
                 raise RuntimeError(f"MM dynamics with input {mdin} failed in {os.getcwd()}")
 
-    def sample(self, index, mdin):
-        name = str(index)
-        rst = f"{name}.rst7"
-        copyfile(os.path.join("..", rst), f"{name}_heat0.rst7")
-        for j in range(1, self.heatCounter + 1):
+    def sample(self, frames, mdin):
+        pdbIndex = 1
+        for frame in frames:
+            name = str(frame)
+            copyfile(f"{name}.rst7", f"{name}_heat0.rst7")
+            for j in range(1, self.heatCounter + 1):
+                self.runSander(
+                    os.path.join("..", self.prmtop),
+                    os.path.join("..", f"heat{str(j)}.in"),
+                    f"{name}_heat{str(j)}.out",
+                    f"{name}_heat{str(j-1)}.rst7",
+                    f"{name}_heat{str(j)}.nc",
+                    f"{name}_heat{str(j)}.rst7",
+                )
             self.runSander(
                 os.path.join("..", self.prmtop),
-                os.path.join("..", f"heat{str(j)}.in"),
-                f"{name}_heat{str(j)}.out",
-                f"{name}_heat{str(j-1)}.rst7",
-                f"{name}_heat{str(j)}.nc",
-                f"{name}_heat{str(j)}.rst7",
+                os.path.join("..", mdin),
+                f"{name}_.out",
+                f"{name}_heat{str(self.heatCounter)}.rst7",
+                f"{name}.nc",
+                f"{name}_md.rst7",
+                mdvels=f"{name}_vel.nc",
             )
-        self.runSander(
-            os.path.join("..", self.prmtop),
-            os.path.join("..", mdin),
-            f"{name}_.out",
-            f"{name}_heat{str(self.heatCounter)}.rst7",
-            f"{name}.nc",
-            f"{name}_md.rst7",
-            mdvels=f"{name}_vel.nc",
-        )
-        with open("cpptraj.in", "w") as f:
-            f.write(f"loadcrd {name}.nc coors\n")
-            f.write(f"crdout coors {name}.pdb multi\n")
-            f.write("exit\n")
-        try:
-            os.system(
-                f"cpptraj -p {os.path.join('..',self.prmtop)} -i cpptraj.in > cpptraj.out"
-            )
-        except Exception as e:
-            print(e)
-            raise RuntimeError(f"Error in trajectory postprocessing in {os.getcwd()}")
-        for f in os.listdir():
-            if ".pdb" in f and len(f.split(".")) > 2:
-                label = f.split(".")[2]
-                os.system(f"mv {f} {label}.pdb")
-
+            with open("cpptraj.in", "w") as f:
+                f.write(f"loadcrd {name}.nc coors\n")
+                f.write(f"crdout coors {name}.pdb multi\n")
+                f.write("exit\n")
+            try:
+                os.system(
+                    f"cpptraj -p {os.path.join('..',self.prmtop)} -i cpptraj.in > cpptraj.out"
+                )
+            except Exception as e:
+                print(e)
+                raise RuntimeError(f"Error in trajectory postprocessing in {os.getcwd()}")
+            newPdbIndex = 1
+            while os.path.isfile(f"{name}.pdb.{str(newPdbIndex)}"):
+                os.system(f"mv {name}.pdb.{str(newPdbIndex)} {str(pdbIndex)}.pdb")
+                pdbIndex += 1
+                newPdbIndex += 1
 
 class ExternalOpenMMEngine(MMEngine):
     def __init__():
