@@ -345,7 +345,7 @@ def initializeMMEngine(args):
         mmEngine = mmengine.ExternalAmberEngine(mmOptions)
     return mmEngine
 
-if __name__ == "main":
+if __name__ == "__main__":
     # Summary stuff
     summary = dedent(
         """\
