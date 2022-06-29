@@ -15,6 +15,7 @@ class RespPriors:
         # We run RespPriors from within optdir but initialize in the main directory
         # getCharges will determine automatically where we are
         self.sampledir = options["sampledir"]
+        self.prmtop = options["prmtop"]
         self.allEsp = []
         self.allResp = []
         self.getRepeats(options["mol2"])
@@ -22,13 +23,10 @@ class RespPriors:
         self.getUnits()
 
     def getUnits(self):
-        for f in os.listdir(os.path.join(self.sampledir, "1_cycle_1")):
-            if f.endswith(".prmtop"):
-                prmtop = os.path.join(self.sampledir, "1_cycle_1", f)
         self.units = 0
         inResidues = False
         almostInResidues = False
-        with open(prmtop, "r") as f:
+        with open(self.prmtop, "r") as f:
             for line in f.readlines():
                 if "%FLAG" in line:
                     inResidues = False
@@ -172,8 +170,6 @@ class RespPriors:
         # the given value of the cdf occurs at the same charge for this distribution and the ESP distribution
         elif self.mode == 2:
             ppf = norm.ppf(cdf)
-            print(self.espStdevs[5])
-            print(np.abs(self.espMeans[5] - self.respMeans[5]))
             return np.abs(self.espMeans - self.respMeans) / ppf + self.espStdevs
 
     def setMol2Charges(self, charges: list, mol2: str):

@@ -23,7 +23,7 @@ def cleanOptDir(optdir):
     except:
         pass
     for f in os.listdir(optdir):
-        if f.startswith("prev"):
+        if f.startswith("prev") or f.endswith(".inpcrd") or f.endswith(".prmtop") or f == "leap.out":
             os.remove(os.path.join(optdir, f))
 
 

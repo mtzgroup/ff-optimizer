@@ -14,6 +14,7 @@ def test_findRepeatIndex():
     options["sampledir"] = "sample"
     options["mol2"] = "acn.mol2"
     options["mode"] = 1
+    options['prmtop'] = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     j = respPriors.findRepeatIndex(3)
@@ -28,6 +29,7 @@ def test_readCharges():
     options["sampledir"] = "sample"
     options["mol2"] = "dasa.mol2"
     options["mode"] = 1
+    options['prmtop'] = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     with open("resp.out", "r") as f:
@@ -45,6 +47,7 @@ def test_getCharges(monkeypatch):
     options["sampledir"] = "sample"
     options["mol2"] = "dasa.mol2"
     options["mode"] = 1
+    options['prmtop'] = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     respPriors.getCharges(1)
@@ -61,6 +64,7 @@ def test_setMol2Charges():
     options["sampledir"] = "sample"
     options["mol2"] = "dasa.mol2"
     options["mode"] = 1
+    options['prmtop'] = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     charges = loadtxt("charges.txt")
@@ -76,6 +80,7 @@ def test_setPriors1():
     options["sampledir"] = "sample"
     options["mol2"] = "dasa.mol2"
     options["mode"] = 1
+    options['prmtop'] = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     priors = loadtxt("priors.txt")
@@ -92,6 +97,7 @@ def test_setPriors2():
     options["sampledir"] = "sample"
     options["mol2"] = "dasa.mol2"
     options["mode"] = 1
+    options['prmtop'] = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     priors = loadtxt("priors.txt")
@@ -108,6 +114,7 @@ def test_getRepeats1():
     options["sampledir"] = "sample"
     options["mol2"] = "dasa.mol2"
     options["mode"] = 1
+    options['prmtop'] = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     print(respPriors.repeats)
@@ -164,6 +171,7 @@ def test_getRepeats2():
     options["sampledir"] = "sample"
     options["mol2"] = "acn.mol2"
     options["mode"] = 1
+    options['prmtop'] = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     refRepeats = [[0, 3], [1], [], [], [], [4, 5]]
@@ -176,6 +184,7 @@ def test_computeChargeDistribution():
     options["sampledir"] = "sample"
     options["mol2"] = "dasa.mol2"
     options["mode"] = 1
+    options['prmtop'] = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     respPriors.getCharges(1)
@@ -192,6 +201,7 @@ def test_computePriors():
     options["sampledir"] = "sample"
     options["mol2"] = "dasa.mol2"
     options["mode"] = 2
+    options['prmtop'] = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     respPriors.getCharges(1)
@@ -209,6 +219,7 @@ def test_updateRespPriors():
     options["sampledir"] = "sample"
     options["mol2"] = "dasa.mol2"
     options["mode"] = 1
+    options['prmtop'] = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options)
     respPriors.sampledir = "sample"
     copyfile("dasa.mol2", "update.mol2")
