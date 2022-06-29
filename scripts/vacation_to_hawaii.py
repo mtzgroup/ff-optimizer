@@ -369,6 +369,7 @@ if __name__ == "main":
         -- Backup TeraChem input file if job fails (tc_template_long.in)
         -- sbatch template file for queue (sbatch_template.sh)
     """
+
     )
     parser = argparse.ArgumentParser(
         epilog=summary, formatter_class=argparse.RawDescriptionHelpFormatter
