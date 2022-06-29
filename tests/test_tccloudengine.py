@@ -24,11 +24,8 @@ def test_initResp():
         "qmengine/tc.in", "qmengine/tc_backup.in", doResp=True
     )
     assert tccloudEngine.keywords["resp"] == "yes"
-    #assert tccloudEngine.keywords["esp_restraint_a"] == "0"
-    #assert tccloudEngine.keywords["esp_restraint_b"] == "0"
     assert tccloudEngine.backupKeywords["resp"] == "yes"
-    #assert tccloudEngine.backupKeywords["esp_restraint_a"] == "0"
-    #assert tccloudEngine.backupKeywords["esp_restraint_b"] == "0"
+
 
 
 def testGetQMRefData(monkeypatch):
