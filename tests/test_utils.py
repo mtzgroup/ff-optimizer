@@ -70,3 +70,17 @@ def test_writeRst():
         for line in f.readlines()[2:]:
             refCoors.append(line.split())
     checkUtils.checkArray(testCoors, refCoors)
+
+# check that pdbs are read in correctly
+def test_readPDB1():
+    os.chdir(os.path.dirname(__file__))
+    testCoords = utils.readPDB("qmengine/test.pdb")
+    coords = np.loadtxt("qmengine/coords.txt").flatten()
+    assert checkUtils.checkArray(coords, testCoords)
+
+def test_readPDB2():
+    os.chdir(os.path.join(os.path.dirname(__file__),"utils"))
+    coors = utils.readPDB("1.pdb")
+    ref = np.loadtxt("1.txt").flatten()
+    checkUtils.checkArray(coors, ref)
+    pass
