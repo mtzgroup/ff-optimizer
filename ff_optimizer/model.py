@@ -3,7 +3,25 @@ import argparse
 from . import mmengine, qmengine, optengine, utils
 from shutil import copyfile, rmtree
 
-class Model:
+# Template class for ff models used by ff_optimizer
+class AbstractModel:
+
+    def __init__(self):
+        pass
+
+    def initialCycle(self):
+        pass
+
+    def doMMSampling(self, i):
+        pass
+
+    def doQMCalculations(self, i):
+        pass
+
+    def doParameterOptimization(self, i):
+        pass
+
+class Model(AbstractModel):
     
     def __init__(self, args):
         # Set up each engine
@@ -120,7 +138,7 @@ class Model:
     
     def doMMSampling(self, i):
         # Make sampling directory and copy files into it
-        sampleName = str(i) + "_cycle_" + str(i)
+        sampleName = f"{str(i)}_cycle_{str(i)}"
         samplePath = os.path.join(self.sampledir, sampleName)
         if not os.path.isdir(samplePath):
             os.mkdir(samplePath)
@@ -142,7 +160,7 @@ class Model:
 
     def doQMCalculations(self, i):
         # Run QM calculations for each sampling trajectory
-        os.chdir(os.path.join(self.sampledir, f"{str(i)_cycle}_{str(i)}")
+        os.chdir(os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}"))
         for f in os.listdir():
             if (f.startswith("train") or f.startswith("valid")) and os.path.isdir(f):
                 os.chdir(f)
@@ -155,7 +173,7 @@ class Model:
                             pdbs.append(g)
                     self.qmEngine.getQMRefData(pdbs, ".")
                 os.chdir("..")
-        os.chdir(home)
+        os.chdir(selfhome)
 
     # NOTE: currently only supports a single validation set
     def doParameterOptimization(self, i):
@@ -184,7 +202,7 @@ class Model:
     
         for f in ["all.mdcrd", "qdata.txt"]:
             copyfile(os.path.join(mmTrainFolder,f), os.path.join(self.optdir, "targets", f"train_{str(i)}", f))
-            copyfile(os.path.join(valids[0], f), os.path.join(self.optdir, "targets", f"valid_{str(i)}", f)
+            copyfile(os.path.join(valids[0], f), os.path.join(self.optdir, "targets", f"valid_{str(i)}", f))
     
         # Run ForceBalance on each input
         os.chdir(self.optdir)

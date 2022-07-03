@@ -67,7 +67,7 @@ def test_debug_full():
         os.path.join("1_opt", "targets", "train_1", "qdata.txt"),
     )
     # compareOpt(os.path.join("3_ref","opt_1.out"),os.path.join("1_opt","opt_1.out"))
-    # os.system("./clean.sh")
+    os.system("./clean.sh")
 
 
 @pytest.mark.full
@@ -83,7 +83,7 @@ def test_tccloud_full():
         os.path.join("1_opt", "targets", "train_1", "qdata.txt"),
     )
     # compareOpt(os.path.join("3_ref","opt_1.out"),os.path.join("1_opt","opt_1.out"))
-    # os.system("./clean.sh")
+    os.system("./clean.sh")
 
 
 @pytest.mark.full

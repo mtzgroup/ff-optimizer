@@ -5,10 +5,10 @@ import pytest
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--external",
+        "--amber",
         action="store_true",
         default=False,
-        help="run tests which call external code",
+        help="run tests which call amber code",
     )
     parser.addoption(
         "--tccloud",
@@ -36,7 +36,7 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     config.addinivalue_line(
-        "markers", "external: test calls external libraries/code and may be slow to run"
+        "markers", "amber: test calls amber libraries/code and may be slow to run"
     )
     config.addinivalue_line(
         "markers", "tccloud: test calls tccloud and may be slow to run"
@@ -52,7 +52,7 @@ def pytest_configure(config):
 
 def pytest_collection_modifyitems(config, items):
     skips = {}
-    skips["external"] = pytest.mark.skip(reason="need --external option to run")
+    skips["amber"] = pytest.mark.skip(reason="need --amber option to run")
     skips["tccloud"] = pytest.mark.skip(reason="need --tccloud option to run")
     skips["full"] = pytest.mark.skip(reason="need --full option to run")
     skips["gpu"] = pytest.mark.skip(reason="need --gpu option to run")

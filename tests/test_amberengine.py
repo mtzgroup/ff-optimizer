@@ -53,7 +53,7 @@ def test_AmberInit(monkeypatch):
     assert mmEngine.amberExe == "pmemd.cuda"
 
 
-@pytest.mark.external
+@pytest.mark.amber
 def test_runSander(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
@@ -72,7 +72,7 @@ def test_runSander(monkeypatch):
 
 
 @pytest.mark.gpu
-@pytest.mark.external
+@pytest.mark.amber
 def test_runSanderCUDA(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
@@ -90,7 +90,7 @@ def test_runSanderCUDA(monkeypatch):
     checkUtils.checkArray(testRst, refRst)
 
 
-@pytest.mark.external
+@pytest.mark.amber
 def test_sample(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.ExternalAmberEngine, "runSander", monkeySander)
@@ -116,7 +116,7 @@ def test_sample(monkeypatch):
             assert refLines[i] == testLines[i]
     rmtree("928")
 
-@pytest.mark.external
+@pytest.mark.amber
 def test_sample_conformers(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.ExternalAmberEngine, "runSander", monkeySander)
