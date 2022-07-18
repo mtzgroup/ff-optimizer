@@ -1,7 +1,7 @@
 import os
 
 import numpy as np
-from tccloud.models import Molecule
+from qccloud.models import Molecule
 
 from ff_optimizer import utils
 

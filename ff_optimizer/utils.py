@@ -153,7 +153,7 @@ def readPDB(pdb: str):
                 coords.append(line[30:38].replace(" ",""))
                 coords.append(line[38:46].replace(" ",""))
                 coords.append(line[46:54].replace(" ",""))
-    return coords
+    return np.asarray(coords,dtype=np.float32)
 
 
 def convertPDBtoMolecule(pdb: str):
@@ -307,3 +307,15 @@ def writeRst(frame, natoms, dest):
             )
             if int(i / 2) * 2 != i:
                 f.write("\n")
+
+def writePDB(geometry, dest, template):
+    with open(template, 'r') as f:
+        templateLines = f.readlines()
+
+    i = 0
+    with open(dest, 'w') as f:
+        for line in templateLines:
+            if line.startswith("ATOM") or line.startswith("HETATM"):
+                f.write("%s%8.3f%8.3f%8.3f%s" % (line[:38], geometry[i], geometry[i+1], geometry[i+2], line[54:]))
+            else:
+                f.write(line)

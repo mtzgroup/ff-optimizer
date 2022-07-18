@@ -4,9 +4,13 @@ from . import mmengine, qmengine, optengine, utils
 from shutil import copyfile, rmtree
 
 # Template class for ff models used by ff_optimizer
+# All these functions must be implemented and
+# all these variables set properly for ff_optimizer to
+# use the inherited class
 class AbstractModel:
 
     def __init__(self):
+        self.restartCycle = -1
         pass
 
     def initialCycle(self):
@@ -173,7 +177,7 @@ class Model(AbstractModel):
                             pdbs.append(g)
                     self.qmEngine.getQMRefData(pdbs, ".")
                 os.chdir("..")
-        os.chdir(selfhome)
+        os.chdir(self.home)
 
     # NOTE: currently only supports a single validation set
     def doParameterOptimization(self, i):

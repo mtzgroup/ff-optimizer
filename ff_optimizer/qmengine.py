@@ -6,9 +6,9 @@ import numpy as np
 from qcelemental.models import Provenance
 from qcelemental.models.results import AtomicResultProperties
 from qcelemental.util.serialization import json_loads
-from tccloud import TCClient
-from tccloud.models import AtomicInput, AtomicResult, to_file, from_file
-from tccloud.models import AtomicInput, AtomicResult
+from qccloud import QCClient
+from qccloud.models import AtomicInput, AtomicResult, to_file, from_file
+from qccloud.models import AtomicInput, AtomicResult
 
 from . import utils
 
@@ -355,7 +355,7 @@ class TCCloudEngine(QMEngine):
             self.batchSize = 50
         else:
             self.batchSize = batchSize
-        self.client = TCClient()
+        self.client = QCClient()
         super().__init__(inputFile, backupInputFile, doResp)
         self.keywords = {}
         self.backupKeywords = {}

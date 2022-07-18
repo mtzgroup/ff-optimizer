@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 from qcelemental.util.serialization import json_loads
-from tccloud.models import AtomicResult
+from qccloud.models import AtomicResult
 
 from ff_optimizer import qmengine, utils
 

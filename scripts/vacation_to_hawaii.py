@@ -3,7 +3,7 @@
 import argparse
 import errno
 from time import perf_counter
-from ff_optimizer import model
+from ff_optimizer import model, active_learning
 from textwrap import dedent
 
 # Some helper functions
@@ -137,6 +137,8 @@ def checkArgs(args):
                 raise RuntimeError(f"Conformer XYZ file {args.conformers} does not exist in {args.dynamicsdir}")
         if args.conformersPerSet < 1:
             raise ValueError("conformersPerSet must be a positive integer")
+        if args.activeLearning < 1:
+            raise ValueError("activeLearning must be a positive integer")
 
 if __name__ == "main":
     # Summary stuff
@@ -306,11 +308,15 @@ if __name__ == "main":
     )
     parser.add_argument("--conformers",help="XYZ file containing conformers to use for initial MM sampling conditions. If not provided, will use the initial dynamics XYZ.",type=str,default=None)
     parser.add_argument("--conformersPerSet",help="Number of conformers to do MM sampling on per training/validation dataset, default is 1",type=int, default=1)
+    parser.add_argument("--activeLearning",help="Use active learning (multiple different ff models optimized simultanesouly) to choose new geometries. Use this argument to specify the number of models. Default is 1 (no active learning).",type=int, default=1)
     
     args = parser.parse_args()
     checkArgs(args)
-    
-    ffModel = model.Model(args)
+
+    if args.activeLearning > 1:
+        ffModel = active_learning.ActiveLearningModel(args)
+    else:
+        ffModel = model.Model(args)
     
     # First optimization cycle is not necessary if restarting from somewhere later
     if restartCycle < 0:

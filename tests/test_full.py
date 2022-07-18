@@ -71,12 +71,12 @@ def test_debug_full():
 
 
 @pytest.mark.full
-@pytest.mark.tccloud
-def test_tccloud_full():
+@pytest.mark.qccloud
+def test_qccloud_full():
     os.chdir(os.path.join(os.path.dirname(__file__), "full"))
     os.system("./clean.sh")
     os.system(
-        "vacation_to_hawaii.py --stride 1 --split 2 --maxcycles 1 --qmengine tccloud"
+        "vacation_to_hawaii.py --stride 1 --split 2 --maxcycles 1 --qmengine qccloud"
     )
     compareQdata(
         os.path.join("3_ref", "qdata.txt"),
