@@ -1,43 +1,41 @@
 import os
 
 from qcelemental.util.serialization import json_loads
-from tccloud.models import AtomicResult, FailedOperation
+from qccloud.models import AtomicResult, FailedOperation
 
 from ff_optimizer import qmengine
 
 
 def test_init():
     os.chdir(os.path.dirname(__file__))
-    tccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
-    assert tccloudEngine.method == "b3lyp"
-    assert tccloudEngine.basis == "6-31gss"
-    assert tccloudEngine.keywords["dftd"] == "d3"
-    assert tccloudEngine.keywords["charge"] == "0"
-    assert tccloudEngine.backupKeywords["threall"] == "1.0e-14"
-    assert tccloudEngine.backupKeywords["diismaxvecs"] == "40"
-    assert tccloudEngine.backupKeywords["maxit"] == "200"
+    qccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
+    assert qccloudEngine.method == "b3lyp"
+    assert qccloudEngine.basis == "6-31gss"
+    assert qccloudEngine.keywords["dftd"] == "d3"
+    assert qccloudEngine.keywords["charge"] == "0"
+    assert qccloudEngine.backupKeywords["threall"] == "1.0e-14"
+    assert qccloudEngine.backupKeywords["diismaxvecs"] == "40"
+    assert qccloudEngine.backupKeywords["maxit"] == "200"
 
 
 def test_initResp():
     os.chdir(os.path.dirname(__file__))
-    tccloudEngine = qmengine.TCCloudEngine(
+    qccloudEngine = qmengine.TCCloudEngine(
         "qmengine/tc.in", "qmengine/tc_backup.in", doResp=True
     )
-    assert tccloudEngine.keywords["resp"] == "yes"
-    assert tccloudEngine.backupKeywords["resp"] == "yes"
+    assert qccloudEngine.keywords["resp"] == "yes"
+    assert qccloudEngine.backupKeywords["resp"] == "yes"
 
-
-
-def testGetQMRefData(monkeypatch):
+def test_getQMRefData(monkeypatch):
     os.chdir(os.path.dirname(__file__))
-    tccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
-    calcDir = "tccloudengine"
+    qccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
+    calcDir = "qccloudengine"
     pdbs = []
     jsons = []
     for f in os.listdir(calcDir):
         if f.endswith("pdb"):
             pdbs.append(f)
-        if f.endswith("json"):
+        if f.endswith("json") and "success" not in f:
             jsons.append(f)
     results = []
     for json in jsons:
@@ -54,6 +52,7 @@ def testGetQMRefData(monkeypatch):
             retryResults.append(AtomicResult(**json_loads(f.read())))
 
     def monkeyCompute(atomicInputs):
+        print(len(atomicInputs))
         if len(atomicInputs) == 10:
             return 0, results
         else:
@@ -63,6 +62,7 @@ def testGetQMRefData(monkeypatch):
             assert atomicInputs[0].keywords["diismaxvecs"] == "40"
             for i in range(len(ids)):
                 assert ids[i] == refIds[i]
+            print(retryResults)
             return 0, retryResults
 
     def monkeyRead(*args):
@@ -71,20 +71,20 @@ def testGetQMRefData(monkeypatch):
     def monkeyWrite(*args):
         pass
 
-    monkeypatch.setattr(tccloudEngine, "computeBatch", monkeyCompute)
-    monkeypatch.setattr(tccloudEngine, "writeResult", monkeyWrite)
+    monkeypatch.setattr(qccloudEngine, "computeBatch", monkeyCompute)
+    monkeypatch.setattr(qccloudEngine, "writeResult", monkeyWrite)
     monkeypatch.setattr(qmengine.QMEngine, "readQMRefData", monkeyRead)
     monkeypatch.setattr(qmengine.QMEngine, "writeFBdata", monkeyWrite)
-    tccloudEngine.getQMRefData(pdbs, calcDir)
+    qccloudEngine.getQMRefData(pdbs, calcDir)
 
 
 def test_createAtomicInputsResp():
     os.chdir(os.path.dirname(__file__))
-    tccloudEngine = qmengine.TCCloudEngine(
+    qccloudEngine = qmengine.TCCloudEngine(
         "qmengine/tc.in", "qmengine/tc_backup.in", doResp=True
     )
     pdbs = ["qmengine/test.pdb"]
-    atomicInputs = tccloudEngine.createAtomicInputs(pdbs)
+    atomicInputs = qccloudEngine.createAtomicInputs(pdbs)
     ainput = atomicInputs[0]
     assert ainput.protocols.native_files.all == "all"
     assert ainput.extras["tcfe:keywords"]["native_files"] == ["esp.xyz"]
@@ -92,7 +92,7 @@ def test_createAtomicInputsResp():
 
 def test_computeBatch(monkeypatch):
     os.chdir(os.path.dirname(__file__))
-    tccloudEngine = qmengine.TCCloudEngine(os.path.join("qmengine","tc.in"), os.path.join("qmengine","tc_backup.in"))
+    qccloudEngine = qmengine.TCCloudEngine(os.path.join("qmengine","tc.in"), os.path.join("qmengine","tc_backup.in"))
 
     class MonkeyFutureResult:
         def __init__(self, atomicInputs):
@@ -116,34 +116,35 @@ def test_computeBatch(monkeypatch):
     def monkeyCompute(atomicInputs, engine):
         return MonkeyFutureResult(atomicInputs)
 
-    os.chdir("tccloudengine")
+    os.chdir("qccloudengine")
     pdbs = []
     for f in os.listdir():
         if f.endswith("pdb"):
             pdbs.append(f)
-    inputs = tccloudEngine.createAtomicInputs(pdbs)
-    monkeypatch.setattr(tccloudEngine.client, "compute", monkeyCompute)
+    inputs = qccloudEngine.createAtomicInputs(pdbs)
+    print(inputs)
+    monkeypatch.setattr(qccloudEngine.client, "compute", monkeyCompute)
 
     # Check default batch size
-    status, results = tccloudEngine.computeBatch(inputs)
-    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
-        os.remove(os.path.join("tccloudengine","jobs.txt"))
+    status, results = qccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("qccloudengine","jobs.txt")):
+        os.remove(os.path.join("qccloudengine","jobs.txt"))
     assert status == 0
     assert len(results) == 10
 
     # Check small batch size
-    tccloudEngine.batchsize = 3
-    status, results = tccloudEngine.computeBatch(inputs)
-    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
-        os.remove(os.path.join("tccloudengine","jobs.txt"))
+    qccloudEngine.batchsize = 3
+    status, results = qccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("qccloudengine","jobs.txt")):
+        os.remove(os.path.join("qccloudengine","jobs.txt"))
     assert status == 0
     assert len(results) == 10
 
     # Check large batch size
-    tccloudEngine.batchsize = 77
-    status, results = tccloudEngine.computeBatch(inputs)
-    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
-        os.remove(os.path.join("tccloudengine","jobs.txt"))
+    qccloudEngine.batchsize = 77
+    status, results = qccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("qccloudengine","jobs.txt")):
+        os.remove(os.path.join("qccloudengine","jobs.txt"))
     assert status == 0
     assert len(results) == 10
 
@@ -161,31 +162,31 @@ def test_computeBatch(monkeypatch):
         else:
             return MonkeyFutureResult(atomicInputs)
 
-    monkeypatch.setattr(tccloudEngine.client, "compute", monkeyComputeFailOnce)
-    tccloudEngine.batchSize = 6
-    status, results = tccloudEngine.computeBatch(inputs)
-    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
-        os.remove(os.path.join("tccloudengine","jobs.txt"))
+    monkeypatch.setattr(qccloudEngine.client, "compute", monkeyComputeFailOnce)
+    qccloudEngine.batchSize = 6
+    status, results = qccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("qccloudengine","jobs.txt")):
+        os.remove(os.path.join("qccloudengine","jobs.txt"))
     assert status == 0
     assert len(results) == 10
-    assert tccloudEngine.batchSize == 3
+    assert qccloudEngine.batchSize == 3
 
-    tccloudEngine.batchSize = 12
-    status, results = tccloudEngine.computeBatch(inputs)
-    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
-        os.remove(os.path.join("tccloudengine","jobs.txt"))
+    qccloudEngine.batchSize = 12
+    status, results = qccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("qccloudengine","jobs.txt")):
+        os.remove(os.path.join("qccloudengine","jobs.txt"))
     assert status == 0
     assert len(results) == 10
-    assert tccloudEngine.batchSize == 5
+    assert qccloudEngine.batchSize == 5
 
     # Check failure
     def monkeyComputeFail(atomicInputs, engine):
         return MonkeyResultFail(atomicInputs)
 
-    monkeypatch.setattr(tccloudEngine.client, "compute", monkeyComputeFail)
-    status, results = tccloudEngine.computeBatch(inputs)
-    if os.path.isfile(os.path.join("tccloudengine","jobs.txt")):
-        os.remove(os.path.join("tccloudengine","jobs.txt"))
+    monkeypatch.setattr(qccloudEngine.client, "compute", monkeyComputeFail)
+    status, results = qccloudEngine.computeBatch(inputs)
+    if os.path.isfile(os.path.join("qccloudengine","jobs.txt")):
+        os.remove(os.path.join("qccloudengine","jobs.txt"))
     assert status == -1
     assert len(results) == 0
 
