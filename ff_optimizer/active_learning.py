@@ -8,7 +8,7 @@ import sander
 from .model import AbstractModel, Model
 from .utils import readPDB, writePDB
 
-# import multiprocessing
+# from multiprocessing import Pool
 # from time import perf_counter
 
 
@@ -40,28 +40,34 @@ class ActiveLearningModel(AbstractModel):
     def initialCycle(self):
         for i in range(1, self.nmodels + 1):
             os.chdir(f"model_{str(i)}")
-            models[i].initialCycle()
+            models[i-1].initialCycle()
             os.chdir(home)
 
     def doMMSampling(self, i):
-        for i in range(1, self.nmodels + 1):
-            os.chdir(f"model_{str(i)}")
-            models[i].doMMSampling(i)
+        for j in range(1, self.nmodels + 1):
+            os.chdir(f"model_{str(j)}")
+            models[j-1].doMMSampling(i)
             os.chdir(home)
         self.doActiveLearning(i)
 
     def doQMCalculations(self, i):
-        for i in range(1, self.nmodels + 1):
-            os.chdir(f"model_{str(i)}")
-            models[i].doQMCalculations(i)
+        for j in range(1, self.nmodels + 1):
+            os.chdir(f"model_{str(j)}")
+            models[j-1].doQMCalculations(i)
             os.chdir(home)
 
     def doParameterOptimization(self, i):
         # serial code
+        optResults = []
         for i in range(1, self.nmodels + 1):
             os.chdir(f"model_{str(i)}")
-            models[i].doParameterOptimization(i)
+            result = models[i].doParameterOptimization(i)
+            optResults.append(result)
             os.chdir(home)
+        # for now we arbitrarily print only the first model's info
+        return optResults[0]
+        
+
 
     def doActiveLearning(self, i):
         sampleDirs = [
