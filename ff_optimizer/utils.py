@@ -1,6 +1,8 @@
 import numpy as np
 from qcelemental.models import Molecule
+
 from . import units
+
 
 def convertTCtoFB(
     tcout, coors, stride, start=None, end=None, qdata="qdata.txt", mdcrd="all.mdcrd"
@@ -108,7 +110,7 @@ def convertTCtoFB(
                 indices.append([i, j])
 
     usedIndices = []
-    lastFrame = -args.stride - 37
+    lastFrame = -stride - 37
     for i in range(len(indices)):
         if gradIndex[indices[i][1]] >= start and gradIndex[indices[i][1]] <= end:
             if gradIndex[indices[i][1]] - lastFrame >= stride:
@@ -145,15 +147,16 @@ def convertTCtoFB(
                 f.write("\n")
     return jobCounter
 
+
 def readPDB(pdb: str):
     coords = []
     with open(pdb, "r") as f:
         for line in f.readlines():
             if line.startswith("ATOM") or line.startswith("HETATM"):
-                coords.append(line[30:38].replace(" ",""))
-                coords.append(line[38:46].replace(" ",""))
-                coords.append(line[46:54].replace(" ",""))
-    return np.asarray(coords,dtype=np.float32)
+                coords.append(line[30:38].replace(" ", ""))
+                coords.append(line[38:46].replace(" ", ""))
+                coords.append(line[46:54].replace(" ", ""))
+    return np.asarray(coords, dtype=np.float32)
 
 
 def convertPDBtoMolecule(pdb: str):
@@ -162,9 +165,8 @@ def convertPDBtoMolecule(pdb: str):
     with open(pdb, "r") as f:
         for line in f.readlines():
             if line.startswith("ATOM") or line.startswith("HETATM"):
-                splitLine = line.split()
-                coords.append([splitLine[5], splitLine[6], splitLine[7]])
-                symbols.append(splitLine[-1])
+                coords.append([line[30:38].replace(" ", ""), line[38:46].replace(" ", ""), line[46:54].replace(" ", "")])
+                symbols.append(line.split()[-1])
     coords = np.asarray(coords, dtype=np.float32)
     # Molecule class by default has coordinates in bohr
     coords *= units.ANGSTROM_TO_AU
@@ -308,14 +310,24 @@ def writeRst(frame, natoms, dest):
             if int(i / 2) * 2 != i:
                 f.write("\n")
 
+
 def writePDB(geometry, dest, template):
-    with open(template, 'r') as f:
+    with open(template, "r") as f:
         templateLines = f.readlines()
 
     i = 0
-    with open(dest, 'w') as f:
+    with open(dest, "w") as f:
         for line in templateLines:
             if line.startswith("ATOM") or line.startswith("HETATM"):
-                f.write("%s%8.3f%8.3f%8.3f%s" % (line[:38], geometry[i], geometry[i+1], geometry[i+2], line[54:]))
+                f.write(
+                    "%s%8.3f%8.3f%8.3f%s"
+                    % (
+                        line[:38],
+                        geometry[i],
+                        geometry[i + 1],
+                        geometry[i + 2],
+                        line[54:],
+                    )
+                )
             else:
                 f.write(line)

@@ -1,9 +1,9 @@
 import os
 
 import numpy as np
+from chemcloud.models import AtomicResult
 from qcelemental.util.serialization import json_loads
 from scipy.stats import norm
-from qccloud.models import AtomicResult
 
 # import matplotlib as mpl
 # import matplotlib.pyplot as plt

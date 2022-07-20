@@ -8,7 +8,6 @@ from numpy import loadtxt
 from ff_optimizer import mmengine
 
 from . import checkUtils
-from shutil import copyfile
 
 options = {}
 options["start"] = 33
@@ -21,6 +20,7 @@ options["heatCounter"] = 8
 
 def monkeyGetIndices(self):
     return 1, 2, 3
+
 
 def monkeySander(self, prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=None):
     if not os.path.isfile(prmtop):
@@ -35,6 +35,7 @@ def monkeySander(self, prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=None)
     except:
         pass
     return
+
 
 def test_AmberInit(monkeypatch):
     def monkeyFail(maxLoad=0):
@@ -98,7 +99,7 @@ def test_sample(monkeypatch):
     if os.path.isdir("928"):
         rmtree("928")
     os.mkdir("928")
-    copyfile("928.rst7",os.path.join("928","928.rst7")) 
+    copyfile("928.rst7", os.path.join("928", "928.rst7"))
     os.chdir("928")
     options["coordPath"] = "coors.xyz"
     mmEngine = mmengine.ExternalAmberEngine(options)
@@ -116,20 +117,21 @@ def test_sample(monkeypatch):
             assert refLines[i] == testLines[i]
     rmtree("928")
 
+
 @pytest.mark.amber
 def test_sample_conformers(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.ExternalAmberEngine, "runSander", monkeySander)
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "sample_conformers"))
-    options['conformers'] = 3
+    options["conformers"] = 3
     mmEngine = mmengine.ExternalAmberEngine(options)
     mmEngine.prmtop = "water.prmtop"
     if os.path.isdir("valid_1"):
         rmtree("valid_1")
     os.mkdir("valid_1")
-    copyfile("928.rst7",os.path.join("valid_1","928.rst7")) 
-    copyfile("135.rst7",os.path.join("valid_1","135.rst7")) 
-    copyfile("253.rst7",os.path.join("valid_1","253.rst7")) 
+    copyfile("928.rst7", os.path.join("valid_1", "928.rst7"))
+    copyfile("135.rst7", os.path.join("valid_1", "135.rst7"))
+    copyfile("253.rst7", os.path.join("valid_1", "253.rst7"))
 
     os.chdir("valid_1")
     mmEngine.sample([928, 135, 253], "md.in")

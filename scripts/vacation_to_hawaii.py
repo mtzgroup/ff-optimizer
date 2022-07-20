@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
+import os
 import argparse
 import errno
-from time import perf_counter
-from ff_optimizer import model, active_learning
 from textwrap import dedent
+from time import perf_counter
+
+from ff_optimizer import active_learning, model
 
 # Some helper functions
+
 
 def checkArgs(args):
     # Check for necessary folders and files
@@ -36,7 +39,9 @@ def checkArgs(args):
             "Prototype PDB coordinates conf.pdb does not exist in " + args.optdir
         )
     if not os.path.isfile(os.path.join(args.optdir, "setup.leap")):
-        raise RuntimeError("Tleap input file setup.leap does not exist in " + args.optdir)
+        raise RuntimeError(
+            "Tleap input file setup.leap does not exist in " + args.optdir
+        )
     if not os.path.isfile(os.path.join(args.optdir, args.opt0)):
         raise RuntimeError(
             "Initial ForceBalance optimization input file "
@@ -52,7 +57,9 @@ def checkArgs(args):
             + args.optdir
         )
     if not os.path.isdir(args.sampledir):
-        raise RuntimeError("MM sampling directory " + args.sampledir + " does not exist")
+        raise RuntimeError(
+            "MM sampling directory " + args.sampledir + " does not exist"
+        )
     if not os.path.isfile(os.path.join(args.sampledir, "heat1.in")):
         raise RuntimeError(
             "No sander input file for equilibration named heat1.in provided in "
@@ -60,17 +67,25 @@ def checkArgs(args):
         )
     if not os.path.isfile(os.path.join(args.sampledir, "md.in")):
         raise RuntimeError(
-            "No sander input file for sampling named md.in provided in " + args.sampledir
+            "No sander input file for sampling named md.in provided in "
+            + args.sampledir
         )
     if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
         raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
-    
-    if args.qmengine != "queue" and args.qmengine != "debug" and args.qmengine != "tccloud":
+
+    if (
+        args.qmengine != "queue"
+        and args.qmengine != "debug"
+        and args.qmengine != "chemcloud"
+    ):
         raise RuntimeError("Engine " + args.qmengine + " is not implemented")
     if args.qmengine == "queue":
         if not os.path.isfile(os.path.join(args.sampledir, args.sbatch)):
             raise RuntimeError(
-                "Sbatch template " + args.sbatch + " does not exist in " + args.sampledir
+                "Sbatch template "
+                + args.sbatch
+                + " does not exist in "
+                + args.sampledir
             )
         if not os.path.isfile(os.path.join(args.sampledir, args.tctemplate)):
             raise RuntimeError(
@@ -86,11 +101,11 @@ def checkArgs(args):
                 + " does not exist in "
                 + args.sampledir
             )
-    
+
         if (
             args.qmengine != "queue"
             and args.qmengine != "debug"
-            and args.qmengine != "tccloud"
+            and args.qmengine != "chemcloud"
         ):
             raise RuntimeError("Engine " + args.qmengine + " is not implemented")
         if args.qmengine == "queue":
@@ -115,7 +130,7 @@ def checkArgs(args):
                     + " does not exist in "
                     + args.sampledir
                 )
-    
+
         if args.mmengine != "amber":
             raise ValueError(f"MM Engine {args.mmengine} is unsupported!")
         if args.nvalids < 1:
@@ -133,14 +148,17 @@ def checkArgs(args):
                 os.path.join(args.sampledir, args.validMdin),
             )
         if args.conformers is not None:
-            if not os.path.isfile(os.path.join(args.dynamicsdir,args.conformers)):
-                raise RuntimeError(f"Conformer XYZ file {args.conformers} does not exist in {args.dynamicsdir}")
+            if not os.path.isfile(os.path.join(args.dynamicsdir, args.conformers)):
+                raise RuntimeError(
+                    f"Conformer XYZ file {args.conformers} does not exist in {args.dynamicsdir}"
+                )
         if args.conformersPerSet < 1:
             raise ValueError("conformersPerSet must be a positive integer")
         if args.activeLearning < 1:
             raise ValueError("activeLearning must be a positive integer")
 
-if __name__ == "main":
+
+if __name__ == "__main__":
     # Summary stuff
     summary = dedent(
         """\
@@ -242,9 +260,9 @@ if __name__ == "main":
     )
     parser.add_argument(
         "--qmengine",
-        help="Engine for performing QM calculations, either queue, debug, or tccloud",
+        help="Engine for performing QM calculations, either queue, debug, or chemcloud",
         type=str.lower,
-        default="tccloud",
+        default="chemcloud",
     )
     parser.add_argument(
         "--sbatch",
@@ -275,7 +293,7 @@ if __name__ == "main":
         type=float,
         default=0,
     )
-    
+
     parser.add_argument(
         "--mmengine",
         help="Package for running MM sampling. Default is amber.",
@@ -306,10 +324,25 @@ if __name__ == "main":
         type=int,
         default=0,
     )
-    parser.add_argument("--conformers",help="XYZ file containing conformers to use for initial MM sampling conditions. If not provided, will use the initial dynamics XYZ.",type=str,default=None)
-    parser.add_argument("--conformersPerSet",help="Number of conformers to do MM sampling on per training/validation dataset, default is 1",type=int, default=1)
-    parser.add_argument("--activeLearning",help="Use active learning (multiple different ff models optimized simultanesouly) to choose new geometries. Use this argument to specify the number of models. Default is 1 (no active learning).",type=int, default=1)
-    
+    parser.add_argument(
+        "--conformers",
+        help="XYZ file containing conformers to use for initial MM sampling conditions. If not provided, will use the initial dynamics XYZ.",
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
+        "--conformersPerSet",
+        help="Number of conformers to do MM sampling on per training/validation dataset, default is 1",
+        type=int,
+        default=1,
+    )
+    parser.add_argument(
+        "--activeLearning",
+        help="Use active learning (multiple different ff models optimized simultanesouly) to choose new geometries. Use this argument to specify the number of models. Default is 1 (no active learning).",
+        type=int,
+        default=1,
+    )
+
     args = parser.parse_args()
     checkArgs(args)
 
@@ -317,11 +350,12 @@ if __name__ == "main":
         ffModel = active_learning.ActiveLearningModel(args)
     else:
         ffModel = model.Model(args)
-    
+    restartCycle = ffModel.restartCycle
+
     # First optimization cycle is not necessary if restarting from somewhere later
     if restartCycle < 0:
-        ffModel.initialCycle() 
-    
+        ffModel.initialCycle()
+
     # Begin sampling/optimization cycling
     print(
         "%7s%15s%15s%20s%23s%8s%8s%8s"
@@ -337,23 +371,23 @@ if __name__ == "main":
         )
     )
     for i in range(1, args.maxcycles + 1):
-    
+
         if i <= restartCycle:
             continue
-    
+
         mmStart = perf_counter()
         ffModel.doMMSampling(i)
         mmEnd = perf_counter()
         mmTime = mmEnd - mmStart
-    
+
         ffModel.doQMCalculations(i)
         qmEnd = perf_counter()
         qmTime = qmEnd - mmEnd
-    
+
         optResults = ffModel.doParameterOptimization(i)
         fbEnd = perf_counter()
         fbTime = fbEnd - qmEnd
-    
+
         if i == 1:
             print(
                 "%7d%15.8f%15.8f%20.8f%23s%8.1f%8.1f%8.1f"

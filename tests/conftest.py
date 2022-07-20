@@ -11,10 +11,10 @@ def pytest_addoption(parser):
         help="run tests which call amber code",
     )
     parser.addoption(
-        "--qccloud",
+        "--chemcloud",
         action="store_true",
         default=False,
-        help="run additional qccloud tests",
+        help="run additional chemcloud tests",
     )
     parser.addoption(
         "--full",
@@ -39,7 +39,7 @@ def pytest_configure(config):
         "markers", "amber: test calls amber libraries/code and may be slow to run"
     )
     config.addinivalue_line(
-        "markers", "qccloud: test calls qccloud and may be slow to run"
+        "markers", "chemcloud: test calls chemcloud and may be slow to run"
     )
     config.addinivalue_line(
         "markers", "full: test does a full optimization cycle and is very slow to run"
@@ -53,7 +53,7 @@ def pytest_configure(config):
 def pytest_collection_modifyitems(config, items):
     skips = {}
     skips["amber"] = pytest.mark.skip(reason="need --amber option to run")
-    skips["qccloud"] = pytest.mark.skip(reason="need --qccloud option to run")
+    skips["chemcloud"] = pytest.mark.skip(reason="need --chemcloud option to run")
     skips["full"] = pytest.mark.skip(reason="need --full option to run")
     skips["gpu"] = pytest.mark.skip(reason="need --gpu option to run")
     skips["queue"] = pytest.mark.skip(reason="need --queue option to run")

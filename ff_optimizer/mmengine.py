@@ -5,8 +5,11 @@ except:
 import os
 from random import randint
 from shutil import copyfile, rmtree
+
 import GPUtil
+
 from .utils import writeRst
+
 
 class MMEngine:
     def __init__(self, options):
@@ -108,9 +111,7 @@ class MMEngine:
                 frames.append(randint(self.startIndex, self.endIndex))
         else:
             for i in range(self.options["conformers"]):
-                frames.append(
-                    randint(self.startIndex, self.splitIndex - 1)
-                )
+                frames.append(randint(self.startIndex, self.splitIndex - 1))
             for i in range(self.options["nvalids"] * self.options["conformers"]):
                 frames.append(randint(self.splitIndex, self.endIndex))
         return frames
@@ -133,10 +134,10 @@ class MMEngine:
     def getMMSamples(self):
         self.setup()
         frames = self.getFrames()
-        name = str(frames[0])
+        str(frames[0])
         if not os.path.isdir("train"):
             os.mkdir("train")
-            trainFrames = frames[:self.options['conformers']]
+            trainFrames = frames[: self.options["conformers"]]
             for frame in trainFrames:
                 self.getFrame(frame, os.path.join("train", f"{str(frame)}.rst7"))
             os.chdir("train")
@@ -146,13 +147,17 @@ class MMEngine:
                 f.write("Remove this file\n")
                 f.write("If you want to force a recalculation of the MM sampling")
             os.chdir("..")
-        for i in range(1,self.options["nvalids"]+1):
+        for i in range(1, self.options["nvalids"] + 1):
             validName = f"valid_{str(i)}"
             if not os.path.isdir(validName):
                 os.mkdir(validName)
-                validFrames = frames[i * self.options['conformers'] : (i+1) * self.options['conformers']]
+                validFrames = frames[
+                    i
+                    * self.options["conformers"] : (i + 1)
+                    * self.options["conformers"]
+                ]
                 for frame in validFrames:
-                    self.getFrame(frame, os.path.join(validName,f"{str(frame)}.rst7"))
+                    self.getFrame(frame, os.path.join(validName, f"{str(frame)}.rst7"))
                 os.chdir(validName)
                 self.sample(validFrames, self.options["validMdin"])
                 with open("MMFinished.txt", "w") as f:
@@ -189,12 +194,12 @@ class MMEngine:
                 for g in os.listdir(f):
                     if g.endswith("rst7") and "heat" not in g and "_" not in g:
                         conformers.append(g)
-                if len(conformers) < self.options['conformers']:
+                if len(conformers) < self.options["conformers"]:
                     rmtree(f)
                     continue
                 redoFrames = []
                 for conformer in conformers:
-                    name = conformer.split('.')[0]
+                    name = conformer.split(".")[0]
                     if not os.path.isfile(os.path.join(f, f"{name}.nc")):
                         redoFrames.append(int(name))
                 if len(redoFrames) > 0:
@@ -206,18 +211,22 @@ class MMEngine:
                     self.sample(redoFrames, mdin)
                     os.chdir("..")
                 else:
-                    with open(os.path.join(f, "MMFinished.txt"),'w') as f:
+                    with open(os.path.join(f, "MMFinished.txt"), "w") as f:
                         f.write("MM sampling finished")
                         f.write("Remove this file and the .nc files\n")
-                        f.write("If you want to force a recalculation of the MM sampling")
+                        f.write(
+                            "If you want to force a recalculation of the MM sampling"
+                        )
 
         self.getMMSamples()
+
 
 class AmberEngine(MMEngine):
     def __init__(self, options):
         super().__init__(options)
         inputs = sander.gas_input()
         sander.setup(prmtop, options["coordinates"], None, inputs)
+
 
 class ExternalAmberEngine(MMEngine):
     def __init__(self, options):
@@ -256,9 +265,13 @@ class ExternalAmberEngine(MMEngine):
             if self.amberExe == "pmemd.cuda":
                 print("pmemd.cuda failed; trying MM sampling with pmemd")
                 self.amberExe = "pmemd"
-                self.runSander(prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=mdvels)
+                self.runSander(
+                    prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=mdvels
+                )
             else:
-                raise RuntimeError(f"MM dynamics with input {mdin} failed in {os.getcwd()}")
+                raise RuntimeError(
+                    f"MM dynamics with input {mdin} failed in {os.getcwd()}"
+                )
 
     def sample(self, frames, mdin):
         pdbIndex = 1
@@ -294,12 +307,15 @@ class ExternalAmberEngine(MMEngine):
                 )
             except Exception as e:
                 print(e)
-                raise RuntimeError(f"Error in trajectory postprocessing in {os.getcwd()}")
+                raise RuntimeError(
+                    f"Error in trajectory postprocessing in {os.getcwd()}"
+                )
             newPdbIndex = 1
             while os.path.isfile(f"{name}.pdb.{str(newPdbIndex)}"):
                 os.system(f"mv {name}.pdb.{str(newPdbIndex)} {str(pdbIndex)}.pdb")
                 pdbIndex += 1
                 newPdbIndex += 1
+
 
 class ExternalOpenMMEngine(MMEngine):
     def __init__():
