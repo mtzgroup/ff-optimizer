@@ -26,7 +26,6 @@ def test_initResp():
     assert qccloudEngine.keywords["resp"] == "yes"
     assert qccloudEngine.backupKeywords["resp"] == "yes"
 
-
 def test_getQMRefData(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     qccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")

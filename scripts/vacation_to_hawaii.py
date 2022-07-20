@@ -10,7 +10,6 @@ from ff_optimizer import active_learning, model
 
 # Some helper functions
 
-
 def checkArgs(args):
     # Check for necessary folders and files
     # TODO: Make these the proper errors, and just put it in a function
@@ -82,10 +81,7 @@ def checkArgs(args):
     if args.qmengine == "queue":
         if not os.path.isfile(os.path.join(args.sampledir, args.sbatch)):
             raise RuntimeError(
-                "Sbatch template "
-                + args.sbatch
-                + " does not exist in "
-                + args.sampledir
+                "Sbatch template " + args.sbatch + " does not exist in " + args.sampledir
             )
         if not os.path.isfile(os.path.join(args.sampledir, args.tctemplate)):
             raise RuntimeError(
@@ -101,7 +97,6 @@ def checkArgs(args):
                 + " does not exist in "
                 + args.sampledir
             )
-
         if (
             args.qmengine != "queue"
             and args.qmengine != "debug"
@@ -130,7 +125,6 @@ def checkArgs(args):
                     + " does not exist in "
                     + args.sampledir
                 )
-
         if args.mmengine != "amber":
             raise ValueError(f"MM Engine {args.mmengine} is unsupported!")
         if args.nvalids < 1:
@@ -157,7 +151,6 @@ def checkArgs(args):
         if args.activeLearning < 1:
             raise ValueError("activeLearning must be a positive integer")
 
-
 if __name__ == "__main__":
     # Summary stuff
     summary = dedent(
@@ -182,6 +175,7 @@ if __name__ == "__main__":
         -- Backup TeraChem input file if job fails (tc_template_long.in)
         -- sbatch template file for queue (sbatch_template.sh)
     """
+
     )
     parser = argparse.ArgumentParser(
         epilog=summary, formatter_class=argparse.RawDescriptionHelpFormatter

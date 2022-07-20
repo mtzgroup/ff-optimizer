@@ -14,9 +14,11 @@ class OptEngine:
 
     # We assume __init__ and all the functions it calls run from the top directory in the optimization
     def __init__(self, options):
+        self.home = os.getcwd()
         self.optdir = options["optdir"]
         self.resp = options["resp"]
         self.respPriors = None
+        self.leap = "setup.leap"
         if options["resp"] != 0:
             self.doResp = True
         else:
@@ -50,6 +52,15 @@ class OptEngine:
             raise RuntimeError(
                 f"Frcmod {self.frcmod} specified in opt_0.in is not in {self.optdir}"
             )
+        os.chdir(self.optdir)
+        os.system(f"tleap -f {self.leap} > leap.out")
+        self.prmtop = None
+        for f in os.listdir():
+            if f.endswith(".prmtop"):
+                self.prmtop = f
+        if self.prmtop == None:
+            raise RuntimeError(f"Leap script did not produce a .prmtop file!")
+        os.chdir(self.home)
 
         # Initialize RESP priors
         if options["respPriors"] != 0:
@@ -57,6 +68,7 @@ class OptEngine:
             respOptions["sampledir"] = options["sampledir"]
             respOptions["mol2"] = os.path.join(self.optdir, self.mol2)
             respOptions["mode"] = options["respPriors"]
+            respOptions["prmtop"] = os.path.join(self.optdir, self.prmtop)
             self.respPriors = resp_prior.RespPriors(respOptions)
 
         self.train = []

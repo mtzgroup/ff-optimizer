@@ -148,9 +148,6 @@ class QMEngine:
                 result = AtomicResult(**json_loads(f.read()))
             except Exception as e:
                 print(e)
-                import pdb
-
-                pdb.set_trace()
                 result = FailedOperation(**json_loads(f.read()))
 
         return result
