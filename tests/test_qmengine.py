@@ -1,8 +1,8 @@
 import os
 
 import numpy as np
+from chemcloud.models import AtomicResult
 from qcelemental.util.serialization import json_loads
-from tccloud.models import AtomicResult
 
 from ff_optimizer import qmengine, utils
 
@@ -111,14 +111,6 @@ class TestQMEngine:
         readSettings = qmEngine.readInputFile(testPath)
         os.remove(testPath)
         assert readSettings == inputSettings
-
-    # check that pdbs are read in correctly
-    def test_readPDB(self):
-        os.chdir(os.path.dirname(__file__))
-        qmengine.QMEngine("qmengine/tc.in", "qmengine/tc_backup.in")
-        testCoords = utils.readPDB("qmengine/test.pdb")
-        coords = np.loadtxt("qmengine/coords.txt").flatten()
-        assert checkUtils.checkArray(coords, testCoords)
 
     # check that settings are written out correctly
     def test_writeInputFile(self):

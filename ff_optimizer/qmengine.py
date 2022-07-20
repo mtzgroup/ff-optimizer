@@ -1,15 +1,14 @@
 import os
 import subprocess
+import traceback
 from time import sleep
 
 import numpy as np
+from chemcloud import CCClient
+from chemcloud.models import AtomicInput, AtomicResult, FailedOperation, to_file
 from qcelemental.models import Provenance
 from qcelemental.models.results import AtomicResultProperties
 from qcelemental.util.serialization import json_loads
-from tccloud import TCClient
-from tccloud.models import AtomicInput, AtomicResult, to_file, from_file, FailedOperation
-from tccloud.exceptions import TimeoutError
-import traceback
 
 from . import utils
 
@@ -149,7 +148,6 @@ class QMEngine:
                 result = AtomicResult(**json_loads(f.read()))
             except Exception as e:
                 print(e)
-                import pdb; pdb.set_trace()
                 result = FailedOperation(**json_loads(f.read()))
 
         return result
@@ -349,7 +347,7 @@ class DebugEngine(QMEngine):
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
 
 
-class TCCloudEngine(QMEngine):
+class CCCloudEngine(QMEngine):
     def __init__(
         self, inputFile: str, backupInputFile: str, batchSize=None, doResp=False
     ):
@@ -358,7 +356,7 @@ class TCCloudEngine(QMEngine):
         else:
             self.batchSize = batchSize
         self.retries = 5
-        self.client = TCClient()
+        self.client = CCClient()
         super().__init__(inputFile, backupInputFile, doResp)
         self.keywords = {}
         self.backupKeywords = {}
@@ -388,11 +386,11 @@ class TCCloudEngine(QMEngine):
                     self.backupKeywords[setting[0]] = keyword
         if doResp:
             self.keywords["resp"] = "yes"
-            #self.keywords["esp_restraint_a"] = "0"
-            #self.keywords["esp_restraint_b"] = "0"
+            # self.keywords["esp_restraint_a"] = "0"
+            # self.keywords["esp_restraint_b"] = "0"
             self.backupKeywords["resp"] = "yes"
-            #self.backupKeywords["esp_restraint_a"] = "0"
-            #self.backupKeywords["esp_restraint_b"] = "0"
+            # self.backupKeywords["esp_restraint_a"] = "0"
+            # self.backupKeywords["esp_restraint_b"] = "0"
 
     def computeBatch(self, atomicInputs: list):
         status = 0
@@ -449,7 +447,9 @@ class TCCloudEngine(QMEngine):
                     keywords=keywords,
                     id=jobId,
                     protocols={"native_files": "all"},
-                    extras={"tcfe:keywords": {"native_files": ["esp.xyz"]}},
+                    extras={
+                        "tcfe:keywords": {"native_files": ["esp.xyz"], "stdout": True}
+                    },
                 )
             else:
                 atomicInput = AtomicInput(
@@ -466,7 +466,10 @@ class TCCloudEngine(QMEngine):
         if result.success:
             json = f"tc_{str(result.id)}.json"
         else:
-            json = f"tc_{str(result.input_data['id'])}.json"
+            jobId = result.input_data["id"]
+            if jobId is None:
+                jobId = result.input_data["input_data"]["id"]
+            json = f"tc_{str(jobId)}.json"
         with open(json, "w") as f:
             f.write(result.json())
         if self.doResp and result.success:
@@ -479,15 +482,19 @@ class TCCloudEngine(QMEngine):
     def runJobs(self, pdbs: list, useBackup=False):
         atomicInputs = self.createAtomicInputs(pdbs, useBackup=useBackup)
         status, results = self.computeBatch(atomicInputs)
+        if len(results) != len(atomicInputs):
+            raise RuntimeError(
+                "TCCloud did not return the same number of results as inputs"
+            )
         retryPdbs = []
         for result in results:
             self.writeResult(result)
             if not result.success:
                 jobId = result.input_data["id"]
-                retryPdbs.append(f"{jobId}.pdb")
                 if jobId is None:
                     print("Oops")
                     jobId = result.input_data["input_data"]["id"]
+                retryPdbs.append(f"{jobId}.pdb")
 
         if status == -1:
             raise RuntimeError(
@@ -499,13 +506,13 @@ class TCCloudEngine(QMEngine):
         cwd = os.getcwd()
         os.chdir(calcDir)
         retryPdbs = self.runJobs(pdbs)
+        print(retryPdbs)
         for _ in range(self.retries):
             if len(retryPdbs) == 0:
                 break
-            retryPdbs = self.runJobs(pdbs,useBackup=True)
-        #import pdb; pdb.set_trace()
+            retryPdbs = self.runJobs(retryPdbs, useBackup=True)
         if len(retryPdbs) > 0:
-            #for result in [self.readResult(f"tc_{pdb.split('.')[0]}.json") for pdb in retryPdbs]:
+            # for result in [self.readResult(f"tc_{pdb.split('.')[0]}.json") for pdb in retryPdbs]:
             #    print(
             #        f"Job id {result.input_data['id']} suffered a {result.error.error_type}"
             #    )

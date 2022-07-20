@@ -4,16 +4,159 @@ from qcelemental.models import Molecule
 from . import units
 
 
+def convertTCtoFB(
+    tcout, coors, stride, start=None, end=None, qdata="qdata.txt", mdcrd="all.mdcrd"
+):
+
+    molSize = 0
+    coords = []
+    frame = []
+    energies = []
+    grads = []
+    coordIndex = []
+    gradIndex = []
+    lineCounter = 0
+    frameStart = -1
+    coorEnergies = []
+
+    with open(coors, "r") as f:
+        maxFrame = -1
+        for line in f.readlines():
+            splitLine = line.split()
+            if lineCounter == 0:
+                molSize = int(splitLine[0])
+            if lineCounter == 1:
+                index = int(splitLine[2]) + 1  # coor files are 0-indexed
+                energy = splitLine[0]
+                if frameStart == -1:
+                    frameStart = index
+            elif lineCounter > 1 and lineCounter < molSize + 2:
+                for token in splitLine[1:]:
+                    frame.append(token)
+            if lineCounter == molSize + 1:
+                if index > maxFrame:
+                    maxFrame = index
+                    coords.append(frame)
+                    coordIndex.append(index)
+                    coorEnergies.append(energy)
+                else:
+                    j = len(coords) - 1
+                    while coordIndex[j] > index:
+                        j -= 1
+                    coords[j] = frame
+                    coordIndex[j] = index
+                    coorEnergies[j] = energy
+                frame = []
+                lineCounter = -1
+            lineCounter = lineCounter + 1
+
+    gradCounter = molSize + 37
+    index = 0
+    frameStart = -1
+
+    with open(tcout, "r") as f:
+        maxFrame = -1
+        for line in f.readlines():
+            if "MD STEP" in line:
+                index = int(line.split()[4])
+                if frameStart == -1:
+                    if len(grads) > 0:
+                        frameStart = index - 1  # first step is unnumbered "step 0"
+                        gradIndex[0] = index - 1
+                    else:
+                        frameStart = index
+            if "FINAL ENERGY" in line:
+                energy = float(line.split()[2])
+            if "Gradient units" in line:
+                gradCounter = 0
+                frame = []
+            if gradCounter < molSize + 2 and gradCounter > 2:
+                for token in line.split():
+                    frame.append(token)
+            if gradCounter == molSize + 2:
+                for token in line.split():
+                    frame.append(token)
+                if index > maxFrame:
+                    maxFrame = index
+                    grads.append(frame)
+                    gradIndex.append(index)
+                    energies.append(energy)
+                else:
+                    j = len(grads) - 1
+                    while gradIndex[j] > index:
+                        j -= 1
+                    grads[j] = frame
+                    gradIndex[j] = index
+                    energies[j] = energy
+            gradCounter = gradCounter + 1
+
+    if start == None:
+        start = gradIndex[0]
+    if end == None:
+        end = gradIndex[-1]
+
+    jobCounter = 0
+    indices = []
+    precision = len(coorEnergies[0].split(".")[1])
+    for i in range(len(gradIndex)):
+        for j in range(len(coordIndex)):
+            if gradIndex[i] == coordIndex[j]:
+                eFormat = "%." + str(precision) + "f"
+                gradEnergy = eFormat % energies[i]
+                if coorEnergies[j] != gradEnergy:
+                    # print("Mismatched energies in step " + str(gradIndex[i]))
+                    # raise RuntimeError("Mismatched energies from " + tcout + " and " + coors)
+                    break
+                indices.append([i, j])
+
+    usedIndices = []
+    lastFrame = -stride - 37
+    for i in range(len(indices)):
+        if gradIndex[indices[i][1]] >= start and gradIndex[indices[i][1]] <= end:
+            if gradIndex[indices[i][1]] - lastFrame >= stride:
+                lastFrame = gradIndex[indices[i][1]]
+                usedIndices.append(indices[i])
+
+    with open(qdata, "w") as f:
+        for j in usedIndices:
+            f.write("\n")
+            f.write("JOB " + str(jobCounter) + "\n")
+            coordLine = "COORDS "
+            for coord in coords[j[1]]:
+                coordLine = coordLine + str(coord) + " "
+            gradLine = "FORCES "
+            for grad in grads[j[0]]:
+                gradLine = gradLine + str(grad) + " "
+            f.write(coordLine + "\n")
+            f.write("ENERGY " + str(energies[j[0]]) + "\n")
+            f.write(gradLine + "\n")
+            jobCounter = jobCounter + 1
+
+    with open(mdcrd, "w") as f:
+        f.write("converted from TC with convertTCMDtoFB.py\n")
+        for j in usedIndices:
+            tokenCounter = 1
+            for coord in coords[j[1]]:
+                f.write("%8.3f" % float(coord))
+                if tokenCounter == 10:
+                    f.write("\n")
+                    tokenCounter = 1
+                else:
+                    tokenCounter = tokenCounter + 1
+            if tokenCounter != 1:
+                f.write("\n")
+    return jobCounter
+
+
 def readPDB(pdb: str):
     coords = []
     with open(pdb, "r") as f:
         for line in f.readlines():
             if line.startswith("ATOM") or line.startswith("HETATM"):
-                splitLine = line.split()
-                coords.append(splitLine[5])
-                coords.append(splitLine[6])
-                coords.append(splitLine[7])
-    return coords
+                coords.append(line[30:38].replace(" ", ""))
+                coords.append(line[38:46].replace(" ", ""))
+                coords.append(line[46:54].replace(" ", ""))
+    return np.asarray(coords, dtype=np.float32)
 
 
 def convertPDBtoMolecule(pdb: str):
@@ -22,9 +165,8 @@ def convertPDBtoMolecule(pdb: str):
     with open(pdb, "r") as f:
         for line in f.readlines():
             if line.startswith("ATOM") or line.startswith("HETATM"):
-                splitLine = line.split()
-                coords.append([splitLine[5], splitLine[6], splitLine[7]])
-                symbols.append(splitLine[-1])
+                coords.append([line[30:38].replace(" ", ""), line[38:46].replace(" ", ""), line[46:54].replace(" ", "")])
+                symbols.append(line.split()[-1])
     coords = np.asarray(coords, dtype=np.float32)
     # Molecule class by default has coordinates in bohr
     coords *= units.ANGSTROM_TO_AU
@@ -167,3 +309,25 @@ def writeRst(frame, natoms, dest):
             )
             if int(i / 2) * 2 != i:
                 f.write("\n")
+
+
+def writePDB(geometry, dest, template):
+    with open(template, "r") as f:
+        templateLines = f.readlines()
+
+    i = 0
+    with open(dest, "w") as f:
+        for line in templateLines:
+            if line.startswith("ATOM") or line.startswith("HETATM"):
+                f.write(
+                    "%s%8.3f%8.3f%8.3f%s"
+                    % (
+                        line[:38],
+                        geometry[i],
+                        geometry[i + 1],
+                        geometry[i + 2],
+                        line[54:],
+                    )
+                )
+            else:
+                f.write(line)
