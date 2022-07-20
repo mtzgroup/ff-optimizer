@@ -27,7 +27,7 @@ def test_initResp():
     assert qccloudEngine.backupKeywords["resp"] == "yes"
 
 
-def testGetQMRefData(monkeypatch):
+def test_getQMRefData(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     qccloudEngine = qmengine.TCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
     calcDir = "qccloudengine"
@@ -36,7 +36,7 @@ def testGetQMRefData(monkeypatch):
     for f in os.listdir(calcDir):
         if f.endswith("pdb"):
             pdbs.append(f)
-        if f.endswith("json"):
+        if f.endswith("json") and "success" not in f:
             jsons.append(f)
     results = []
     for json in jsons:
@@ -53,6 +53,7 @@ def testGetQMRefData(monkeypatch):
             retryResults.append(AtomicResult(**json_loads(f.read())))
 
     def monkeyCompute(atomicInputs):
+        print(len(atomicInputs))
         if len(atomicInputs) == 10:
             return 0, results
         else:
@@ -62,6 +63,7 @@ def testGetQMRefData(monkeypatch):
             assert atomicInputs[0].keywords["diismaxvecs"] == "40"
             for i in range(len(ids)):
                 assert ids[i] == refIds[i]
+            print(retryResults)
             return 0, retryResults
 
     def monkeyRead(*args):
@@ -121,6 +123,7 @@ def test_computeBatch(monkeypatch):
         if f.endswith("pdb"):
             pdbs.append(f)
     inputs = qccloudEngine.createAtomicInputs(pdbs)
+    print(inputs)
     monkeypatch.setattr(qccloudEngine.client, "compute", monkeyCompute)
 
     # Check default batch size
