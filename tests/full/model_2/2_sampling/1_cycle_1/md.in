@@ -1,0 +1,14 @@
+the samply sample thingy 
+&cntrl
+  imin=0,irest=1,ntx=5,
+  nstlim=1000,dt=0.0005,
+  ntc=1,ntf=1,
+  cut=999, ntb=0,
+  ntpr=100, ntwx=100,
+  ntwv=1000,
+  ntt=0, 
+  ntr=0,
+  nmropt=0,
+  ig=333333,
+  igb=6,
+/

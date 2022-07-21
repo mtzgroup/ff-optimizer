@@ -1,0 +1,40 @@
+-I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/prep to search path.
+-I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/lib to search path.
+-I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/parm to search path.
+-I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/cmd to search path.
+-f: Source setup.leap.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: ./setup.leap
+Loading parameters: ./sol.frcmod
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP4PEW
+Loading Mol2 file: ./sol.mol2
+Reading MOLECULE named SOL
+Loading PDB file: ./conf.pdb
+  total atoms in file: 6
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 0 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	SOL	2
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 0; Notes = 0.

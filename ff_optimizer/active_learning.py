@@ -8,29 +8,55 @@ import sander
 from .model import AbstractModel, Model
 from .utils import readPDB, writePDB
 
-# from multiprocessing import Pool
+from multiprocessing import Pool
 # from time import perf_counter
 
+def mmSampleStar(args):
+    mmSampleParallel(*args)
+
+def mmSampleParallel(model, folder, i):
+    os.chdir(folder)
+    model.doMMSampling(i)
+
+def paramOptStar(args):
+    result = paramOptParallel(*args)
+    return result
+
+def paramOptParallel(model, folder, i):
+    os.chdir(folder)
+    result = model.doParameterOptimization(i)
+    return result 
 
 def sanderEnergyForce(geometry):
     sander.set_positions(geometry)
     energy, force = sander.energy_forces()
     return [energy.tot, force]
 
-
 class ActiveLearningModel(AbstractModel):
     def __init__(self, args):
         self.home = os.getcwd()
         self.nmodels = args.activeLearning
+        self.nthreads = min(os.cpu_count(), self.nmodels)
         self.models = []
         # account for the fact that models are in self.home/model_{i}
         args.dynamicsdir = os.path.join("..", args.dynamicsdir)
+        os.chdir(args.optdir)
+        os.system(f"tleap -f setup.leap > leap.out")
+        self.prmtop = None
+        for f in os.listdir():
+            if f.endswith(".prmtop"):
+                self.prmtop = f
+        if self.prmtop == None:
+            raise RuntimeError("setup.leap file did not produce a .prmtop file")
+        os.chdir(self.home)
         for i in range(1, self.nmodels + 1):
             folder = f"model_{str(i)}"
             if not os.path.isdir(folder):
                 os.mkdir(folder)
-            copytree(args.optdir, os.path.join(folder, args.optdir))
-            copytree(args.sampledir, os.path.join(folder, args.sampledir))
+            if not os.path.isdir(os.path.join(folder, args.optdir)):
+                copytree(args.optdir, os.path.join(folder, args.optdir))
+            if not os.path.isdir(os.path.join(folder, args.sampledir)):
+                copytree(args.sampledir, os.path.join(folder, args.sampledir))
             os.chdir(folder)
             self.models.append(Model(args))
             os.chdir(self.home)
@@ -40,32 +66,42 @@ class ActiveLearningModel(AbstractModel):
     def initialCycle(self):
         for i in range(1, self.nmodels + 1):
             os.chdir(f"model_{str(i)}")
-            models[i-1].initialCycle()
-            os.chdir(home)
+            self.models[i-1].initialCycle()
+            os.chdir(self.home)
 
     def doMMSampling(self, i):
-        for j in range(1, self.nmodels + 1):
-            os.chdir(f"model_{str(j)}")
-            models[j-1].doMMSampling(i)
-            os.chdir(home)
+        ## serial code
+        #for j in range(1, self.nmodels + 1):
+        #    os.chdir(f"model_{str(j)}")
+        #    models[j-1].doMMSampling(i)
+        #    os.chdir(home)
+        tasks = [(self.models[j], f"model_{str(j+1)}", i) for j in range(self.nmodels)]
+        with Pool(self.nthreads) as p:
+            results = p.map(mmSampleStar, tasks)
         self.doActiveLearning(i)
 
     def doQMCalculations(self, i):
         for j in range(1, self.nmodels + 1):
             os.chdir(f"model_{str(j)}")
-            models[j-1].doQMCalculations(i)
-            os.chdir(home)
+            self.models[j-1].doQMCalculations(i)
+            os.chdir(self.home)
 
     def doParameterOptimization(self, i):
         # serial code
-        optResults = []
-        for i in range(1, self.nmodels + 1):
-            os.chdir(f"model_{str(i)}")
-            result = models[i].doParameterOptimization(i)
-            optResults.append(result)
-            os.chdir(home)
+        #optResults = []
+        #for i in range(1, self.nmodels + 1):
+        #    os.chdir(f"model_{str(i)}")
+        #    result = models[i].doParameterOptimization(i)
+        #    optResults.append(result)
+        #    os.chdir(home)
+        ## for now we arbitrarily print only the first model's info
+        #return optResults[0]
+        tasks = [(self.models[j], f"model_{str(j+1)}",i) for j in range(self.nmodels)]
+        with Pool(self.nthreads) as p:
+            results = p.map(paramOptStar, tasks)
+
         # for now we arbitrarily print only the first model's info
-        return optResults[0]
+        return results[0]
         
 
 
@@ -78,8 +114,9 @@ class ActiveLearningModel(AbstractModel):
             )
             for k in range(self.nmodels)
         ]
+            
         prmtops = [
-            os.path.join(sampleDirs[k], self.models[k].mmEngine.prmtop)
+            os.path.join(sampleDirs[k], self.prmtop)
             for k in range(self.nmodels)
         ]
         dirs = ["train"]
@@ -154,7 +191,6 @@ class ActiveLearningModel(AbstractModel):
 
     def chooseGeometries(self, energies, forces):
         geomsNeeded = int(energies.shape[1] / self.nmodels)
-        print(geomsNeeded)
         if self.nmodels == 2:
             # energySpread = np.abs(energies[0,:] - energies[1,:])
             forceSpread = np.linalg.norm(forces[0, :, :] - forces[1, :, :], axis=1)

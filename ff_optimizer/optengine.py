@@ -236,7 +236,6 @@ class OptEngine:
             diff = np.abs(results["params"] - results["initialParams"]) / np.maximum(
                 results["params"], results["initialParams"]
             )
-            print(diff)
             if np.argwhere(diff > upperThreshold).shape[0] > 0:
                 adaptiveDamping *= 2
                 changeParameter(testFile, "adaptive_damping", str(adaptiveDamping))

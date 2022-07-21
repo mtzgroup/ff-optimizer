@@ -205,6 +205,7 @@ def test_doActiveLearning(monkeypatch):
     )
     args = FakeArgs()
     model = active_learning.ActiveLearningModel(args)
+    model.prmtop = "amber.prmtop"
     for i in range(1, 4):
         for folder in ["train", "valid_1", "valid_2"]:
             copyfile(
@@ -269,6 +270,7 @@ def test_init(monkeypatch):
         if os.path.isdir(f"model_{i}"):
             rmtree(f"model_{i}")
     mod = active_learning.ActiveLearningModel(args)
+    os.remove("leap.out")
     assert mod.restartCycle == 2
     for i in range(1, 4):
         assert os.path.isfile(os.path.join(f"model_{i}", "1_opt", "opt_0.in"))

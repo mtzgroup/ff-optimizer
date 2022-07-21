@@ -1,5 +1,0 @@
-Nvidia GPUs detected; defaulting to pmemd.cuda
-  Epoch     Validation    Valid ratio    Current-Previous   Current-last Current MM time QM time FB time
-[]
-[]
-      1     2.01515540     0.99128417         -0.00145400                           11.4     7.7    31.2

@@ -1,0 +1,11 @@
+$options
+jobtype             single
+forcefield          sol.frcmod sol.mol2
+backup              false
+$end
+
+$target
+type                abinitio_amber
+name                valid_1
+amber_leapcmd       setup.leap
+$end
