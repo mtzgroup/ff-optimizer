@@ -132,7 +132,7 @@ class MMEngine:
         writeRst(frame, natoms, dest)
 
     def getMMSamples(self):
-        self.setup()
+        self.prmtop = self.setup()
         frames = self.getFrames()
         name = str(frames[0])
         if not os.path.isdir("train"):
@@ -185,18 +185,19 @@ class MMEngine:
     # This is hard-coded to use Amber
     def setup(self):
         os.system(f"tleap -f {self.options['leap']} > leap.out")
-        self.prmtop = None
+        prmtop = None
         for f in os.listdir():
             if f.endswith(".prmtop"):
-                self.prmtop = f
-        if self.prmtop == None:
+                prmtop = f
+        if prmtop == None:
             raise RuntimeError(
                 f"Tleap failed to create a new .prmtop file, check {os.path.join(os.getcwd(),'leap.out')} for more information"
             )
+        return prmtop
 
     # This function is currently hard-coded to use .nc trajectory files
     def restart(self):
-        self.setup()
+        self.prmtop = self.setup()
         for f in os.listdir():
             if os.path.isdir(f):
                 # Skip finished jobs

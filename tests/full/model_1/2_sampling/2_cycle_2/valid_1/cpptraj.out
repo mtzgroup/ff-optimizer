@@ -1,0 +1,31 @@
+
+CPPTRAJ: Trajectory Analysis. V4.26.4 (AmberTools V20.04)
+    ___  ___  ___  ___
+     | \/ | \/ | \/ | 
+    _|_/\_|_/\_|_/\_|_
+
+| Date/time: 07/20/22 22:27:48
+| Available memory: 16.692 GB
+
+	Reading '../water.prmtop' as Amber Topology
+	Radius Set: modified Bondi radii (mbondi)
+INPUT: Reading input from 'cpptraj.in'
+  [loadcrd 1.nc coors]
+	Reading '1.nc' as Amber NetCDF
+Warning: COORDS data sets do not store times.
+	Loading trajectory '1.nc' as 'coors'
+----- 1.nc (1-10, 1) -----
+  [crdout coors 1.pdb multi]
+	Using set 'coors'
+----- coors (1-10, 1) -----
+	Writing '1.pdb' as PDB
+  '1.pdb' is a PDB file (1 file per frame), Parm water.prmtop: Writing 10 frames (1-Last, 1)
+ 0% 11% 22% 33% 44% 56% 67% 78% 89% 100% Complete.
+  [exit]
+TIME: Total execution time: 0.0156 seconds.
+--------------------------------------------------------------------------------
+To cite CPPTRAJ use:
+Daniel R. Roe and Thomas E. Cheatham, III, "PTRAJ and CPPTRAJ: Software for
+  Processing and Analysis of Molecular Dynamics Trajectory Data". J. Chem.
+  Theory Comput., 2013, 9 (7), pp 3084-3095.
+

@@ -1,0 +1,9 @@
+REMARK   1 CREATED WITH FORCEBALANCE 2018-02-16
+CRYST1    3.000    3.000    3.000  90.00  90.00  90.00 P 1           1 
+HETATM    1  OW  SOL A   1       0.749  -1.376  -0.337  1.00  0.00           O  
+HETATM    2  HW1 SOL A   1      -0.067  -0.944  -0.100  1.00  0.00           H  
+HETATM    3  HW2 SOL A   1      -0.078  -1.250  -0.861  1.00  0.00           H  
+HETATM    4  OW  SOL A   2      -1.287   0.378  -0.942  1.00  0.00           O  
+HETATM    5  HW1 SOL A   2      -0.843   0.990  -0.352  1.00  0.00           H  
+HETATM    6  HW2 SOL A   2      -1.644   1.262  -0.845  1.00  0.00           H  
+TER      19      SOL A   6

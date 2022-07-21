@@ -1,0 +1,22 @@
+$options
+jobtype             single
+forcefield          initial_sol.frcmod initial_sol.mol2
+backup              false
+$end
+
+
+$target
+type                  abinitio_amber        # The target type; fitting ab initio data using Amber
+name valid_1                       # Also the subdirectory containing data within "targets"
+weight                1.0                   # Weight of this target relative to others
+writelevel            1                     # Amount of data printed to temp directory
+amber_leapcmd         setup_valid_initial.leap
+$end
+
+$target
+type                  abinitio_amber        # The target type; fitting ab initio data using Amber
+name valid_2                       # Also the subdirectory containing data within "targets"
+weight                1.0                   # Weight of this target relative to others
+writelevel            1                     # Amount of data printed to temp directory
+amber_leapcmd         setup_valid_initial.leap
+$end
