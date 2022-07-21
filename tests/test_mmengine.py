@@ -219,6 +219,8 @@ def test_restart3(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getFrames", monkeyGetFrames)
     options["nvalids"] = 2
     options["conformers"] = 2
+    if not os.path.isdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart3")):
+        os.mkdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart3"))
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart3"))
     mmEngine = mmengine.MMEngine(options)
 

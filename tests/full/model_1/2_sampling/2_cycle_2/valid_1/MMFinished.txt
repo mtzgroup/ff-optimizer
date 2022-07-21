@@ -1,0 +1,2 @@
+MM sampling finishedRemove this file
+If you want to force a recalculation of the MM sampling

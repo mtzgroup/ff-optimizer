@@ -318,16 +318,20 @@ def writePDB(geometry, dest, template):
     i = 0
     with open(dest, "w") as f:
         for line in templateLines:
+            if i > len(geometry):
+                break
             if line.startswith("ATOM") or line.startswith("HETATM"):
                 f.write(
                     "%s%8.3f%8.3f%8.3f%s"
                     % (
-                        line[:38],
+                        line[:30],
                         geometry[i],
                         geometry[i + 1],
                         geometry[i + 2],
                         line[54:],
                     )
                 )
+                i += 3
+
             else:
                 f.write(line)

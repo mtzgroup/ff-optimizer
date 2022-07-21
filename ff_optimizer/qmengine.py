@@ -506,7 +506,6 @@ class CCCloudEngine(QMEngine):
         cwd = os.getcwd()
         os.chdir(calcDir)
         retryPdbs = self.runJobs(pdbs)
-        print(retryPdbs)
         for _ in range(self.retries):
             if len(retryPdbs) == 0:
                 break
