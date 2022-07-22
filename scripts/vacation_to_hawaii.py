@@ -69,8 +69,8 @@ def checkArgs(args):
             "No sander input file for sampling named md.in provided in "
             + args.sampledir
         )
-    if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
-        raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
+    #if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
+    #    raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
 
     if (
         args.qmengine != "queue"
