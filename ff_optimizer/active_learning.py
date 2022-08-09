@@ -40,6 +40,7 @@ class ActiveLearningModel(AbstractModel):
         self.models = []
         # account for the fact that models are in self.home/model_{i}
         args.dynamicsdir = os.path.join("..", args.dynamicsdir)
+        args.nvalids = args.activeLearning - 1
         os.chdir(args.optdir)
         os.system(f"tleap -f setup.leap > leap.out")
         self.prmtop = None

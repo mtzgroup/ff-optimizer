@@ -232,5 +232,9 @@ class Model(AbstractModel):
         optResults.append(self.optEngine.valid[-1] / self.optEngine.validInitial[-1])
         optResults.append(self.optEngine.valid[-1] - self.optEngine.validPrevious[-1])
         if i > 1:
-            optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
+            try:
+                optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
+            except:
+                import pdb; pdb.set_trace()
+                
         return optResults
