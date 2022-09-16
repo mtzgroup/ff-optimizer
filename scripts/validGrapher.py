@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from shutil import rmtree
 
+
 mpl.use("Agg")
 
 # Some helper functions
@@ -104,7 +105,6 @@ def makeValidWeaves(validFile):
                     else:
                         v1.write("\n")
                         v2.write("\n")
-
 def splitValids(maxcycles):                        
     with open("valid_1/qdata.txt","r") as f:
         for line in f.readlines():
@@ -566,8 +566,3 @@ ax.set_xlabel("Optimization Cycle", size=17)
 ax.set_ylabel("Mean relative parameter change / %", size=17)
 plt.savefig("ParameterChange.png", bbox_inches="tight")
 plt.close()
-import os
-from shutil import rmtree
-import os
-from shutil import rmtree
-
