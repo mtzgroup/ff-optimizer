@@ -9,6 +9,7 @@ from time import sleep
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+from shutil import rmtree
 
 mpl.use("Agg")
 
@@ -103,7 +104,110 @@ def makeValidWeaves(validFile):
                     else:
                         v1.write("\n")
                         v2.write("\n")
-                        
+
+def splitValids(maxcycles):                        
+    with open("valid_1/qdata.txt","r") as f:
+        for line in f.readlines():
+            if "JOB" in line:
+                njobs = int(line.split()[1])
+    
+        halfjobs = int(njobs / 2)
+    with open("valid_1/all.mdcrd","r") as f:
+        nlines = len(f.readlines())
+    
+    for i in range(1,maxcycles+1):
+        folder = f"valid_{str(i)}"
+        folder1 = f"valid_{str(i)}_split1"
+        folder2 = f"valid_{str(i)}_split2"
+        if os.path.isdir(folder1):
+            rmtree(folder1)
+        if os.path.isdir(folder2):
+            rmtree(folder2)
+        os.mkdir(folder1)
+        os.mkdir(folder2)
+        os.system(f"cp {os.path.join(folder,'setup.leap')} {os.path.join(folder1,'.')}")
+        os.system(f"cp {os.path.join(folder,'conf.pdb')} {os.path.join(folder1,'.')}")
+        os.system(f"cp {os.path.join(folder,'setup.leap')} {os.path.join(folder2,'.')}")
+        os.system(f"cp {os.path.join(folder,'conf.pdb')} {os.path.join(folder2,'.')}")
+        switched = False
+        with open(os.path.join(folder,"qdata.txt"),'r') as f:
+            with open(os.path.join(folder1,"qdata.txt"),'w') as f1:
+                with open(os.path.join(folder2,"qdata.txt"),'w') as f2:
+                    for line in f.readlines():
+                        if f"JOB {str(halfjobs+1)}" in line:
+                            switched = True
+                        if switched:
+                            if "JOB" in line:
+                                number = int(line.split()[1]) - halfjobs
+                                f2.write(f"JOB {str(number)}\n")
+                            else:
+                                f2.write(line)
+                        else:
+                            f1.write(line)
+        oldMdcrd = os.path.join(folder,'all.mdcrd')
+        newMdcrd = os.path.join(folder1,'all.mdcrd')
+        os.system(f"head -n {str(int(nlines/2)+1)} {oldMdcrd} > {newMdcrd}")
+        newMdcrd = os.path.join(folder2,'all.mdcrd')
+        os.system(f"echo 'comment line' > {newMdcrd}")
+        os.system(f"tail -n {str(int(nlines/2))} {oldMdcrd} >> {newMdcrd}")
+
+def weaveValids(maxcycles):
+    for i in range(1,maxcycles+1):
+        folder = f"valid_{str(i)}"
+        folder1 = f"valid_{str(i)}_weave1"
+        folder2 = f"valid_{str(i)}_weave2"
+        if os.path.isdir(folder1):
+            rmtree(folder1)
+        if os.path.isdir(folder2):
+            rmtree(folder2)
+        os.mkdir(folder1)
+        os.mkdir(folder2)
+        os.system(f"cp {os.path.join(folder,'setup.leap')} {os.path.join(folder1,'.')}")
+        os.system(f"cp {os.path.join(folder,'conf.pdb')} {os.path.join(folder1,'.')}")
+        os.system(f"cp {os.path.join(folder,'setup.leap')} {os.path.join(folder2,'.')}")
+        os.system(f"cp {os.path.join(folder,'conf.pdb')} {os.path.join(folder2,'.')}")
+        write1 = False
+        with open(os.path.join(folder,"qdata.txt"),'r') as f:
+            with open(os.path.join(folder1,"qdata.txt"),'w') as f1:
+                with open(os.path.join(folder2,"qdata.txt"),'w') as f2:
+                    for line in f.readlines():
+                        if "JOB" in line:
+                            splitLine = line.split()
+                            line = line.replace(splitLine[1],str(int((int(splitLine[1])+1)/2)))
+                            if write1:
+                                write1 = False
+                            else:
+                                write1 = True
+                        if write1:
+                            f1.write(line)
+                        else:
+                            f2.write(line)
+        oldMdcrd = os.path.join(folder,'all.mdcrd')
+        mdcrd1 = os.path.join(folder1,'all.mdcrd')
+        mdcrd2 = os.path.join(folder2,'all.mdcrd')
+        firstLine = True
+        write1 = True
+        lineCounter = 1
+        with open(oldMdcrd,'r') as f:
+            with open(mdcrd1,'w') as f1:
+                with open(mdcrd2,'w') as f2:
+                    f1.write("Comment line\n")
+                    f2.write("Comment line\n")
+                    for line in f.readlines():
+                        if firstLine:
+                            firstLine = False
+                            continue
+                        if write1:
+                            f1.write(line)
+                        else:
+                            f2.write(line)
+                        lineCounter += 1
+                        if lineCounter == 27:
+                            lineCounter = 1
+                            if write1:
+                                write1 = False
+                            else:
+                                write1 = True
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -149,10 +253,6 @@ optCounter = 0
 for f in os.listdir(args.optdir):
     if "opt_" in f and ".out" in f:
         optCounter += 1
-
-##########
-optCounter = 25
-##########
 
 for i in range(optCounter + 1):
     optOutput = os.path.join(args.optdir, "opt_" + str(i) + ".out")
@@ -201,6 +301,9 @@ for i in range(1,totalCycles):
 
 
 if args.vsplit:
+    os.chdir(os.path.join(args.optdir, "targets"))
+    splitValids(totalCycles)
+    os.chdir("../..")
     for i in range(1,totalCycles + 1):
         if os.path.isfile(
             os.path.join(args.optdir, "valid_" + str(i) + "_split1.out")
@@ -241,6 +344,9 @@ validInitial1 = []
 validInitial2 = []
 #split initial
 if args.vsplit:
+    os.chdir(os.path.join(args.optdir, "targets"))
+    weaveValids(totalCycles)
+    os.chdir("../..")
     src = os.path.join(args.optdir,"*mol2") + " " + os.path.join(args.optdir,"*frcmod")
     os.system(f"cp {src} {os.path.join(args.optdir,'forcefield','.')}")
     for i in range(1,totalCycles + 1):
@@ -342,10 +448,8 @@ validw2 = np.asarray(validw2)
 validInitialw1 = np.asarray(validInitialw1)
 validInitialw2 = np.asarray(validInitialw2)
 # Graph results so far
-x = range(1, i + 1)
-# Graph results so far
-x = range(1, i + 1)
-x0 = np.arange(i + 2)
+x = range(1, len(valid) + 1)
+x0 = np.arange(len(valid) + 1)
 if i < 25:
     xticks = x0
 else:
@@ -462,3 +566,8 @@ ax.set_xlabel("Optimization Cycle", size=17)
 ax.set_ylabel("Mean relative parameter change / %", size=17)
 plt.savefig("ParameterChange.png", bbox_inches="tight")
 plt.close()
+import os
+from shutil import rmtree
+import os
+from shutil import rmtree
+
