@@ -655,8 +655,3 @@ ax.set_xlabel("Optimization Cycle", size=17)
 ax.set_ylabel("Mean relative parameter change / %", size=17)
 plt.savefig("ParameterChange.png", bbox_inches="tight")
 plt.close()
-import os
-from shutil import rmtree
-import os
-from shutil import rmtree
-
