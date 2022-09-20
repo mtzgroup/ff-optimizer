@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from shutil import rmtree
 
-
 mpl.use("Agg")
 
 # Some helper functions
@@ -105,6 +104,7 @@ def makeValidWeaves(validFile):
                     else:
                         v1.write("\n")
                         v2.write("\n")
+
 def splitValids(maxcycles):                        
     with open("valid_1/qdata.txt","r") as f:
         for line in f.readlines():
@@ -344,9 +344,6 @@ validInitial1 = []
 validInitial2 = []
 #split initial
 if args.vsplit:
-    os.chdir(os.path.join(args.optdir, "targets"))
-    weaveValids(totalCycles)
-    os.chdir("../..")
     src = os.path.join(args.optdir,"*mol2") + " " + os.path.join(args.optdir,"*frcmod")
     os.system(f"cp {src} {os.path.join(args.optdir,'forcefield','.')}")
     for i in range(1,totalCycles + 1):
@@ -373,14 +370,61 @@ if args.vsplit:
         validInitial1.append(v1)
         validInitial2.append(v2)
 
+validPrevious1 = []
+validPrevious2 = []
+if args.vsplit:
+    for i in range(1, totalCycles + 1):
+        if os.path.isfile(os.path.join(args.optdir, f"valid_{str(i)}_previous_split1.out")):
+            try:
+                v1 = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous_split1.out"))
+                v2 = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous_split2.out"))
+            except:
+                os.chdir(args.optdir)
+                src = os.path.join("result", f"opt_" + str(i-1), "*")
+                os.system(f"cp {src} forcefield/.")
+                os.system(f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_previous_split1.out")
+                os.system(f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_previous_split2.out")
+                v1 = readValid(f"valid_{str(i)}_previous_split1.out")
+                v2 = readValid(f"valid_{str(i)}_previous_split2.out")
+                os.chdir("..")
+        else:
+            os.chdir(args.optdir)
+            src = os.path.join("result", f"opt_" + str(i-1), "*")
+            os.system(f"cp {src} forcefield/.")
+            os.system(f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_previous_split1.out")
+            os.system(f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_previous_split2.out")
+            v1 = readValid(f"valid_{str(i)}_previous_split1.out")
+            v2 = readValid(f"valid_{str(i)}_previous_split2.out")
+            os.chdir("..")
+        validPrevious1.append(v1)
+        validPrevious2.append(v2)
+    
 valid1 = np.asarray(valid1)
 valid2 = np.asarray(valid2)
 validInitial1 = np.asarray(validInitial1)
 validInitial2 = np.asarray(validInitial2)
+validPrevious1 = np.asarray(validPrevious1)
+validPrevious2 = np.asarray(validPrevious2)
+
+if args.vsplit:
+    print("Valid split 1")
+    print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
+    print("%7d%15.8f%15.8f%20.8f" % (1,valid1[0],valid1[0]/validInitial1[0],valid1[0]-validPrevious1[0]))
+    for i in range(1,totalCycles):
+        print("%7d%15.8f%15.8f%20.8f%23.8f" % (i+1,valid1[i],valid1[i]/validInitial1[i],valid1[i]-validPrevious1[i],valid1[i]-valid1[i-1]))
+
+    print("Valid split 2")
+    print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
+    print("%7d%15.8f%15.8f%20.8f" % (1,valid2[0],valid2[0]/validInitial2[0],valid2[0]-validPrevious2[0]))
+    for i in range(1,totalCycles):
+        print("%7d%15.8f%15.8f%20.8f%23.8f" % (i+1,valid2[i],valid2[i]/validInitial2[i],valid2[i]-validPrevious2[i],valid2[i]-valid2[i-1]))
 
 validw1 = []
 validw2 = []
 if args.vweave:
+    os.chdir(os.path.join(args.optdir, "targets"))
+    weaveValids(totalCycles)
+    os.chdir("../..")
     for i in range(1,totalCycles + 1):
         if os.path.isfile(
             os.path.join(args.optdir, "valid_" + str(i) + "_weave1.out")
@@ -443,10 +487,55 @@ if args.vweave:
         validInitialw1.append(v1)
         validInitialw2.append(v2)
 
+validPreviousw1 = []
+validPreviousw2 = []
+if args.vsplit:
+    for i in range(1, totalCycles + 1):
+        if os.path.isfile(os.path.join(args.optdir, f"valid_{str(i)}_previous_weave1.out")):
+            try:
+                v1 = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous_weave1.out"))
+                v2 = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous_weave2.out"))
+            except:
+                os.chdir(args.optdir)
+                src = os.path.join("result", f"opt_" + str(i-1), "*")
+                os.system(f"cp {src} forcefield/.")
+                os.system(f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_previous_weave1.out")
+                os.system(f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_previous_weave2.out")
+                v1 = readValid(f"valid_{str(i)}_previous_weave1.out")
+                v2 = readValid(f"valid_{str(i)}_previous_weave2.out")
+                os.chdir("..")
+        else:
+            os.chdir(args.optdir)
+            src = os.path.join("result", f"opt_" + str(i-1), "*")
+            os.system(f"cp {src} forcefield/.")
+            os.system(f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_previous_weave1.out")
+            os.system(f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_previous_weave2.out")
+            v1 = readValid(f"valid_{str(i)}_previous_weave1.out")
+            v2 = readValid(f"valid_{str(i)}_previous_weave2.out")
+            os.chdir("..")
+        validPreviousw1.append(v1)
+        validPreviousw2.append(v2)
+
 validw1 = np.asarray(validw1)
 validw2 = np.asarray(validw2)
 validInitialw1 = np.asarray(validInitialw1)
 validInitialw2 = np.asarray(validInitialw2)
+validPreviousw1 = np.asarray(validPreviousw1)
+validPreviousw2 = np.asarray(validPreviousw2)
+
+if args.vsplit:
+    print("Valid weave 1")
+    print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
+    print("%7d%15.8f%15.8f%20.8f" % (1,validw1[0],validw1[0]/validInitialw1[0],validw1[0]-validPreviousw1[0]))
+    for i in range(1,totalCycles):
+        print("%7d%15.8f%15.8f%20.8f%23.8f" % (i+1,validw1[i],validw1[i]/validInitialw1[i],validw1[i]-validPreviousw1[i],validw1[i]-validw1[i-1]))
+
+    print("Valid weave 2")
+    print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
+    print("%7d%15.8f%15.8f%20.8f" % (1,validw2[0],validw2[0]/validInitialw2[0],validw2[0]-validPreviousw2[0]))
+    for i in range(1,totalCycles):
+        print("%7d%15.8f%15.8f%20.8f%23.8f" % (i+1,validw2[i],validw2[i]/validInitialw2[i],validw2[i]-validPreviousw2[i],validw2[i]-validw2[i-1]))
+
 # Graph results so far
 x = range(1, len(valid) + 1)
 x0 = np.arange(len(valid) + 1)
