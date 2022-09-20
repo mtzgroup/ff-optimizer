@@ -60,6 +60,8 @@ class ActiveLearningModel(AbstractModel):
                 copytree(args.sampledir, os.path.join(folder, args.sampledir))
             os.chdir(folder)
             self.models.append(Model(args))
+            # Want to sample multiple validation sets, but don't need to evaluate them all with QM
+            self.models[-1].optEngine.nvalids = 1
             os.chdir(self.home)
         self.restartCycle = min([model.restartCycle for model in self.models])
         self.templatePdb = os.path.join(args.optdir, "conf.pdb")

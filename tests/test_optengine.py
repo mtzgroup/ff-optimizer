@@ -36,6 +36,7 @@ def test_init1():
     options["respPriors"] = 0
     options["restart"] = False
     options["maxCycles"] = 10
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
 
     assert not optEngine.doResp
@@ -101,6 +102,7 @@ def test_init2():
     options["restart"] = False
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
 
     assert not optEngine.doResp
@@ -172,6 +174,7 @@ def test_init1_RESP():
     options["restart"] = False
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
 
     assert optEngine.doResp
@@ -238,6 +241,7 @@ def test_readOpt1():
     options["restart"] = False
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
 
@@ -253,6 +257,7 @@ def test_readOpt2():
     options["restart"] = False
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
 
@@ -268,6 +273,7 @@ def test_readOpt3():
     options["restart"] = False
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
 
@@ -303,6 +309,7 @@ def test_addTargetLines1():
     options["restart"] = False
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     copyfile("opt_4.in", "opt_4_2.in")
@@ -323,6 +330,7 @@ def test_addTargetLines2():
     options["restart"] = False
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     copyfile("opt_4.in", "opt_5.in")
@@ -351,6 +359,7 @@ def test_readValid1():
     options["restart"] = False
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     test = optEngine.readValid("valid.out")
@@ -365,6 +374,7 @@ def test_readValid2():
     options["restart"] = False
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     try:
@@ -382,6 +392,7 @@ def test_setupInputFiles():
     options["restart"] = False
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     optEngine.optdir = "."
@@ -444,6 +455,7 @@ def test_optimizeForcefield0(monkeypatch):
     options["restart"] = False
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForceBalance)
     os.chdir("opt1")
@@ -477,6 +489,7 @@ def test_optimizeForcefield1(monkeypatch):
     options["restart"] = True
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForceBalance)
     monkeypatch.setattr(optEngine, "graphResults", monkeyGraph)
@@ -523,6 +536,7 @@ def test_determineRestart1():
     options["restart"] = True
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     assert optEngine.restartCycle == 3
@@ -537,6 +551,7 @@ def test_determineRestart2():
     options["restart"] = True
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     assert optEngine.restartCycle == 2
@@ -551,6 +566,7 @@ def test_determineRestart3():
     options["restart"] = True
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     assert optEngine.restartCycle == 2
@@ -567,6 +583,7 @@ def test_sortParams1():
     options["restart"] = True
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     assert optEngine.labels[0] == "BONDSK/cy-c3"
@@ -585,6 +602,7 @@ def test_sortParams2():
     options["restart"] = True
     options["maxCycles"] = 10
     options["respPriors"] = 0
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     refParams = [1.6289e-01, 1.6289e-01, 1.4744e-01, 1.4744e-01, 1.4744e-01]
@@ -604,6 +622,7 @@ def test_respPriors(monkeypatch):
     options["resp"] = 0
     options["restart"] = True
     options["maxCycles"] = 10
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     optEngine.respPriors.allResp
     monkeypatch.setattr(os, "system", monkeyForceBalance)
@@ -646,6 +665,7 @@ def test_restartResp():
     options["maxCycles"] = 10
     options["respPriors"] = 1
     options["sampledir"] = os.path.join("..", "resp", "sample")
+    options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     arr = np.asarray(optEngine.respPriors.allResp, dtype=np.float32)

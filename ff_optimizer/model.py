@@ -65,6 +65,7 @@ class Model(AbstractModel):
         optOptions["resp"] = args.resp
         optOptions["maxCycles"] = args.maxcycles
         optOptions["restart"] = args.restart
+        optOptions["nvalids"] = args.nvalids
         optEngine = optengine.OptEngine(optOptions)
         return optEngine
 

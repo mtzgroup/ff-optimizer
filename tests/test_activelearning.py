@@ -259,7 +259,12 @@ def test_doActiveLearning(monkeypatch):
 
 def monkeyInitModel(self, args):
     self.restartCycle = random.randint(1, 10)
+    options = {"nvalids" : 1}
+    class monkeyOpt():
+        def __init__(self, options):
+            self.options = options
 
+    self.optEngine = monkeyOpt(options)
 
 def test_init(monkeypatch):
     monkeypatch.setattr(model.Model, "__init__", monkeyInitModel)
@@ -270,7 +275,9 @@ def test_init(monkeypatch):
         if os.path.isdir(f"model_{i}"):
             rmtree(f"model_{i}")
     mod = active_learning.ActiveLearningModel(args)
-    os.remove("leap.out")
+    for i in range(1, 4):
+        os.remove(os.path.join(f"model_{i}","1_opt","leap.out"))
+    os.remove(os.path.join("1_opt","leap.out"))
     assert mod.restartCycle == 2
     for i in range(1, 4):
         assert os.path.isfile(os.path.join(f"model_{i}", "1_opt", "opt_0.in"))
