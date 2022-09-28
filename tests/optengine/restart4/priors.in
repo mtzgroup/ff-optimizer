@@ -1,0 +1,81 @@
+$options
+jobtype             NewtonRaphson
+forcefield          dasa.frcmod dasa.mol2
+penalty_additive    0.01
+penalty_type        L2
+verbose_options     true
+backup              false
+constrain_charge    true
+priors
+BONDSK                               : 2.0e+04
+BONDSB                               : 1.0e-01
+ANGLESK                              : 2.0e+02
+ANGLESB                              : 1.0e+02
+PDIHS1K                              : 1.0e+02
+PDIHS2K                              : 4.0e+01
+PDIHS3K                              : 1.0e+01
+IDIHSK                               : 2.0e+01
+COUL:DAS-1 : 0.5594649910926819
+COUL:DAS-2 : 0.0743226706981659
+COUL:DAS-3 : 0.10687293857336044
+COUL:DAS-4 : 0.07050394266843796
+COUL:DAS-5 : 0.11506908386945724
+COUL:DAS-6 : 0.03169058635830879
+COUL:DAS-9 : 0.040484730154275894
+COUL:DAS-10 : 0.016925515606999397
+COUL:DAS-13 : 0.0881117433309555
+COUL:DAS-14 : 0.022177541628479958
+COUL:DAS-15 : 0.06152931973338127
+COUL:DAS-16 : 0.09159420430660248
+COUL:DAS-17 : 0.03116615302860737
+COUL:DAS-18 : 0.07922478765249252
+COUL:DAS-19 : 0.03830144554376602
+COUL:DAS-20 : 0.03699779137969017
+COUL:DAS-21 : 0.017668023705482483
+COUL:DAS-22 : 0.028019940480589867
+COUL:DAS-23 : 0.01924239471554756
+COUL:DAS-25 : 0.02504611760377884
+COUL:DAS-26 : 0.017458096146583557
+COUL:DAS-29 : 0.09896676987409592
+COUL:DAS-30 : 0.0305965393781662
+COUL:DAS-32 : 0.14257653057575226
+COUL:DAS-33 : 0.03721466287970543
+COUL:DAS-36 : 0.06454212963581085
+COUL:DAS-37 : 0.02221699431538582
+COUL:DAS-38 : 0.03110634908080101
+COUL:DAS-39 : 0.025606827810406685
+COUL:DAS-40 : 0.03822728991508484
+COUL:DAS-41 : 0.042940653860569
+COUL:DAS-42 : 0.03646137937903404
+/priors
+$end
+
+$target
+type                abinitio_amber
+name                dynamics
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                train_1
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                train_2
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                train_3
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                train_4
+amber_leapcmd       setup.leap
+$end

@@ -13,10 +13,12 @@ mpl.use("Agg")
 class OptEngine:
 
     # We assume __init__ and all the functions it calls run from the top directory in the optimization
+    # All other functions are called from within self.optdir
     def __init__(self, options):
         self.home = os.getcwd()
         self.optdir = options["optdir"]
         self.resp = options["resp"]
+        self.nvalids = options["nvalids"]
         self.respPriors = None
         self.leap = "setup.leap"
         if options["resp"] != 0:
@@ -148,6 +150,16 @@ class OptEngine:
                         )
                     )
 
+        for j in range(1, self.nvalids):
+            copyfile(
+                os.path.join(self.optdir, "valid_0.in"),
+                os.path.join(self.optdir, f"valid_0_{str(j)}.in"),
+            )
+            copyfile(
+                os.path.join(self.optdir, "valid_0_initial.in"),
+                os.path.join(self.optdir, f"valid_0_{str(j)}_initial.in"),
+            )
+
     def readOpt(self, filename):
         inInitialParams = False
         inFinalParams = False
@@ -259,6 +271,12 @@ class OptEngine:
         copyfile(f"valid_{str(i - 1)}.in", f"valid_{str(i)}.in")
         copyfile(f"valid_{str(i - 1)}_initial.in", f"valid_{str(i)}_initial.in")
         copyfile(f"opt_{str(i - 1)}.in", f"opt_{str(i)}.in")
+        for j in range(1, self.nvalids):
+            copyfile(f"valid_{str(i - 1)}_{str(j)}.in", f"valid_{str(i)}_{str(j)}.in")
+            copyfile(
+                f"valid_{str(i - 1)}_{str(j)}_initial.in",
+                f"valid_{str(i)}_{str(j)}_initial.in",
+            )
 
         # Add new targets section to each FB input file
         self.addTargetLines(
@@ -274,6 +292,17 @@ class OptEngine:
             self.validInitialTargetLines,
             f"valid_{str(i)}",
         )
+        for j in range(1, self.nvalids):
+            self.addTargetLines(
+                f"valid_{str(i)}_{str(j)}.in",
+                self.validTargetLines,
+                f"valid_{str(i)}_{str(j)}",
+            )
+            self.addTargetLines(
+                f"valid_{str(i)}_{str(j)}_initial.in",
+                self.validInitialTargetLines,
+                f"valid_{str(i)}_{str(j)}",
+            )
 
     def graphResults(self):
         # Graph results so far
@@ -405,9 +434,14 @@ class OptEngine:
                 os.system(
                     f"ForceBalance.py valid_{str(i)}.in > valid_{str(i)}_previous.out"
                 )
+                for j in range(1, self.nvalids):
+                    os.system(
+                        f"ForceBalance.py valid_{str(i)}_{str(j)}.in > valid_{str(i)}_{str(j)}_previous.out"
+                    )
                 self.validPrevious.append(
                     self.readValid(f"valid_{str(i)}_previous.out")
                 )
+
             if len(self.train) <= i:
                 if self.respPriors is not None:
                     self.respPriors.updateRespPriors(
@@ -436,11 +470,19 @@ class OptEngine:
                 self.sortParams(results, i)
             if len(self.valid) <= i:
                 os.system(f"ForceBalance.py valid_{str(i)}.in > valid_{str(i)}.out")
+                for j in range(1, self.nvalids):
+                    os.system(
+                        f"ForceBalance.py valid_{str(i)}_{str(j)}.in > valid_{str(i)}_{str(j)}.out"
+                    )
                 self.valid.append(self.readValid(f"valid_{str(i)}.out"))
             if len(self.validInitial) <= i:
                 os.system(
                     f"ForceBalance.py valid_{str(i)}_initial.in > valid_{str(i)}_initial.out"
                 )
+                for j in range(1, self.nvalids):
+                    os.system(
+                        f"ForceBalance.py valid_{str(i)}_{str(j)}_initial.in > valid_{str(i)}_{str(j)}_initial.out"
+                    )
                 self.validInitial.append(self.readValid(f"valid_{str(i)}_initial.out"))
             self.graphResults()
         else:
@@ -489,6 +531,24 @@ class OptEngine:
                             vInitial = self.readValid(
                                 os.path.join(self.optdir, f"valid_{str(i)}_initial.out")
                             )
+                            for j in range(1, self.nvalids):
+                                self.readValid(
+                                    os.path.join(
+                                        self.optdir, f"valid_{str(i)}_{str(j)}.out"
+                                    )
+                                )
+                                self.readValid(
+                                    os.path.join(
+                                        self.optdir,
+                                        f"valid_{str(i)}_{str(j)}_previous.out",
+                                    )
+                                )
+                                self.readValid(
+                                    os.path.join(
+                                        self.optdir,
+                                        f"valid_{str(i)}_{str(j)}_initial.out",
+                                    )
+                                )
                         except:
                             break
                         self.valid.append(v)

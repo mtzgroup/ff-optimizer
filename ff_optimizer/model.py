@@ -65,6 +65,7 @@ class Model(AbstractModel):
         optOptions["resp"] = args.resp
         optOptions["maxCycles"] = args.maxcycles
         optOptions["restart"] = args.restart
+        optOptions["nvalids"] = args.nvalids
         optEngine = optengine.OptEngine(optOptions)
         return optEngine
 
@@ -185,11 +186,10 @@ class Model(AbstractModel):
                 os.chdir("..")
         os.chdir(self.home)
 
-    # NOTE: currently only supports a single validation set
     def doParameterOptimization(self, i):
         # Copy new QM data into appropriate folders
-        trainFolder = os.path.join(self.optdir, "targets", "train_" + str(i))
-        validFolder = os.path.join(self.optdir, "targets", "valid_" + str(i))
+        trainFolder = os.path.join(self.optdir, "targets", f"train_{str(i)}")
+        validFolder = os.path.join(self.optdir, "targets", f"valid_{str(i)}")
         if not os.path.isdir(trainFolder):
             os.mkdir(trainFolder)
         if not os.path.isdir(validFolder):
@@ -220,8 +220,15 @@ class Model(AbstractModel):
             )
             copyfile(
                 os.path.join(valids[0], f),
-                os.path.join(self.optdir, "targets", f"valid_{str(i)}", f),
+                os.path.join(validFolder, f),
             )
+            for j in range(1, self.nvalids):
+                validFolderJ = os.path.join(
+                    self.optdir, "targets", f"valid_{str(i)}_{str(j)}"
+                )
+                if not os.path.isdir(validFolderJ):
+                    os.mkdir(validFolderJ)
+                copyfile(os.path.join(valids[j], f), os.path.join(validFolderJ, f))
 
         # Run ForceBalance on each input
         os.chdir(self.optdir)
@@ -235,6 +242,8 @@ class Model(AbstractModel):
             try:
                 optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
             except:
-                import pdb; pdb.set_trace()
-                
+                import pdb
+
+                pdb.set_trace()
+
         return optResults
