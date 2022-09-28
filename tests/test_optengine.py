@@ -9,6 +9,10 @@ from ff_optimizer import optengine
 from . import checkUtils
 
 
+def monkeyGraph():
+    pass
+
+
 def cleanOptDir(optdir):
     try:
         rmtree(os.path.join(optdir, "forcefield"))
@@ -23,7 +27,12 @@ def cleanOptDir(optdir):
     except:
         pass
     for f in os.listdir(optdir):
-        if f.startswith("prev") or f.endswith(".inpcrd") or f.endswith(".prmtop") or f == "leap.out":
+        if (
+            f.startswith("prev")
+            or f.endswith(".inpcrd")
+            or f.endswith(".prmtop")
+            or f == "leap.out"
+        ):
             os.remove(os.path.join(optdir, f))
 
 
@@ -395,23 +404,25 @@ def test_setupInputFiles():
     options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
-    optEngine.optdir = "."
+    optEngine.optdir = "inputs"
+    os.chdir("inputs")
     optEngine.setupInputFiles(8)
     with open("opt_8.in", "r") as f:
         testLinesOpt = f.readlines()
-    with open(os.path.join("inputs", "opt_8.in")) as f:
+    with open(os.path.join("..", "ref_inputs", "opt_8.in")) as f:
         refLinesOpt = f.readlines()
     with open("valid_8.in", "r") as f:
         testLinesValid = f.readlines()
-    with open(os.path.join("inputs", "valid_8.in")) as f:
+    with open(os.path.join("..", "ref_inputs", "valid_8.in")) as f:
         refLinesValid = f.readlines()
     with open("valid_8_initial.in", "r") as f:
         testLinesValidInitial = f.readlines()
-    with open(os.path.join("inputs", "valid_8_initial.in")) as f:
+    with open(os.path.join("..", "ref_inputs", "valid_8_initial.in")) as f:
         refLinesValidInitial = f.readlines()
     os.remove("opt_8.in")
     os.remove("valid_8.in")
     os.remove("valid_8_initial.in")
+    os.chdir("..")
     checkUtils.checkLists(testLinesOpt, refLinesOpt)
     checkUtils.checkLists(testLinesValid, refLinesValid)
     checkUtils.checkLists(testLinesValidInitial, refLinesValidInitial)
@@ -460,27 +471,30 @@ def test_optimizeForcefield0(monkeypatch):
     monkeypatch.setattr(os, "system", monkeyForceBalance)
     os.chdir("opt1")
     optEngine.optimizeForcefield(0)
-    assert os.path.isfile(os.path.join("result", "opt_0", "dasa.mol2"))
-    assert os.path.isfile(os.path.join("result", "opt_0", "dasa.frcmod"))
-    assert os.path.isfile("opt_0.out")
+    filesFound = True
+    if not os.path.isfile(os.path.join("result", "opt_0", "dasa.mol2")):
+        filesFound = False
+    if not os.path.isfile(os.path.join("result", "opt_0", "dasa.frcmod")):
+        filesFound = False
+    if not os.path.isfile("opt_0.out"):
+        filesFound = False
     with open(os.path.join("forcefield", "dasa.mol2"), "r") as f:
-        refLines = f.readlines()
+        refMol2Lines = f.readlines()
     with open(os.path.join("result", "opt_0", "dasa.mol2"), "r") as f:
-        testLines = f.readlines()
-    assert checkUtils.checkLists(testLines, refLines)
+        testMol2Lines = f.readlines()
     with open(os.path.join("forcefield", "dasa.frcmod"), "r") as f:
         refLines = f.readlines()
     with open(os.path.join("result", "opt_0", "dasa.frcmod"), "r") as f:
         testLines = f.readlines()
-    assert checkUtils.checkLists(testLines, refLines)
+    os.remove("opt_0.out")
     os.chdir("..")
     cleanOptDir(options["optdir"])
+    assert filesFound
+    assert checkUtils.checkLists(testMol2Lines, refMol2Lines)
+    assert checkUtils.checkLists(testLines, refLines)
 
 
 def test_optimizeForcefield1(monkeypatch):
-    def monkeyGraph():
-        pass
-
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = {}
     options["optdir"] = "restart1"
@@ -539,6 +553,10 @@ def test_determineRestart1():
     options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
+    assert checkUtils.checkFloat(optEngine.params[0, 0], 266.5)
+    assert checkUtils.checkFloat(optEngine.params[0, -1], -6.0860)
+    assert checkUtils.checkFloat(optEngine.params[4, 0], 235.8)
+    assert checkUtils.checkFloat(optEngine.params[4, -1], -4.4187)
     assert optEngine.restartCycle == 3
 
 
@@ -569,6 +587,8 @@ def test_determineRestart3():
     options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
+    assert checkUtils.checkFloat(optEngine.params[4, 0], 0)
+    assert checkUtils.checkFloat(optEngine.params[3, 0], 245.75)
     assert optEngine.restartCycle == 2
 
 
@@ -671,3 +691,112 @@ def test_restartResp():
     arr = np.asarray(optEngine.respPriors.allResp, dtype=np.float32)
     assert checkUtils.checkFloat(arr[5, 0], 2.0)
     assert checkUtils.checkFloat(arr[8, 0], 3.0)
+
+
+def test_setupInputFiles_multipleValids():
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = {}
+    options["optdir"] = "opt1"
+    options["resp"] = 0.5
+    options["restart"] = False
+    options["maxCycles"] = 10
+    options["respPriors"] = 0
+    options["nvalids"] = 3
+    optEngine = optengine.OptEngine(options)
+    cleanOptDir(options["optdir"])
+    optEngine.optdir = "inputs"
+    os.chdir("inputs")
+    optEngine.setupInputFiles(8)
+    with open("valid_8_1.in", "r") as f:
+        testLinesValid1 = f.readlines()
+    with open("valid_8_2.in", "r") as f:
+        testLinesValid2 = f.readlines()
+    with open(os.path.join("..", "ref_inputs", "valid_8_1.in")) as f:
+        refLinesValid1 = f.readlines()
+    with open(os.path.join("..", "ref_inputs", "valid_8_2.in")) as f:
+        refLinesValid2 = f.readlines()
+    with open("valid_8_1_initial.in", "r") as f:
+        testLinesValidInitial1 = f.readlines()
+    with open(os.path.join("..", "ref_inputs", "valid_8_1_initial.in")) as f:
+        refLinesValidInitial1 = f.readlines()
+    with open("valid_8_2_initial.in", "r") as f:
+        testLinesValidInitial2 = f.readlines()
+    with open(os.path.join("..", "ref_inputs", "valid_8_2_initial.in")) as f:
+        refLinesValidInitial2 = f.readlines()
+    os.remove("opt_8.in")
+    os.remove("valid_8.in")
+    os.remove("valid_8_initial.in")
+    os.remove("valid_8_1.in")
+    os.remove("valid_8_2.in")
+    os.remove("valid_8_1_initial.in")
+    os.remove("valid_8_2_initial.in")
+    checkUtils.checkLists(testLinesValid1, refLinesValid1)
+    checkUtils.checkLists(testLinesValidInitial1, refLinesValidInitial1)
+    checkUtils.checkLists(testLinesValid2, refLinesValid2)
+    checkUtils.checkLists(testLinesValidInitial2, refLinesValidInitial2)
+
+
+def test_optimizeForcefield_multipleValids(monkeypatch):
+    def monkeyForceBalance(command):
+        split = command.split()
+        inp = split[1]
+        out = split[3]
+        if not os.path.isfile(inp):
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), inp)
+        if not os.path.isfile(os.path.join("ref", out)):
+            raise FileNotFoundError(
+                errno.ENOENT, os.strerror(errno.ENOENT), os.path.join("ref", out)
+            )
+        copyfile(os.path.join("ref", out), out)
+
+    def monkeySort(results, i):
+        return
+
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = {}
+    options["optdir"] = "opt3"
+    cleanOptDir(options["optdir"])
+    options["resp"] = 0
+    options["restart"] = False
+    options["maxCycles"] = 10
+    options["respPriors"] = 0
+    options["nvalids"] = 3
+    optEngine = optengine.OptEngine(options)
+    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    monkeypatch.setattr(optEngine, "graphResults", monkeyGraph)
+    monkeypatch.setattr(optEngine, "sortParams", monkeySort)
+    os.chdir("opt3")
+    os.mkdir("result")
+    os.mkdir(os.path.join("result", "opt_1"))
+    for f in ["dasa.frcmod", "dasa.mol2"]:
+        copyfile(f, os.path.join("result", "opt_1", f))
+    optEngine.optimizeForcefield(1)
+    files = os.listdir()
+    valid1 = 0
+    valid2 = 0
+    for f in files:
+        if "1_1" in f and f.endswith(".out"):
+            valid1 += 1
+        elif "1_2" in f and f.endswith(".out"):
+            valid2 += 1
+    os.chdir("..")
+    cleanOptDir(options["optdir"])
+    assert valid1 == 3
+    assert valid2 == 3
+
+
+def test_determineRestart_multipleValids():
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    for f in os.listdir("restart4"):
+        if "4" in f:
+            os.remove(os.path.join("restart4", f))
+    options = {}
+    options["optdir"] = "restart4"
+    options["resp"] = 0
+    options["restart"] = True
+    options["maxCycles"] = 10
+    options["respPriors"] = 0
+    options["nvalids"] = 3
+    optEngine = optengine.OptEngine(options)
+    cleanOptDir(options["optdir"])
+    assert optEngine.restartCycle == 1

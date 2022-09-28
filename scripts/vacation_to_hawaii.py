@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
-import os
 import argparse
 import errno
+import os
 from textwrap import dedent
 from time import perf_counter
 
 from ff_optimizer import active_learning, model
 
 # Some helper functions
+
 
 def checkArgs(args):
     # Check for necessary folders and files
@@ -69,7 +70,7 @@ def checkArgs(args):
             "No sander input file for sampling named md.in provided in "
             + args.sampledir
         )
-    #if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
+    # if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
     #    raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
 
     if (
@@ -81,7 +82,10 @@ def checkArgs(args):
     if args.qmengine == "queue":
         if not os.path.isfile(os.path.join(args.sampledir, args.sbatch)):
             raise RuntimeError(
-                "Sbatch template " + args.sbatch + " does not exist in " + args.sampledir
+                "Sbatch template "
+                + args.sbatch
+                + " does not exist in "
+                + args.sampledir
             )
         if not os.path.isfile(os.path.join(args.sampledir, args.tctemplate)):
             raise RuntimeError(
@@ -151,6 +155,7 @@ def checkArgs(args):
         if args.activeLearning < 1:
             raise ValueError("activeLearning must be a positive integer")
 
+
 if __name__ == "__main__":
     # Summary stuff
     summary = dedent(
@@ -174,7 +179,6 @@ if __name__ == "__main__":
         -- Backup TeraChem input file if job fails (tc_template_long.in)
         -- sbatch template file for queue (sbatch_template.sh)
     """
-
     )
     parser = argparse.ArgumentParser(
         epilog=summary, formatter_class=argparse.RawDescriptionHelpFormatter

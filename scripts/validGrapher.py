@@ -2,14 +2,11 @@
 
 import argparse
 import os
-import subprocess
-from textwrap import dedent
-from time import sleep
+from shutil import rmtree
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-from shutil import rmtree
 
 mpl.use("Agg")
 
@@ -60,6 +57,7 @@ def readOpt(filename):
     results["initialParams"] = initialParams
     return status, results
 
+
 def readValid(filename):
     with open(filename, "r") as f:
         for line in f.readlines():
@@ -69,35 +67,45 @@ def readValid(filename):
             "ForceBalance single-point evaluation of " + filename + " did not converge"
         )
 
+
 def makeValidSplits(validFile):
-    name = validFile.split('.')[0]
-    with open(validFile,'r') as f:
-        with open(f"{name}_split1.in",'w') as v1:
-            with open(f"{name}_split2.in",'w') as v2:
+    name = validFile.split(".")[0]
+    with open(validFile, "r") as f:
+        with open(f"{name}_split1.in", "w") as v1:
+            with open(f"{name}_split2.in", "w") as v2:
                 for line in f.readlines():
                     splitLine = line.split()
                     if len(splitLine) > 0:
                         if splitLine[0] == "name":
-                            v1.write(line.replace(splitLine[1],splitLine[1]+"_split1"))
-                            v2.write(line.replace(splitLine[1],splitLine[1]+"_split2"))
+                            v1.write(
+                                line.replace(splitLine[1], splitLine[1] + "_split1")
+                            )
+                            v2.write(
+                                line.replace(splitLine[1], splitLine[1] + "_split2")
+                            )
                         else:
                             v1.write(line)
                             v2.write(line)
                     else:
                         v1.write("\n")
                         v2.write("\n")
+
 
 def makeValidWeaves(validFile):
-    name = validFile.split('.')[0]
-    with open(validFile,'r') as f:
-        with open(f"{name}_weave1.in",'w') as v1:
-            with open(f"{name}_weave2.in",'w') as v2:
+    name = validFile.split(".")[0]
+    with open(validFile, "r") as f:
+        with open(f"{name}_weave1.in", "w") as v1:
+            with open(f"{name}_weave2.in", "w") as v2:
                 for line in f.readlines():
                     splitLine = line.split()
                     if len(splitLine) > 0:
                         if splitLine[0] == "name":
-                            v1.write(line.replace(splitLine[1],splitLine[1]+"_weave1"))
-                            v2.write(line.replace(splitLine[1],splitLine[1]+"_weave2"))
+                            v1.write(
+                                line.replace(splitLine[1], splitLine[1] + "_weave1")
+                            )
+                            v2.write(
+                                line.replace(splitLine[1], splitLine[1] + "_weave2")
+                            )
                         else:
                             v1.write(line)
                             v2.write(line)
@@ -105,17 +113,18 @@ def makeValidWeaves(validFile):
                         v1.write("\n")
                         v2.write("\n")
 
-def splitValids(maxcycles):                        
-    with open("valid_1/qdata.txt","r") as f:
+
+def splitValids(maxcycles):
+    with open("valid_1/qdata.txt", "r") as f:
         for line in f.readlines():
             if "JOB" in line:
                 njobs = int(line.split()[1])
-    
+
         halfjobs = int(njobs / 2)
-    with open("valid_1/all.mdcrd","r") as f:
+    with open("valid_1/all.mdcrd", "r") as f:
         nlines = len(f.readlines())
-    
-    for i in range(1,maxcycles+1):
+
+    for i in range(1, maxcycles + 1):
         folder = f"valid_{str(i)}"
         folder1 = f"valid_{str(i)}_split1"
         folder2 = f"valid_{str(i)}_split2"
@@ -130,9 +139,9 @@ def splitValids(maxcycles):
         os.system(f"cp {os.path.join(folder,'setup.leap')} {os.path.join(folder2,'.')}")
         os.system(f"cp {os.path.join(folder,'conf.pdb')} {os.path.join(folder2,'.')}")
         switched = False
-        with open(os.path.join(folder,"qdata.txt"),'r') as f:
-            with open(os.path.join(folder1,"qdata.txt"),'w') as f1:
-                with open(os.path.join(folder2,"qdata.txt"),'w') as f2:
+        with open(os.path.join(folder, "qdata.txt"), "r") as f:
+            with open(os.path.join(folder1, "qdata.txt"), "w") as f1:
+                with open(os.path.join(folder2, "qdata.txt"), "w") as f2:
                     for line in f.readlines():
                         if f"JOB {str(halfjobs+1)}" in line:
                             switched = True
@@ -144,15 +153,16 @@ def splitValids(maxcycles):
                                 f2.write(line)
                         else:
                             f1.write(line)
-        oldMdcrd = os.path.join(folder,'all.mdcrd')
-        newMdcrd = os.path.join(folder1,'all.mdcrd')
+        oldMdcrd = os.path.join(folder, "all.mdcrd")
+        newMdcrd = os.path.join(folder1, "all.mdcrd")
         os.system(f"head -n {str(int(nlines/2)+1)} {oldMdcrd} > {newMdcrd}")
-        newMdcrd = os.path.join(folder2,'all.mdcrd')
+        newMdcrd = os.path.join(folder2, "all.mdcrd")
         os.system(f"echo 'comment line' > {newMdcrd}")
         os.system(f"tail -n {str(int(nlines/2))} {oldMdcrd} >> {newMdcrd}")
 
+
 def weaveValids(maxcycles):
-    for i in range(1,maxcycles+1):
+    for i in range(1, maxcycles + 1):
         folder = f"valid_{str(i)}"
         folder1 = f"valid_{str(i)}_weave1"
         folder2 = f"valid_{str(i)}_weave2"
@@ -167,13 +177,15 @@ def weaveValids(maxcycles):
         os.system(f"cp {os.path.join(folder,'setup.leap')} {os.path.join(folder2,'.')}")
         os.system(f"cp {os.path.join(folder,'conf.pdb')} {os.path.join(folder2,'.')}")
         write1 = False
-        with open(os.path.join(folder,"qdata.txt"),'r') as f:
-            with open(os.path.join(folder1,"qdata.txt"),'w') as f1:
-                with open(os.path.join(folder2,"qdata.txt"),'w') as f2:
+        with open(os.path.join(folder, "qdata.txt"), "r") as f:
+            with open(os.path.join(folder1, "qdata.txt"), "w") as f1:
+                with open(os.path.join(folder2, "qdata.txt"), "w") as f2:
                     for line in f.readlines():
                         if "JOB" in line:
                             splitLine = line.split()
-                            line = line.replace(splitLine[1],str(int((int(splitLine[1])+1)/2)))
+                            line = line.replace(
+                                splitLine[1], str(int((int(splitLine[1]) + 1) / 2))
+                            )
                             if write1:
                                 write1 = False
                             else:
@@ -182,15 +194,15 @@ def weaveValids(maxcycles):
                             f1.write(line)
                         else:
                             f2.write(line)
-        oldMdcrd = os.path.join(folder,'all.mdcrd')
-        mdcrd1 = os.path.join(folder1,'all.mdcrd')
-        mdcrd2 = os.path.join(folder2,'all.mdcrd')
+        oldMdcrd = os.path.join(folder, "all.mdcrd")
+        mdcrd1 = os.path.join(folder1, "all.mdcrd")
+        mdcrd2 = os.path.join(folder2, "all.mdcrd")
         firstLine = True
         write1 = True
         lineCounter = 1
-        with open(oldMdcrd,'r') as f:
-            with open(mdcrd1,'w') as f1:
-                with open(mdcrd2,'w') as f2:
+        with open(oldMdcrd, "r") as f:
+            with open(mdcrd1, "w") as f1:
+                with open(mdcrd2, "w") as f2:
                     f1.write("Comment line\n")
                     f2.write("Comment line\n")
                     for line in f.readlines():
@@ -209,6 +221,7 @@ def weaveValids(maxcycles):
                             else:
                                 write1 = True
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--optdir",
@@ -216,8 +229,12 @@ parser.add_argument(
     type=str,
     default="1_opt",
 )
-parser.add_argument('--vsplit', help="Compute split validation sets",action="store_false",default=True)
-parser.add_argument('--vweave', help="Compute woven validation sets",action="store_false",default=True)
+parser.add_argument(
+    "--vsplit", help="Compute split validation sets", action="store_false", default=True
+)
+parser.add_argument(
+    "--vweave", help="Compute woven validation sets", action="store_false", default=True
+)
 args = parser.parse_args()
 
 # Set up the calculation
@@ -266,8 +283,12 @@ for i in range(optCounter + 1):
             else:
                 try:
                     v = readValid(os.path.join(args.optdir, "valid_" + str(i) + ".out"))
-                    vPrev = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_previous.out"))
-                    vInit = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial.out"))
+                    vPrev = readValid(
+                        os.path.join(args.optdir, "valid_" + str(i) + "_previous.out")
+                    )
+                    vInit = readValid(
+                        os.path.join(args.optdir, "valid_" + str(i) + "_initial.out")
+                    )
                 except:
                     print("valids didn't complete")
                     break
@@ -294,23 +315,40 @@ i = totalCycles
 if totalCycles <= 0:
     raise RuntimeError("No opts completed!")
 
-print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
-print("%7d%15.8f%15.8f%20.8f" % (1,valid[0],valid[0]/validInitial[0],valid[0]-validPrevious[0]))
-for i in range(1,totalCycles):
-    print("%7d%15.8f%15.8f%20.8f%23.8f" % (i+1,valid[i],valid[i]/validInitial[i],valid[i]-validPrevious[i],valid[i]-valid[i-1]))
+print(
+    "%7s%15s%15s%20s%23s"
+    % ("Epoch", "Validation", "Valid ratio", "Current-Previous", "Current-last Current")
+)
+print(
+    "%7d%15.8f%15.8f%20.8f"
+    % (1, valid[0], valid[0] / validInitial[0], valid[0] - validPrevious[0])
+)
+for i in range(1, totalCycles):
+    print(
+        "%7d%15.8f%15.8f%20.8f%23.8f"
+        % (
+            i + 1,
+            valid[i],
+            valid[i] / validInitial[i],
+            valid[i] - validPrevious[i],
+            valid[i] - valid[i - 1],
+        )
+    )
 
 
 if args.vsplit:
     os.chdir(os.path.join(args.optdir, "targets"))
     splitValids(totalCycles)
     os.chdir("../..")
-    for i in range(1,totalCycles + 1):
-        if os.path.isfile(
-            os.path.join(args.optdir, "valid_" + str(i) + "_split1.out")
-        ):
+    for i in range(1, totalCycles + 1):
+        if os.path.isfile(os.path.join(args.optdir, "valid_" + str(i) + "_split1.out")):
             try:
-                v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_split1.out"))
-                v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_split2.out"))
+                v1 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_split1.out")
+                )
+                v2 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_split2.out")
+                )
                 valid1.append(v1)
                 valid2.append(v2)
             except:
@@ -319,11 +357,19 @@ if args.vsplit:
                 os.system(f"cp {src} {dest}")
                 os.chdir(args.optdir)
                 makeValidSplits(f"valid_{str(i)}.in")
-                os.system(f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_split1.out")
-                os.system(f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_split2.out")
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_split1.out"
+                )
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_split2.out"
+                )
                 os.chdir("..")
-                v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_split1.out"))
-                v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_split2.out"))
+                v1 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_split1.out")
+                )
+                v2 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_split2.out")
+                )
                 valid1.append(v1)
                 valid2.append(v2)
         else:
@@ -332,8 +378,12 @@ if args.vsplit:
             os.system(f"cp {src} {dest}")
             os.chdir(args.optdir)
             makeValidSplits(f"valid_{str(i)}.in")
-            os.system(f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_split1.out")
-            os.system(f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_split2.out")
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_split1.out"
+            )
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_split2.out"
+            )
             os.chdir("..")
             v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_split1.out"))
             v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_split2.out"))
@@ -342,31 +392,53 @@ if args.vsplit:
 
 validInitial1 = []
 validInitial2 = []
-#split initial
+# split initial
 if args.vsplit:
-    src = os.path.join(args.optdir,"*mol2") + " " + os.path.join(args.optdir,"*frcmod")
+    src = (
+        os.path.join(args.optdir, "*mol2") + " " + os.path.join(args.optdir, "*frcmod")
+    )
     os.system(f"cp {src} {os.path.join(args.optdir,'forcefield','.')}")
-    for i in range(1,totalCycles + 1):
+    for i in range(1, totalCycles + 1):
         if os.path.isfile(
             os.path.join(args.optdir, "valid_" + str(i) + "_initial_split1.out")
         ):
             try:
-                v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_split1.out"))
-                v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_split2.out"))
+                v1 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_initial_split1.out")
+                )
+                v2 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_initial_split2.out")
+                )
             except:
                 os.chdir(args.optdir)
-                os.system(f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_initial_split1.out")
-                os.system(f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_initial_split2.out")
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_initial_split1.out"
+                )
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_initial_split2.out"
+                )
                 os.chdir("..")
-                v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_split1.out"))
-                v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_split2.out"))
+                v1 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_initial_split1.out")
+                )
+                v2 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_initial_split2.out")
+                )
         else:
             os.chdir(args.optdir)
-            os.system(f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_initial_split1.out")
-            os.system(f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_initial_split2.out")
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_initial_split1.out"
+            )
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_initial_split2.out"
+            )
             os.chdir("..")
-            v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_split1.out"))
-            v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_split2.out"))
+            v1 = readValid(
+                os.path.join(args.optdir, "valid_" + str(i) + "_initial_split1.out")
+            )
+            v2 = readValid(
+                os.path.join(args.optdir, "valid_" + str(i) + "_initial_split2.out")
+            )
         validInitial1.append(v1)
         validInitial2.append(v2)
 
@@ -374,31 +446,45 @@ validPrevious1 = []
 validPrevious2 = []
 if args.vsplit:
     for i in range(1, totalCycles + 1):
-        if os.path.isfile(os.path.join(args.optdir, f"valid_{str(i)}_previous_split1.out")):
+        if os.path.isfile(
+            os.path.join(args.optdir, f"valid_{str(i)}_previous_split1.out")
+        ):
             try:
-                v1 = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous_split1.out"))
-                v2 = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous_split2.out"))
+                v1 = readValid(
+                    os.path.join(args.optdir, f"valid_{str(i)}_previous_split1.out")
+                )
+                v2 = readValid(
+                    os.path.join(args.optdir, f"valid_{str(i)}_previous_split2.out")
+                )
             except:
                 os.chdir(args.optdir)
-                src = os.path.join("result", f"opt_" + str(i-1), "*")
+                src = os.path.join("result", f"opt_" + str(i - 1), "*")
                 os.system(f"cp {src} forcefield/.")
-                os.system(f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_previous_split1.out")
-                os.system(f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_previous_split2.out")
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_previous_split1.out"
+                )
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_previous_split2.out"
+                )
                 v1 = readValid(f"valid_{str(i)}_previous_split1.out")
                 v2 = readValid(f"valid_{str(i)}_previous_split2.out")
                 os.chdir("..")
         else:
             os.chdir(args.optdir)
-            src = os.path.join("result", f"opt_" + str(i-1), "*")
+            src = os.path.join("result", f"opt_" + str(i - 1), "*")
             os.system(f"cp {src} forcefield/.")
-            os.system(f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_previous_split1.out")
-            os.system(f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_previous_split2.out")
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_split1.in > valid_{str(i)}_previous_split1.out"
+            )
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_split2.in > valid_{str(i)}_previous_split2.out"
+            )
             v1 = readValid(f"valid_{str(i)}_previous_split1.out")
             v2 = readValid(f"valid_{str(i)}_previous_split2.out")
             os.chdir("..")
         validPrevious1.append(v1)
         validPrevious2.append(v2)
-    
+
 valid1 = np.asarray(valid1)
 valid2 = np.asarray(valid2)
 validInitial1 = np.asarray(validInitial1)
@@ -408,16 +494,58 @@ validPrevious2 = np.asarray(validPrevious2)
 
 if args.vsplit:
     print("Valid split 1")
-    print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
-    print("%7d%15.8f%15.8f%20.8f" % (1,valid1[0],valid1[0]/validInitial1[0],valid1[0]-validPrevious1[0]))
-    for i in range(1,totalCycles):
-        print("%7d%15.8f%15.8f%20.8f%23.8f" % (i+1,valid1[i],valid1[i]/validInitial1[i],valid1[i]-validPrevious1[i],valid1[i]-valid1[i-1]))
+    print(
+        "%7s%15s%15s%20s%23s"
+        % (
+            "Epoch",
+            "Validation",
+            "Valid ratio",
+            "Current-Previous",
+            "Current-last Current",
+        )
+    )
+    print(
+        "%7d%15.8f%15.8f%20.8f"
+        % (1, valid1[0], valid1[0] / validInitial1[0], valid1[0] - validPrevious1[0])
+    )
+    for i in range(1, totalCycles):
+        print(
+            "%7d%15.8f%15.8f%20.8f%23.8f"
+            % (
+                i + 1,
+                valid1[i],
+                valid1[i] / validInitial1[i],
+                valid1[i] - validPrevious1[i],
+                valid1[i] - valid1[i - 1],
+            )
+        )
 
     print("Valid split 2")
-    print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
-    print("%7d%15.8f%15.8f%20.8f" % (1,valid2[0],valid2[0]/validInitial2[0],valid2[0]-validPrevious2[0]))
-    for i in range(1,totalCycles):
-        print("%7d%15.8f%15.8f%20.8f%23.8f" % (i+1,valid2[i],valid2[i]/validInitial2[i],valid2[i]-validPrevious2[i],valid2[i]-valid2[i-1]))
+    print(
+        "%7s%15s%15s%20s%23s"
+        % (
+            "Epoch",
+            "Validation",
+            "Valid ratio",
+            "Current-Previous",
+            "Current-last Current",
+        )
+    )
+    print(
+        "%7d%15.8f%15.8f%20.8f"
+        % (1, valid2[0], valid2[0] / validInitial2[0], valid2[0] - validPrevious2[0])
+    )
+    for i in range(1, totalCycles):
+        print(
+            "%7d%15.8f%15.8f%20.8f%23.8f"
+            % (
+                i + 1,
+                valid2[i],
+                valid2[i] / validInitial2[i],
+                valid2[i] - validPrevious2[i],
+                valid2[i] - valid2[i - 1],
+            )
+        )
 
 validw1 = []
 validw2 = []
@@ -425,32 +553,46 @@ if args.vweave:
     os.chdir(os.path.join(args.optdir, "targets"))
     weaveValids(totalCycles)
     os.chdir("../..")
-    for i in range(1,totalCycles + 1):
-        if os.path.isfile(
-            os.path.join(args.optdir, "valid_" + str(i) + "_weave1.out")
-        ):
+    for i in range(1, totalCycles + 1):
+        if os.path.isfile(os.path.join(args.optdir, "valid_" + str(i) + "_weave1.out")):
             try:
-                v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_weave1.out"))
-                v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_weave2.out"))
+                v1 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_weave1.out")
+                )
+                v2 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_weave2.out")
+                )
             except:
                 src = os.path.join(args.optdir, "result", "opt_" + str(i), "*")
                 dest = os.path.join(args.optdir, "forcefield")
                 os.system(f"cp {src} {dest}")
                 os.chdir(args.optdir)
                 makeValidWeaves(f"valid_{str(i)}.in")
-                os.system(f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_weave1.out")
-                os.system(f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_weave2.out")
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_weave1.out"
+                )
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_weave2.out"
+                )
                 os.chdir("..")
-                v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_weave1.out"))
-                v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_weave2.out"))
+                v1 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_weave1.out")
+                )
+                v2 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_weave2.out")
+                )
         else:
             src = os.path.join(args.optdir, "result", "opt_" + str(i), "*")
             dest = os.path.join(args.optdir, "forcefield")
             os.system(f"cp {src} {dest}")
             os.chdir(args.optdir)
             makeValidWeaves(f"valid_{str(i)}.in")
-            os.system(f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_weave1.out")
-            os.system(f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_weave2.out")
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_weave1.out"
+            )
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_weave2.out"
+            )
             os.chdir("..")
             v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_weave1.out"))
             v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_weave2.out"))
@@ -459,31 +601,53 @@ if args.vweave:
 
 validInitialw1 = []
 validInitialw2 = []
-#split initial
+# split initial
 if args.vweave:
-    src = os.path.join(args.optdir,"*mol2") + " " + os.path.join(args.optdir,"*frcmod")
+    src = (
+        os.path.join(args.optdir, "*mol2") + " " + os.path.join(args.optdir, "*frcmod")
+    )
     os.system(f"cp {src} {os.path.join(args.optdir,'forcefield','.')}")
-    for i in range(1,totalCycles + 1):
+    for i in range(1, totalCycles + 1):
         if os.path.isfile(
             os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave1.out")
         ):
             try:
-                v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave1.out"))
-                v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave2.out"))
+                v1 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave1.out")
+                )
+                v2 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave2.out")
+                )
             except:
                 os.chdir(args.optdir)
-                os.system(f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_initial_weave1.out")
-                os.system(f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_initial_weave2.out")
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_initial_weave1.out"
+                )
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_initial_weave2.out"
+                )
                 os.chdir("..")
-                v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave1.out"))
-                v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave2.out"))
+                v1 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave1.out")
+                )
+                v2 = readValid(
+                    os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave2.out")
+                )
         else:
             os.chdir(args.optdir)
-            os.system(f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_initial_weave1.out")
-            os.system(f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_initial_weave2.out")
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_initial_weave1.out"
+            )
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_initial_weave2.out"
+            )
             os.chdir("..")
-            v1 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave1.out"))
-            v2 = readValid(os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave2.out"))
+            v1 = readValid(
+                os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave1.out")
+            )
+            v2 = readValid(
+                os.path.join(args.optdir, "valid_" + str(i) + "_initial_weave2.out")
+            )
         validInitialw1.append(v1)
         validInitialw2.append(v2)
 
@@ -491,25 +655,39 @@ validPreviousw1 = []
 validPreviousw2 = []
 if args.vsplit:
     for i in range(1, totalCycles + 1):
-        if os.path.isfile(os.path.join(args.optdir, f"valid_{str(i)}_previous_weave1.out")):
+        if os.path.isfile(
+            os.path.join(args.optdir, f"valid_{str(i)}_previous_weave1.out")
+        ):
             try:
-                v1 = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous_weave1.out"))
-                v2 = readValid(os.path.join(args.optdir, f"valid_{str(i)}_previous_weave2.out"))
+                v1 = readValid(
+                    os.path.join(args.optdir, f"valid_{str(i)}_previous_weave1.out")
+                )
+                v2 = readValid(
+                    os.path.join(args.optdir, f"valid_{str(i)}_previous_weave2.out")
+                )
             except:
                 os.chdir(args.optdir)
-                src = os.path.join("result", f"opt_" + str(i-1), "*")
+                src = os.path.join("result", f"opt_" + str(i - 1), "*")
                 os.system(f"cp {src} forcefield/.")
-                os.system(f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_previous_weave1.out")
-                os.system(f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_previous_weave2.out")
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_previous_weave1.out"
+                )
+                os.system(
+                    f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_previous_weave2.out"
+                )
                 v1 = readValid(f"valid_{str(i)}_previous_weave1.out")
                 v2 = readValid(f"valid_{str(i)}_previous_weave2.out")
                 os.chdir("..")
         else:
             os.chdir(args.optdir)
-            src = os.path.join("result", f"opt_" + str(i-1), "*")
+            src = os.path.join("result", f"opt_" + str(i - 1), "*")
             os.system(f"cp {src} forcefield/.")
-            os.system(f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_previous_weave1.out")
-            os.system(f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_previous_weave2.out")
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_weave1.in > valid_{str(i)}_previous_weave1.out"
+            )
+            os.system(
+                f"ForceBalance.py valid_{str(i)}_weave2.in > valid_{str(i)}_previous_weave2.out"
+            )
             v1 = readValid(f"valid_{str(i)}_previous_weave1.out")
             v2 = readValid(f"valid_{str(i)}_previous_weave2.out")
             os.chdir("..")
@@ -525,16 +703,68 @@ validPreviousw2 = np.asarray(validPreviousw2)
 
 if args.vsplit:
     print("Valid weave 1")
-    print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
-    print("%7d%15.8f%15.8f%20.8f" % (1,validw1[0],validw1[0]/validInitialw1[0],validw1[0]-validPreviousw1[0]))
-    for i in range(1,totalCycles):
-        print("%7d%15.8f%15.8f%20.8f%23.8f" % (i+1,validw1[i],validw1[i]/validInitialw1[i],validw1[i]-validPreviousw1[i],validw1[i]-validw1[i-1]))
+    print(
+        "%7s%15s%15s%20s%23s"
+        % (
+            "Epoch",
+            "Validation",
+            "Valid ratio",
+            "Current-Previous",
+            "Current-last Current",
+        )
+    )
+    print(
+        "%7d%15.8f%15.8f%20.8f"
+        % (
+            1,
+            validw1[0],
+            validw1[0] / validInitialw1[0],
+            validw1[0] - validPreviousw1[0],
+        )
+    )
+    for i in range(1, totalCycles):
+        print(
+            "%7d%15.8f%15.8f%20.8f%23.8f"
+            % (
+                i + 1,
+                validw1[i],
+                validw1[i] / validInitialw1[i],
+                validw1[i] - validPreviousw1[i],
+                validw1[i] - validw1[i - 1],
+            )
+        )
 
     print("Valid weave 2")
-    print("%7s%15s%15s%20s%23s" % ("Epoch","Validation","Valid ratio","Current-Previous","Current-last Current"))
-    print("%7d%15.8f%15.8f%20.8f" % (1,validw2[0],validw2[0]/validInitialw2[0],validw2[0]-validPreviousw2[0]))
-    for i in range(1,totalCycles):
-        print("%7d%15.8f%15.8f%20.8f%23.8f" % (i+1,validw2[i],validw2[i]/validInitialw2[i],validw2[i]-validPreviousw2[i],validw2[i]-validw2[i-1]))
+    print(
+        "%7s%15s%15s%20s%23s"
+        % (
+            "Epoch",
+            "Validation",
+            "Valid ratio",
+            "Current-Previous",
+            "Current-last Current",
+        )
+    )
+    print(
+        "%7d%15.8f%15.8f%20.8f"
+        % (
+            1,
+            validw2[0],
+            validw2[0] / validInitialw2[0],
+            validw2[0] - validPreviousw2[0],
+        )
+    )
+    for i in range(1, totalCycles):
+        print(
+            "%7d%15.8f%15.8f%20.8f%23.8f"
+            % (
+                i + 1,
+                validw2[i],
+                validw2[i] / validInitialw2[i],
+                validw2[i] - validPreviousw2[i],
+                validw2[i] - validw2[i - 1],
+            )
+        )
 
 # Graph results so far
 x = range(1, len(valid) + 1)
@@ -545,15 +775,15 @@ else:
     xticks = np.arange(0, i + 1, 2)
 fig, ax = plt.subplots(figsize=(9, 6))
 ax.plot(x, valid, label="Validation, current parameters", marker="o")
-#ax.plot(x, validPrevious, label="Validation, previous parameters", marker="o")
+# ax.plot(x, validPrevious, label="Validation, previous parameters", marker="o")
 ax.plot(x, validInitial, label="Validation, initial parameters", marker="o")
-#ax.plot(x0, train, label="Training", marker="o")
+# ax.plot(x0, train, label="Training", marker="o")
 if args.vsplit:
-    ax.plot(x, valid1, label="Validation, split1",marker="o")
-    ax.plot(x, valid2, label="Validation, split2",marker="o")
+    ax.plot(x, valid1, label="Validation, split1", marker="o")
+    ax.plot(x, valid2, label="Validation, split2", marker="o")
 if args.vweave:
-    ax.plot(x, validw1, label="Validation, weave1",marker="o")
-    ax.plot(x, validw2, label="Validation, weave2",marker="o")
+    ax.plot(x, validw1, label="Validation, weave1", marker="o")
+    ax.plot(x, validw2, label="Validation, weave2", marker="o")
 ax.set_xlabel("Optimization cycle", size=17)
 ax.set_ylabel("Objective function", size=17)
 ax.set_xticks(xticks)
@@ -562,14 +792,16 @@ plt.legend(fontsize=14)
 plt.savefig("Validations.png", bbox_inches="tight")
 plt.close()
 
-fig, ax = plt.subplots(figsize=(9,6))
-ax.plot(x, np.asarray(valid)/np.asarray(validInitial), label="Valid ratio", marker="o")
+fig, ax = plt.subplots(figsize=(9, 6))
+ax.plot(
+    x, np.asarray(valid) / np.asarray(validInitial), label="Valid ratio", marker="o"
+)
 if args.vsplit:
-    ax.plot(x, valid1/validInitial1, label="Valid ratio split 1", marker="o")
-    ax.plot(x, valid2/validInitial2, label="Valid ratio split 2", marker="o")
+    ax.plot(x, valid1 / validInitial1, label="Valid ratio split 1", marker="o")
+    ax.plot(x, valid2 / validInitial2, label="Valid ratio split 2", marker="o")
 if args.vweave:
-    ax.plot(x, validw1/validInitialw1, label="Valid ratio weave 1", marker="o")
-    ax.plot(x, validw2/validInitialw2, label="Valid ratio weave 2", marker="o")
+    ax.plot(x, validw1 / validInitialw1, label="Valid ratio weave 1", marker="o")
+    ax.plot(x, validw2 / validInitialw2, label="Valid ratio weave 2", marker="o")
 ax.set_xlabel("Optimization cycle", size=17)
 ax.set_ylabel("Objective function", size=17)
 ax.set_xticks(xticks)

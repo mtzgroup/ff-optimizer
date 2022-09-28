@@ -24,10 +24,12 @@ def monkeyGetIndices(self):
 def test_getIndices():
     pass
 
+
 def monkeyGetFrame(self, frame, dest):
-    folder = dest.split('/')[0]
-    with open(os.path.join(folder,"frames.txt"),'a') as f:
+    folder = dest.split("/")[0]
+    with open(os.path.join(folder, "frames.txt"), "a") as f:
         f.write(str(frame) + "\n")
+
 
 def monkeyGetFrame(self, frame, dest):
     folder = dest.split("/")[0]
@@ -42,16 +44,18 @@ def monkeyGetFrames(self):
 def monkeySetup(self):
     pass
 
+
 def test_getFrames(monkeypatch):
     coordPath = os.path.join("..", "coors.xyz")
     options["coordPath"] = coordPath
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
-    #monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
+    # monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     mmEngine = mmengine.MMEngine(options)
     frames = mmEngine.getFrames()
     assert len(frames) == 2
     assert mmEngine.splitIndex > frames[0]
     assert mmEngine.splitIndex <= frames[1]
+
 
 def test_getMMsamples(monkeypatch):
     coordPath = os.path.join("..", "coors.xyz")
@@ -61,24 +65,25 @@ def test_getMMsamples(monkeypatch):
         rmtree("testSetup")
     os.mkdir("testSetup")
     os.chdir("testSetup")
-    
+
     monkeypatch.setattr(mmengine.MMEngine, "getFrame", monkeyGetFrame)
     monkeypatch.setattr(mmengine.MMEngine, "getFrames", monkeyGetFrames)
-    #monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
+    # monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.MMEngine, "setup", monkeySetup)
     mmEngine = mmengine.MMEngine(options)
     mmEngine.getMMSamples()
 
-    with open(os.path.join("train","frames.txt"),'r') as f:
+    with open(os.path.join("train", "frames.txt"), "r") as f:
         trainCrds = f.readlines()
 
-    with open(os.path.join("valid_1","frames.txt"),'r') as f:
+    with open(os.path.join("valid_1", "frames.txt"), "r") as f:
         validCrds = f.readlines()
 
     os.chdir("..")
-    #rmtree("testSetup")
+    # rmtree("testSetup")
     assert trainCrds == ["0\n"]
     assert validCrds == ["1\n"]
+
 
 def test_getFrames(monkeypatch):
     coordPath = os.path.join("..", "coors.xyz")
@@ -219,7 +224,9 @@ def test_restart3(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getFrames", monkeyGetFrames)
     options["nvalids"] = 2
     options["conformers"] = 2
-    if not os.path.isdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart3")):
+    if not os.path.isdir(
+        os.path.join(os.path.dirname(__file__), "mmengine", "restart3")
+    ):
         os.mkdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart3"))
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart3"))
     mmEngine = mmengine.MMEngine(options)

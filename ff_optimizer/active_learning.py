@@ -1,4 +1,5 @@
 import os
+from multiprocessing import Pool
 from random import sample
 from shutil import copytree
 
@@ -8,29 +9,34 @@ import sander
 from .model import AbstractModel, Model
 from .utils import readPDB, writePDB
 
-from multiprocessing import Pool
 # from time import perf_counter
+
 
 def mmSampleStar(args):
     mmSampleParallel(*args)
+
 
 def mmSampleParallel(model, folder, i):
     os.chdir(folder)
     model.doMMSampling(i)
 
+
 def paramOptStar(args):
     result = paramOptParallel(*args)
     return result
 
+
 def paramOptParallel(model, folder, i):
     os.chdir(folder)
     result = model.doParameterOptimization(i)
-    return result 
+    return result
+
 
 def sanderEnergyForce(geometry):
     sander.set_positions(geometry)
     energy, force = sander.energy_forces()
     return [energy.tot, force]
+
 
 class ActiveLearningModel(AbstractModel):
     def __init__(self, args):
@@ -69,44 +75,42 @@ class ActiveLearningModel(AbstractModel):
     def initialCycle(self):
         for i in range(1, self.nmodels + 1):
             os.chdir(f"model_{str(i)}")
-            self.models[i-1].initialCycle()
+            self.models[i - 1].initialCycle()
             os.chdir(self.home)
 
     def doMMSampling(self, i):
         ## serial code
-        #for j in range(1, self.nmodels + 1):
+        # for j in range(1, self.nmodels + 1):
         #    os.chdir(f"model_{str(j)}")
         #    models[j-1].doMMSampling(i)
         #    os.chdir(home)
         tasks = [(self.models[j], f"model_{str(j+1)}", i) for j in range(self.nmodels)]
         with Pool(self.nthreads) as p:
-            results = p.map(mmSampleStar, tasks)
+            p.map(mmSampleStar, tasks)
         self.doActiveLearning(i)
 
     def doQMCalculations(self, i):
         for j in range(1, self.nmodels + 1):
             os.chdir(f"model_{str(j)}")
-            self.models[j-1].doQMCalculations(i)
+            self.models[j - 1].doQMCalculations(i)
             os.chdir(self.home)
 
     def doParameterOptimization(self, i):
         # serial code
-        #optResults = []
-        #for i in range(1, self.nmodels + 1):
+        # optResults = []
+        # for i in range(1, self.nmodels + 1):
         #    os.chdir(f"model_{str(i)}")
         #    result = models[i].doParameterOptimization(i)
         #    optResults.append(result)
         #    os.chdir(home)
         ## for now we arbitrarily print only the first model's info
-        #return optResults[0]
-        tasks = [(self.models[j], f"model_{str(j+1)}",i) for j in range(self.nmodels)]
+        # return optResults[0]
+        tasks = [(self.models[j], f"model_{str(j+1)}", i) for j in range(self.nmodels)]
         with Pool(self.nthreads) as p:
             results = p.map(paramOptStar, tasks)
 
         # for now we arbitrarily print only the first model's info
         return results[0]
-        
-
 
     def doActiveLearning(self, i):
         sampleDirs = [
@@ -117,10 +121,9 @@ class ActiveLearningModel(AbstractModel):
             )
             for k in range(self.nmodels)
         ]
-            
+
         prmtops = [
-            os.path.join(sampleDirs[k], self.prmtop)
-            for k in range(self.nmodels)
+            os.path.join(sampleDirs[k], self.prmtop) for k in range(self.nmodels)
         ]
         dirs = ["train"]
         for k in range(1, self.nmodels):
