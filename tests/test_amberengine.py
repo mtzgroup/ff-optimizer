@@ -8,7 +8,6 @@ from numpy import loadtxt
 from ff_optimizer import mmengine
 
 from . import checkUtils
-from shutil import copyfile
 
 options = {}
 options["start"] = 33
@@ -21,6 +20,7 @@ options["heatCounter"] = 8
 
 def monkeyGetIndices(self):
     return 1, 2, 3
+
 
 def monkeySander(self, prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=None):
     if not os.path.isfile(prmtop):
@@ -35,6 +35,7 @@ def monkeySander(self, prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=None)
     except:
         pass
     return
+
 
 def monkeySander(self, prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=None):
     if not os.path.isfile(prmtop):
@@ -131,6 +132,7 @@ def test_sample(monkeypatch):
         for i in range(len(testLines)):
             assert refLines[i] == testLines[i]
     rmtree("928")
+
 
 @pytest.mark.amber
 def test_sample_conformers(monkeypatch):

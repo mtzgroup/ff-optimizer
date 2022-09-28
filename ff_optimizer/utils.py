@@ -165,7 +165,13 @@ def convertPDBtoMolecule(pdb: str):
     with open(pdb, "r") as f:
         for line in f.readlines():
             if line.startswith("ATOM") or line.startswith("HETATM"):
-                coords.append([line[30:38].replace(" ", ""), line[38:46].replace(" ", ""), line[46:54].replace(" ", "")])
+                coords.append(
+                    [
+                        line[30:38].replace(" ", ""),
+                        line[38:46].replace(" ", ""),
+                        line[46:54].replace(" ", ""),
+                    ]
+                )
                 symbols.append(line.split()[-1])
     coords = np.asarray(coords, dtype=np.float32)
     # Molecule class by default has coordinates in bohr

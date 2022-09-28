@@ -1,0 +1,53 @@
+$options
+jobtype             single
+forcefield          dasa.frcmod dasa.mol2
+backup              false
+$end
+
+$target
+type                abinitio_amber
+name                valid_1_2
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                valid_2_2
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                valid_3_2
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                valid_4_2
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                valid_5_2
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                valid_6_2
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                valid_7_2
+amber_leapcmd       setup.leap
+$end
+
+$target
+type                abinitio_amber
+name                valid_8_2
+amber_leapcmd       setup.leap
+$end
