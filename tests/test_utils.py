@@ -86,12 +86,13 @@ def test_readPDB2():
     ref = np.loadtxt("1.txt").flatten()
     checkUtils.checkArray(coors, ref)
 
-def test_writePDB():    
+
+def test_writePDB():
     os.chdir(os.path.join(os.path.dirname(__file__), "utils"))
     coords = utils.readPDB("3.pdb")
     utils.writePDB(coords, "3_test.pdb", "2.pdb")
-    with open("3_test.pdb", 'r') as f:
+    with open("3_test.pdb", "r") as f:
         testLines = f.readlines()
-    with open("3.pdb", 'r') as f:
+    with open("3.pdb", "r") as f:
         refLines = f.readlines()
     assert testLines == refLines
