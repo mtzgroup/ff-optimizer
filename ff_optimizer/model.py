@@ -222,7 +222,7 @@ class Model(AbstractModel):
                 os.path.join(valids[0], f),
                 os.path.join(validFolder, f),
             )
-            for j in range(1, self.nvalids):
+            for j in range(1, self.args.nvalids):
                 validFolderJ = os.path.join(
                     self.optdir, "targets", f"valid_{str(i)}_{str(j)}"
                 )
