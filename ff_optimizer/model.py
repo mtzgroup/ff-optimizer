@@ -190,8 +190,8 @@ class Model(AbstractModel):
         # Copy new QM data into appropriate folders
         trainFolder = os.path.join(self.optdir, "targets", f"train_{str(i)}")
         validFolders = [os.path.join(self.optdir, "targets", f"valid_{str(i)}")]
-        for i in range(1, self.args.nvalids):
-            validFolders.append(os.path.join(self.optdir, "targets", f"valid_{str(i)}"))
+        for j in range(1, self.args.nvalids):
+            validFolders.append(os.path.join(self.optdir, "targets", f"valid_{str(j)}"))
         if not os.path.isdir(trainFolder):
             os.mkdir(trainFolder)
         for validFolder in validFolders:
