@@ -224,10 +224,10 @@ class Model(AbstractModel):
                 os.path.join(mmTrainFolder, f),
                 os.path.join(self.optdir, "targets", f"train_{str(i)}", f),
             )
-            for i in range(len(valids)):
+            for j in range(len(valids)):
                 copyfile(
-                    os.path.join(valids[i], f),
-                    os.path.join(validFolders[i], f),
+                    os.path.join(valids[j], f),
+                    os.path.join(validFolders[j], f),
                 )
 
         # Run ForceBalance on each input
