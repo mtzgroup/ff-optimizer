@@ -33,6 +33,7 @@ class Model(AbstractModel):
         self.home = os.getcwd()
         self.optdir = args.optdir
         self.sampledir = args.sampledir
+        self.nvalids = args.nvalids
         os.rename(
             os.path.join(args.optdir, args.valid0),
             os.path.join(args.optdir, "valid_0.in"),
@@ -190,8 +191,8 @@ class Model(AbstractModel):
         # Copy new QM data into appropriate folders
         trainFolder = os.path.join(self.optdir, "targets", f"train_{str(i)}")
         validFolders = [os.path.join(self.optdir, "targets", f"valid_{str(i)}")]
-        for j in range(1, self.args.nvalids):
-            validFolders.append(os.path.join(self.optdir, "targets", f"valid_{str(j)}"))
+        for j in range(1, self.nvalids):
+            validFolders.append(os.path.join(self.optdir, "targets", f"valid_{str(i)}_{str(j)}"))
         if not os.path.isdir(trainFolder):
             os.mkdir(trainFolder)
         for validFolder in validFolders:

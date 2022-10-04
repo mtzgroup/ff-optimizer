@@ -134,30 +134,15 @@ class MMEngine:
     def getMMSamples(self):
         self.prmtop = self.setup()
         frames = self.getFrames()
-        str(frames[0])
         if not os.path.isdir("train"):
             os.mkdir("train")
-        trainFrames = frames[: self.options["conformers"]]
-        for frame in trainFrames:
-            self.getFrame(frame, os.path.join("train", f"{str(frame)}.rst7"))
-        os.chdir("train")
-        self.sample(trainFrames, self.options["trainMdin"])
-        with open("MMFinished.txt", "w") as f:
-            f.write("MM sampling finished")
-        os.chdir("..")
-        for i in range(1, self.options["nvalids"] + 1):
-            validName = f"valid_{str(i)}"
-            if not os.path.isdir(validName):
-                os.mkdir(validName)
-            validFrames = frames[
-                i * self.options["conformers"] : (i + 1) * self.options["conformers"]
-            ]
-            for frame in validFrames:
-                self.getFrame(frame, os.path.join(validName, f"{str(frame)}.rst7"))
-            os.chdir(validName)
-            self.sample(validFrames, self.options["validMdin"])
+            trainFrames = frames[: self.options["conformers"]]
+            for frame in trainFrames:
+                self.getFrame(frame, os.path.join("train", f"{str(frame)}.rst7"))
+            os.chdir("train")
+            self.sample(trainFrames, self.options["trainMdin"])
             with open("MMFinished.txt", "w") as f:
-                f.write("MM sampling finished")
+                f.write("MM sampling finished\n")
                 f.write("Remove this file\n")
                 f.write("If you want to force a recalculation of the MM sampling")
             os.chdir("..")
@@ -166,16 +151,14 @@ class MMEngine:
             if not os.path.isdir(validName):
                 os.mkdir(validName)
                 validFrames = frames[
-                    i
-                    * self.options["conformers"] : (i + 1)
-                    * self.options["conformers"]
+                    i * self.options["conformers"] : (i + 1) * self.options["conformers"]
                 ]
                 for frame in validFrames:
                     self.getFrame(frame, os.path.join(validName, f"{str(frame)}.rst7"))
                 os.chdir(validName)
                 self.sample(validFrames, self.options["validMdin"])
                 with open("MMFinished.txt", "w") as f:
-                    f.write("MM sampling finished\n")
+                    f.write("MM sampling finished")
                     f.write("Remove this file\n")
                     f.write("If you want to force a recalculation of the MM sampling")
                 os.chdir("..")
