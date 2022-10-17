@@ -508,7 +508,7 @@ class OptEngine:
         # Determine cycle for restart, set restart variables
         restartCycle = -1
         for i in range(self.maxCycles + 2):
-            optOutput = os.path.join(self.optdir, "opt_" + str(i) + ".out")
+            optOutput = os.path.join(self.optdir, f"opt_{str(i)}.out")
             if os.path.isfile(optOutput):
                 status, results = self.readOpt(optOutput)
                 if status == 0:

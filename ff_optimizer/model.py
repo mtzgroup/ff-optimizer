@@ -33,6 +33,7 @@ class Model(AbstractModel):
         self.home = os.getcwd()
         self.optdir = args.optdir
         self.sampledir = args.sampledir
+        self.nvalids = args.nvalids
         os.rename(
             os.path.join(args.optdir, args.valid0),
             os.path.join(args.optdir, "valid_0.in"),
@@ -189,16 +190,22 @@ class Model(AbstractModel):
     def doParameterOptimization(self, i):
         # Copy new QM data into appropriate folders
         trainFolder = os.path.join(self.optdir, "targets", f"train_{str(i)}")
-        validFolder = os.path.join(self.optdir, "targets", f"valid_{str(i)}")
+        validFolders = [os.path.join(self.optdir, "targets", f"valid_{str(i)}")]
+        for j in range(1, self.nvalids):
+            validFolders.append(os.path.join(self.optdir, "targets", f"valid_{str(i)}_{str(j)}"))
         if not os.path.isdir(trainFolder):
             os.mkdir(trainFolder)
-        if not os.path.isdir(validFolder):
-            os.mkdir(validFolder)
+        for validFolder in validFolders:
+            if not os.path.isdir(validFolder):
+                os.mkdir(validFolder)
         for f in ["setup.leap", "conf.pdb", "setup_valid_initial.leap"]:
             copyfile(os.path.join(self.optdir, f), os.path.join(trainFolder, f))
-            copyfile(os.path.join(self.optdir, f), os.path.join(validFolder, f))
+            for validFolder in validFolders:
+                copyfile(os.path.join(self.optdir, f), os.path.join(validFolder, f))
 
         valids = []
+        # done this way to maintain back compatibility to when sampling folders were named
+        # based on index of initial geometry
         for f in os.listdir(os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}")):
             if f.startswith("train") and os.path.isdir(
                 os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}", f)
@@ -218,17 +225,11 @@ class Model(AbstractModel):
                 os.path.join(mmTrainFolder, f),
                 os.path.join(self.optdir, "targets", f"train_{str(i)}", f),
             )
-            copyfile(
-                os.path.join(valids[0], f),
-                os.path.join(validFolder, f),
-            )
-            for j in range(1, self.args.nvalids):
-                validFolderJ = os.path.join(
-                    self.optdir, "targets", f"valid_{str(i)}_{str(j)}"
+            for j in range(len(valids)):
+                copyfile(
+                    os.path.join(valids[j], f),
+                    os.path.join(validFolders[j], f),
                 )
-                if not os.path.isdir(validFolderJ):
-                    os.mkdir(validFolderJ)
-                copyfile(os.path.join(valids[j], f), os.path.join(validFolderJ, f))
 
         # Run ForceBalance on each input
         os.chdir(self.optdir)
