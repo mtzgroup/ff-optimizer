@@ -458,6 +458,7 @@ class CCCloudEngine(QMEngine):
                     driver="gradient",
                     keywords=keywords,
                     id=jobId,
+                    extras={"stdout":True},
                 )
             atomicInputs.append(atomicInput)
         return atomicInputs
