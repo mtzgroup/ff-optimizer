@@ -244,7 +244,7 @@ class Model(AbstractModel):
                 optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
             except:
                 import pdb
-
                 pdb.set_trace()
+                #pass
 
         return optResults
