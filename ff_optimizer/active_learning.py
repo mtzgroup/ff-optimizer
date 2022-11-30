@@ -1,7 +1,7 @@
 import os
 from multiprocessing import Pool
 from random import sample
-from shutil import copytree
+from shutil import copytree, rmtree
 
 import numpy as np
 import sander
@@ -58,7 +58,9 @@ class ActiveLearningModel(AbstractModel):
         os.chdir(self.home)
         for i in range(1, self.nmodels + 1):
             folder = f"model_{str(i)}"
-            if not os.path.isdir(folder):
+            if os.path.isdir(folder):
+                rmtree(folder)
+            else:
                 os.mkdir(folder)
             if not os.path.isdir(os.path.join(folder, args.optdir)):
                 copytree(args.optdir, os.path.join(folder, args.optdir))
