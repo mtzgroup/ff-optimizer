@@ -335,7 +335,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--activeLearning",
-        help="Use active learning (multiple different ff models optimized simultanesouly) to choose new geometries. Use this argument to specify the number of models. Default is 1 (no active learning).",
+        help="Use active learning (multiple different ff models optimized simultaneously) to choose new geometries. Use this argument to specify the number of models. Default is 1 (no active learning).",
         type=int,
         default=1,
     )

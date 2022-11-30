@@ -777,8 +777,10 @@ def test_optimizeForcefield_multipleValids(monkeypatch):
     for f in files:
         if "1_1" in f and f.endswith(".out"):
             valid1 += 1
+            os.remove(f)
         elif "1_2" in f and f.endswith(".out"):
             valid2 += 1
+            os.remove(f)
     os.chdir("..")
     cleanOptDir(options["optdir"])
     assert valid1 == 3
