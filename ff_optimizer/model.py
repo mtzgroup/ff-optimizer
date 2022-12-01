@@ -243,8 +243,6 @@ class Model(AbstractModel):
             try:
                 optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
             except:
-                import pdb
-                pdb.set_trace()
-                #pass
+                print("Problem with accessing validation set performance")
 
         return optResults
