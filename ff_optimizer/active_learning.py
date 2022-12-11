@@ -59,7 +59,8 @@ class ActiveLearningModel(AbstractModel):
         for i in range(1, self.nmodels + 1):
             folder = f"model_{str(i)}"
             if os.path.isdir(folder):
-                rmtree(folder)
+                if not args.restart:
+                    rmtree(folder)
             else:
                 os.mkdir(folder)
             if not os.path.isdir(os.path.join(folder, args.optdir)):
@@ -68,10 +69,13 @@ class ActiveLearningModel(AbstractModel):
                 copytree(args.sampledir, os.path.join(folder, args.sampledir))
             os.chdir(folder)
             self.models.append(Model(args))
-            # Want to sample multiple validation sets, but don't need to evaluate them all with QM
+            # Want to sample multiple validation sets, but don't need to evaluate them allG
+            # So we need to recompute restart cycle
             self.models[-1].optEngine.nvalids = 1
+            self.models[-1].optEngine.determineRestart()
+            self.models[-1].restartCycle = self.models[-1].optEngine.restartCycle
             os.chdir(self.home)
-        self.restartCycle = min([model.restartCycle for model in self.models])
+        self.restartCycle = min([m.restartCycle for m in self.models])
         self.templatePdb = os.path.join(args.optdir, "conf.pdb")
 
     def initialCycle(self):

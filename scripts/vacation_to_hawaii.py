@@ -347,7 +347,11 @@ if __name__ == "__main__":
         ffModel = active_learning.ActiveLearningModel(args)
     else:
         ffModel = model.Model(args)
-    restartCycle = ffModel.restartCycle
+    if args.restart:
+        restartCycle = ffModel.restartCycle
+        print(f"Restarting optimization at cycle {restartCycle}")
+    else:
+        restartCycle = -1
 
     # First optimization cycle is not necessary if restarting from somewhere later
     if restartCycle < 0:

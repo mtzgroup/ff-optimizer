@@ -5,7 +5,7 @@ from shutil import copyfile, rmtree
 import numpy as np
 import pytest
 
-from ff_optimizer import active_learning, model, utils
+from ff_optimizer import active_learning, model, optengine, qmengine, utils
 
 from . import checkUtils
 
@@ -27,6 +27,15 @@ class FakeArgs:
         self.sampledir = "2_sampling"
         self.optdir = "1_opt"
         self.dynamicsdir = "0_dynamics"
+        self.restart = False
+        self.valid0 = "valid_0.in"
+        self.opt0 = "opt_0.in"
+        self.resp = 0
+        self.respPriors = 0
+        self.maxcycles = 100
+        self.qmengine = "chemcloud"
+        self.tctemplate = "tc.in"
+        self.tctemplate_long = "tc.in"
 
 
 def monkeyInit(self, args):
@@ -259,11 +268,15 @@ def test_doActiveLearning(monkeypatch):
 
 def monkeyInitModel(self, args):
     self.restartCycle = random.randint(1, 10)
-    options = {"nvalids": 1}
+    options = {"nvalids": 1, "restart": self.restartCycle}
 
     class monkeyOpt:
         def __init__(self, options):
             self.options = options
+            self.restartCycle = options["restart"]
+
+        def determineRestart(self):
+            pass
 
     self.optEngine = monkeyOpt(options)
 
@@ -284,3 +297,41 @@ def test_init(monkeypatch):
     for i in range(1, 4):
         assert os.path.isfile(os.path.join(f"model_{i}", "1_opt", "opt_0.in"))
         assert os.path.isfile(os.path.join(f"model_{i}", "2_sampling", "md.in"))
+
+
+def monkeyInitOpt(self, args):
+    self.train = []
+    self.valid = []
+    self.nvalids = args["nvalids"]
+    self.validPrevious = []
+    self.validInitial = []
+    self.maxCycles = args["maxCycles"]
+    self.optdir = args["optdir"]
+    self.restartCycle = self.determineRestart()
+    self.respPriors = None
+
+
+def monkeyInitMM(self, args):
+    pass
+
+
+def monkeyInitQM(self, arg1, arg2, doResp):
+    pass
+
+
+def monkeyRename(a, b):
+    pass
+
+
+def test_restart(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)
+    monkeypatch.setattr(qmengine.CCCloudEngine, "__init__", monkeyInitQM)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    monkeypatch.setattr(os, "rename", monkeyRename)
+
+    args = FakeArgs()
+    args.restart = True
+    os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "restart"))
+    mod = active_learning.ActiveLearningModel(args)
+    os.remove(os.path.join("1_opt", "leap.out"))
+    assert mod.restartCycle == 1

@@ -78,7 +78,7 @@ class OptEngine:
         self.validInitial = []
         self.validPrevious = []
         if options["restart"]:
-            self.restartCycle = self.determineRestart()
+            self.determineRestart()
         else:
             self.restartCycle = -1
 
@@ -138,14 +138,15 @@ class OptEngine:
             )
         # Make validation input for initial MM parameters
         with open(os.path.join(self.optdir, "valid_0.in"), "r") as srcValid:
-            with open(
-                os.path.join(self.optdir, "temp.txt"), "w"
-            ) as destValid:
+            with open(os.path.join(self.optdir, "temp.txt"), "w") as destValid:
                 for line in srcValid.readlines():
                     if "$target" in line:
                         break
                     destValid.write(line)
-        os.rename(os.path.join(self.optdir, "temp.txt"), os.path.join(self.optdir, "valid_0.in"))
+        os.rename(
+            os.path.join(self.optdir, "temp.txt"),
+            os.path.join(self.optdir, "valid_0.in"),
+        )
         with open(os.path.join(self.optdir, "valid_0.in"), "r") as srcValid:
             with open(
                 os.path.join(self.optdir, "valid_0_initial.in"), "w"
@@ -572,5 +573,4 @@ class OptEngine:
             else:
                 break
         restartCycle = i - 1
-        print("Restarting optimization at cycle " + str(restartCycle + 1))
-        return restartCycle
+        self.restartCycle = restartCycle
