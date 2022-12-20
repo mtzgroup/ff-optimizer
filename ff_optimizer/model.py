@@ -221,6 +221,8 @@ class Model(AbstractModel):
                 valids.append(
                     os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}", f)
                 )
+        # consistent performance on tests
+        valids = sorted(valids)
 
         for f in ["all.mdcrd", "qdata.txt"]:
             copyfile(

@@ -44,6 +44,13 @@ def checkListsFloats(list1, list2, thresh=0.000001):
             return False
     return True
 
+def checkFiles(f1, f2):
+    with open(f1, 'r') as f:
+        lines1 = f.readlines()
+    with open(f2, 'r') as f:
+        lines2 = f.readlines()
+    return checkLists(lines1, lines2)
+
 
 def checkFileFloatsNoWhitespace(f1, f2, thresh=0.000001):
     with open(f1, "r") as f:
