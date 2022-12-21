@@ -22,14 +22,14 @@ def mmSampleParallel(model, folder, i):
 
 
 def paramOptStar(args):
-    result = paramOptParallel(*args)
-    return result
+    model = paramOptParallel(*args)
+    return model
 
 
 def paramOptParallel(model, folder, i):
     os.chdir(folder)
-    result = model.doParameterOptimization(i)
-    return result
+    model.doParameterOptimization(i)
+    return model
 
 
 def sanderEnergyForce(geometry):
@@ -69,7 +69,7 @@ class ActiveLearningModel(AbstractModel):
                 copytree(args.sampledir, os.path.join(folder, args.sampledir))
             os.chdir(folder)
             self.models.append(Model(args))
-            # Want to sample multiple validation sets, but don't need to evaluate them allG
+            # Want to sample multiple validation sets, but don't need to evaluate them all
             # So we need to recompute restart cycle
             self.models[-1].optEngine.nvalids = 1
             self.models[-1].optEngine.determineRestart()
@@ -113,10 +113,9 @@ class ActiveLearningModel(AbstractModel):
         # return optResults[0]
         tasks = [(self.models[j], f"model_{str(j+1)}", i) for j in range(self.nmodels)]
         with Pool(self.nthreads) as p:
-            results = p.map(paramOptStar, tasks)
-
+            self.models = p.map(paramOptStar, tasks)
         # for now we arbitrarily print only the first model's info
-        return results[0]
+        self.optResults = self.models[0].optResults
 
     def doActiveLearning(self, i):
         sampleDirs = [

@@ -385,7 +385,8 @@ if __name__ == "__main__":
         qmEnd = perf_counter()
         qmTime = qmEnd - mmEnd
 
-        optResults = ffModel.doParameterOptimization(i)
+        ffModel.doParameterOptimization(i)
+        optResults = ffModel.optResults
         fbEnd = perf_counter()
         fbTime = fbEnd - qmEnd
 

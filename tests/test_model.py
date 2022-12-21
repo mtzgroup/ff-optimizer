@@ -211,12 +211,10 @@ def test_doParameterOptimization(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine,"graphResults",monkeyGraphResults)
     
     m = model.Model(args)
-    optResults1 = m.doParameterOptimization(1)
+    m.doParameterOptimization(1)
+    assert len(m.optResults) == 3
     optResults2 = m.doParameterOptimization(2)
-    assert len(optResults1) == 3
-    assert len(optResults2) == 4
-    print(os.getcwd())
-    print(os.listdir())
+    assert len(m.optResults) == 4
     files = ["setup.leap", "setup_valid_initial.leap", "conf.pdb", "all.mdcrd", "qdata.txt"]
     copiedFiles = True
     for f in files:

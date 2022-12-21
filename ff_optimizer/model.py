@@ -239,14 +239,13 @@ class Model(AbstractModel):
         os.chdir(self.optdir)
         self.optEngine.optimizeForcefield(i)
         os.chdir(self.home)
-        optResults = []
-        optResults.append(self.optEngine.valid[-1])
-        optResults.append(self.optEngine.valid[-1] / self.optEngine.validInitial[-1])
-        optResults.append(self.optEngine.valid[-1] - self.optEngine.validPrevious[-1])
+        self.optResults = []
+        self.optResults.append(self.optEngine.valid[-1])
+        self.optResults.append(self.optEngine.valid[-1] / self.optEngine.validInitial[-1])
+        self.optResults.append(self.optEngine.valid[-1] - self.optEngine.validPrevious[-1])
         if i > 1:
             try:
-                optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
+                self.optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
             except:
-                print("Problem with accessing validation set performance")
-
-        return optResults
+                pass
+                #print("Problem with accessing validation set performance")
