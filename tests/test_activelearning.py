@@ -5,7 +5,7 @@ from shutil import copyfile, rmtree
 import numpy as np
 import pytest
 
-from ff_optimizer import active_learning, model, utils
+from ff_optimizer import active_learning, model, optengine, qmengine, utils
 
 from . import checkUtils
 
@@ -27,6 +27,15 @@ class FakeArgs:
         self.sampledir = "2_sampling"
         self.optdir = "1_opt"
         self.dynamicsdir = "0_dynamics"
+        self.restart = False
+        self.valid0 = "valid_0.in"
+        self.opt0 = "opt_0.in"
+        self.resp = 0
+        self.respPriors = 0
+        self.maxcycles = 100
+        self.qmengine = "chemcloud"
+        self.tctemplate = "tc.in"
+        self.tctemplate_long = "tc.in"
 
 
 def monkeyInit(self, args):
@@ -259,11 +268,15 @@ def test_doActiveLearning(monkeypatch):
 
 def monkeyInitModel(self, args):
     self.restartCycle = random.randint(1, 10)
-    options = {"nvalids": 1}
+    options = {"nvalids": 1, "restart": self.restartCycle}
 
     class monkeyOpt:
         def __init__(self, options):
             self.options = options
+            self.restartCycle = options["restart"]
+
+        def determineRestart(self):
+            pass
 
     self.optEngine = monkeyOpt(options)
 
@@ -284,3 +297,119 @@ def test_init(monkeypatch):
     for i in range(1, 4):
         assert os.path.isfile(os.path.join(f"model_{i}", "1_opt", "opt_0.in"))
         assert os.path.isfile(os.path.join(f"model_{i}", "2_sampling", "md.in"))
+
+
+def monkeyInitOpt(self, args):
+    self.train = []
+    self.valid = []
+    self.nvalids = args["nvalids"]
+    self.validPrevious = []
+    self.validInitial = []
+    self.maxCycles = args["maxCycles"]
+    self.optdir = args["optdir"]
+    self.restartCycle = self.determineRestart()
+    self.respPriors = None
+
+
+def monkeyInitMM(self, args):
+    pass
+
+
+def monkeyInitQM(self, arg1, arg2, doResp):
+    pass
+
+
+def monkeyRename(a, b):
+    pass
+
+
+def test_restart(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)
+    monkeypatch.setattr(qmengine.CCCloudEngine, "__init__", monkeyInitQM)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    monkeypatch.setattr(os, "rename", monkeyRename)
+
+    args = FakeArgs()
+    args.restart = True
+    os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "restart"))
+    mod = active_learning.ActiveLearningModel(args)
+    os.remove(os.path.join("1_opt", "leap.out"))
+    assert mod.restartCycle == 1
+
+def monkeySetupFiles(self, i):
+    pass
+
+def monkeySortParams(self, results, i):
+    pass
+
+def monkeyGraphResults(self):
+    pass
+
+def monkeyOptInit(self, args):
+    self.nvalids = args['nvalids']
+    for f in os.listdir(args['optdir']):
+        if f.endswith(".mol2"):
+            self.mol2 = f
+        elif f.endswith(".frcmod"):
+            self.frcmod = f
+    self.validPrevious = []
+    self.train = []
+    self.valid = []
+    self.validInitial = []
+    self.restartCycle = 0
+    self.respPriors = None
+        
+def monkeyForceBalance(command):
+    out = command.split()[3]
+    cycle = out.split("_")[1].split(".")[0]
+    copyfile(os.path.join("reference",out), out)
+
+def monkeyInitialize(self, args):
+    pass
+
+def clean():
+    for d in ["model_1", "model_2"]:
+        os.chdir(os.path.join(d,"1_opt"))
+        for f in os.listdir():
+            if f.endswith(".out"):
+                os.remove(f)
+        os.chdir("targets")
+        for f in os.listdir():
+            rmtree(f)
+        os.chdir(os.path.join("..","..",".."))
+
+def monkeyALInit(self, args):
+    self.home = os.getcwd()
+    self.nmodels = args.activeLearning
+    args.nvalids = args.activeLearning
+    self.models = []
+    for i in range(1, self.nmodels + 1):
+        folder = f"model_{str(i)}"
+        os.chdir(folder)
+        self.models.append(model.Model(args))
+        os.chdir("..")
+        self.models[-1].optEngine.nvalids = 1
+    self.restartCycle = 0
+    self.nthreads = min(os.cpu_count(), self.nmodels)
+
+def test_doParameterOptimization(monkeypatch):
+    args = FakeArgs()
+    args.activeLearning = 2
+    args.restart = True
+    os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "doParameterOptimization"))
+    clean()
+    monkeypatch.setattr(model.Model,"initializeQMEngine",monkeyInitialize)
+    monkeypatch.setattr(model.Model,"initializeMMEngine",monkeyInitialize)
+    monkeypatch.setattr(optengine.OptEngine,"setupInputFiles",monkeySetupFiles)
+    monkeypatch.setattr(optengine.OptEngine,"__init__",monkeyOptInit)
+    monkeypatch.setattr(os,"system",monkeyForceBalance)
+    monkeypatch.setattr(optengine.OptEngine,"sortParams",monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine,"graphResults",monkeyGraphResults)
+    monkeypatch.setattr(active_learning.ActiveLearningModel,"__init__",monkeyALInit)
+    
+    m = active_learning.ActiveLearningModel(args)
+    m.doParameterOptimization(1)
+    assert len(m.optResults) == 3
+    m.doParameterOptimization(2)
+    assert len(m.optResults) == 4
+    clean()

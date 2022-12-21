@@ -48,7 +48,7 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "queue: test runs on queue and may take long to run"
     )
-
+    config.addinivalue_line("markers", "debug: run only these tests")
 
 def pytest_collection_modifyitems(config, items):
     skips = {}
@@ -57,6 +57,8 @@ def pytest_collection_modifyitems(config, items):
     skips["full"] = pytest.mark.skip(reason="need --full option to run")
     skips["gpu"] = pytest.mark.skip(reason="need --gpu option to run")
     skips["queue"] = pytest.mark.skip(reason="need --queue option to run")
+    debug = pytest.mark.skip(reason="skipping unmarked tests in debug mode")
+    items2 = []
     for item in items:
         for keyword in skips.keys():
             if (
@@ -65,3 +67,9 @@ def pytest_collection_modifyitems(config, items):
                 and not config.getoption("--all")
             ):
                 item.add_marker(skips[keyword])
+        if "debug" in item.keywords:
+            items2.append(item)
+    if len(items2) > 0:
+        for item in items:
+            if item not in items2:
+                item.add_marker(debug)

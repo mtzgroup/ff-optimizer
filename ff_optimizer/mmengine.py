@@ -151,7 +151,9 @@ class MMEngine:
             if not os.path.isdir(validName):
                 os.mkdir(validName)
                 validFrames = frames[
-                    i * self.options["conformers"] : (i + 1) * self.options["conformers"]
+                    i
+                    * self.options["conformers"] : (i + 1)
+                    * self.options["conformers"]
                 ]
                 for frame in validFrames:
                     self.getFrame(frame, os.path.join(validName, f"{str(frame)}.rst7"))
