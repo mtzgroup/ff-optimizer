@@ -22,14 +22,14 @@ def mmSampleParallel(model, folder, i):
 
 
 def paramOptStar(args):
-    result = paramOptParallel(*args)
-    return result
+    model = paramOptParallel(*args)
+    return model
 
 
 def paramOptParallel(model, folder, i):
     os.chdir(folder)
-    result = model.doParameterOptimization(i)
-    return result
+    model.doParameterOptimization(i)
+    return model
 
 
 def sanderEnergyForce(geometry):
@@ -59,7 +59,8 @@ class ActiveLearningModel(AbstractModel):
         for i in range(1, self.nmodels + 1):
             folder = f"model_{str(i)}"
             if os.path.isdir(folder):
-                rmtree(folder)
+                if not args.restart:
+                    rmtree(folder)
             else:
                 os.mkdir(folder)
             if not os.path.isdir(os.path.join(folder, args.optdir)):
@@ -68,10 +69,13 @@ class ActiveLearningModel(AbstractModel):
                 copytree(args.sampledir, os.path.join(folder, args.sampledir))
             os.chdir(folder)
             self.models.append(Model(args))
-            # Want to sample multiple validation sets, but don't need to evaluate them all with QM
+            # Want to sample multiple validation sets, but don't need to evaluate them all
+            # So we need to recompute restart cycle
             self.models[-1].optEngine.nvalids = 1
+            self.models[-1].optEngine.determineRestart()
+            self.models[-1].restartCycle = self.models[-1].optEngine.restartCycle
             os.chdir(self.home)
-        self.restartCycle = min([model.restartCycle for model in self.models])
+        self.restartCycle = min([m.restartCycle for m in self.models])
         self.templatePdb = os.path.join(args.optdir, "conf.pdb")
 
     def initialCycle(self):
@@ -109,10 +113,9 @@ class ActiveLearningModel(AbstractModel):
         # return optResults[0]
         tasks = [(self.models[j], f"model_{str(j+1)}", i) for j in range(self.nmodels)]
         with Pool(self.nthreads) as p:
-            results = p.map(paramOptStar, tasks)
-
+            self.models = p.map(paramOptStar, tasks)
         # for now we arbitrarily print only the first model's info
-        return results[0]
+        self.optResults = self.models[0].optResults
 
     def doActiveLearning(self, i):
         sampleDirs = [

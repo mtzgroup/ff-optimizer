@@ -192,7 +192,9 @@ class Model(AbstractModel):
         trainFolder = os.path.join(self.optdir, "targets", f"train_{str(i)}")
         validFolders = [os.path.join(self.optdir, "targets", f"valid_{str(i)}")]
         for j in range(1, self.nvalids):
-            validFolders.append(os.path.join(self.optdir, "targets", f"valid_{str(i)}_{str(j)}"))
+            validFolders.append(
+                os.path.join(self.optdir, "targets", f"valid_{str(i)}_{str(j)}")
+            )
         if not os.path.isdir(trainFolder):
             os.mkdir(trainFolder)
         for validFolder in validFolders:
@@ -219,6 +221,8 @@ class Model(AbstractModel):
                 valids.append(
                     os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}", f)
                 )
+        # consistent performance on tests
+        valids = sorted(valids)
 
         for f in ["all.mdcrd", "qdata.txt"]:
             copyfile(
@@ -235,14 +239,10 @@ class Model(AbstractModel):
         os.chdir(self.optdir)
         self.optEngine.optimizeForcefield(i)
         os.chdir(self.home)
-        optResults = []
-        optResults.append(self.optEngine.valid[-1])
-        optResults.append(self.optEngine.valid[-1] / self.optEngine.validInitial[-1])
-        optResults.append(self.optEngine.valid[-1] - self.optEngine.validPrevious[-1])
+        self.optResults = []
+        self.optResults.append(self.optEngine.valid[-1])
+        self.optResults.append(self.optEngine.valid[-1] / self.optEngine.validInitial[-1])
+        self.optResults.append(self.optEngine.valid[-1] - self.optEngine.validPrevious[-1])
         if i > 1:
-            try:
-                optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
-            except:
-                print("Problem with accessing validation set performance")
+            self.optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
 
-        return optResults
