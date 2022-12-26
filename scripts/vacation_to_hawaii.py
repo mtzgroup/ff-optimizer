@@ -373,7 +373,7 @@ if __name__ == "__main__":
     )
     for i in range(1, args.maxcycles + 1):
 
-        if i <= restartCycle:
+        if i < restartCycle:
             continue
 
         mmStart = perf_counter()

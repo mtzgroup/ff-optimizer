@@ -429,18 +429,17 @@ class OptEngine:
     # We assume that optimizeForcefield and all the functions it calls run in the args.optdir directory
     def optimizeForcefield(self, i):
         if i > 0:
+            copyfile(
+                os.path.join("result", f"opt_{str(i - 1)}", self.frcmod),
+                os.path.join("forcefield", self.frcmod),
+            )
+            copyfile(
+                os.path.join("result", f"opt_{str(i - 1)}", self.mol2),
+                os.path.join("forcefield", self.mol2),
+            )
             self.setupInputFiles(i)
             # If we're just restarting, skip if this calculation finished
-            if len(self.validPrevious) <= i:
-                if i > 1:
-                    copyfile(
-                        os.path.join("result", f"opt_{str(i - 1)}", self.frcmod),
-                        os.path.join("forcefield", self.frcmod),
-                    )
-                    copyfile(
-                        os.path.join("result", f"opt_{str(i - 1)}", self.mol2),
-                        os.path.join("forcefield", self.mol2),
-                    )
+            if len(self.validPrevious) < i:
                 os.system(
                     f"ForceBalance.py valid_{str(i)}.in > valid_{str(i)}_previous.out"
                 )
@@ -468,24 +467,24 @@ class OptEngine:
                     print(
                         "Ethan should implement adaptive changing of adaptive_damping"
                     )
-                copyfile(
-                    os.path.join("result", f"opt_{str(i)}", self.frcmod),
-                    os.path.join("forcefield", self.frcmod),
-                )
-                copyfile(
-                    os.path.join("result", f"opt_{str(i)}", self.mol2),
-                    os.path.join("forcefield", self.mol2),
-                )
                 self.train.append(results["obj"])
                 self.sortParams(results, i)
-            if len(self.valid) <= i:
+            copyfile(
+                os.path.join("result", f"opt_{str(i)}", self.frcmod),
+                os.path.join("forcefield", self.frcmod),
+            )
+            copyfile(
+                os.path.join("result", f"opt_{str(i)}", self.mol2),
+                os.path.join("forcefield", self.mol2),
+            )
+            if len(self.valid) < i:
                 os.system(f"ForceBalance.py valid_{str(i)}.in > valid_{str(i)}.out")
                 for j in range(1, self.nvalids):
                     os.system(
                         f"ForceBalance.py valid_{str(i)}_{str(j)}.in > valid_{str(i)}_{str(j)}.out"
                     )
                 self.valid.append(self.readValid(f"valid_{str(i)}.out"))
-            if len(self.validInitial) <= i:
+            if len(self.validInitial) < i:
                 os.system(
                     f"ForceBalance.py valid_{str(i)}_initial.in > valid_{str(i)}_initial.out"
                 )
@@ -518,6 +517,23 @@ class OptEngine:
         # Determine cycle for restart, set restart variables
         restartCycle = -1
         for i in range(self.maxCycles + 2):
+            if i > 0:
+                try:
+                    vPrev = self.readValid(
+                        os.path.join(
+                            self.optdir, f"valid_{str(i)}_previous.out"
+                        )
+                    )
+                    for j in range(1, self.nvalids):
+                        self.readValid(
+                            os.path.join(
+                                self.optdir,
+                                f"valid_{str(i)}_{str(j)}_previous.out",
+                            )
+                        )
+                except:
+                    break
+                self.validPrevious.append(vPrev)
             optOutput = os.path.join(self.optdir, f"opt_{str(i)}.out")
             if os.path.isfile(optOutput):
                 status, results = self.readOpt(optOutput)
@@ -528,18 +544,12 @@ class OptEngine:
                         )
                         self.labels = results["labels"]
                         self.params[0, :] = results["initialParams"]
-                    else:
+                    self.train.append(results["obj"])
+                    self.sortParams(results, i)
+                    if i > 0:
                         try:
                             v = self.readValid(
                                 os.path.join(self.optdir, f"valid_{str(i)}.out")
-                            )
-                            vPrev = self.readValid(
-                                os.path.join(
-                                    self.optdir, f"valid_{str(i)}_previous.out"
-                                )
-                            )
-                            vInitial = self.readValid(
-                                os.path.join(self.optdir, f"valid_{str(i)}_initial.out")
                             )
                             for j in range(1, self.nvalids):
                                 self.readValid(
@@ -547,12 +557,14 @@ class OptEngine:
                                         self.optdir, f"valid_{str(i)}_{str(j)}.out"
                                     )
                                 )
-                                self.readValid(
-                                    os.path.join(
-                                        self.optdir,
-                                        f"valid_{str(i)}_{str(j)}_previous.out",
-                                    )
-                                )
+                        except:
+                            break
+                        self.valid.append(v)
+                        try:
+                            vInitial = self.readValid(
+                                os.path.join(self.optdir, f"valid_{str(i)}_initial.out")
+                            )
+                            for j in range(1, self.nvalids):
                                 self.readValid(
                                     os.path.join(
                                         self.optdir,
@@ -561,16 +573,11 @@ class OptEngine:
                                 )
                         except:
                             break
-                        self.valid.append(v)
-                        self.validPrevious.append(vPrev)
                         self.validInitial.append(vInitial)
                         if self.respPriors is not None:
                             self.respPriors.getCharges(i)
-                    self.train.append(results["obj"])
-                    self.sortParams(results, i)
                 else:
                     break
             else:
                 break
-        restartCycle = i - 1
-        self.restartCycle = restartCycle
+        self.restartCycle = i
