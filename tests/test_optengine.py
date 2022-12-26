@@ -1,4 +1,5 @@
 import errno
+import pytest
 import os
 from shutil import copyfile, rmtree
 
@@ -557,7 +558,11 @@ def test_determineRestart1():
     assert checkUtils.checkFloat(optEngine.params[0, -1], -6.0860)
     assert checkUtils.checkFloat(optEngine.params[4, 0], 235.8)
     assert checkUtils.checkFloat(optEngine.params[4, -1], -4.4187)
-    assert optEngine.restartCycle == 3
+    assert len(optEngine.validPrevious) == 3
+    assert len(optEngine.train) == 4
+    assert len(optEngine.validInitial) == 3
+    assert len(optEngine.valid) == 3
+    assert optEngine.restartCycle == 4
 
 
 # Failed in opt
@@ -572,10 +577,14 @@ def test_determineRestart2():
     options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
-    assert optEngine.restartCycle == 2
+    assert len(optEngine.validPrevious) == 3
+    assert len(optEngine.train) == 3
+    assert len(optEngine.valid) == 2
+    assert len(optEngine.validInitial) == 2
+    assert optEngine.restartCycle == 3
 
 
-# Failed in a validation
+# Failed in valid_initial
 def test_determineRestart3():
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = {}
@@ -587,9 +596,18 @@ def test_determineRestart3():
     options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
-    assert checkUtils.checkFloat(optEngine.params[4, 0], 0)
+    print(optEngine.params[:6,0])
+    assert checkUtils.checkFloat(optEngine.params[0, 0], 297.1)
+    assert checkUtils.checkFloat(optEngine.params[1, 0], 223.05)
+    assert checkUtils.checkFloat(optEngine.params[2, 0], 216.97)
     assert checkUtils.checkFloat(optEngine.params[3, 0], 245.75)
-    assert optEngine.restartCycle == 2
+    assert checkUtils.checkFloat(optEngine.params[4, 0], 245.28)
+    assert checkUtils.checkFloat(optEngine.params[5, 0], 0)
+    assert len(optEngine.train) == 4
+    assert len(optEngine.valid) == 3
+    assert len(optEngine.validPrevious) == 3
+    assert len(optEngine.validInitial) == 2
+    assert optEngine.restartCycle == 3
 
 
 def test_sortParams1():
@@ -770,6 +788,9 @@ def test_optimizeForcefield_multipleValids(monkeypatch):
     os.mkdir(os.path.join("result", "opt_1"))
     for f in ["dasa.frcmod", "dasa.mol2"]:
         copyfile(f, os.path.join("result", "opt_1", f))
+    os.mkdir(os.path.join("result", "opt_0"))
+    for f in ["dasa.frcmod", "dasa.mol2"]:
+        copyfile(f, os.path.join("result", "opt_0", f))
     optEngine.optimizeForcefield(1)
     files = os.listdir()
     valid1 = 0
@@ -801,4 +822,182 @@ def test_determineRestart_multipleValids():
     options["nvalids"] = 3
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
-    assert optEngine.restartCycle == 1
+    assert optEngine.restartCycle == 2
+
+def monkeyForcebalance(command):
+    with open("fb.log","a") as f:
+        f.write(command + "\n")
+    inFile = command.split()[1]
+    outFileSplit = command.split()[3].replace(".out","").split("_")
+    if outFileSplit[0] == "opt":
+        fbType = "opt"
+    else:   
+        if len(outFileSplit) == 2:
+            fbType = "valid"
+        else:
+            fbType = outFileSplit[2]
+    with open(inFile, 'r') as f:
+        lines = f.readlines()
+    for line in lines:
+        if len(line.split()) > 0:
+            if line.split()[0] == "forcefield":
+                for token in line.split():
+                    if "frcmod" in token:
+                        frcmod = token
+    with open(os.path.join("forcefield",frcmod),'r') as f:
+        commentLine = f.readline()
+    if fbType not in commentLine:
+        print(commentLine)
+        print(command)
+        raise RuntimeError("Ran FB on wrong parameters")
+
+def monkeySortParams(self, results, i):
+    pass
+
+def monkeyGraphResults(self):
+    pass
+
+def monkeySetupInputFiles(self, i):
+    pass
+
+def monkeyReadValid(self, filename):
+    return 1
+
+def monkeyReadOpt(self, filename):
+    result = {}
+    result['obj'] = 1
+    return 0, result
+
+def setupFFdir(optdir):
+    os.chdir(optdir)
+    if os.path.isdir("forcefield"):
+        rmtree("forcefield")
+    os.mkdir("forcefield")
+    copyfile("dasa.frcmod",os.path.join("forcefield","dasa.frcmod"))
+    copyfile("dasa.mol2",os.path.join("forcefield","dasa.mol2"))
+    copyfile("dasa.frcmod",os.path.join("forcefield","initial_dasa.frcmod"))
+    copyfile("dasa.mol2",os.path.join("forcefield","initial_dasa.mol2"))
+    os.chdir("..")
+
+# Restart from new FB cycle
+def test_restart1Params(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = {}
+    options["optdir"] = "params1"
+    options["resp"] = 0
+    options["restart"] = True
+    options["maxCycles"] = 10
+    options["respPriors"] = 0
+    options["nvalids"] = 1
+    optEngine = optengine.OptEngine(options)
+    monkeypatch.setattr(os, "system", monkeyForcebalance)
+    monkeypatch.setattr(optengine.OptEngine,"readValid", monkeyReadValid)
+    monkeypatch.setattr(optengine.OptEngine,"readOpt", monkeyReadOpt)
+    setupFFdir("params1")
+    os.chdir("params1")
+    if os.path.isfile("fb.log"):
+        os.remove("fb.log")
+    optEngine.optimizeForcefield(optEngine.restartCycle)
+    with open("fb.log",'r') as f:
+        lines = f.readlines()
+    os.remove("fb.log")
+    rmtree("forcefield")
+    os.chdir("..")
+    assert len(lines) == 4
+
+# Restart from failed param opt
+def test_restart2Params(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    testDir = "params2"
+
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = {}
+    options["optdir"] = testDir
+    options["resp"] = 0
+    options["restart"] = True
+    options["maxCycles"] = 10
+    options["respPriors"] = 0
+    options["nvalids"] = 1
+    optEngine = optengine.OptEngine(options)
+    monkeypatch.setattr(os, "system", monkeyForcebalance)
+    monkeypatch.setattr(optengine.OptEngine,"readValid", monkeyReadValid)
+    monkeypatch.setattr(optengine.OptEngine,"readOpt", monkeyReadOpt)
+    setupFFdir(testDir)
+    os.chdir(testDir)
+    if os.path.isfile("fb.log"):
+        os.remove("fb.log")
+    optEngine.optimizeForcefield(optEngine.restartCycle)
+    with open("fb.log",'r') as f:
+        lines = f.readlines()
+    os.remove("fb.log")
+    rmtree("forcefield")
+    os.chdir("..")
+    assert len(lines) == 3
+
+# Restart from failed validation after param opt
+def test_restart3Params(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    testDir = "params3"
+
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = {}
+    options["optdir"] = testDir
+    options["resp"] = 0
+    options["restart"] = True
+    options["maxCycles"] = 10
+    options["respPriors"] = 0
+    options["nvalids"] = 1
+    optEngine = optengine.OptEngine(options)
+    monkeypatch.setattr(os, "system", monkeyForcebalance)
+    monkeypatch.setattr(optengine.OptEngine,"readValid", monkeyReadValid)
+    monkeypatch.setattr(optengine.OptEngine,"readOpt", monkeyReadOpt)
+    setupFFdir(testDir)
+    os.chdir(testDir)
+    if os.path.isfile("fb.log"):
+        os.remove("fb.log")
+    optEngine.optimizeForcefield(optEngine.restartCycle)
+    with open("fb.log",'r') as f:
+        lines = f.readlines()
+    os.remove("fb.log")
+    rmtree("forcefield")
+    os.chdir("..")
+    assert len(lines) == 2
+
+# Restart from failed validation on initial params 
+def test_restart3Params(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    testDir = "params4"
+
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = {}
+    options["optdir"] = testDir
+    options["resp"] = 0
+    options["restart"] = True
+    options["maxCycles"] = 10
+    options["respPriors"] = 0
+    options["nvalids"] = 1
+    optEngine = optengine.OptEngine(options)
+    monkeypatch.setattr(os, "system", monkeyForcebalance)
+    monkeypatch.setattr(optengine.OptEngine,"readValid", monkeyReadValid)
+    monkeypatch.setattr(optengine.OptEngine,"readOpt", monkeyReadOpt)
+    setupFFdir(testDir)
+    os.chdir(testDir)
+    if os.path.isfile("fb.log"):
+        os.remove("fb.log")
+    optEngine.optimizeForcefield(optEngine.restartCycle)
+    with open("fb.log",'r') as f:
+        lines = f.readlines()
+    os.remove("fb.log")
+    rmtree("forcefield")
+    os.chdir("..")
+    assert len(lines) == 1
