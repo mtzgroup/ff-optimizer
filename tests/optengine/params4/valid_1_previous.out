@@ -1,0 +1,425 @@
+Note: Failed to import the optional openff.evaluator package. 
+Note: Failed to import the optional openff-toolkit package. 
+Note: Failed to import the optional openff.recharge package.
+#======================================================================#
+#| [1m            Welcome to ForceBalance version 1.8.1! =D             [0m |#
+#| [1m                 Force Field Optimization System                  [0m |#
+#| [1m                                                                  [0m |#
+#| [1m                             Authors:                             [0m |#
+#| [1m                          Lee-Ping Wang                           [0m |#
+#| [1m                  Yudong Qiu, Keri A. McKiernan                   [0m |#
+#| [1m          Jeffrey R. Wagner, Hyesu Jang, Simon Boothroyd          [0m |#
+#| [1m          Arthur Vigil, Erik G. Brandt, John Stoppelman           [0m |#
+#| [1m                  Johnny Israeli, Matt Thompson                   [0m |#
+#======================================================================#
+
+                          [44m     [0m                                        
+                       [44m        [0m      [43m     [0m                              
+                    [44m        [0m   [44m  [0m    [43m         [0m                          
+                 [44m       [0m    [44m      [0m      [43m         [0m                       
+             [44m        [0m    [44m        [0m          [43m         [0m                    
+          [44m        [0m    [44m        [0m                 [43m        [0m                 
+       [44m        [0m    [44m       [0m                        [43m        [0m              
+    [44m        [0m   [44m        [0m                              [43m         [0m          
+   [44m      [0m   [44m        [0m               `.:+@@###@'          [43m         [0m       
+    [44m [0m    [44m        [0m          ,;'+###############.             [43m     [0m       
+      [44m        [0m         +################':`                    [43m [0m        
+      [44m     [0m              `.,,...####+.                                  
+                                ,#####      +##.               [44m   [0m   [44m   [0m
+ [43m    [0m                            #####      ######             [44m   [0m   [44m   [0m
+ [43m    [0m                ###'        ####'     :#####'             [44m   [0m   [44m   [0m
+ [43m    [0m                :####@      ####.    ,####'               [44m   [0m   [44m   [0m
+ [43m    [0m                 ######     ####    +###+                 [44m   [0m   [44m   [0m
+ [43m    [0m                  #####     ####   ###;                   [44m   [0m   [44m   [0m
+ [43m    [0m                   :##      ####  ++`                     [44m   [0m   [44m   [0m
+ [43m    [0m                            ####``..:;+##############+`   [44m   [0m   [44m   [0m
+ [43m    [0m             .,:;;'++##################################`  [44m   [0m   [44m   [0m
+ [43m    [0m    `############################++++''';;;;;;;;;;;'';    [44m   [0m   [44m   [0m
+ [43m    [0m      ,########':,.``       ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+      [44m    [0m                       ####                                   
+     [44m        [0m                    ####                                   
+    [44m [0m    [44m       [0m                 ####                       [43m     [0m       
+   [44m     [0m    [44m        [0m             ####                    [43m        [0m       
+   [44m        [0m    [44m        [0m          ###                  [43m         [0m         
+      [44m        [0m    [44m        [0m        +`               [43m        [0m             
+          [44m        [0m   [44m        [0m                   [43m        [0m                
+             [44m        [0m   [44m         [0m           [43m         [0m                   
+                [44m        [0m    [44m       [0m      [43m         [0m                      
+                   [44m        [0m    [44m   [0m    [43m        [0m                          
+                      [44m        [0m       [43m      [0m                             
+                          [44m      [0m      [43m  [0m                                
+                             [44m  [0m                                         
+
+Reading options from file: valid_1.in
+#========================================================#
+#| [95m  Options at their default values are not printed   [0m |#
+#| [95m        Use 'verbose_options True' to Enable        [0m |#
+#========================================================#
+Reading force field from file: dasa.frcmod
+Reading force field from file: dasa.mol2
+#=========================================================#
+#| [92m Starting parameter indices, physical values and IDs [0m |#
+#=========================================================#
+   0 [  1.6724e+02 ] : BONDSK/cy-c3
+   1 [  1.5244e+00 ] : BONDSB/cy-c3
+   2 [  9.4673e+01 ] : BONDSK/cy-os
+   3 [  1.4310e+00 ] : BONDSB/cy-os
+   4 [  1.4766e+02 ] : BONDSK/cv-cv
+   5 [  1.5486e+00 ] : BONDSB/cv-cv
+   6 [  3.7726e+02 ] : BONDSK/cv-o
+   7 [  1.2346e+00 ] : BONDSB/cv-o
+   8 [  1.7476e+02 ] : BONDSK/cv-os
+   9 [  1.3752e+00 ] : BONDSB/cv-os
+  10 [  3.2779e+02 ] : BONDSK/cv-ce
+  11 [  1.4082e+00 ] : BONDSB/cv-ce
+  12 [  1.8750e+02 ] : BONDSK/c3-hc
+  13 [  1.0963e+00 ] : BONDSB/c3-hc
+  14 [  1.8608e+02 ] : BONDSK/ce-ha
+  15 [  1.0787e+00 ] : BONDSB/ce-ha
+  16 [  1.1616e+02 ] : BONDSK/c2-ha
+  17 [  1.0825e+00 ] : BONDSB/c2-ha
+  18 [  3.8744e+02 ] : BONDSK/c2-c2
+  19 [  1.3902e+00 ] : BONDSB/c2-c2
+  20 [  2.3706e+02 ] : BONDSK/c2-ce
+  21 [  1.3851e+00 ] : BONDSB/c2-ce
+  22 [  1.8586e+02 ] : BONDSK/c2-oh
+  23 [  1.3260e+00 ] : BONDSB/c2-oh
+  24 [  1.2214e+02 ] : BONDSK/ce-h4
+  25 [  1.0901e+00 ] : BONDSB/ce-h4
+  26 [  3.1921e+02 ] : BONDSK/ce-n3
+  27 [  1.3310e+00 ] : BONDSB/ce-n3
+  28 [  1.9266e+02 ] : BONDSK/c3-h1
+  29 [  1.0937e+00 ] : BONDSB/c3-h1
+  30 [  1.7199e+02 ] : BONDSK/c3-c3
+  31 [  1.5238e+00 ] : BONDSB/c3-c3
+  32 [  1.4077e+02 ] : BONDSK/c3-n3
+  33 [  1.4588e+00 ] : BONDSB/c3-n3
+  34 [  3.2181e+02 ] : BONDSK/oh-ho
+  35 [  9.5874e-01 ] : BONDSB/oh-ho
+  36 [  3.6463e+01 ] : ANGLESK/cy-c3-hc
+  37 [  1.0557e+02 ] : ANGLESB/cy-c3-hc
+  38 [  4.7690e+01 ] : ANGLESK/cy-os-cv
+  39 [  1.0992e+02 ] : ANGLESB/cy-os-cv
+  40 [  5.0389e+01 ] : ANGLESK/cv-cv-cv
+  41 [  1.6757e+02 ] : ANGLESB/cv-cv-cv
+  42 [  4.4815e+01 ] : ANGLESK/cv-cv-ce
+  43 [  1.6851e+02 ] : ANGLESB/cv-cv-ce
+  44 [  2.9780e+01 ] : ANGLESK/cv-cv-o
+  45 [  1.7166e+02 ] : ANGLESB/cv-cv-o
+  46 [  3.2190e+01 ] : ANGLESK/cv-cv-os
+  47 [  1.4238e+02 ] : ANGLESB/cv-cv-os
+  48 [  3.9754e+01 ] : ANGLESK/cv-ce-ha
+  49 [  1.2738e+02 ] : ANGLESB/cv-ce-ha
+  50 [  7.4638e+00 ] : ANGLESK/cv-ce-c2
+  51 [  1.5123e+02 ] : ANGLESB/cv-ce-c2
+  52 [  3.9401e+01 ] : ANGLESK/c3-cy-c3
+  53 [  1.1289e+02 ] : ANGLESB/c3-cy-c3
+  54 [  6.0933e+01 ] : ANGLESK/c3-cy-os
+  55 [  1.0628e+02 ] : ANGLESB/c3-cy-os
+  56 [  2.7404e+01 ] : ANGLESK/hc-c3-hc
+  57 [  1.0382e+02 ] : ANGLESB/hc-c3-hc
+  58 [  6.1749e+01 ] : ANGLESK/ce-c2-ce
+  59 [  1.2053e+02 ] : ANGLESB/ce-c2-ce
+  60 [  2.3465e+01 ] : ANGLESK/ce-c2-oh
+  61 [  1.1247e+02 ] : ANGLESB/ce-c2-oh
+  62 [  2.3870e+01 ] : ANGLESK/ha-ce-c2
+  63 [  1.4038e+02 ] : ANGLESB/ha-ce-c2
+  64 [  2.6675e+01 ] : ANGLESK/c2-ce-c2
+  65 [  1.4028e+02 ] : ANGLESB/c2-ce-c2
+  66 [  4.3789e+01 ] : ANGLESK/c2-oh-ho
+  67 [  1.0699e+02 ] : ANGLESB/c2-oh-ho
+  68 [  2.5918e+01 ] : ANGLESK/ha-c2-ce
+  69 [  1.2466e+02 ] : ANGLESB/ha-c2-ce
+  70 [  2.8506e+01 ] : ANGLESK/c2-ce-h4
+  71 [  1.4399e+02 ] : ANGLESB/c2-ce-h4
+  72 [  5.2134e+01 ] : ANGLESK/c2-ce-n3
+  73 [  1.3867e+02 ] : ANGLESB/c2-ce-n3
+  74 [  5.3077e+01 ] : ANGLESK/ce-n3-c3
+  75 [  1.1725e+02 ] : ANGLESB/ce-n3-c3
+  76 [  2.9297e+01 ] : ANGLESK/h4-ce-n3
+  77 [  1.4237e+02 ] : ANGLESB/h4-ce-n3
+  78 [  2.8788e+01 ] : ANGLESK/c3-c3-hc
+  79 [  1.0675e+02 ] : ANGLESB/c3-c3-hc
+  80 [  7.8537e+01 ] : ANGLESK/c3-n3-c3
+  81 [  1.1609e+02 ] : ANGLESB/c3-n3-c3
+  82 [  3.3461e+01 ] : ANGLESK/h1-c3-h1
+  83 [  1.0023e+02 ] : ANGLESB/h1-c3-h1
+  84 [  3.4734e+01 ] : ANGLESK/h1-c3-c3
+  85 [  1.0213e+02 ] : ANGLESB/h1-c3-c3
+  86 [  2.6661e+01 ] : ANGLESK/h1-c3-n3
+  87 [  9.9189e+01 ] : ANGLESB/h1-c3-n3
+  88 [  6.6393e+01 ] : ANGLESK/c3-c3-n3
+  89 [  1.0786e+02 ] : ANGLESB/c3-c3-n3
+  90 [  8.5780e+01 ] : ANGLESK/o-cv-os
+  91 [  1.2978e+02 ] : ANGLESB/o-cv-os
+  92 [  9.0094e+01 ] : ANGLESK/os-cy-os
+  93 [  1.0837e+02 ] : ANGLESB/os-cy-os
+  94 [  1.3912e+00 ] : PDIHS2K/cv-cv-cv-o
+  95 [ -6.7133e-01 ] : PDIHS2K/cv-cv-cv-os
+  96 [  1.0794e+00 ] : PDIHS2K/cv-cv-ce-ha
+  97 [  3.6307e-03 ] : PDIHS2K/cv-cv-ce-c2
+  98 [  8.7971e-01 ] : PDIHS2K/cy-os-cv-cv
+  99 [  3.0385e+00 ] : PDIHS2K/cy-os-cv-o
+ 100 [  2.3622e-01 ] : PDIHS3K/cv-os-cy-c3
+ 101 [  5.1597e-01 ] : PDIHS3K/cv-os-cy-os
+ 102 [  8.4135e+00 ] : PDIHS2K/cv-ce-c2-ce
+ 103 [  1.7177e+00 ] : PDIHS2K/cv-ce-c2-oh
+ 104 [  4.2485e-01 ] : PDIHS3K/c3-cy-c3-hc
+ 105 [  8.1820e-02 ] : PDIHS3K/hc-c3-cy-os
+ 106 [  1.1704e+00 ] : PDIHS1K/hc-c3-cy-os
+ 107 [ -7.0625e-01 ] : PDIHS2K/ce-cv-cv-o
+ 108 [  5.1063e+00 ] : PDIHS2K/ce-cv-cv-os
+ 109 [  2.1365e+00 ] : PDIHS2K/ce-c2-ce-ha
+ 110 [  6.4150e+00 ] : PDIHS2K/ce-c2-ce-c2
+ 111 [ -1.7265e-01 ] : PDIHS2K/ce-c2-oh-ho
+ 112 [  3.4538e+00 ] : PDIHS2K/ha-ce-c2-oh
+ 113 [ -9.8710e-02 ] : PDIHS2K/ce-c2-ce-h4
+ 114 [  2.8372e+00 ] : PDIHS2K/ce-c2-ce-n3
+ 115 [  4.0412e+00 ] : PDIHS2K/ha-c2-ce-ha
+ 116 [  4.5737e+00 ] : PDIHS2K/c2-ce-c2-oh
+ 117 [  4.2701e+00 ] : PDIHS2K/c2-ce-n3-c3
+ 118 [  3.2633e+00 ] : PDIHS2K/ha-c2-ce-h4
+ 119 [  1.8682e-01 ] : PDIHS2K/ha-c2-ce-n3
+ 120 [  7.3130e-01 ] : PDIHS3K/ce-n3-c3-h1
+ 121 [ -8.9801e-01 ] : PDIHS3K/ce-n3-c3-c3
+ 122 [  1.6709e+00 ] : PDIHS2K/h4-ce-n3-c3
+ 123 [ -1.2106e+00 ] : PDIHS2K/ha-c2-ce-c2
+ 124 [  9.8352e-01 ] : PDIHS3K/c3-n3-c3-h1
+ 125 [ -1.3067e+00 ] : PDIHS3K/c3-n3-c3-c3
+ 126 [  3.6880e-01 ] : PDIHS2K/c3-n3-c3-c3
+ 127 [  2.0977e-01 ] : PDIHS3K/h1-c3-c3-hc
+ 128 [  9.1333e-02 ] : PDIHS3K/hc-c3-c3-n3
+ 129 [  2.9810e+00 ] : IDIHSK/cv-o-cv-os
+ 130 [ -1.2203e+01 ] : IDIHSK/ce-cv-cv-cv
+ 131 [ -5.0765e+00 ] : IDIHSK/c2-cv-ce-ha
+ 132 [ -1.7233e+00 ] : IDIHSK/ce-ce-c2-oh
+ 133 [ -6.5010e+00 ] : IDIHSK/c2-c2-ce-ha
+ 134 [ -5.3713e+00 ] : IDIHSK/c2-h4-ce-n3
+-----------------------------------------------------------
+#=========================================================#
+#| [91m Rescaling Factors by Type (Lower Takes Precedence): [0m |#
+#=========================================================#
+   BONDSK                               : 9.37583e+05
+   BONDSB                               : 5.29177e-02
+   ANGLESK                              : 6.05928e+02
+   ANGLESB                              : 5.72958e+01
+   PDIHS1K                              : 9.64853e+01
+   PDIHS2K                              : 9.64853e+01
+   PDIHS3K                              : 9.64853e+01
+   IDIHSK                               : 1.22034e+01
+-----------------------------------------------------------
+#========================================================#
+#| [91m   Rescaling Types / Factors by Parameter Number:   [0m |#
+#========================================================#
+   0 [    BONDSK                        : 9.37583e+05 ] : BONDSK/cy-c3
+   1 [    BONDSB                        : 5.29177e-02 ] : BONDSB/cy-c3
+   2 [    BONDSK                        : 9.37583e+05 ] : BONDSK/cy-os
+   3 [    BONDSB                        : 5.29177e-02 ] : BONDSB/cy-os
+   4 [    BONDSK                        : 9.37583e+05 ] : BONDSK/cv-cv
+   5 [    BONDSB                        : 5.29177e-02 ] : BONDSB/cv-cv
+   6 [    BONDSK                        : 9.37583e+05 ] : BONDSK/cv-o
+   7 [    BONDSB                        : 5.29177e-02 ] : BONDSB/cv-o
+   8 [    BONDSK                        : 9.37583e+05 ] : BONDSK/cv-os
+   9 [    BONDSB                        : 5.29177e-02 ] : BONDSB/cv-os
+  10 [    BONDSK                        : 9.37583e+05 ] : BONDSK/cv-ce
+  11 [    BONDSB                        : 5.29177e-02 ] : BONDSB/cv-ce
+  12 [    BONDSK                        : 9.37583e+05 ] : BONDSK/c3-hc
+  13 [    BONDSB                        : 5.29177e-02 ] : BONDSB/c3-hc
+  14 [    BONDSK                        : 9.37583e+05 ] : BONDSK/ce-ha
+  15 [    BONDSB                        : 5.29177e-02 ] : BONDSB/ce-ha
+  16 [    BONDSK                        : 9.37583e+05 ] : BONDSK/c2-ha
+  17 [    BONDSB                        : 5.29177e-02 ] : BONDSB/c2-ha
+  18 [    BONDSK                        : 9.37583e+05 ] : BONDSK/c2-c2
+  19 [    BONDSB                        : 5.29177e-02 ] : BONDSB/c2-c2
+  20 [    BONDSK                        : 9.37583e+05 ] : BONDSK/c2-ce
+  21 [    BONDSB                        : 5.29177e-02 ] : BONDSB/c2-ce
+  22 [    BONDSK                        : 9.37583e+05 ] : BONDSK/c2-oh
+  23 [    BONDSB                        : 5.29177e-02 ] : BONDSB/c2-oh
+  24 [    BONDSK                        : 9.37583e+05 ] : BONDSK/ce-h4
+  25 [    BONDSB                        : 5.29177e-02 ] : BONDSB/ce-h4
+  26 [    BONDSK                        : 9.37583e+05 ] : BONDSK/ce-n3
+  27 [    BONDSB                        : 5.29177e-02 ] : BONDSB/ce-n3
+  28 [    BONDSK                        : 9.37583e+05 ] : BONDSK/c3-h1
+  29 [    BONDSB                        : 5.29177e-02 ] : BONDSB/c3-h1
+  30 [    BONDSK                        : 9.37583e+05 ] : BONDSK/c3-c3
+  31 [    BONDSB                        : 5.29177e-02 ] : BONDSB/c3-c3
+  32 [    BONDSK                        : 9.37583e+05 ] : BONDSK/c3-n3
+  33 [    BONDSB                        : 5.29177e-02 ] : BONDSB/c3-n3
+  34 [    BONDSK                        : 9.37583e+05 ] : BONDSK/oh-ho
+  35 [    BONDSB                        : 5.29177e-02 ] : BONDSB/oh-ho
+  36 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/cy-c3-hc
+  37 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/cy-c3-hc
+  38 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/cy-os-cv
+  39 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/cy-os-cv
+  40 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/cv-cv-cv
+  41 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/cv-cv-cv
+  42 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/cv-cv-ce
+  43 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/cv-cv-ce
+  44 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/cv-cv-o
+  45 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/cv-cv-o
+  46 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/cv-cv-os
+  47 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/cv-cv-os
+  48 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/cv-ce-ha
+  49 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/cv-ce-ha
+  50 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/cv-ce-c2
+  51 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/cv-ce-c2
+  52 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/c3-cy-c3
+  53 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/c3-cy-c3
+  54 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/c3-cy-os
+  55 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/c3-cy-os
+  56 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/hc-c3-hc
+  57 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/hc-c3-hc
+  58 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/ce-c2-ce
+  59 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/ce-c2-ce
+  60 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/ce-c2-oh
+  61 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/ce-c2-oh
+  62 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/ha-ce-c2
+  63 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/ha-ce-c2
+  64 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/c2-ce-c2
+  65 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/c2-ce-c2
+  66 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/c2-oh-ho
+  67 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/c2-oh-ho
+  68 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/ha-c2-ce
+  69 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/ha-c2-ce
+  70 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/c2-ce-h4
+  71 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/c2-ce-h4
+  72 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/c2-ce-n3
+  73 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/c2-ce-n3
+  74 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/ce-n3-c3
+  75 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/ce-n3-c3
+  76 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/h4-ce-n3
+  77 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/h4-ce-n3
+  78 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/c3-c3-hc
+  79 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/c3-c3-hc
+  80 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/c3-n3-c3
+  81 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/c3-n3-c3
+  82 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/h1-c3-h1
+  83 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/h1-c3-h1
+  84 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/h1-c3-c3
+  85 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/h1-c3-c3
+  86 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/h1-c3-n3
+  87 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/h1-c3-n3
+  88 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/c3-c3-n3
+  89 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/c3-c3-n3
+  90 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/o-cv-os
+  91 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/o-cv-os
+  92 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/os-cy-os
+  93 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/os-cy-os
+  94 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/cv-cv-cv-o
+  95 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/cv-cv-cv-os
+  96 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/cv-cv-ce-ha
+  97 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/cv-cv-ce-c2
+  98 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/cy-os-cv-cv
+  99 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/cy-os-cv-o
+ 100 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/cv-os-cy-c3
+ 101 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/cv-os-cy-os
+ 102 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/cv-ce-c2-ce
+ 103 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/cv-ce-c2-oh
+ 104 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/c3-cy-c3-hc
+ 105 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/hc-c3-cy-os
+ 106 [    PDIHS1K                       : 9.64853e+01 ] : PDIHS1K/hc-c3-cy-os
+ 107 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ce-cv-cv-o
+ 108 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ce-cv-cv-os
+ 109 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ce-c2-ce-ha
+ 110 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ce-c2-ce-c2
+ 111 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ce-c2-oh-ho
+ 112 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ha-ce-c2-oh
+ 113 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ce-c2-ce-h4
+ 114 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ce-c2-ce-n3
+ 115 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ha-c2-ce-ha
+ 116 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/c2-ce-c2-oh
+ 117 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/c2-ce-n3-c3
+ 118 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ha-c2-ce-h4
+ 119 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ha-c2-ce-n3
+ 120 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/ce-n3-c3-h1
+ 121 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/ce-n3-c3-c3
+ 122 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/h4-ce-n3-c3
+ 123 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/ha-c2-ce-c2
+ 124 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/c3-n3-c3-h1
+ 125 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/c3-n3-c3-c3
+ 126 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/c3-n3-c3-c3
+ 127 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/h1-c3-c3-hc
+ 128 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/hc-c3-c3-n3
+ 129 [    IDIHSK                        : 1.22034e+01 ] : IDIHSK/cv-o-cv-os
+ 130 [    IDIHSK                        : 1.22034e+01 ] : IDIHSK/ce-cv-cv-cv
+ 131 [    IDIHSK                        : 1.22034e+01 ] : IDIHSK/c2-cv-ce-ha
+ 132 [    IDIHSK                        : 1.22034e+01 ] : IDIHSK/ce-ce-c2-oh
+ 133 [    IDIHSK                        : 1.22034e+01 ] : IDIHSK/c2-c2-ce-ha
+ 134 [    IDIHSK                        : 1.22034e+01 ] : IDIHSK/c2-h4-ce-n3
+----------------------------------------------------------
+Building charge constraints...
+#========================================================#
+#| [92m               Setup for force field                [0m |#
+#========================================================#
+fnms                      ['dasa.frcmod', 'dasa.mol2'] 
+----------------------------------------------------------
+Relative energy fitting: Subtracting (MM - QM) energy gap from all relative energy calculations - this is the default.
+The 'amberhome' option was not specified; using default.
+Received an error message:
+
+[====] [91mError Message[0m [====]
+STOP PMEMD Terminated Abnormally!
+[====] [91mEnd o'Message[0m [====]
+/global/software/Amber/20-GCC-4.8.1/build2/bin/pmemd.cuda -h gave a return code of 1 (it may have crashed) -- carrying on
+pmemd.cuda gave a nonzero returncode; CUDA environment variables likely missing
+[1;91mPress Enter or wait 10 seconds (I assume no responsibility for what happens after this!)[0m
+Cannot find a unique file with extension .mdin in /home/curtie/7_FF_fitting/0_ff-optimizer/5_dasa_optimization_testing/1_optimizing_charges/2_BAT/1_opt/targets/valid_1 (0 found; )
+Fitting the forces on all atoms
+#========================================================#
+#| [92m             Setup for target valid_1 :             [0m |#
+#========================================================#
+leapcmd                   setup.leap 
+name                      valid_1 
+type                      ABINITIO_AMBER 
+backup                    False 
+tgtdir                    targets/valid_1 
+shots                     400 
+----------------------------------------------------------
+Using parabolic regularization (Gaussian prior) with strength 0.0e+00 (+), 0.0e+00 (x)
+#========================================================#
+#| [92m           Setup for objective function :           [0m |#
+#========================================================#
+
+----------------------------------------------------------
+#========================================================#
+#| [92m                Setup for optimizer                 [0m |#
+#========================================================#
+jobtype                   SINGLE 
+backup                    False 
+input_file                valid_1.in 
+----------------------------------------------------------
+Calculation started at 2022-04-07 01:16 PM
+
+#================================================================================================#
+#|                Target: valid_1  Type: AbInitio_AMBER  Objective = 9.08189e-01                |#
+#|                        Difference   Denominator     Percent                                  |#
+#|  Observable            (Calc-Ref)     RMS (Ref)   Difference       Term   x Wt =   Contrib.  |#
+#================================================================================================#
+    Energy (kJ/mol)          72.9281       96.1952     75.8126%     0.5748    1.000     0.5748 
+    Gradient (kJ/mol/A)     144.7230      250.6300     57.7437%     0.3334    1.000     0.3334 
+--------------------------------------------------------------------------------------------------
+Maximum force difference on atom 46 (C), frame 399, 315.0104 kJ/mol/A
+#====================================================================#
+#| [94m                  Objective Function Breakdown                  [0m |#
+#| [94m  Target Name              Residual  x  Weight  =  Contribution [0m |#
+#====================================================================#
+valid_1                        0.90819      1.000 [94m     9.08189e-01[0m 
+Regularization                 0.00000      1.000 [94m     0.00000e+00[0m 
+Total                                             [94m     9.08189e-01[0m 
+----------------------------------------------------------------------
+#========================================================#
+#| [92m    Objective Function Single Point: 0.90818897     [0m |#
+#========================================================#
+Parameter file same as original; will not be printed to results folder.
+Wall time since calculation start: 0.5 seconds
+#========================================================#
+#| [1;44;93m               Calculation Finished.                [0m |#
+#| [1;44;93m     ---==(  May the Force be with you!  )==---     [0m |#
+#========================================================#

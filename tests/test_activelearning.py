@@ -334,7 +334,7 @@ def test_restart(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "restart"))
     mod = active_learning.ActiveLearningModel(args)
     os.remove(os.path.join("1_opt", "leap.out"))
-    assert mod.restartCycle == 1
+    assert mod.restartCycle == 2
 
 def monkeySetupFiles(self, i):
     pass

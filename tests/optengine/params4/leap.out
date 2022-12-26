@@ -1,0 +1,66 @@
+-I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/prep to search path.
+-I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/lib to search path.
+-I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/parm to search path.
+-I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/cmd to search path.
+-f: Source setup.leap.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: ./setup.leap
+----- Source: /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/cmd/leaprc.gaff
+----- Source of /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/cmd/leaprc.gaff done
+Log file: ./leap.log
+Loading parameters: /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/parm/gaff.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 1.81, May 2017)
+Loading parameters: ./dasa.frcmod
+Reading force field modification type file (frcmod)
+Reading title:
+initial params
+
+/global/software/Amber/20-GCC-4.8.1/build2/bin/teLeap: Warning!
+Expected Improper Torsion PK>=0 (-14.709613)
+Here is the Improper Torsion line in question:
+ce cv cv cv        -1.470961329746e+01          180.0         2.0 # PRM 1
+
+/global/software/Amber/20-GCC-4.8.1/build2/bin/teLeap: Warning!
+Expected Improper Torsion PK>=0 (-4.747299)
+Here is the Improper Torsion line in question:
+c2 cv ce ha        -4.747299332481e+00          180.0         2.0 # PRM 1
+
+/global/software/Amber/20-GCC-4.8.1/build2/bin/teLeap: Warning!
+Expected Improper Torsion PK>=0 (-3.768385)
+Here is the Improper Torsion line in question:
+c2 c2 ce ha        -3.768384511196e+00          180.0         2.0 # PRM 1
+
+/global/software/Amber/20-GCC-4.8.1/build2/bin/teLeap: Warning!
+Expected Improper Torsion PK>=0 (-6.085964)
+Here is the Improper Torsion line in question:
+c2 h4 ce n3        -6.085964317918e+00          180.0         2.0 # PRM 1
+Loading Mol2 file: ./dasa.mol2
+Reading MOLECULE named DAS
+Loading PDB file: ./conf.pdb
+  total atoms in file: 84
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 14 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	DAS	2
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 4; Notes = 0.

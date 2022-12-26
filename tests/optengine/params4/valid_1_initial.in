@@ -1,0 +1,14 @@
+$options
+jobtype             single
+forcefield          initial_dasa.frcmod initial_dasa.mol2
+backup              false
+$end
+
+$target
+
+$target
+type                abinitio_amber
+name                valid_1
+amber_leapcmd       setup_valid_initial.leap
+$end
+
