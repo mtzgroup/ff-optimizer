@@ -1,5 +1,4 @@
 import errno
-import pytest
 import os
 from shutil import copyfile, rmtree
 
@@ -596,7 +595,7 @@ def test_determineRestart3():
     options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
-    print(optEngine.params[:6,0])
+    print(optEngine.params[:6, 0])
     assert checkUtils.checkFloat(optEngine.params[0, 0], 297.1)
     assert checkUtils.checkFloat(optEngine.params[1, 0], 223.05)
     assert checkUtils.checkFloat(optEngine.params[2, 0], 216.97)
@@ -824,19 +823,20 @@ def test_determineRestart_multipleValids():
     cleanOptDir(options["optdir"])
     assert optEngine.restartCycle == 2
 
+
 def monkeyForcebalance(command):
-    with open("fb.log","a") as f:
+    with open("fb.log", "a") as f:
         f.write(command + "\n")
     inFile = command.split()[1]
-    outFileSplit = command.split()[3].replace(".out","").split("_")
+    outFileSplit = command.split()[3].replace(".out", "").split("_")
     if outFileSplit[0] == "opt":
         fbType = "opt"
-    else:   
+    else:
         if len(outFileSplit) == 2:
             fbType = "valid"
         else:
             fbType = outFileSplit[2]
-    with open(inFile, 'r') as f:
+    with open(inFile, "r") as f:
         lines = f.readlines()
     for line in lines:
         if len(line.split()) > 0:
@@ -844,40 +844,47 @@ def monkeyForcebalance(command):
                 for token in line.split():
                     if "frcmod" in token:
                         frcmod = token
-    with open(os.path.join("forcefield",frcmod),'r') as f:
+    with open(os.path.join("forcefield", frcmod), "r") as f:
         commentLine = f.readline()
     if fbType not in commentLine:
         print(commentLine)
         print(command)
         raise RuntimeError("Ran FB on wrong parameters")
 
+
 def monkeySortParams(self, results, i):
     pass
+
 
 def monkeyGraphResults(self):
     pass
 
+
 def monkeySetupInputFiles(self, i):
     pass
+
 
 def monkeyReadValid(self, filename):
     return 1
 
+
 def monkeyReadOpt(self, filename):
     result = {}
-    result['obj'] = 1
+    result["obj"] = 1
     return 0, result
+
 
 def setupFFdir(optdir):
     os.chdir(optdir)
     if os.path.isdir("forcefield"):
         rmtree("forcefield")
     os.mkdir("forcefield")
-    copyfile("dasa.frcmod",os.path.join("forcefield","dasa.frcmod"))
-    copyfile("dasa.mol2",os.path.join("forcefield","dasa.mol2"))
-    copyfile("dasa.frcmod",os.path.join("forcefield","initial_dasa.frcmod"))
-    copyfile("dasa.mol2",os.path.join("forcefield","initial_dasa.mol2"))
+    copyfile("dasa.frcmod", os.path.join("forcefield", "dasa.frcmod"))
+    copyfile("dasa.mol2", os.path.join("forcefield", "dasa.mol2"))
+    copyfile("dasa.frcmod", os.path.join("forcefield", "initial_dasa.frcmod"))
+    copyfile("dasa.mol2", os.path.join("forcefield", "initial_dasa.mol2"))
     os.chdir("..")
+
 
 # Restart from new FB cycle
 def test_restart1Params(monkeypatch):
@@ -895,19 +902,20 @@ def test_restart1Params(monkeypatch):
     options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForcebalance)
-    monkeypatch.setattr(optengine.OptEngine,"readValid", monkeyReadValid)
-    monkeypatch.setattr(optengine.OptEngine,"readOpt", monkeyReadOpt)
+    monkeypatch.setattr(optengine.OptEngine, "readValid", monkeyReadValid)
+    monkeypatch.setattr(optengine.OptEngine, "readOpt", monkeyReadOpt)
     setupFFdir("params1")
     os.chdir("params1")
     if os.path.isfile("fb.log"):
         os.remove("fb.log")
     optEngine.optimizeForcefield(optEngine.restartCycle)
-    with open("fb.log",'r') as f:
+    with open("fb.log", "r") as f:
         lines = f.readlines()
     os.remove("fb.log")
     rmtree("forcefield")
     os.chdir("..")
     assert len(lines) == 4
+
 
 # Restart from failed param opt
 def test_restart2Params(monkeypatch):
@@ -926,19 +934,20 @@ def test_restart2Params(monkeypatch):
     options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForcebalance)
-    monkeypatch.setattr(optengine.OptEngine,"readValid", monkeyReadValid)
-    monkeypatch.setattr(optengine.OptEngine,"readOpt", monkeyReadOpt)
+    monkeypatch.setattr(optengine.OptEngine, "readValid", monkeyReadValid)
+    monkeypatch.setattr(optengine.OptEngine, "readOpt", monkeyReadOpt)
     setupFFdir(testDir)
     os.chdir(testDir)
     if os.path.isfile("fb.log"):
         os.remove("fb.log")
     optEngine.optimizeForcefield(optEngine.restartCycle)
-    with open("fb.log",'r') as f:
+    with open("fb.log", "r") as f:
         lines = f.readlines()
     os.remove("fb.log")
     rmtree("forcefield")
     os.chdir("..")
     assert len(lines) == 3
+
 
 # Restart from failed validation after param opt
 def test_restart3Params(monkeypatch):
@@ -957,21 +966,22 @@ def test_restart3Params(monkeypatch):
     options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForcebalance)
-    monkeypatch.setattr(optengine.OptEngine,"readValid", monkeyReadValid)
-    monkeypatch.setattr(optengine.OptEngine,"readOpt", monkeyReadOpt)
+    monkeypatch.setattr(optengine.OptEngine, "readValid", monkeyReadValid)
+    monkeypatch.setattr(optengine.OptEngine, "readOpt", monkeyReadOpt)
     setupFFdir(testDir)
     os.chdir(testDir)
     if os.path.isfile("fb.log"):
         os.remove("fb.log")
     optEngine.optimizeForcefield(optEngine.restartCycle)
-    with open("fb.log",'r') as f:
+    with open("fb.log", "r") as f:
         lines = f.readlines()
     os.remove("fb.log")
     rmtree("forcefield")
     os.chdir("..")
     assert len(lines) == 2
 
-# Restart from failed validation on initial params 
+
+# Restart from failed validation on initial params
 def test_restart3Params(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
     monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
@@ -988,14 +998,14 @@ def test_restart3Params(monkeypatch):
     options["nvalids"] = 1
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForcebalance)
-    monkeypatch.setattr(optengine.OptEngine,"readValid", monkeyReadValid)
-    monkeypatch.setattr(optengine.OptEngine,"readOpt", monkeyReadOpt)
+    monkeypatch.setattr(optengine.OptEngine, "readValid", monkeyReadValid)
+    monkeypatch.setattr(optengine.OptEngine, "readOpt", monkeyReadOpt)
     setupFFdir(testDir)
     os.chdir(testDir)
     if os.path.isfile("fb.log"):
         os.remove("fb.log")
     optEngine.optimizeForcefield(optEngine.restartCycle)
-    with open("fb.log",'r') as f:
+    with open("fb.log", "r") as f:
         lines = f.readlines()
     os.remove("fb.log")
     rmtree("forcefield")

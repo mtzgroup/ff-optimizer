@@ -336,18 +336,22 @@ def test_restart(monkeypatch):
     os.remove(os.path.join("1_opt", "leap.out"))
     assert mod.restartCycle == 2
 
+
 def monkeySetupFiles(self, i):
     pass
+
 
 def monkeySortParams(self, results, i):
     pass
 
+
 def monkeyGraphResults(self):
     pass
 
+
 def monkeyOptInit(self, args):
-    self.nvalids = args['nvalids']
-    for f in os.listdir(args['optdir']):
+    self.nvalids = args["nvalids"]
+    for f in os.listdir(args["optdir"]):
         if f.endswith(".mol2"):
             self.mol2 = f
         elif f.endswith(".frcmod"):
@@ -358,25 +362,29 @@ def monkeyOptInit(self, args):
     self.validInitial = []
     self.restartCycle = 0
     self.respPriors = None
-        
+
+
 def monkeyForceBalance(command):
     out = command.split()[3]
-    cycle = out.split("_")[1].split(".")[0]
-    copyfile(os.path.join("reference",out), out)
+    out.split("_")[1].split(".")[0]
+    copyfile(os.path.join("reference", out), out)
+
 
 def monkeyInitialize(self, args):
     pass
 
+
 def clean():
     for d in ["model_1", "model_2"]:
-        os.chdir(os.path.join(d,"1_opt"))
+        os.chdir(os.path.join(d, "1_opt"))
         for f in os.listdir():
             if f.endswith(".out"):
                 os.remove(f)
         os.chdir("targets")
         for f in os.listdir():
             rmtree(f)
-        os.chdir(os.path.join("..","..",".."))
+        os.chdir(os.path.join("..", "..", ".."))
+
 
 def monkeyALInit(self, args):
     self.home = os.getcwd()
@@ -392,21 +400,26 @@ def monkeyALInit(self, args):
     self.restartCycle = 0
     self.nthreads = min(os.cpu_count(), self.nmodels)
 
+
 def test_doParameterOptimization(monkeypatch):
     args = FakeArgs()
     args.activeLearning = 2
     args.restart = True
-    os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "doParameterOptimization"))
+    os.chdir(
+        os.path.join(
+            os.path.dirname(__file__), "active_learning", "doParameterOptimization"
+        )
+    )
     clean()
-    monkeypatch.setattr(model.Model,"initializeQMEngine",monkeyInitialize)
-    monkeypatch.setattr(model.Model,"initializeMMEngine",monkeyInitialize)
-    monkeypatch.setattr(optengine.OptEngine,"setupInputFiles",monkeySetupFiles)
-    monkeypatch.setattr(optengine.OptEngine,"__init__",monkeyOptInit)
-    monkeypatch.setattr(os,"system",monkeyForceBalance)
-    monkeypatch.setattr(optengine.OptEngine,"sortParams",monkeySortParams)
-    monkeypatch.setattr(optengine.OptEngine,"graphResults",monkeyGraphResults)
-    monkeypatch.setattr(active_learning.ActiveLearningModel,"__init__",monkeyALInit)
-    
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInitialize)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitialize)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupFiles)
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyOptInit)
+    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
+    monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyALInit)
+
     m = active_learning.ActiveLearningModel(args)
     m.doParameterOptimization(1)
     assert len(m.optResults) == 3

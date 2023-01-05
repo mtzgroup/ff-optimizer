@@ -515,14 +515,11 @@ class OptEngine:
 
     def determineRestart(self):
         # Determine cycle for restart, set restart variables
-        restartCycle = -1
         for i in range(self.maxCycles + 2):
             if i > 0:
                 try:
                     vPrev = self.readValid(
-                        os.path.join(
-                            self.optdir, f"valid_{str(i)}_previous.out"
-                        )
+                        os.path.join(self.optdir, f"valid_{str(i)}_previous.out")
                     )
                     for j in range(1, self.nvalids):
                         self.readValid(

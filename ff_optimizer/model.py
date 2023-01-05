@@ -241,8 +241,11 @@ class Model(AbstractModel):
         os.chdir(self.home)
         self.optResults = []
         self.optResults.append(self.optEngine.valid[-1])
-        self.optResults.append(self.optEngine.valid[-1] / self.optEngine.validInitial[-1])
-        self.optResults.append(self.optEngine.valid[-1] - self.optEngine.validPrevious[-1])
+        self.optResults.append(
+            self.optEngine.valid[-1] / self.optEngine.validInitial[-1]
+        )
+        self.optResults.append(
+            self.optEngine.valid[-1] - self.optEngine.validPrevious[-1]
+        )
         if i > 1:
             self.optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
-
