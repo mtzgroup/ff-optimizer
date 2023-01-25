@@ -164,7 +164,7 @@ class Model(AbstractModel):
             copyfile(os.path.join(self.sampledir, f), os.path.join(samplePath, f))
         os.chdir(samplePath)
         # Do MM sampling
-        if i == self.restartCycle + 1:
+        if i == self.restartCycle:
             self.mmEngine.restart()
         else:
             self.mmEngine.getMMSamples()
@@ -241,8 +241,11 @@ class Model(AbstractModel):
         os.chdir(self.home)
         self.optResults = []
         self.optResults.append(self.optEngine.valid[-1])
-        self.optResults.append(self.optEngine.valid[-1] / self.optEngine.validInitial[-1])
-        self.optResults.append(self.optEngine.valid[-1] - self.optEngine.validPrevious[-1])
+        self.optResults.append(
+            self.optEngine.valid[-1] / self.optEngine.validInitial[-1]
+        )
+        self.optResults.append(
+            self.optEngine.valid[-1] - self.optEngine.validPrevious[-1]
+        )
         if i > 1:
             self.optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
-

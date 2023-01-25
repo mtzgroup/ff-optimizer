@@ -1,0 +1,3 @@
+loadcrd 928.nc coors
+crdout coors 928_all.xyz
+exit

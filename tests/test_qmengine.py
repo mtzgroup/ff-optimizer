@@ -158,7 +158,7 @@ class TestQMEngine:
         qmengine.QMEngine("qmengine/tc.in", "qmengine/tc_backup.in")
         testCoords = utils.readPDB("qmengine/test.pdb")
         coords = np.loadtxt("qmengine/coords.txt").flatten()
-        assert checkUtils.checkArray(coords, testCoords)
+        assert checkUtils.checkArrays(coords, testCoords)
 
     # check that FB data is written correctly
     def test_writeFBdata(self):
@@ -259,7 +259,7 @@ class TestQMEngine:
         with open(os.path.join("qmengine", "tc_1_ref.json"), "r") as f:
             refResult = AtomicResult(**json_loads(f.read()))
         qmEngine.writeResult(
-            os.path.join("qmengine", "tc_1.out"), os.path.join("qmengine", "1.pdb")
+            os.path.join("qmengine", "tc_1.out"), os.path.join("qmengine", "1.xyz")
         )
         with open(os.path.join("qmengine", "tc_1.json"), "r") as f:
             testResult = AtomicResult(**json_loads(f.read()))
@@ -269,7 +269,7 @@ class TestQMEngine:
             testResult.properties.return_energy,
             0.00001,
         )
-        assert checkUtils.checkArray(
+        assert checkUtils.checkArrays(
             refResult.return_result, testResult.return_result, 0.00001
         )
 
@@ -277,21 +277,21 @@ class TestQMEngine:
         os.chdir(os.path.dirname(__file__))
         qmEngine = qmengine.QMEngine("qmengine/tc.in", "qmengine/tc_backup.in")
 
-        def monkeyCompute(pdbs, folder):
-            pdbs = sorted(pdbs)
-            with open("pdbs.txt", "w") as f:
-                for pdb in pdbs:
-                    f.write(str(pdb) + "\n")
-            return pdbs
+        def monkeyCompute(xyzs, folder):
+            xyzs = sorted(xyzs)
+            with open("xyzs.txt", "w") as f:
+                for xyz in xyzs:
+                    f.write(str(xyz) + "\n")
+            return xyzs
 
         monkeypatch.setattr(qmEngine, "getQMRefData", monkeyCompute)
         qmEngine.restart(os.path.join("qmengine", "restart"))
-        testPdbs = []
-        with open("pdbs.txt", "r") as f:
+        testXyzs = []
+        with open("xyzs.txt", "r") as f:
             for line in f.readlines():
-                testPdbs.append(line.replace("\n", ""))
-        os.remove("pdbs.txt")
-        refPdbs = ["3.pdb", "6.pdb", "9.pdb"]
-        assert len(testPdbs) == len(refPdbs)
-        for i in range(len(testPdbs)):
-            assert testPdbs[i] == refPdbs[i]
+                testXyzs.append(line.replace("\n", ""))
+        os.remove("xyzs.txt")
+        refXyzs = ["3.xyz", "6.xyz", "9.xyz"]
+        assert len(testXyzs) == len(refXyzs)
+        for i in range(len(testXyzs)):
+            assert testXyzs[i] == refXyzs[i]

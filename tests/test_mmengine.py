@@ -1,20 +1,24 @@
 import os
-from shutil import rmtree
+from shutil import copyfile, rmtree
 
 from ff_optimizer import mmengine
 
 from . import checkUtils
 
-options = {}
-options["start"] = 33
-options["end"] = 2000
-options["split"] = 777
-options["stride"] = 50
-options["nvalids"] = 1
-options["trainMdin"] = "md.in"
-options["validMdin"] = "md.in"
-options["leap"] = "setup.leap"
-options["conformers"] = 1
+
+def getOptions():
+    options = {}
+    options["start"] = 33
+    options["end"] = 2000
+    options["split"] = 777
+    options["stride"] = 50
+    options["nvalids"] = 1
+    options["trainMdin"] = "md.in"
+    options["validMdin"] = "md.in"
+    options["leap"] = "setup.leap"
+    options["conformers"] = 1
+    options["coordPath"] = "."
+    return options
 
 
 def monkeyGetIndices(self):
@@ -38,26 +42,33 @@ def monkeyGetFrame(self, frame, dest):
 
 
 def monkeyGetFrames(self):
-    return [i for i in range((options["nvalids"] + 1) * options["conformers"])]
+    return [
+        i for i in range((self.options["nvalids"] + 1) * self.options["conformers"])
+    ]
 
 
 def monkeySetup(self):
     pass
 
 
-def test_getFrames(monkeypatch):
+def test_getFrames1(monkeypatch):
+    options = getOptions()
     coordPath = os.path.join("..", "coors.xyz")
     options["coordPath"] = coordPath
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
+    print(os.listdir())
     # monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     mmEngine = mmengine.MMEngine(options)
+    print(os.listdir())
     frames = mmEngine.getFrames()
+    print(os.listdir())
     assert len(frames) == 2
     assert mmEngine.splitIndex > frames[0]
     assert mmEngine.splitIndex <= frames[1]
 
 
 def test_getMMsamples(monkeypatch):
+    options = getOptions()
     coordPath = os.path.join("..", "coors.xyz")
     options["coordPath"] = coordPath
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
@@ -85,7 +96,8 @@ def test_getMMsamples(monkeypatch):
     assert validCrds == ["1\n"]
 
 
-def test_getFrames(monkeypatch):
+def test_getFrames2(monkeypatch):
+    options = getOptions()
     coordPath = os.path.join("..", "coors.xyz")
     options["coordPath"] = coordPath
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
@@ -98,6 +110,7 @@ def test_getFrames(monkeypatch):
 
 
 def test_getMMsamples(monkeypatch):
+    options = getOptions()
     coordPath = os.path.join("..", "coors.xyz")
     options["coordPath"] = coordPath
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
@@ -127,6 +140,7 @@ def test_getMMsamples(monkeypatch):
 
 # Also tests utils.writeRst()
 def test_getFrame(monkeypatch):
+    options = getOptions()
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     options["coordPath"] = os.path.join(
         "ff-optimizer", "tests", "mmengine", "coors.xyz"
@@ -145,7 +159,7 @@ def test_getFrame(monkeypatch):
     with open(os.path.join("mmengine", "23.rst7"), "r") as f:
         for line in f.readlines()[2:]:
             refCoors.append(line.split())
-    checkUtils.checkArray(testCoors, refCoors)
+    checkUtils.checkArrays(testCoors, refCoors)
 
 
 def monkeyGetSamples(self):
@@ -165,6 +179,7 @@ def monkeySetup(self):
 
 # Tests restarting a completed directory
 def test_restart1(monkeypatch):
+    options = getOptions()
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.MMEngine, "setup", monkeySetup)
     monkeypatch.setattr(mmengine.MMEngine, "getMMSamples", monkeyGetSamples)
@@ -192,6 +207,7 @@ def test_restart1(monkeypatch):
 # Tests restarting a directory with one IC complete
 # Tests restarting a directory with a partially complete IC
 def test_restart2(monkeypatch):
+    options = getOptions()
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.MMEngine, "setup", monkeySetup)
     monkeypatch.setattr(mmengine.MMEngine, "getMMSamples", monkeyGetSamples)
@@ -212,11 +228,19 @@ def test_restart2(monkeypatch):
         os.remove(os.path.join("valid_1", "sample.txt"))
     else:
         passTest = False
+
+    try:
+        os.mkdir("valid_1")
+    except:
+        pass
+    copyfile(os.path.join("..", "928.rst7"), os.path.join("valid_1", "928.rst7"))
+
     assert passTest
 
 
 # Tests restarting a directory with the wrong number of rsts
 def test_restart3(monkeypatch):
+    options = getOptions()
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.MMEngine, "setup", monkeySetup)
     monkeypatch.setattr(mmengine.MMEngine, "sample", monkeySample)
@@ -264,7 +288,8 @@ def test_restart3(monkeypatch):
     assert passTest
 
 
-def test_getFrames(monkeypatch):
+def test_getFrames3(monkeypatch):
+    options = getOptions()
     options["conformers"] = 3
     options["nvalids"] = 2
     coordPath = os.path.join("..", "coors.xyz")
@@ -280,7 +305,10 @@ def test_getFrames(monkeypatch):
         assert mmEngine.splitIndex <= frames[i]
 
 
-def test_getMMsamples(monkeypatch):
+def test_getMMsamples2(monkeypatch):
+    options = getOptions()
+    options["conformers"] = 3
+    options["nvalids"] = 2
     coordPath = os.path.join("..", "coors.xyz")
     options["coordPath"] = coordPath
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
