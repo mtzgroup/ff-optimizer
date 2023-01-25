@@ -913,6 +913,7 @@ def test_restart1Params(monkeypatch):
         lines = f.readlines()
     os.remove("fb.log")
     rmtree("forcefield")
+    cleanOptDir(".")
     os.chdir("..")
     assert len(lines) == 4
 
@@ -945,6 +946,7 @@ def test_restart2Params(monkeypatch):
         lines = f.readlines()
     os.remove("fb.log")
     rmtree("forcefield")
+    cleanOptDir(".")
     os.chdir("..")
     assert len(lines) == 3
 
@@ -977,6 +979,7 @@ def test_restart3Params(monkeypatch):
         lines = f.readlines()
     os.remove("fb.log")
     rmtree("forcefield")
+    cleanOptDir(".")
     os.chdir("..")
     assert len(lines) == 2
 
@@ -1009,5 +1012,6 @@ def test_restart3Params(monkeypatch):
         lines = f.readlines()
     os.remove("fb.log")
     rmtree("forcefield")
+    cleanOptDir(".")
     os.chdir("..")
     assert len(lines) == 1

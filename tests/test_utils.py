@@ -118,6 +118,7 @@ def test_writeXYZ():
     refCoords, refSymbols = utils.readXYZ("test.xyz", readSymbols=True)
     utils.writeXYZ(refCoords, refSymbols, "temp.xyz")
     testCoords, testSymbols = utils.readXYZ("temp.xyz", readSymbols=True)
-    # os.remove("temp.xyz")
+    os.remove("temp.xyz")
     assert checkUtils.checkArrays(refCoords, testCoords)
     assert checkUtils.checkLists(list(refSymbols), list(testSymbols))
+
