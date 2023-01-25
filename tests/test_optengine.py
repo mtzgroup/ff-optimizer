@@ -1,4 +1,5 @@
 import errno
+import pytest
 import os
 from shutil import copyfile, rmtree
 
@@ -825,13 +826,13 @@ def test_determineRestart_multipleValids():
 
 
 def monkeyForcebalance(command):
-    with open("fb.log", "a") as f:
+    with open("fb.log","a") as f:
         f.write(command + "\n")
     inFile = command.split()[1]
-    outFileSplit = command.split()[3].replace(".out", "").split("_")
+    outFileSplit = command.split()[3].replace(".out","").split("_")
     if outFileSplit[0] == "opt":
         fbType = "opt"
-    else:
+    else:   
         if len(outFileSplit) == 2:
             fbType = "valid"
         else:
@@ -884,7 +885,6 @@ def setupFFdir(optdir):
     copyfile("dasa.frcmod", os.path.join("forcefield", "initial_dasa.frcmod"))
     copyfile("dasa.mol2", os.path.join("forcefield", "initial_dasa.mol2"))
     os.chdir("..")
-
 
 # Restart from new FB cycle
 def test_restart1Params(monkeypatch):

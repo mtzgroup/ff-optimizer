@@ -337,7 +337,6 @@ def test_restart(monkeypatch):
     os.remove(os.path.join("1_opt", "leap.out"))
     assert mod.restartCycle == 2
 
-
 def monkeySetupFiles(self, i):
     pass
 
