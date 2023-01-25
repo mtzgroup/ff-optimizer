@@ -7,7 +7,7 @@ def checkFloat(f1, f2, thresh=0.00001):
     return abs(f1 - f2) < thresh
 
 
-def checkArray(a1, a2, thresh=0.00001):
+def checkArrays(a1, a2, thresh=0.00001):
     a1 = np.asarray(a1, dtype=np.float32)
     a2 = np.asarray(a2, dtype=np.float32)
     if a1.shape != a2.shape:

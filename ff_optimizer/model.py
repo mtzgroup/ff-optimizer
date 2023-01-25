@@ -164,7 +164,7 @@ class Model(AbstractModel):
             copyfile(os.path.join(self.sampledir, f), os.path.join(samplePath, f))
         os.chdir(samplePath)
         # Do MM sampling
-        if i == self.restartCycle + 1:
+        if i == self.restartCycle:
             self.mmEngine.restart()
         else:
             self.mmEngine.getMMSamples()

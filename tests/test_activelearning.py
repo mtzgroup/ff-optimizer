@@ -57,7 +57,7 @@ def test_computeEnergyForceSP(monkeypatch):
         "MMforce.xyz", usecols=(1, 2, 3), skiprows=2, max_rows=84
     ).flatten()
     results = model.computeEnergyForce([geometry], "amber.prmtop")
-    checkUtils.checkArray(results[0][1], force)
+    checkUtils.checkArrays(results[0][1], force)
 
 
 def readXYZTraj(filename):
@@ -93,7 +93,7 @@ def test_computeEnergyForceAll(monkeypatch):
     results = model.computeEnergyForce(frames, "amber.prmtop")
     forces = readXYZTraj("MMforce.xyz")
     for i in range(len(frames)):
-        checkUtils.checkArray(results[i][1], forces[i])
+        checkUtils.checkArrays(results[i][1], forces[i])
 
 
 def test_collectGeometries(monkeypatch):
@@ -227,43 +227,43 @@ def test_doActiveLearning(monkeypatch):
         os.path.join("model_1", "2_sampling", "7_cycle_7", "train", "1.pdb")
     )
     refGeom = utils.readPDB(os.path.join("ref", "1.pdb"))
-    checkUtils.checkArray(testGeom, refGeom)
+    assert checkUtils.checkArrays(testGeom, refGeom)
     testGeom = utils.readPDB(
         os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_2", "1.pdb")
     )
-    checkUtils.checkArray(testGeom, refGeom)
+    assert checkUtils.checkArrays(testGeom, refGeom)
     testGeom = utils.readPDB(
         os.path.join("model_3", "2_sampling", "7_cycle_7", "valid_1", "1.pdb")
     )
-    checkUtils.checkArray(testGeom, refGeom)
+    assert checkUtils.checkArrays(testGeom, refGeom)
 
     testGeom = utils.readPDB(
         os.path.join("model_2", "2_sampling", "7_cycle_7", "train", "1.pdb")
     )
     refGeom = utils.readPDB(os.path.join("ref", "2.pdb"))
-    checkUtils.checkArray(testGeom, refGeom)
+    assert checkUtils.checkArrays(testGeom, refGeom)
     testGeom = utils.readPDB(
         os.path.join("model_3", "2_sampling", "7_cycle_7", "valid_2", "1.pdb")
     )
-    checkUtils.checkArray(testGeom, refGeom)
+    assert checkUtils.checkArrays(testGeom, refGeom)
     testGeom = utils.readPDB(
         os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_1", "1.pdb")
     )
-    checkUtils.checkArray(testGeom, refGeom)
+    assert checkUtils.checkArrays(testGeom, refGeom)
 
     testGeom = utils.readPDB(
         os.path.join("model_3", "2_sampling", "7_cycle_7", "train", "1.pdb")
     )
     refGeom = utils.readPDB(os.path.join("ref", "3.pdb"))
-    checkUtils.checkArray(testGeom, refGeom)
+    assert checkUtils.checkArrays(testGeom, refGeom)
     testGeom = utils.readPDB(
         os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_2", "1.pdb")
     )
-    checkUtils.checkArray(testGeom, refGeom)
+    assert checkUtils.checkArrays(testGeom, refGeom)
     testGeom = utils.readPDB(
         os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_1", "1.pdb")
     )
-    checkUtils.checkArray(testGeom, refGeom)
+    assert checkUtils.checkArrays(testGeom, refGeom)
 
 
 def monkeyInitModel(self, args):

@@ -6,7 +6,7 @@ from time import sleep
 import numpy as np
 from chemcloud import CCClient
 from chemcloud.models import AtomicInput, AtomicResult, FailedOperation, to_file
-from qcelemental.models import Provenance
+from qcelemental.models import Molecule, Provenance
 from qcelemental.models.results import AtomicResultProperties
 from qcelemental.util.serialization import json_loads
 
@@ -87,7 +87,7 @@ class QMEngine:
                     f.write("\n")
 
         with open("all.mdcrd", "w") as f:
-            f.write("Converted from pdb by QMEngine\n")
+            f.write("Converted from xyz by QMEngine\n")
             for i in range(len(energies)):
                 tokenCounter = 1
                 for coord in coords[i]:
@@ -100,9 +100,9 @@ class QMEngine:
                 if tokenCounter != 1:
                     f.write("\n")
 
-    def writeResult(self, tcOut, pdb):
+    def writeResult(self, tcOut, xyz):
         energy, grad = utils.readGradFromTCout(tcOut)
-        mol = utils.convertPDBtoMolecule(pdb)
+        mol = Molecule.from_file(xyz)
         properties = AtomicResultProperties()
         model = {"method": "see tc.in", "basis": "see tc.in"}
         provenance = Provenance(**{"creator": "ffoptimizer (file-based)"})
@@ -163,8 +163,8 @@ class QMEngine:
             espXYZs = None
             esps = None
         for f in os.listdir():
-            if f.endswith(".pdb"):
-                coord = utils.readPDB(f)
+            if f.endswith(".xyz"):
+                coord = utils.readXYZ(f)
                 name = f.split(".")[0]
                 json = f"tc_{name}.json"
                 result = self.readResult(json)
@@ -182,10 +182,10 @@ class QMEngine:
         return energies, grads, coords, espXYZs, esps
 
     def restart(self, calcDir: str):
-        pdbs = []
+        xyzs = []
         os.chdir(calcDir)
         for f in os.listdir():
-            if f.endswith(".pdb"):
+            if f.endswith(".xyz"):
                 name = f.split(".")[0]
                 json = f"tc_{name}.json"
                 if os.path.isfile(json):
@@ -193,16 +193,16 @@ class QMEngine:
                         with open(json, "r") as j:
                             result = AtomicResult(**json_loads(j.read()))
                     except:
-                        pdbs.append(f)
+                        xyzs.append(f)
                         continue
                     if not result.success:
-                        pdbs.append(f)
+                        xyzs.append(f)
                 else:
-                    pdbs.append(f)
-        self.getQMRefData(pdbs, ".")
+                    xyzs.append(f)
+        self.getQMRefData(xyzs, ".")
 
     # This is the function which must be implemented by inherited classes
-    def getQMRefData(self, pdbs: list, calcDir: str):
+    def getQMRefData(self, xyzs: list, calcDir: str):
         pass
 
 
@@ -258,7 +258,7 @@ class SbatchEngine(QMEngine):
             sbatchLines.insert(self.optionsEnd, f"#SBATCH --fout=tc_{index}.out\n")
         sbatchLines.insert(
             self.optionsEnd,
-            f"#SBATCH --fin=tc_{index}.in,{index}.pdb,tc_{index}_backup.in\n",
+            f"#SBATCH --fin=tc_{index}.in,{index}.xyz,tc_{index}_backup.in\n",
         )
         sbatchLines.insert(self.optionsEnd, f"#SBATCH -J FB_ref_gradient_{index}\n")
         with open(fileName, "w") as f:
@@ -287,14 +287,14 @@ class SbatchEngine(QMEngine):
             raise RuntimeError(f"Slurm command {str(command)} failed")
         return output
 
-    def getQMRefData(self, pdbs: list, calcDir: str):
+    def getQMRefData(self, xyzs: list, calcDir: str):
         os.chdir(calcDir)
         jobIDs = []
-        for pdb in pdbs:
-            name = pdb.split(".")[0]
-            super().writeInputFile(self.inputSettings, pdb, f"tc_{name}.in")
+        for xyz in xyzs:
+            name = xyz.split(".")[0]
+            super().writeInputFile(self.inputSettings, xyz, f"tc_{name}.in")
             super().writeInputFile(
-                self.backupInputSettings, pdb, f"tc_{name}_backup.in"
+                self.backupInputSettings, xyz, f"tc_{name}_backup.in"
             )
             self.writeSbatchFile(name, f"sbatch_{name}.sh")
             job = self.slurmCommand(["sbatch", f"sbatch_{name}.sh"])
@@ -312,9 +312,9 @@ class SbatchEngine(QMEngine):
                         runningIDs.append(runningID)
             jobIDs = runningIDs
 
-        for pdb in pdbs:
-            name = pdb.split(".")[0]
-            super().writeResult(f"tc_{name}.out", pdb)
+        for xyz in xyzs:
+            name = xyz.split(".")[0]
+            super().writeResult(f"tc_{name}.out", xyz)
 
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
@@ -324,24 +324,24 @@ class DebugEngine(QMEngine):
     def __init__(self, inputFile, backupInputFile, doResp=False):
         super().__init__(inputFile, backupInputFile, doResp)
 
-    def getQMRefData(self, pdbs: list, calcDir: str):
+    def getQMRefData(self, xyzs: list, calcDir: str):
         os.chdir(calcDir)
         energies = []
         grads = []
         coords = []
-        for pdb in pdbs:
-            name = pdb.split(".")[0]
-            super().writeInputFile(self.inputSettings, pdb, f"tc_{name}.in")
+        for xyz in xyzs:
+            name = xyz.split(".")[0]
+            super().writeInputFile(self.inputSettings, xyz, f"tc_{name}.in")
             os.system(f"terachem tc_{name}.in > tc_{name}.out")
             energy, grad = utils.readGradFromTCout(f"tc_{name}.out")
             if grad == -1:
                 super().writeInputFile(
-                    self.backupInputSettings, pdb, f"tc_{name}_backup.in"
+                    self.backupInputSettings, xyz, f"tc_{name}_backup.in"
                 )
                 os.system(f"terachem tc_{name}_backup.in > tc_{name}.out")
             if self.doResp:
                 espXYZ, esps = utils.readEsp(f"scr.{name}/esp.xyz")
-            super().writeResult(f"tc_{name}.out", pdb)
+            super().writeResult(f"tc_{name}.out", xyz)
 
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
@@ -427,7 +427,7 @@ class CCCloudEngine(QMEngine):
                 status = -1
         return status, results
 
-    def createAtomicInputs(self, pdbs: list, useBackup=False):
+    def createAtomicInputs(self, xyzs: list, useBackup=False):
         mod = {}
         mod["method"] = self.method
         mod["basis"] = self.basis
@@ -436,9 +436,9 @@ class CCCloudEngine(QMEngine):
             keywords = self.backupKeywords
         else:
             keywords = self.keywords
-        for pdb in sorted(pdbs):
-            jobId = pdb.split(".")[0]
-            mol = utils.convertPDBtoMolecule(pdb)
+        for xyz in sorted(xyzs):
+            jobId = xyz.split(".")[0]
+            mol = Molecule.from_file(xyz)
             if self.doResp:
                 atomicInput = AtomicInput(
                     molecule=mol,
@@ -480,14 +480,14 @@ class CCCloudEngine(QMEngine):
                 except:
                     print(f"Job {str(result.id)} in {os.getcwd()} is missing esp file!")
 
-    def runJobs(self, pdbs: list, useBackup=False):
-        atomicInputs = self.createAtomicInputs(pdbs, useBackup=useBackup)
+    def runJobs(self, xyzs: list, useBackup=False):
+        atomicInputs = self.createAtomicInputs(xyzs, useBackup=useBackup)
         status, results = self.computeBatch(atomicInputs)
         if len(results) != len(atomicInputs):
             raise RuntimeError(
                 "TCCloud did not return the same number of results as inputs"
             )
-        retryPdbs = []
+        retryXyzs = []
         for result in results:
             self.writeResult(result)
             if not result.success:
@@ -495,30 +495,30 @@ class CCCloudEngine(QMEngine):
                 if jobId is None:
                     print("Oops")
                     jobId = result.input_data["input_data"]["id"]
-                retryPdbs.append(f"{jobId}.pdb")
+                retryXyzs.append(f"{jobId}.xyz")
 
         if status == -1:
             raise RuntimeError(
                 "Batch resubmission reached size 1; QM calculations incomplete"
             )
-        return retryPdbs
+        return retryXyzs
 
-    def getQMRefData(self, pdbs: list, calcDir: str):
+    def getQMRefData(self, xyzs: list, calcDir: str):
         cwd = os.getcwd()
         os.chdir(calcDir)
-        retryPdbs = self.runJobs(pdbs)
+        retryXyzs = self.runJobs(xyzs)
         for _ in range(self.retries):
-            if len(retryPdbs) == 0:
+            if len(retryXyzs) == 0:
                 break
-            retryPdbs = self.runJobs(retryPdbs, useBackup=True)
-        if len(retryPdbs) > 0:
-            # for result in [self.readResult(f"tc_{pdb.split('.')[0]}.json") for pdb in retryPdbs]:
+            retryXyzs = self.runJobs(retryXyzs, useBackup=True)
+        if len(retryXyzs) > 0:
+            # for result in [self.readResult(f"tc_{xyz.split('.')[0]}.json") for xyz in retryXyzs]:
             #    print(
             #        f"Job id {result.input_data['id']} suffered a {result.error.error_type}"
             #    )
             #    print(result.error.error_message)
             raise RuntimeError(
-                f"Job ids {[pdb.split('.')[0] for pdb in retryPdbs]} in {os.getcwd()} failed {str(self.retries)} times!"
+                f"Job ids {[xyz.split('.')[0] for xyz in retryXyzs]} in {os.getcwd()} failed {str(self.retries)} times!"
             )
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)

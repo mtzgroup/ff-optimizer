@@ -37,21 +37,6 @@ def monkeySander(self, prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=None)
     return
 
 
-def monkeySander(self, prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=None):
-    if not os.path.isfile(prmtop):
-        raise RuntimeError("No prmtop!")
-    if not os.path.isfile(mdin):
-        raise RuntimeError("No mdin!")
-    if not os.path.isfile(mdcrd):
-        raise RuntimeError("No input crd!")
-    copyfile(os.path.join("..", "ref", restart), restart)
-    try:
-        copyfile(os.path.join("..", "ref", mdtraj), mdtraj)
-    except:
-        pass
-    return
-
-
 def test_AmberInit(monkeypatch):
     def monkeyFail(maxLoad=0):
         raise RuntimeError("Oops")
@@ -84,7 +69,7 @@ def test_runSander(monkeypatch):
     os.remove("mdinfo")
     os.remove("md.out")
     refRst = loadtxt(os.path.join("ref", "md.rst7"), skiprows=2)
-    checkUtils.checkArray(testRst, refRst)
+    checkUtils.checkArrays(testRst, refRst)
 
 
 @pytest.mark.gpu
@@ -103,7 +88,7 @@ def test_runSanderCUDA(monkeypatch):
     os.remove("mdinfo")
     os.remove("md.out")
     refRst = loadtxt(os.path.join("ref", "md.rst7"), skiprows=2)
-    checkUtils.checkArray(testRst, refRst)
+    checkUtils.checkArrays(testRst, refRst)
 
 
 @pytest.mark.amber
@@ -111,12 +96,12 @@ def test_sample(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.ExternalAmberEngine, "runSander", monkeySander)
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "sample"))
-    if os.path.isdir("928"):
-        rmtree("928")
-    os.mkdir("928")
+    if os.path.isdir("train"):
+        rmtree("train")
+    os.mkdir("train")
 
-    copyfile("928.rst7", os.path.join("928", "928.rst7"))
-    os.chdir("928")
+    copyfile("928.rst7", os.path.join("train", "928.rst7"))
+    os.chdir("train")
     options["coordPath"] = "coors.xyz"
     mmEngine = mmengine.ExternalAmberEngine(options)
     mmEngine.prmtop = "water.prmtop"
@@ -124,14 +109,10 @@ def test_sample(monkeypatch):
     mmEngine.sample([928], "md.in")
     os.chdir("..")
     for i in range(1, 11):
-        with open(os.path.join("928", f"{str(i)}.pdb"), "r") as f:
-            testLines = f.readlines()
-        with open(os.path.join("ref", f"{str(i)}.pdb"), "r") as f:
-            refLines = f.readlines()
-        assert len(testLines) == len(refLines)
-        for i in range(len(testLines)):
-            assert refLines[i] == testLines[i]
-    rmtree("928")
+        testXyz = loadtxt(os.path.join("train", f"{str(i)}.xyz"), skiprows=2, usecols=(1,2,3))
+        refXyz = loadtxt(os.path.join("ref", f"{str(i)}.xyz"), skiprows=2, usecols=(1,2,3))
+        assert checkUtils.checkArrays(testXyz, refXyz)
+    #rmtree("train")
 
 
 @pytest.mark.amber
@@ -153,11 +134,7 @@ def test_sample_conformers(monkeypatch):
     mmEngine.sample([928, 135, 253], "md.in")
     os.chdir("..")
     for i in range(1, 31):
-        with open(os.path.join("valid_1", f"{str(i)}.pdb"), "r") as f:
-            testLines = f.readlines()
-        with open(os.path.join("ref", f"{str(i)}.pdb"), "r") as f:
-            refLines = f.readlines()
-        assert len(testLines) == len(refLines)
-        for i in range(len(testLines)):
-            assert refLines[i] == testLines[i]
-    rmtree("valid_1")
+        testXyz = loadtxt(os.path.join("valid_1", f"{str(i)}.xyz"), skiprows=2, usecols=(1,2,3))
+        refXyz = loadtxt(os.path.join("ref", f"{str(i)}.xyz"), skiprows=2, usecols=(1,2,3))
+        assert checkUtils.checkArrays(testXyz, refXyz)
+    #rmtree("valid_1")

@@ -158,6 +158,16 @@ def readPDB(pdb: str):
                 coords.append(line[46:54].replace(" ", ""))
     return np.asarray(coords, dtype=np.float32)
 
+def readXYZ(xyz: str):
+    return np.loadtxt(xyz, skiprows=2, usecols=(1,2,3), dtype=np.float32).flatten()
+
+#def convertXYZtoMolecule(xyz: str):
+#    coords = np.loadtxt(xyz, skiprows=2, usecols=(1,2,3), dtype=np.float32).flatten()
+#    symbols = np.loadtxt(xyz, skiprows=2, usecols=(0), dtype=str)
+#    # Molecule class by default has coordinates in bohr
+#    coords *= units.ANGSTROM_TO_AU
+#    mol = Molecule(**{"symbols": symbols, "geometry": coords)
+#    return mol
 
 def convertPDBtoMolecule(pdb: str):
     coords = []

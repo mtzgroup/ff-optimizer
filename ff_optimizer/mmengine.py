@@ -274,7 +274,7 @@ class ExternalAmberEngine(MMEngine):
                 )
 
     def sample(self, frames, mdin):
-        pdbIndex = 1
+        xyzIndex = 1
         for frame in frames:
             name = str(frame)
             # Right now needs to be copy instead of move for restarting
@@ -299,7 +299,7 @@ class ExternalAmberEngine(MMEngine):
             )
             with open("cpptraj.in", "w") as f:
                 f.write(f"loadcrd {name}.nc coors\n")
-                f.write(f"crdout coors {name}.pdb multi\n")
+                f.write(f"crdout coors {name}_all.xyz\n")
                 f.write("exit\n")
             try:
                 os.system(
@@ -310,12 +310,17 @@ class ExternalAmberEngine(MMEngine):
                 raise RuntimeError(
                     f"Error in trajectory postprocessing in {os.getcwd()}"
                 )
-
-            newPdbIndex = 1
-            while os.path.isfile(f"{name}.pdb.{str(newPdbIndex)}"):
-                os.system(f"mv {name}.pdb.{str(newPdbIndex)} {str(pdbIndex)}.pdb")
-                pdbIndex += 1
-                newPdbIndex += 1
+            
+            with open(f"{name}_all.xyz",'r') as f:
+                coordLines = f.readlines()
+            nlines = int(coordLines[0].split()[0]) + 2
+            i = 1
+            while i * nlines <= len(coordLines):
+                with open(f"{xyzIndex}.xyz", "w") as f:
+                    for line in coordLines[(i-1) * nlines : i * nlines]:
+                        f.write(line)
+                i += 1
+                xyzIndex += 1
 
 
 class ExternalOpenMMEngine(MMEngine):

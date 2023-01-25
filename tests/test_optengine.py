@@ -289,7 +289,7 @@ def test_readOpt3():
     status, results = optEngine.readOpt(os.path.join("optengine", "success.out"))
     assert status == 0
     refParams = [-6.5120e-01, 3.2560e-01, 1.0000e02, 1.0452e02, 1.7564e00, 2.9777e-01]
-    assert checkUtils.checkArray(refParams, results["params"])
+    assert checkUtils.checkArrays(refParams, results["params"])
     refInitialParams = [
         -9.4824e-01,
         4.7412e-01,
@@ -298,7 +298,7 @@ def test_readOpt3():
         1.7564e00,
         1.7912e-01,
     ]
-    assert checkUtils.checkArray(refInitialParams, results["initialParams"])
+    assert checkUtils.checkArrays(refInitialParams, results["initialParams"])
     refLabels = [
         "COUL:SOL-1",
         "COUL:SOL-2",
@@ -626,9 +626,9 @@ def test_sortParams1():
     assert optEngine.labels[0] == "BONDSK/cy-c3"
     assert optEngine.labels[-1] == "IDIHSK/c2-h4-ce-n3"
     refParams = [2.6650e02, 1.6724e02, 1.9135e02, 2.1897e02, 2.3580e02]
-    checkUtils.checkArray(refParams, optEngine.params[:5, 0])
+    assert checkUtils.checkArrays(refParams, optEngine.params[:5, 0])
     refParams = [-6.0860e00, -5.3713e00, -4.3450e00, -4.5274e00, -4.4187e00]
-    checkUtils.checkArray(refParams, optEngine.params[:5, -1])
+    checkUtils.checkArrays(refParams, optEngine.params[:5, -1])
 
 
 def test_sortParams2():
@@ -643,7 +643,7 @@ def test_sortParams2():
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options["optdir"])
     refParams = [1.6289e-01, 1.6289e-01, 1.4744e-01, 1.4744e-01, 1.4744e-01]
-    checkUtils.checkArray(refParams, optEngine.params[:5, 137])
+    assert checkUtils.checkArrays(refParams, optEngine.params[:5, 137])
 
 
 def test_respPriors(monkeypatch):

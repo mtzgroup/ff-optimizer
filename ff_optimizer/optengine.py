@@ -425,7 +425,6 @@ class OptEngine:
                         self.params[i + 1, k] = results["params"][j]
                         break
 
-    # TODO: make each optimization occur in a separate directory
     # We assume that optimizeForcefield and all the functions it calls run in the args.optdir directory
     def optimizeForcefield(self, i):
         if i > 0:
@@ -450,8 +449,9 @@ class OptEngine:
                 self.validPrevious.append(
                     self.readValid(f"valid_{str(i)}_previous.out")
                 )
-
+            print(len(self.train))
             if len(self.train) <= i:
+                print("optimizing cycle " + str(i))
                 if self.respPriors is not None:
                     self.respPriors.updateRespPriors(
                         i, os.path.join("forcefield", self.mol2)
@@ -464,9 +464,6 @@ class OptEngine:
                     )
                 if status == 1:
                     print("WARNING: large change in one of the parameters")
-                    print(
-                        "Ethan should implement adaptive changing of adaptive_damping"
-                    )
                 self.train.append(results["obj"])
                 self.sortParams(results, i)
             copyfile(

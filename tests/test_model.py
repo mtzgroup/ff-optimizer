@@ -131,7 +131,7 @@ def test_doMMsampling(monkeypatch):
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
     m = model.Model(args)
-    m.restartCycle = 2
+    m.restartCycle = 3
     m.doMMSampling(3)
     isDir = os.path.isdir(path)
     isFile = True
