@@ -7,7 +7,7 @@ import numpy as np
 import sander
 
 from .model import AbstractModel, Model
-from .utils import readPDB, writePDB
+from .utils import readXYZ, writeXYZ
 
 # from time import perf_counter
 
@@ -76,7 +76,7 @@ class ActiveLearningModel(AbstractModel):
             self.models[-1].restartCycle = self.models[-1].optEngine.restartCycle
             os.chdir(self.home)
         self.restartCycle = min([m.restartCycle for m in self.models])
-        self.templatePdb = os.path.join(args.optdir, "conf.pdb")
+        self.symbols = None
 
     def initialCycle(self):
         for i in range(1, self.nmodels + 1):
@@ -175,8 +175,12 @@ class ActiveLearningModel(AbstractModel):
                 dirs[k - j],
             )
             for f in os.listdir(sampleDir):
-                if ".pdb" in f:
-                    geometries.append(readPDB(os.path.join(sampleDir, f)))
+                if ".xyz" in f:
+                    if self.symbols is None:
+                        geometry, self.symbols = readXYZ(os.path.join(sampleDir, f), readSymbols=True)
+                        geometries.append(geometry)
+                    else:
+                        geometries.append(readXYZ(os.path.join(sampleDir, f)))
                     # os.remove(f)
         return geometries
 
@@ -219,6 +223,6 @@ class ActiveLearningModel(AbstractModel):
 
     def writeGeoms(self, geometries, dest):
         for i in range(1, len(geometries) + 1):
-            writePDB(
-                geometries[i - 1], os.path.join(dest, f"{str(i)}.pdb"), self.templatePdb
+            writeXYZ(
+                geometries[i - 1], self.symbols, os.path.join(dest, f"{str(i)}.xyz") 
             )

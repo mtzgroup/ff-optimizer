@@ -1,4 +1,5 @@
 import os
+import pytest
 
 import numpy as np
 from chemcloud.models import Molecule
@@ -96,3 +97,25 @@ def test_writePDB():
     with open("3.pdb", "r") as f:
         refLines = f.readlines()
     assert testLines == refLines
+
+def test_readXYZ1():
+    os.chdir(os.path.join(os.path.dirname(__file__), "utils"))
+    coords = utils.readXYZ("test.xyz")
+    assert checkUtils.checkFloat(coords[0], 0.081)
+    assert checkUtils.checkFloat(coords[2], -0.195)
+    assert checkUtils.checkFloat(coords[-1], -2.544)
+
+def test_readXYZ2():
+    os.chdir(os.path.join(os.path.dirname(__file__), "utils"))
+    coords, symbols = utils.readXYZ("test.xyz", readSymbols=True)
+    assert symbols[0] == 'O'
+    assert symbols[-1] == 'H'
+
+def test_writeXYZ():
+    os.chdir(os.path.join(os.path.dirname(__file__), "utils"))
+    refCoords, refSymbols = utils.readXYZ("test.xyz", readSymbols=True)
+    utils.writeXYZ(refCoords, refSymbols, "temp.xyz")
+    testCoords, testSymbols = utils.readXYZ("temp.xyz", readSymbols=True)
+    #os.remove("temp.xyz")
+    assert checkUtils.checkArrays(refCoords, testCoords)
+    assert checkUtils.checkLists(list(refSymbols), list(testSymbols))

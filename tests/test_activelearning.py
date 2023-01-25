@@ -41,7 +41,7 @@ class FakeArgs:
 def monkeyInit(self, args):
     self.nmodels = args.activeLearning
     self.models = [FakeModel(args) for i in range(self.nmodels)]
-    self.templatePdb = os.path.join("ref", "1.pdb")
+    self.symbols = None
 
 
 @pytest.mark.amber
@@ -94,7 +94,6 @@ def test_computeEnergyForceAll(monkeypatch):
     forces = readXYZTraj("MMforce.xyz")
     for i in range(len(frames)):
         checkUtils.checkArrays(results[i][1], forces[i])
-
 
 def test_collectGeometries(monkeypatch):
     os.chdir(
@@ -185,7 +184,6 @@ def test_chooseGeometries2Models(monkeypatch):
     forces = np.asarray(forces, dtype=np.float32)
     random.seed(404)
     newGeoms = model.chooseGeometries(energies, forces)
-    print(newGeoms)
     assert newGeoms == [6, 14, 18, 20, 3, 11, 7, 12, 15, 21, 19, 2]
 
 
@@ -193,13 +191,11 @@ def monkeyComputeAll(self, geometries, prmtops):
     for prmtop in prmtops:
         if not os.path.isfile(prmtop):
             raise RuntimeError(f"{prmtop} is missing!")
-    model = int(prmtops[0][6])
-    return [model - 1], []
+    return [0], []
 
 
 def monkeyChooseGeometries(self, energies, forces):
     return energies
-
 
 def test_doActiveLearning(monkeypatch):
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
@@ -215,53 +211,54 @@ def test_doActiveLearning(monkeypatch):
     args = FakeArgs()
     model = active_learning.ActiveLearningModel(args)
     model.prmtop = "amber.prmtop"
+    folders = ["train", "valid_1", "valid_2"]
     for i in range(1, 4):
-        for folder in ["train", "valid_1", "valid_2"]:
+        for j in range(1, 4):
             copyfile(
-                os.path.join("ref", f"{i}.pdb"),
-                os.path.join(f"model_{i}", "2_sampling", "7_cycle_7", folder, "1.pdb"),
+                os.path.join("ref", f"{i}.xyz"),
+                os.path.join(f"model_{j}", "2_sampling", "7_cycle_7", folders[i-1], f"1.xyz"),
             )
-
     model.doActiveLearning(7)
-    testGeom = utils.readPDB(
-        os.path.join("model_1", "2_sampling", "7_cycle_7", "train", "1.pdb")
-    )
-    refGeom = utils.readPDB(os.path.join("ref", "1.pdb"))
-    assert checkUtils.checkArrays(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_2", "1.pdb")
+
+    refGeom = utils.readXYZ(os.path.join("ref", "1.xyz"))
+    testGeom = utils.readXYZ(
+        os.path.join("model_1", "2_sampling", "7_cycle_7", "train", "1.xyz")
     )
     assert checkUtils.checkArrays(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_3", "2_sampling", "7_cycle_7", "valid_1", "1.pdb")
+    testGeom = utils.readXYZ(
+        os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_1", "1.xyz")
+    )
+    assert checkUtils.checkArrays(testGeom, refGeom)
+    testGeom = utils.readXYZ(
+        os.path.join("model_3", "2_sampling", "7_cycle_7", "valid_2", "1.xyz")
     )
     assert checkUtils.checkArrays(testGeom, refGeom)
 
-    testGeom = utils.readPDB(
-        os.path.join("model_2", "2_sampling", "7_cycle_7", "train", "1.pdb")
-    )
-    refGeom = utils.readPDB(os.path.join("ref", "2.pdb"))
-    assert checkUtils.checkArrays(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_3", "2_sampling", "7_cycle_7", "valid_2", "1.pdb")
+    refGeom = utils.readXYZ(os.path.join("ref", "3.xyz"))
+    testGeom = utils.readXYZ(
+        os.path.join("model_2", "2_sampling", "7_cycle_7", "train", "1.xyz")
     )
     assert checkUtils.checkArrays(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_1", "1.pdb")
+    testGeom = utils.readXYZ(
+        os.path.join("model_3", "2_sampling", "7_cycle_7", "valid_1", "1.xyz")
+    )
+    assert checkUtils.checkArrays(testGeom, refGeom)
+    testGeom = utils.readXYZ(
+        os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_2", "1.xyz")
     )
     assert checkUtils.checkArrays(testGeom, refGeom)
 
-    testGeom = utils.readPDB(
-        os.path.join("model_3", "2_sampling", "7_cycle_7", "train", "1.pdb")
-    )
-    refGeom = utils.readPDB(os.path.join("ref", "3.pdb"))
-    assert checkUtils.checkArrays(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_2", "1.pdb")
+    refGeom = utils.readXYZ(os.path.join("ref", "2.xyz"))
+    testGeom = utils.readXYZ(
+        os.path.join("model_3", "2_sampling", "7_cycle_7", "train", "1.xyz")
     )
     assert checkUtils.checkArrays(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_1", "1.pdb")
+    testGeom = utils.readXYZ(
+        os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_1", "1.xyz")
+    )
+    assert checkUtils.checkArrays(testGeom, refGeom)
+    testGeom = utils.readXYZ(
+        os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_2", "1.xyz")
     )
     assert checkUtils.checkArrays(testGeom, refGeom)
 

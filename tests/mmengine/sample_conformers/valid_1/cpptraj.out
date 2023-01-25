@@ -4,8 +4,8 @@ CPPTRAJ: Trajectory Analysis. V6.4.4 (AmberTools)
      | \/ | \/ | \/ | 
     _|_/\_|_/\_|_/\_|_
 
-| Date/time: 01/25/23 10:57:14
-| Available memory: 26.321 GB
+| Date/time: 01/25/23 13:15:13
+| Available memory: 27.022 GB
 
 	Reading '../water.prmtop' as Amber Topology
 	Radius Set: modified Bondi radii (mbondi)
@@ -21,7 +21,7 @@ INPUT: Reading input from 'cpptraj.in'
   '253_all.xyz' is a standard XYZ trajectory, Parm water.prmtop: Writing 10 frames (1-Last, 1)
  0% 11% 22% 33% 44% 56% 67% 78% 89% 100% Complete.
   [exit]
-TIME: Total execution time: 0.0144 seconds.
+TIME: Total execution time: 0.0198 seconds.
 --------------------------------------------------------------------------------
 To cite CPPTRAJ use:
 Daniel R. Roe and Thomas E. Cheatham, III, "PTRAJ and CPPTRAJ: Software for
