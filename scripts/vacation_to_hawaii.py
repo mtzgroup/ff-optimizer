@@ -65,14 +65,14 @@ def checkArgs(args):
             "No sander input file for equilibration named heat1.in provided in "
             + args.sampledir
         )
-    if not os.path.isfile(os.path.join(args.sampledir, "md.in")):
+    if not os.path.isfile(os.path.join(args.sampledir, args.trainMdin)):
         raise RuntimeError(
-            "No sander input file for sampling named md.in provided in "
-            + args.sampledir
+            f"No sander input file for training set sampling named {args.trainMdin} provided in {args.sampledir}"
         )
-    # if not os.path.isfile(os.path.join(args.sampledir, "cpptraj.in")):
-    #    raise RuntimeError("No cpptraj input file provided in " + args.sampledir)
-
+    if not os.path.isfile(os.path.join(args.sampledir, args.validMdin)):
+        raise RuntimeError(
+            f"No sander input file for validation set sampling named {args.validMdin} provided in {args.sampledir}"
+        )
     if (
         args.qmengine != "queue"
         and args.qmengine != "debug"

@@ -148,6 +148,7 @@ def convertTCtoFB(
     return jobCounter
 
 
+# unused
 def readPDB(pdb: str):
     coords = []
     with open(pdb, "r") as f:
@@ -159,6 +160,37 @@ def readPDB(pdb: str):
     return np.asarray(coords, dtype=np.float32)
 
 
+def readXYZ(xyz: str, readSymbols=False):
+    if readSymbols:
+        symbols = np.loadtxt(xyz, skiprows=2, usecols=(0), dtype=str)
+        geometry = np.loadtxt(
+            xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
+        ).flatten()
+        return geometry, symbols
+    else:
+        return np.loadtxt(
+            xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
+        ).flatten()
+
+
+def writeXYZ(geometry: np.array, symbols: list, dest: str):
+    natoms = int(geometry.shape[0] / 3)
+    with open(dest, "w") as f:
+        f.write(f"{natoms}\n")
+        f.write("Written by ff_opt active learning\n")
+        for i in range(natoms):
+            f.write(
+                "%3s %14.7f %14.7f %14.7f\n"
+                % (
+                    symbols[i],
+                    geometry[3 * i],
+                    geometry[3 * i + 1],
+                    geometry[3 * i + 2],
+                )
+            )
+
+
+# unused
 def convertPDBtoMolecule(pdb: str):
     coords = []
     symbols = []
@@ -180,6 +212,7 @@ def convertPDBtoMolecule(pdb: str):
     return mol
 
 
+# unused
 def convertPDBtoXYZ(pdb: str):
     name = pdb.replace(".pdb", ".xyz")
     xyzLines = []
@@ -317,6 +350,7 @@ def writeRst(frame, natoms, dest):
                 f.write("\n")
 
 
+# unused
 def writePDB(geometry, dest, template):
     with open(template, "r") as f:
         templateLines = f.readlines()

@@ -41,7 +41,7 @@ class FakeArgs:
 def monkeyInit(self, args):
     self.nmodels = args.activeLearning
     self.models = [FakeModel(args) for i in range(self.nmodels)]
-    self.templatePdb = os.path.join("ref", "1.pdb")
+    self.symbols = None
 
 
 @pytest.mark.amber
@@ -57,7 +57,7 @@ def test_computeEnergyForceSP(monkeypatch):
         "MMforce.xyz", usecols=(1, 2, 3), skiprows=2, max_rows=84
     ).flatten()
     results = model.computeEnergyForce([geometry], "amber.prmtop")
-    checkUtils.checkArray(results[0][1], force)
+    checkUtils.checkArrays(results[0][1], force)
 
 
 def readXYZTraj(filename):
@@ -93,7 +93,7 @@ def test_computeEnergyForceAll(monkeypatch):
     results = model.computeEnergyForce(frames, "amber.prmtop")
     forces = readXYZTraj("MMforce.xyz")
     for i in range(len(frames)):
-        checkUtils.checkArray(results[i][1], forces[i])
+        checkUtils.checkArrays(results[i][1], forces[i])
 
 
 def test_collectGeometries(monkeypatch):
@@ -185,7 +185,6 @@ def test_chooseGeometries2Models(monkeypatch):
     forces = np.asarray(forces, dtype=np.float32)
     random.seed(404)
     newGeoms = model.chooseGeometries(energies, forces)
-    print(newGeoms)
     assert newGeoms == [6, 14, 18, 20, 3, 11, 7, 12, 15, 21, 19, 2]
 
 
@@ -193,8 +192,7 @@ def monkeyComputeAll(self, geometries, prmtops):
     for prmtop in prmtops:
         if not os.path.isfile(prmtop):
             raise RuntimeError(f"{prmtop} is missing!")
-    model = int(prmtops[0][6])
-    return [model - 1], []
+    return [0], []
 
 
 def monkeyChooseGeometries(self, energies, forces):
@@ -215,55 +213,58 @@ def test_doActiveLearning(monkeypatch):
     args = FakeArgs()
     model = active_learning.ActiveLearningModel(args)
     model.prmtop = "amber.prmtop"
+    folders = ["train", "valid_1", "valid_2"]
     for i in range(1, 4):
-        for folder in ["train", "valid_1", "valid_2"]:
+        for j in range(1, 4):
             copyfile(
-                os.path.join("ref", f"{i}.pdb"),
-                os.path.join(f"model_{i}", "2_sampling", "7_cycle_7", folder, "1.pdb"),
+                os.path.join("ref", f"{i}.xyz"),
+                os.path.join(
+                    f"model_{j}", "2_sampling", "7_cycle_7", folders[i - 1], f"1.xyz"
+                ),
             )
-
     model.doActiveLearning(7)
-    testGeom = utils.readPDB(
-        os.path.join("model_1", "2_sampling", "7_cycle_7", "train", "1.pdb")
-    )
-    refGeom = utils.readPDB(os.path.join("ref", "1.pdb"))
-    checkUtils.checkArray(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_2", "1.pdb")
-    )
-    checkUtils.checkArray(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_3", "2_sampling", "7_cycle_7", "valid_1", "1.pdb")
-    )
-    checkUtils.checkArray(testGeom, refGeom)
 
-    testGeom = utils.readPDB(
-        os.path.join("model_2", "2_sampling", "7_cycle_7", "train", "1.pdb")
+    refGeom = utils.readXYZ(os.path.join("ref", "1.xyz"))
+    testGeom = utils.readXYZ(
+        os.path.join("model_1", "2_sampling", "7_cycle_7", "train", "1.xyz")
     )
-    refGeom = utils.readPDB(os.path.join("ref", "2.pdb"))
-    checkUtils.checkArray(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_3", "2_sampling", "7_cycle_7", "valid_2", "1.pdb")
+    assert checkUtils.checkArrays(testGeom, refGeom)
+    testGeom = utils.readXYZ(
+        os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_1", "1.xyz")
     )
-    checkUtils.checkArray(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_1", "1.pdb")
+    assert checkUtils.checkArrays(testGeom, refGeom)
+    testGeom = utils.readXYZ(
+        os.path.join("model_3", "2_sampling", "7_cycle_7", "valid_2", "1.xyz")
     )
-    checkUtils.checkArray(testGeom, refGeom)
+    assert checkUtils.checkArrays(testGeom, refGeom)
 
-    testGeom = utils.readPDB(
-        os.path.join("model_3", "2_sampling", "7_cycle_7", "train", "1.pdb")
+    refGeom = utils.readXYZ(os.path.join("ref", "3.xyz"))
+    testGeom = utils.readXYZ(
+        os.path.join("model_2", "2_sampling", "7_cycle_7", "train", "1.xyz")
     )
-    refGeom = utils.readPDB(os.path.join("ref", "3.pdb"))
-    checkUtils.checkArray(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_2", "1.pdb")
+    assert checkUtils.checkArrays(testGeom, refGeom)
+    testGeom = utils.readXYZ(
+        os.path.join("model_3", "2_sampling", "7_cycle_7", "valid_1", "1.xyz")
     )
-    checkUtils.checkArray(testGeom, refGeom)
-    testGeom = utils.readPDB(
-        os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_1", "1.pdb")
+    assert checkUtils.checkArrays(testGeom, refGeom)
+    testGeom = utils.readXYZ(
+        os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_2", "1.xyz")
     )
-    checkUtils.checkArray(testGeom, refGeom)
+    assert checkUtils.checkArrays(testGeom, refGeom)
+
+    refGeom = utils.readXYZ(os.path.join("ref", "2.xyz"))
+    testGeom = utils.readXYZ(
+        os.path.join("model_3", "2_sampling", "7_cycle_7", "train", "1.xyz")
+    )
+    assert checkUtils.checkArrays(testGeom, refGeom)
+    testGeom = utils.readXYZ(
+        os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_1", "1.xyz")
+    )
+    assert checkUtils.checkArrays(testGeom, refGeom)
+    testGeom = utils.readXYZ(
+        os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_2", "1.xyz")
+    )
+    assert checkUtils.checkArrays(testGeom, refGeom)
 
 
 def monkeyInitModel(self, args):
@@ -339,15 +340,18 @@ def test_restart(monkeypatch):
 def monkeySetupFiles(self, i):
     pass
 
+
 def monkeySortParams(self, results, i):
     pass
+
 
 def monkeyGraphResults(self):
     pass
 
+
 def monkeyOptInit(self, args):
-    self.nvalids = args['nvalids']
-    for f in os.listdir(args['optdir']):
+    self.nvalids = args["nvalids"]
+    for f in os.listdir(args["optdir"]):
         if f.endswith(".mol2"):
             self.mol2 = f
         elif f.endswith(".frcmod"):
@@ -358,25 +362,29 @@ def monkeyOptInit(self, args):
     self.validInitial = []
     self.restartCycle = 0
     self.respPriors = None
-        
+
+
 def monkeyForceBalance(command):
     out = command.split()[3]
-    cycle = out.split("_")[1].split(".")[0]
-    copyfile(os.path.join("reference",out), out)
+    out.split("_")[1].split(".")[0]
+    copyfile(os.path.join("reference", out), out)
+
 
 def monkeyInitialize(self, args):
     pass
 
+
 def clean():
     for d in ["model_1", "model_2"]:
-        os.chdir(os.path.join(d,"1_opt"))
+        os.chdir(os.path.join(d, "1_opt"))
         for f in os.listdir():
             if f.endswith(".out"):
                 os.remove(f)
         os.chdir("targets")
         for f in os.listdir():
             rmtree(f)
-        os.chdir(os.path.join("..","..",".."))
+        os.chdir(os.path.join("..", "..", ".."))
+
 
 def monkeyALInit(self, args):
     self.home = os.getcwd()
@@ -392,21 +400,26 @@ def monkeyALInit(self, args):
     self.restartCycle = 0
     self.nthreads = min(os.cpu_count(), self.nmodels)
 
+
 def test_doParameterOptimization(monkeypatch):
     args = FakeArgs()
     args.activeLearning = 2
     args.restart = True
-    os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "doParameterOptimization"))
+    os.chdir(
+        os.path.join(
+            os.path.dirname(__file__), "active_learning", "doParameterOptimization"
+        )
+    )
     clean()
-    monkeypatch.setattr(model.Model,"initializeQMEngine",monkeyInitialize)
-    monkeypatch.setattr(model.Model,"initializeMMEngine",monkeyInitialize)
-    monkeypatch.setattr(optengine.OptEngine,"setupInputFiles",monkeySetupFiles)
-    monkeypatch.setattr(optengine.OptEngine,"__init__",monkeyOptInit)
-    monkeypatch.setattr(os,"system",monkeyForceBalance)
-    monkeypatch.setattr(optengine.OptEngine,"sortParams",monkeySortParams)
-    monkeypatch.setattr(optengine.OptEngine,"graphResults",monkeyGraphResults)
-    monkeypatch.setattr(active_learning.ActiveLearningModel,"__init__",monkeyALInit)
-    
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInitialize)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitialize)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupFiles)
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyOptInit)
+    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
+    monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyALInit)
+
     m = active_learning.ActiveLearningModel(args)
     m.doParameterOptimization(1)
     assert len(m.optResults) == 3

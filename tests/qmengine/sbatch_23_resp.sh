@@ -5,7 +5,7 @@
 #SBATCH --mem=16GB
 #SBATCH --exclude=fire-11-01
 #SBATCH -J FB_ref_gradient_23
-#SBATCH --fin=tc_23.in,23.pdb,tc_23_backup.in
+#SBATCH --fin=tc_23.in,23.xyz,tc_23_backup.in
 #SBATCH --fout=tc_23.out,esp_23.xyz
 cd $SCRATCH
 

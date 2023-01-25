@@ -7,7 +7,7 @@ def checkFloat(f1, f2, thresh=0.00001):
     return abs(f1 - f2) < thresh
 
 
-def checkArray(a1, a2, thresh=0.00001):
+def checkArrays(a1, a2, thresh=0.00001):
     a1 = np.asarray(a1, dtype=np.float32)
     a2 = np.asarray(a2, dtype=np.float32)
     if a1.shape != a2.shape:
@@ -44,10 +44,11 @@ def checkListsFloats(list1, list2, thresh=0.000001):
             return False
     return True
 
+
 def checkFiles(f1, f2):
-    with open(f1, 'r') as f:
+    with open(f1, "r") as f:
         lines1 = f.readlines()
-    with open(f2, 'r') as f:
+    with open(f2, "r") as f:
         lines2 = f.readlines()
     return checkLists(lines1, lines2)
 

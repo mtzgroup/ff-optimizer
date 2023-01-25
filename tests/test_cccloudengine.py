@@ -31,11 +31,11 @@ def test_getQMRefData(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     chemcloudEngine = qmengine.CCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
     calcDir = "chemcloudengine"
-    pdbs = []
+    xyzs = []
     jsons = []
     for f in os.listdir(calcDir):
-        if f.endswith("pdb"):
-            pdbs.append(f)
+        if f.endswith("xyz"):
+            xyzs.append(f)
         if f.endswith("json") and "success" not in f:
             jsons.append(f)
     results = []
@@ -76,7 +76,7 @@ def test_getQMRefData(monkeypatch):
     monkeypatch.setattr(chemcloudEngine, "writeResult", monkeyWrite)
     monkeypatch.setattr(qmengine.QMEngine, "readQMRefData", monkeyRead)
     monkeypatch.setattr(qmengine.QMEngine, "writeFBdata", monkeyWrite)
-    chemcloudEngine.getQMRefData(pdbs, calcDir)
+    chemcloudEngine.getQMRefData(xyzs, calcDir)
 
 
 def test_createAtomicInputsResp():
@@ -84,8 +84,8 @@ def test_createAtomicInputsResp():
     chemcloudEngine = qmengine.CCCloudEngine(
         "qmengine/tc.in", "qmengine/tc_backup.in", doResp=True
     )
-    pdbs = ["qmengine/test.pdb"]
-    atomicInputs = chemcloudEngine.createAtomicInputs(pdbs)
+    xyzs = ["qmengine/test.xyz"]
+    atomicInputs = chemcloudEngine.createAtomicInputs(xyzs)
     ainput = atomicInputs[0]
     assert ainput.protocols.native_files.all == "all"
     assert ainput.extras["tcfe:keywords"]["native_files"] == ["esp.xyz"]
@@ -120,11 +120,11 @@ def test_computeBatch(monkeypatch):
         return MonkeyFutureResult(atomicInputs)
 
     os.chdir("chemcloudengine")
-    pdbs = []
+    xyzs = []
     for f in os.listdir():
-        if f.endswith("pdb"):
-            pdbs.append(f)
-    inputs = chemcloudEngine.createAtomicInputs(pdbs)
+        if f.endswith("xyz"):
+            xyzs.append(f)
+    inputs = chemcloudEngine.createAtomicInputs(xyzs)
     print(inputs)
     monkeypatch.setattr(chemcloudEngine.client, "compute", monkeyCompute)
 

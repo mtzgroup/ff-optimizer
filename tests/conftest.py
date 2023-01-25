@@ -50,6 +50,7 @@ def pytest_configure(config):
     )
     config.addinivalue_line("markers", "debug: run only these tests")
 
+
 def pytest_collection_modifyitems(config, items):
     skips = {}
     skips["amber"] = pytest.mark.skip(reason="need --amber option to run")
