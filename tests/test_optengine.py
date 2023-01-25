@@ -13,7 +13,7 @@ def monkeyGraph():
     pass
 
 
-def cleanOptDir(optdir):
+def cleanOptDir(optdir, removeResult=False):
     try:
         rmtree(os.path.join(optdir, "forcefield"))
     except:
@@ -22,16 +22,18 @@ def cleanOptDir(optdir):
         os.remove(os.path.join(optdir, "valid_0_initial.in"))
     if os.path.isfile(os.path.join(optdir, "setup_valid_initial.leap")):
         os.remove(os.path.join(optdir, "setup_valid_initial.leap"))
-    try:
-        rmtree(os.path.join(optdir, "result"))
-    except:
-        pass
+    if removeResult:
+        try:
+            rmtree(os.path.join(optdir, "result"))
+        except:
+            pass
     for f in os.listdir(optdir):
         if (
             f.startswith("prev")
             or f.endswith(".inpcrd")
             or f.endswith(".prmtop")
             or f == "leap.out"
+            or f == "leap.log"
         ):
             os.remove(os.path.join(optdir, f))
 
@@ -488,7 +490,7 @@ def test_optimizeForcefield0(monkeypatch):
         testLines = f.readlines()
     os.remove("opt_0.out")
     os.chdir("..")
-    cleanOptDir(options["optdir"])
+    cleanOptDir(options["optdir"], removeResult=True)
     assert filesFound
     assert checkUtils.checkLists(testMol2Lines, refMol2Lines)
     assert checkUtils.checkLists(testLines, refLines)
@@ -535,7 +537,7 @@ def test_optimizeForcefield1(monkeypatch):
         testLines = f.readlines()
     assert checkUtils.checkLists(testLines, refLines)
     os.chdir("..")
-    cleanOptDir(options["optdir"])
+    cleanOptDir(options["optdir"], removeResult=True)
 
 
 # Finished FB cycle
@@ -687,7 +689,7 @@ def test_respPriors(monkeypatch):
         "prev_dasa.mol2", os.path.join("ref", "dasa_priors.mol2")
     )
     os.chdir("..")
-    cleanOptDir(options["optdir"])
+    cleanOptDir(options["optdir"], removeResult=True)
 
 
 def test_restartResp():
@@ -802,7 +804,7 @@ def test_optimizeForcefield_multipleValids(monkeypatch):
             valid2 += 1
             os.remove(f)
     os.chdir("..")
-    cleanOptDir(options["optdir"])
+    cleanOptDir(options["optdir"], removeResult=True)
     assert valid1 == 3
     assert valid2 == 3
 
