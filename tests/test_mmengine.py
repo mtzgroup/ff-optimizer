@@ -1,9 +1,10 @@
 import os
-import pytest
-from shutil import rmtree, copyfile
+from shutil import copyfile, rmtree
+
 from ff_optimizer import mmengine
 
 from . import checkUtils
+
 
 def getOptions():
     options = {}
@@ -41,11 +42,14 @@ def monkeyGetFrame(self, frame, dest):
 
 
 def monkeyGetFrames(self):
-    return [i for i in range((self.options["nvalids"] + 1) * self.options["conformers"])]
+    return [
+        i for i in range((self.options["nvalids"] + 1) * self.options["conformers"])
+    ]
 
 
 def monkeySetup(self):
     pass
+
 
 def test_getFrames1(monkeypatch):
     options = getOptions()
@@ -90,6 +94,7 @@ def test_getMMsamples(monkeypatch):
     # rmtree("testSetup")
     assert trainCrds == ["0\n"]
     assert validCrds == ["1\n"]
+
 
 def test_getFrames2(monkeypatch):
     options = getOptions()
@@ -229,7 +234,7 @@ def test_restart2(monkeypatch):
     except:
         pass
     copyfile(os.path.join("..", "928.rst7"), os.path.join("valid_1", "928.rst7"))
-        
+
     assert passTest
 
 
@@ -281,6 +286,7 @@ def test_restart3(monkeypatch):
     else:
         passTest = False
     assert passTest
+
 
 def test_getFrames3(monkeypatch):
     options = getOptions()

@@ -177,7 +177,9 @@ class ActiveLearningModel(AbstractModel):
             for f in os.listdir(sampleDir):
                 if ".xyz" in f:
                     if self.symbols is None:
-                        geometry, self.symbols = readXYZ(os.path.join(sampleDir, f), readSymbols=True)
+                        geometry, self.symbols = readXYZ(
+                            os.path.join(sampleDir, f), readSymbols=True
+                        )
                         geometries.append(geometry)
                     else:
                         geometries.append(readXYZ(os.path.join(sampleDir, f)))
@@ -224,5 +226,5 @@ class ActiveLearningModel(AbstractModel):
     def writeGeoms(self, geometries, dest):
         for i in range(1, len(geometries) + 1):
             writeXYZ(
-                geometries[i - 1], self.symbols, os.path.join(dest, f"{str(i)}.xyz") 
+                geometries[i - 1], self.symbols, os.path.join(dest, f"{str(i)}.xyz")
             )

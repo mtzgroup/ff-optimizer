@@ -109,10 +109,14 @@ def test_sample(monkeypatch):
     mmEngine.sample([928], "md.in")
     os.chdir("..")
     for i in range(1, 11):
-        testXyz = loadtxt(os.path.join("train", f"{str(i)}.xyz"), skiprows=2, usecols=(1,2,3))
-        refXyz = loadtxt(os.path.join("ref", f"{str(i)}.xyz"), skiprows=2, usecols=(1,2,3))
+        testXyz = loadtxt(
+            os.path.join("train", f"{str(i)}.xyz"), skiprows=2, usecols=(1, 2, 3)
+        )
+        refXyz = loadtxt(
+            os.path.join("ref", f"{str(i)}.xyz"), skiprows=2, usecols=(1, 2, 3)
+        )
         assert checkUtils.checkArrays(testXyz, refXyz)
-    #rmtree("train")
+    # rmtree("train")
 
 
 @pytest.mark.amber
@@ -134,7 +138,11 @@ def test_sample_conformers(monkeypatch):
     mmEngine.sample([928, 135, 253], "md.in")
     os.chdir("..")
     for i in range(1, 31):
-        testXyz = loadtxt(os.path.join("valid_1", f"{str(i)}.xyz"), skiprows=2, usecols=(1,2,3))
-        refXyz = loadtxt(os.path.join("ref", f"{str(i)}.xyz"), skiprows=2, usecols=(1,2,3))
+        testXyz = loadtxt(
+            os.path.join("valid_1", f"{str(i)}.xyz"), skiprows=2, usecols=(1, 2, 3)
+        )
+        refXyz = loadtxt(
+            os.path.join("ref", f"{str(i)}.xyz"), skiprows=2, usecols=(1, 2, 3)
+        )
         assert checkUtils.checkArrays(testXyz, refXyz)
-    #rmtree("valid_1")
+    # rmtree("valid_1")

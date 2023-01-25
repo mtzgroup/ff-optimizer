@@ -147,6 +147,7 @@ def convertTCtoFB(
                 f.write("\n")
     return jobCounter
 
+
 # unused
 def readPDB(pdb: str):
     coords = []
@@ -158,21 +159,36 @@ def readPDB(pdb: str):
                 coords.append(line[46:54].replace(" ", ""))
     return np.asarray(coords, dtype=np.float32)
 
-def readXYZ(xyz: str, readSymbols = False):
+
+def readXYZ(xyz: str, readSymbols=False):
     if readSymbols:
         symbols = np.loadtxt(xyz, skiprows=2, usecols=(0), dtype=str)
-        geometry = np.loadtxt(xyz, skiprows=2, usecols=(1,2,3), dtype=np.float32).flatten()
+        geometry = np.loadtxt(
+            xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
+        ).flatten()
         return geometry, symbols
     else:
-        return np.loadtxt(xyz, skiprows=2, usecols=(1,2,3), dtype=np.float32).flatten()
+        return np.loadtxt(
+            xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
+        ).flatten()
+
 
 def writeXYZ(geometry: np.array, symbols: list, dest: str):
     natoms = int(geometry.shape[0] / 3)
-    with open(dest, 'w') as f:
+    with open(dest, "w") as f:
         f.write(f"{natoms}\n")
         f.write("Written by ff_opt active learning\n")
         for i in range(natoms):
-            f.write("%3s %14.7f %14.7f %14.7f\n" % (symbols[i], geometry[3*i], geometry[3*i+1], geometry[3*i+2]))
+            f.write(
+                "%3s %14.7f %14.7f %14.7f\n"
+                % (
+                    symbols[i],
+                    geometry[3 * i],
+                    geometry[3 * i + 1],
+                    geometry[3 * i + 2],
+                )
+            )
+
 
 # unused
 def convertPDBtoMolecule(pdb: str):
@@ -194,6 +210,7 @@ def convertPDBtoMolecule(pdb: str):
     coords *= units.ANGSTROM_TO_AU
     mol = Molecule(**{"symbols": symbols, "geometry": coords})
     return mol
+
 
 # unused
 def convertPDBtoXYZ(pdb: str):
@@ -331,6 +348,7 @@ def writeRst(frame, natoms, dest):
             )
             if int(i / 2) * 2 != i:
                 f.write("\n")
+
 
 # unused
 def writePDB(geometry, dest, template):

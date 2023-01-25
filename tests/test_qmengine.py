@@ -3,7 +3,6 @@ import os
 import numpy as np
 from chemcloud.models import AtomicResult
 from qcelemental.util.serialization import json_loads
-from qcelemental.models import Molecule
 
 from ff_optimizer import qmengine, utils
 

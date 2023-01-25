@@ -95,6 +95,7 @@ def test_computeEnergyForceAll(monkeypatch):
     for i in range(len(frames)):
         checkUtils.checkArrays(results[i][1], forces[i])
 
+
 def test_collectGeometries(monkeypatch):
     os.chdir(
         os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries")
@@ -197,6 +198,7 @@ def monkeyComputeAll(self, geometries, prmtops):
 def monkeyChooseGeometries(self, energies, forces):
     return energies
 
+
 def test_doActiveLearning(monkeypatch):
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
     monkeypatch.setattr(
@@ -216,7 +218,9 @@ def test_doActiveLearning(monkeypatch):
         for j in range(1, 4):
             copyfile(
                 os.path.join("ref", f"{i}.xyz"),
-                os.path.join(f"model_{j}", "2_sampling", "7_cycle_7", folders[i-1], f"1.xyz"),
+                os.path.join(
+                    f"model_{j}", "2_sampling", "7_cycle_7", folders[i - 1], f"1.xyz"
+                ),
             )
     model.doActiveLearning(7)
 

@@ -310,14 +310,14 @@ class ExternalAmberEngine(MMEngine):
                 raise RuntimeError(
                     f"Error in trajectory postprocessing in {os.getcwd()}"
                 )
-            
-            with open(f"{name}_all.xyz",'r') as f:
+
+            with open(f"{name}_all.xyz", "r") as f:
                 coordLines = f.readlines()
             nlines = int(coordLines[0].split()[0]) + 2
             i = 1
             while i * nlines <= len(coordLines):
                 with open(f"{xyzIndex}.xyz", "w") as f:
-                    for line in coordLines[(i-1) * nlines : i * nlines]:
+                    for line in coordLines[(i - 1) * nlines : i * nlines]:
                         f.write(line)
                 i += 1
                 xyzIndex += 1
