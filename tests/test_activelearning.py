@@ -427,3 +427,17 @@ def test_doParameterOptimization(monkeypatch):
     m.doParameterOptimization(2)
     assert len(m.optResults) == 4
     clean()
+
+#def test_restart(monkeypatch):
+#    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)
+#    monkeypatch.setattr(qmengine.CCCloudEngine, "__init__", monkeyInitQM)
+#    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+#    monkeypatch.setattr(os, "rename", monkeyRename)
+#
+#    args = FakeArgs()
+#    args.restart = True
+#    os.chdir("/home/curtie/7_FF_fitting/0_ff-optimizer/4_alanine_tetrapeptide/5_40_ppc/6_active_learning_3_models")
+#    mod = active_learning.ActiveLearningModel(args)
+#    print(mod.restartCycle)
+#    assert False
+#

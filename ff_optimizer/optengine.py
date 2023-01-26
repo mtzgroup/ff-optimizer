@@ -575,3 +575,4 @@ class OptEngine:
             else:
                 break
         self.restartCycle = i
+        print(f"Restart cycle is {i}")

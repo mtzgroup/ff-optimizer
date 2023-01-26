@@ -5,7 +5,7 @@ import GPUtil
 import pytest
 from numpy import loadtxt
 
-from ff_optimizer import mmengine
+from ff_optimizer import mmengine, utils
 
 from . import checkUtils
 
@@ -90,7 +90,6 @@ def test_runSanderCUDA(monkeypatch):
     refRst = loadtxt(os.path.join("ref", "md.rst7"), skiprows=2)
     checkUtils.checkArrays(testRst, refRst)
 
-
 @pytest.mark.amber
 def test_sample(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
@@ -101,11 +100,12 @@ def test_sample(monkeypatch):
     os.mkdir("train")
 
     copyfile("928.rst7", os.path.join("train", "928.rst7"))
-    os.chdir("train")
     options["coordPath"] = "coors.xyz"
     mmEngine = mmengine.ExternalAmberEngine(options)
     mmEngine.prmtop = "water.prmtop"
+    mmEngine.symbols = utils.getSymbolsFromPrmtop("water.prmtop")
 
+    os.chdir("train")
     mmEngine.sample([928], "md.in")
     os.chdir("..")
     for i in range(1, 11):
@@ -118,7 +118,6 @@ def test_sample(monkeypatch):
         assert checkUtils.checkArrays(testXyz, refXyz)
     # rmtree("train")
 
-
 @pytest.mark.amber
 def test_sample_conformers(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
@@ -127,6 +126,7 @@ def test_sample_conformers(monkeypatch):
     options["conformers"] = 3
     mmEngine = mmengine.ExternalAmberEngine(options)
     mmEngine.prmtop = "water.prmtop"
+    mmEngine.symbols = utils.getSymbolsFromPrmtop("water.prmtop")
     if os.path.isdir("valid_1"):
         rmtree("valid_1")
     os.mkdir("valid_1")
