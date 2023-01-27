@@ -17,6 +17,7 @@ class MMEngine:
         # Account for being in basedir/sampledir/x_cycle_x/
         self.coordPath = os.path.join("..", "..", options["coordPath"])
         self.startIndex, self.endIndex, self.splitIndex = self.getIndices()
+        self.symbols = None
 
     # 0-indexed
     # TODO: figure out what to do with this awful function

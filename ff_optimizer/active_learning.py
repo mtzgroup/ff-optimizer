@@ -7,7 +7,7 @@ import numpy as np
 import sander
 
 from .model import AbstractModel, Model
-from .utils import readXYZ, writeXYZ
+from . import utils
 
 # from time import perf_counter
 
@@ -174,15 +174,32 @@ class ActiveLearningModel(AbstractModel):
                 f"{str(i)}_cycle_{str(i)}",
                 dirs[k - j],
             )
+            # If restarting, we redo the .nc processing (in case pooling
+            # was already done and the original xyzs overwritten)
+            if i == self.restartCycle:
+                currentDir = os.getcwd()
+                os.chdir(sampleDir)
+                ncs = []
+                prmtop = None
+                for f in os.listdir(".."):
+                    if f.endswith(".prmtop"):
+                        prmtop = f
+                for f in os.listdir():
+                    if f.endswith(".nc"):
+                        ncs.append(f)
+                self.symbols = utils.getSymbolsFromPrmtop(os.path.join("..",prmtop))
+                for nc in ncs:
+                    utils.convertNCtoXYZs(nc, self.symbols)
+                os.chdir(currentDir)
             for f in os.listdir(sampleDir):
                 if ".xyz" in f:
                     if self.symbols is None:
-                        geometry, self.symbols = readXYZ(
+                        geometry, self.symbols = utils.readXYZ(
                             os.path.join(sampleDir, f), readSymbols=True
                         )
                         geometries.append(geometry)
                     else:
-                        geometries.append(readXYZ(os.path.join(sampleDir, f)))
+                        geometries.append(utils.readXYZ(os.path.join(sampleDir, f)))
                     # os.remove(f)
         return geometries
 
@@ -225,6 +242,6 @@ class ActiveLearningModel(AbstractModel):
 
     def writeGeoms(self, geometries, dest):
         for i in range(1, len(geometries) + 1):
-            writeXYZ(
+            utils.writeXYZ(
                 geometries[i - 1], self.symbols, os.path.join(dest, f"{str(i)}.xyz")
             )
