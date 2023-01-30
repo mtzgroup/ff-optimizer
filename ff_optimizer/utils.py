@@ -1,8 +1,9 @@
-import numpy as np
 import os
+
+import numpy as np
+import yaml
 from qcelemental.models import Molecule
 from scipy.io import netcdf_file
-import yaml
 
 from . import units
 
@@ -379,10 +380,11 @@ def writePDB(geometry, dest, template):
             else:
                 f.write(line)
 
+
 def convertNCtoXYZs(nc, symbols, offset=0):
-    f = netcdf_file(nc, 'r', mmap=False)
+    f = netcdf_file(nc, "r", mmap=False)
     try:
-        coords = f.variables['coordinates']
+        coords = f.variables["coordinates"]
     except:
         # if no coords, must be vels file
         return 0
@@ -396,24 +398,25 @@ def convertNCtoXYZs(nc, symbols, offset=0):
                     "%3s %14.7f %14.7f %14.7f\n"
                     % (
                         symbols[j],
-                        coords[i,j,0],
-                        coords[i,j,1],
-                        coords[i,j,2],
+                        coords[i, j, 0],
+                        coords[i, j, 1],
+                        coords[i, j, 2],
                     )
                 )
     return coords.shape[0]
 
+
 def getSymbolsFromPrmtop(prmtop):
-    with open(os.path.join(os.path.dirname(__file__),'elements.yaml'),'r') as f:
+    with open(os.path.join(os.path.dirname(__file__), "elements.yaml"), "r") as f:
         elements = yaml.safe_load(f)
     elementsByNumber = {}
     for element in elements.keys():
-        elementsByNumber[elements[element]['atomic_number']] = element
+        elementsByNumber[elements[element]["atomic_number"]] = element
 
     atomicNumbers = []
     inAtomicNumbers = False
     almostInAtomicNumbers = False
-    with open(prmtop, 'r') as f:
+    with open(prmtop, "r") as f:
         for line in f.readlines():
             if inAtomicNumbers:
                 if "FLAG" in line:

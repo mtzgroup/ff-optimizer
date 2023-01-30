@@ -6,8 +6,8 @@ from shutil import copytree, rmtree
 import numpy as np
 import sander
 
-from .model import AbstractModel, Model
 from . import utils
+from .model import AbstractModel, Model
 
 # from time import perf_counter
 
@@ -192,7 +192,7 @@ class ActiveLearningModel(AbstractModel):
                 for f in os.listdir():
                     if f.endswith(".nc"):
                         ncs.append(f)
-                self.symbols = utils.getSymbolsFromPrmtop(os.path.join("..",prmtop))
+                self.symbols = utils.getSymbolsFromPrmtop(os.path.join("..", prmtop))
                 for nc in ncs:
                     utils.convertNCtoXYZs(nc, self.symbols)
                 os.chdir(currentDir)

@@ -90,6 +90,7 @@ def test_runSanderCUDA(monkeypatch):
     refRst = loadtxt(os.path.join("ref", "md.rst7"), skiprows=2)
     checkUtils.checkArrays(testRst, refRst)
 
+
 @pytest.mark.amber
 def test_sample(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
@@ -117,6 +118,7 @@ def test_sample(monkeypatch):
         )
         assert checkUtils.checkArrays(testXyz, refXyz)
     # rmtree("train")
+
 
 @pytest.mark.amber
 def test_sample_conformers(monkeypatch):

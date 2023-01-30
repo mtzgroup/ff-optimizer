@@ -303,6 +303,7 @@ class ExternalAmberEngine(MMEngine):
             )
             numXYZs += utils.convertNCtoXYZs(f"{name}.nc", self.symbols, numXYZs)
 
+
 class ExternalOpenMMEngine(MMEngine):
     def __init__():
         super().__init__()

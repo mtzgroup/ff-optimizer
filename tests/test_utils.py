@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 from chemcloud.models import Molecule
-import pytest
 
 from ff_optimizer import utils
 
@@ -123,6 +122,7 @@ def test_writeXYZ():
     assert checkUtils.checkArrays(refCoords, testCoords)
     assert checkUtils.checkLists(list(refSymbols), list(testSymbols))
 
+
 def test_convertNCtoXYZs():
     os.chdir(os.path.join(os.path.dirname(__file__), "utils", "test_nc"))
     _, symbols = utils.readXYZ("ref_1.xyz", readSymbols=True)
@@ -137,10 +137,12 @@ def test_convertNCtoXYZs():
         os.remove(f"{i+offset}.xyz")
     assert passTest
 
+
 def test_convertNCtoXYZs2():
     os.chdir(os.path.join(os.path.dirname(__file__), "utils", "test_nc"))
     numXYZs = utils.convertNCtoXYZs("test_vel.nc", [], offset=0)
     assert numXYZs == 0
+
 
 def test_getSymbolsFromPrmtop():
     os.chdir(os.path.join(os.path.dirname(__file__), "utils"))

@@ -5,10 +5,9 @@ from shutil import copyfile, rmtree
 import numpy as np
 import pytest
 
-from ff_optimizer import active_learning, mmengine, qmengine, utils, optengine, model
+from ff_optimizer import active_learning, model, optengine, qmengine, utils
 
 from . import checkUtils
-from scripts.vacation_to_hawaii import checkArgs
 
 
 class FakeModel:
@@ -122,6 +121,7 @@ def test_collectGeometries(monkeypatch):
     geometries = model.collectGeometries(7, 2)
     assert len(geometries) == 27
 
+
 def test_collectGeometries2(monkeypatch):
     os.chdir(
         os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries2")
@@ -133,10 +133,17 @@ def test_collectGeometries2(monkeypatch):
 
     geometries = model.collectGeometries(7, 0)
     for i in range(1, 11):
-        os.remove(os.path.join(f"model_1", "2_sampling", "7_cycle_7", "train", f"{i}.xyz"))
-        os.remove(os.path.join(f"model_2", "2_sampling", "7_cycle_7", "valid_1", f"{i}.xyz"))
-        os.remove(os.path.join(f"model_3", "2_sampling", "7_cycle_7", "valid_2", f"{i}.xyz"))
+        os.remove(
+            os.path.join(f"model_1", "2_sampling", "7_cycle_7", "train", f"{i}.xyz")
+        )
+        os.remove(
+            os.path.join(f"model_2", "2_sampling", "7_cycle_7", "valid_1", f"{i}.xyz")
+        )
+        os.remove(
+            os.path.join(f"model_3", "2_sampling", "7_cycle_7", "valid_2", f"{i}.xyz")
+        )
     assert len(geometries) == 30
+
 
 @pytest.mark.amber
 def test_computeAll(monkeypatch):
@@ -224,6 +231,7 @@ def monkeyComputeAll(self, geometries, prmtops):
 def monkeyChooseGeometries(self, energies, forces):
     return energies
 
+
 def test_doActiveLearning(monkeypatch):
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
     monkeypatch.setattr(
@@ -306,11 +314,13 @@ def monkeyInitModel(self, args):
 
     self.optEngine = monkeyOpt(options)
 
+
 def monkeySystemNoLeap(command):
     if command.split()[0] == "tleap":
         return
     else:
         os.system(command)
+
 
 def test_init(monkeypatch):
     monkeypatch.setattr(model.Model, "__init__", monkeyInitModel)
@@ -354,6 +364,7 @@ def monkeyInitQM(self, arg1, arg2, doResp):
 
 def monkeyRename(a, b):
     pass
+
 
 def test_restart(monkeypatch):
     monkeypatch.setattr(os, "system", monkeySystemNoLeap)
@@ -462,13 +473,15 @@ def test_doParameterOptimization(monkeypatch):
     m.doParameterOptimization(2)
     assert len(m.optResults) == 4
     clean()
-    
+
+
 def monkeyMMSamples(self):
     if not os.path.isdir("train"):
         print("Need to do train MM sampling")
-    for i in range(1, self.options['nvalids'] + 1):
+    for i in range(1, self.options["nvalids"] + 1):
         if not os.path.isdir(f"valid_{i}"):
             print(f"Need to do valid_{i} sampling")
+
 
 def monkeyQMRestart(self, calcDir):
     xyzCounter = 0
@@ -483,18 +496,20 @@ def monkeyQMRestart(self, calcDir):
                 jsonCounter += 1
     print(f"Found {xyzCounter} xyzs and {jsonCounter} jsons")
 
+
 def monkeyFB(command):
     if command.split()[0] == "ForceBalance.py":
         inp = command.split()[1]
         print(f"FB optimizing {inp}")
 
-#@pytest.mark.debug
-#def test_restart(monkeypatch):
+
+# @pytest.mark.debug
+# def test_restart(monkeypatch):
 #    #monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)
 #    #monkeypatch.setattr(qmengine.CCCloudEngine, "__init__", monkeyInitQM)
 #    #monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
 #    monkeypatch.setattr(os, "rename", monkeyRename)
-#    
+#
 #    monkeypatch.setattr(qmengine.QMEngine, "restart", monkeyQMRestart)
 #    monkeypatch.setattr(mmengine.MMEngine, "getMMSamples", monkeyMMSamples)
 #    monkeypatch.setattr(os, "system", monkeyFB)
