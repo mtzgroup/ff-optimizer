@@ -181,11 +181,11 @@ class Model(AbstractModel):
                 if i == self.restartCycle:
                     self.qmEngine.restart(".")
                 else:
-                    pdbs = []
+                    xyzs = []
                     for g in os.listdir():
-                        if g.endswith(".pdb"):
-                            pdbs.append(g)
-                    self.qmEngine.getQMRefData(pdbs, ".")
+                        if g.endswith(".xyz"):
+                            xyzs.append(g)
+                    self.qmEngine.getQMRefData(xyzs, ".")
                 os.chdir("..")
         os.chdir(self.home)
 

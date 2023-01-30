@@ -42,6 +42,7 @@ def monkeyInit(self, args):
     self.nmodels = args.activeLearning
     self.models = [FakeModel(args) for i in range(self.nmodels)]
     self.symbols = None
+    self.restartCycle = -1
 
 
 @pytest.mark.amber
@@ -96,7 +97,6 @@ def test_computeEnergyForceAll(monkeypatch):
         checkUtils.checkArrays(results[i][1], forces[i])
 
 
-@pytest.mark.debug
 def test_collectGeometries(monkeypatch):
     os.chdir(
         os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries")
@@ -113,7 +113,6 @@ def test_collectGeometries(monkeypatch):
     geometries = model.collectGeometries(7, 2)
     assert len(geometries) == 27
 
-@pytest.mark.debug
 def test_collectGeometries2(monkeypatch):
     os.chdir(
         os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries2")
@@ -215,7 +214,6 @@ def monkeyComputeAll(self, geometries, prmtops):
 
 def monkeyChooseGeometries(self, energies, forces):
     return energies
-
 
 def test_doActiveLearning(monkeypatch):
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
@@ -446,6 +444,7 @@ def test_doParameterOptimization(monkeypatch):
     assert len(m.optResults) == 4
     clean()
 
+#@pytest.mark.debug
 #def test_restart(monkeypatch):
 #    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)
 #    monkeypatch.setattr(qmengine.CCCloudEngine, "__init__", monkeyInitQM)
@@ -458,4 +457,4 @@ def test_doParameterOptimization(monkeypatch):
 #    mod = active_learning.ActiveLearningModel(args)
 #    print(mod.restartCycle)
 #    assert False
-#
+
