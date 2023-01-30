@@ -5,9 +5,10 @@ from shutil import copyfile, rmtree
 import numpy as np
 import pytest
 
-from ff_optimizer import active_learning, model, optengine, qmengine, utils
+from ff_optimizer import active_learning, mmengine, qmengine, utils, optengine, model
 
 from . import checkUtils
+from scripts.vacation_to_hawaii import checkArgs
 
 
 class FakeModel:
@@ -34,8 +35,16 @@ class FakeArgs:
         self.respPriors = 0
         self.maxcycles = 100
         self.qmengine = "chemcloud"
-        self.tctemplate = "tc.in"
-        self.tctemplate_long = "tc.in"
+        self.tctemplate = "tc_template.in"
+        self.tctemplate_backup = "tc_template_long.in"
+        self.conformers = 1
+        self.mmengine = "amber"
+        self.conformers = "coors.xyz"
+        self.coors = "coors.xyz"
+        self.tcout = "tc.out"
+        self.trainMdin = "train_md.in"
+        self.validMdin = "valid_md.in"
+        self.conformersPerSet = 1
 
 
 def monkeyInit(self, args):
@@ -297,11 +306,18 @@ def monkeyInitModel(self, args):
 
     self.optEngine = monkeyOpt(options)
 
+def monkeySystemNoLeap(command):
+    if command.split()[0] == "tleap":
+        return
+    else:
+        os.system(command)
 
 def test_init(monkeypatch):
     monkeypatch.setattr(model.Model, "__init__", monkeyInitModel)
+    monkeypatch.setattr(os, "system", monkeySystemNoLeap)
     random.seed(1015)
     args = FakeArgs()
+    args.restart = True
     os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "init"))
     for i in range(1, 4):
         if os.path.isdir(f"model_{i}"):
@@ -339,8 +355,8 @@ def monkeyInitQM(self, arg1, arg2, doResp):
 def monkeyRename(a, b):
     pass
 
-
 def test_restart(monkeypatch):
+    monkeypatch.setattr(os, "system", monkeySystemNoLeap)
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)
     monkeypatch.setattr(qmengine.CCCloudEngine, "__init__", monkeyInitQM)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
@@ -352,6 +368,9 @@ def test_restart(monkeypatch):
     mod = active_learning.ActiveLearningModel(args)
     os.remove(os.path.join("1_opt", "leap.out"))
     assert mod.restartCycle == 2
+    assert len(mod.models[0].optEngine.train) == 3
+    assert len(mod.models[1].optEngine.train) == 4
+    assert len(mod.models[2].optEngine.train) == 2
 
 
 def monkeySetupFiles(self, i):
@@ -443,18 +462,54 @@ def test_doParameterOptimization(monkeypatch):
     m.doParameterOptimization(2)
     assert len(m.optResults) == 4
     clean()
+    
+def monkeyMMSamples(self):
+    if not os.path.isdir("train"):
+        print("Need to do train MM sampling")
+    for i in range(1, self.options['nvalids'] + 1):
+        if not os.path.isdir(f"valid_{i}"):
+            print(f"Need to do valid_{i} sampling")
+
+def monkeyQMRestart(self, calcDir):
+    xyzCounter = 0
+    jsonCounter = 0
+    os.chdir(calcDir)
+    for f in os.listdir():
+        if f.endswith(".xyz"):
+            xyzCounter += 1
+            name = f.split(".")[0]
+            json = f"tc_{name}.json"
+            if os.path.isfile(json):
+                jsonCounter += 1
+    print(f"Found {xyzCounter} xyzs and {jsonCounter} jsons")
+
+def monkeyFB(command):
+    if command.split()[0] == "ForceBalance.py":
+        inp = command.split()[1]
+        print(f"FB optimizing {inp}")
 
 #@pytest.mark.debug
 #def test_restart(monkeypatch):
-#    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)
-#    monkeypatch.setattr(qmengine.CCCloudEngine, "__init__", monkeyInitQM)
-#    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+#    #monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)
+#    #monkeypatch.setattr(qmengine.CCCloudEngine, "__init__", monkeyInitQM)
+#    #monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
 #    monkeypatch.setattr(os, "rename", monkeyRename)
+#    
+#    monkeypatch.setattr(qmengine.QMEngine, "restart", monkeyQMRestart)
+#    monkeypatch.setattr(mmengine.MMEngine, "getMMSamples", monkeyMMSamples)
+#    monkeypatch.setattr(os, "system", monkeyFB)
 #
 #    args = FakeArgs()
 #    args.restart = True
+#    args.dynamicsdir = "../../1_dynamics/2_all"
 #    os.chdir("/home/curtie/7_FF_fitting/0_ff-optimizer/4_alanine_tetrapeptide/5_40_ppc/6_active_learning_3_models")
+#    checkArgs(args)
+#
 #    mod = active_learning.ActiveLearningModel(args)
 #    print(mod.restartCycle)
+#    #i = mod.restartCycle
+#    #mod.doMMSampling(i)
+#    #mod.doQMCalculations(i)
+#    #mod.doParameterOptimization(i)
 #    assert False
-
+#

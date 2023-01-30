@@ -381,7 +381,11 @@ def writePDB(geometry, dest, template):
 
 def convertNCtoXYZs(nc, symbols, offset=0):
     f = netcdf_file(nc, 'r', mmap=False)
-    coords = f.variables['coordinates']
+    try:
+        coords = f.variables['coordinates']
+    except:
+        # if no coords, must be vels file
+        return 0
     natoms = coords.shape[1]
     for i in range(coords.shape[0]):
         with open(f"{i+1+offset}.xyz", "w") as f:

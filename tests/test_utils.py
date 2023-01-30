@@ -137,6 +137,11 @@ def test_convertNCtoXYZs():
         os.remove(f"{i+offset}.xyz")
     assert passTest
 
+def test_convertNCtoXYZs2():
+    os.chdir(os.path.join(os.path.dirname(__file__), "utils", "test_nc"))
+    numXYZs = utils.convertNCtoXYZs("test_vel.nc", [], offset=0)
+    assert numXYZs == 0
+
 def test_getSymbolsFromPrmtop():
     os.chdir(os.path.join(os.path.dirname(__file__), "utils"))
     _, refSymbols = utils.readXYZ("prmtop_test.xyz", readSymbols=True)

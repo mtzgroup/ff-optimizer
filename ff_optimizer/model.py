@@ -74,13 +74,13 @@ class Model(AbstractModel):
         if args.qmengine == "debug":
             qmEngine = qmengine.DebugEngine(
                 os.path.join(args.sampledir, args.tctemplate),
-                os.path.join(args.sampledir, args.tctemplate_long),
+                os.path.join(args.sampledir, args.tctemplate_backup),
                 doResp=self.doResp,
             )
         elif args.qmengine == "queue":
             qmEngine = qmengine.SbatchEngine(
                 os.path.join(args.sampledir, args.tctemplate),
-                os.path.join(args.sampledir, args.tctemplate_long),
+                os.path.join(args.sampledir, args.tctemplate_backup),
                 os.path.join(args.sampledir, args.sbatch),
                 os.getenv("USER"),
                 doResp=self.doResp,
@@ -88,7 +88,7 @@ class Model(AbstractModel):
         elif args.qmengine == "chemcloud":
             qmEngine = qmengine.CCCloudEngine(
                 os.path.join(args.sampledir, args.tctemplate),
-                os.path.join(args.sampledir, args.tctemplate_long),
+                os.path.join(args.sampledir, args.tctemplate_backup),
                 doResp=self.doResp,
             )
         return qmEngine

@@ -68,14 +68,19 @@ class ActiveLearningModel(AbstractModel):
             if not os.path.isdir(os.path.join(folder, args.sampledir)):
                 copytree(args.sampledir, os.path.join(folder, args.sampledir))
             os.chdir(folder)
-            self.models.append(Model(args))
             # Want to sample multiple validation sets, but don't need to evaluate them all
-            # So we need to recompute restart cycle
+            # So we need to compute restart cycle manually from this level
+            # There must be a better way to do this
+            self.models.append(Model(args))
             self.models[-1].optEngine.nvalids = 1
-            self.models[-1].optEngine.determineRestart()
-            self.models[-1].restartCycle = self.models[-1].optEngine.restartCycle
+            if args.restart:
+                self.models[-1].optEngine.determineRestart()
+                self.models[-1].restartCycle = self.models[-1].optEngine.restartCycle
             os.chdir(self.home)
-        self.restartCycle = min([m.restartCycle for m in self.models])
+        if args.restart:
+            self.restartCycle = min([m.restartCycle for m in self.models])
+        else:
+            self.restartCyle = -1
         self.symbols = None
 
     def initialCycle(self):
