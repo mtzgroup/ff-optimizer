@@ -45,11 +45,11 @@ def monkeyInit(self, args):
 
 class MonkeyQMEngine:
     def __init__(self, args):
-        self.pdbs = []
+        self.xyzs = []
         self.dirs = []
 
-    def getQMRefData(self, pdbs, directory):
-        self.pdbs.append(pdbs)
+    def getQMRefData(self, xyzs, directory):
+        self.xyzs.append(xyzs)
         self.dirs.append(os.getcwd().split("/")[-1])
 
     def restart(self, directory):
@@ -75,14 +75,15 @@ def test_doQMCalculations(monkeypatch):
 
     m = model.Model(args)
     m.doQMCalculations(3)
-    testPdbs = {}
-    testPdbs["train"] = ["1.pdb", "2.pdb"]
-    testPdbs["valid"] = ["3.pdb", "4.pdb"]
-    testPdbs["valid_2"] = ["5.pdb", "6.pdb"]
+    testXyzs = {}
+    testXyzs["train"] = ["1.xyz", "2.xyz"]
+    testXyzs["valid"] = ["3.xyz", "4.xyz"]
+    testXyzs["valid_2"] = ["5.xyz", "6.xyz"]
     assert len(m.qmEngine.dirs) == 3
     for i in range(len(m.qmEngine.dirs)):
-        for pdb in m.qmEngine.pdbs[i]:
-            assert pdb in testPdbs[m.qmEngine.dirs[i]]
+        for xyz in m.qmEngine.xyzs[i]:
+            assert xyz in testXyzs[m.qmEngine.dirs[i]]
+
 
 
 def test_doQMCalculationsRestart(monkeypatch):

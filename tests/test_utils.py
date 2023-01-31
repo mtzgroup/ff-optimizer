@@ -118,6 +118,34 @@ def test_writeXYZ():
     refCoords, refSymbols = utils.readXYZ("test.xyz", readSymbols=True)
     utils.writeXYZ(refCoords, refSymbols, "temp.xyz")
     testCoords, testSymbols = utils.readXYZ("temp.xyz", readSymbols=True)
-    # os.remove("temp.xyz")
+    os.remove("temp.xyz")
     assert checkUtils.checkArrays(refCoords, testCoords)
     assert checkUtils.checkLists(list(refSymbols), list(testSymbols))
+
+
+def test_convertNCtoXYZs():
+    os.chdir(os.path.join(os.path.dirname(__file__), "utils", "test_nc"))
+    _, symbols = utils.readXYZ("ref_1.xyz", readSymbols=True)
+    offset = 10
+    numXYZs = utils.convertNCtoXYZs("test.nc", symbols, offset=offset)
+    passTest = True
+    for i in range(1, 11):
+        refCoords = utils.readXYZ(f"ref_{i}.xyz")
+        testCoords = utils.readXYZ(f"{i+offset}.xyz")
+        if not checkUtils.checkArrays(refCoords, testCoords):
+            passTest = False
+        os.remove(f"{i+offset}.xyz")
+    assert passTest
+
+
+def test_convertNCtoXYZs2():
+    os.chdir(os.path.join(os.path.dirname(__file__), "utils", "test_nc"))
+    numXYZs = utils.convertNCtoXYZs("test_vel.nc", [], offset=0)
+    assert numXYZs == 0
+
+
+def test_getSymbolsFromPrmtop():
+    os.chdir(os.path.join(os.path.dirname(__file__), "utils"))
+    _, refSymbols = utils.readXYZ("prmtop_test.xyz", readSymbols=True)
+    testSymbols = utils.getSymbolsFromPrmtop("test.prmtop")
+    assert checkUtils.checkLists(list(refSymbols), testSymbols)

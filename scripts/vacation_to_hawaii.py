@@ -274,10 +274,10 @@ if __name__ == "__main__":
         default="tc_template.in",
     )
     parser.add_argument(
-        "--tctemplate_long",
-        help="TC input template file for resubmitting failed jobs to fire, default is tc_template_long.in",
+        "--tctemplate_backup",
+        help="TC input template file for resubmitting failed jobs, default is tc_template_backup.in",
         type=str,
-        default="tc_template_long.in",
+        default="tc_template_backup.in",
     )
     parser.add_argument(
         "--restart",
