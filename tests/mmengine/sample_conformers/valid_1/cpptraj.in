@@ -1,0 +1,3 @@
+loadcrd 253.nc coors
+crdout coors 253_all.xyz
+exit
