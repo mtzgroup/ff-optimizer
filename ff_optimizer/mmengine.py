@@ -8,7 +8,7 @@ from shutil import copyfile, rmtree
 
 import GPUtil
 
-from .utils import writeRst
+from . import utils
 
 
 class MMEngine:
@@ -17,6 +17,7 @@ class MMEngine:
         # Account for being in basedir/sampledir/x_cycle_x/
         self.coordPath = os.path.join("..", "..", options["coordPath"])
         self.startIndex, self.endIndex, self.splitIndex = self.getIndices()
+        self.symbols = None
 
     # 0-indexed
     # TODO: figure out what to do with this awful function
@@ -129,7 +130,7 @@ class MMEngine:
                     break
         if len(frame) != natoms:
             raise RuntimeError("Error finding frame in coordinates XYZ file")
-        writeRst(frame, natoms, dest)
+        utils.writeRst(frame, natoms, dest)
 
     def getMMSamples(self):
         self.prmtop = self.setup()
@@ -180,10 +181,13 @@ class MMEngine:
             raise RuntimeError(
                 f"Tleap failed to create a new .prmtop file, check {os.path.join(os.getcwd(),'leap.out')} for more information"
             )
+        if self.symbols is None:
+            self.symbols = utils.getSymbolsFromPrmtop(prmtop)
         return prmtop
 
     # This function is currently hard-coded to use .nc trajectory files
     def restart(self):
+        print("Restarting MM")
         self.prmtop = self.setup()
         for f in os.listdir():
             if os.path.isdir(f):
@@ -274,7 +278,7 @@ class ExternalAmberEngine(MMEngine):
                 )
 
     def sample(self, frames, mdin):
-        xyzIndex = 1
+        numXYZs = 0
         for frame in frames:
             name = str(frame)
             # Right now needs to be copy instead of move for restarting
@@ -297,30 +301,7 @@ class ExternalAmberEngine(MMEngine):
                 f"{name}_md.rst7",
                 mdvels=f"{name}_vel.nc",
             )
-            with open("cpptraj.in", "w") as f:
-                f.write(f"loadcrd {name}.nc coors\n")
-                f.write(f"crdout coors {name}_all.xyz\n")
-                f.write("exit\n")
-            try:
-                os.system(
-                    f"cpptraj -p {os.path.join('..',self.prmtop)} -i cpptraj.in > cpptraj.out"
-                )
-            except Exception as e:
-                print(e)
-                raise RuntimeError(
-                    f"Error in trajectory postprocessing in {os.getcwd()}"
-                )
-
-            with open(f"{name}_all.xyz", "r") as f:
-                coordLines = f.readlines()
-            nlines = int(coordLines[0].split()[0]) + 2
-            i = 1
-            while i * nlines <= len(coordLines):
-                with open(f"{xyzIndex}.xyz", "w") as f:
-                    for line in coordLines[(i - 1) * nlines : i * nlines]:
-                        f.write(line)
-                i += 1
-                xyzIndex += 1
+            numXYZs += utils.convertNCtoXYZs(f"{name}.nc", self.symbols, numXYZs)
 
 
 class ExternalOpenMMEngine(MMEngine):

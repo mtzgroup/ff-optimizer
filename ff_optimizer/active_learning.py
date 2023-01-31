@@ -6,8 +6,8 @@ from shutil import copytree, rmtree
 import numpy as np
 import sander
 
+from . import utils
 from .model import AbstractModel, Model
-from .utils import readXYZ, writeXYZ
 
 # from time import perf_counter
 
@@ -68,14 +68,19 @@ class ActiveLearningModel(AbstractModel):
             if not os.path.isdir(os.path.join(folder, args.sampledir)):
                 copytree(args.sampledir, os.path.join(folder, args.sampledir))
             os.chdir(folder)
-            self.models.append(Model(args))
             # Want to sample multiple validation sets, but don't need to evaluate them all
-            # So we need to recompute restart cycle
+            # So we need to compute restart cycle manually from this level
+            # There must be a better way to do this
+            self.models.append(Model(args))
             self.models[-1].optEngine.nvalids = 1
-            self.models[-1].optEngine.determineRestart()
-            self.models[-1].restartCycle = self.models[-1].optEngine.restartCycle
+            if args.restart:
+                self.models[-1].optEngine.determineRestart()
+                self.models[-1].restartCycle = self.models[-1].optEngine.restartCycle
             os.chdir(self.home)
-        self.restartCycle = min([m.restartCycle for m in self.models])
+        if args.restart:
+            self.restartCycle = min([m.restartCycle for m in self.models])
+        else:
+            self.restartCyle = -1
         self.symbols = None
 
     def initialCycle(self):
@@ -174,15 +179,32 @@ class ActiveLearningModel(AbstractModel):
                 f"{str(i)}_cycle_{str(i)}",
                 dirs[k - j],
             )
+            # If restarting, we redo the .nc processing (in case pooling
+            # was already done and the original xyzs overwritten)
+            if i == self.restartCycle:
+                currentDir = os.getcwd()
+                os.chdir(sampleDir)
+                ncs = []
+                prmtop = None
+                for f in os.listdir(".."):
+                    if f.endswith(".prmtop"):
+                        prmtop = f
+                for f in os.listdir():
+                    if f.endswith(".nc"):
+                        ncs.append(f)
+                self.symbols = utils.getSymbolsFromPrmtop(os.path.join("..", prmtop))
+                for nc in ncs:
+                    utils.convertNCtoXYZs(nc, self.symbols)
+                os.chdir(currentDir)
             for f in os.listdir(sampleDir):
                 if ".xyz" in f:
                     if self.symbols is None:
-                        geometry, self.symbols = readXYZ(
+                        geometry, self.symbols = utils.readXYZ(
                             os.path.join(sampleDir, f), readSymbols=True
                         )
                         geometries.append(geometry)
                     else:
-                        geometries.append(readXYZ(os.path.join(sampleDir, f)))
+                        geometries.append(utils.readXYZ(os.path.join(sampleDir, f)))
                     # os.remove(f)
         return geometries
 
@@ -225,6 +247,6 @@ class ActiveLearningModel(AbstractModel):
 
     def writeGeoms(self, geometries, dest):
         for i in range(1, len(geometries) + 1):
-            writeXYZ(
+            utils.writeXYZ(
                 geometries[i - 1], self.symbols, os.path.join(dest, f"{str(i)}.xyz")
             )
