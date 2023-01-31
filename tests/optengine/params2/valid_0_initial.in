@@ -1,6 +1,0 @@
-$options
-jobtype             single
-forcefield          initial_dasa.frcmod initial_dasa.mol2
-backup              false
-$end
-
