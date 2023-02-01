@@ -1,6 +1,6 @@
 import os
 import random
-from shutil import copyfile, rmtree, copytree
+from shutil import copyfile, rmtree
 
 import numpy as np
 import pytest
@@ -106,16 +106,16 @@ def test_computeEnergyForceAll(monkeypatch):
     for i in range(len(frames)):
         checkUtils.checkArrays(results[i][1], forces[i])
 
+
 def dontRemove(f):
     if not os.path.isfile(f):
         raise RuntimeError(f"File {f} not found")
 
+
 def test_collectAll(monkeypatch):
-    os.chdir(
-        os.path.join(os.path.dirname(__file__), "active_learning")
-    )
+    os.chdir(os.path.join(os.path.dirname(__file__), "active_learning"))
     os.chdir("collectGeometries")
-    
+
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
     monkeypatch.setattr(os, "remove", dontRemove)
     args = FakeArgs()
@@ -157,6 +157,7 @@ def test_collectAll2(monkeypatch):
         )
     assert len(geometries) == 30
 
+
 def test_collectAll3(monkeypatch):
     os.chdir(
         os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries3")
@@ -168,9 +169,10 @@ def test_collectAll3(monkeypatch):
     model = active_learning.ActiveLearningModel(args)
     model.restartCycle = 7
 
-    geometries = model.collectAll(7, 0)
+    model.collectAll(7, 0)
     assert model.trainGeometries == 1
     assert model.validGeometries == 2
+
 
 @pytest.mark.amber
 def test_computeAll(monkeypatch):
@@ -328,6 +330,7 @@ def test_doActiveLearning(monkeypatch):
     )
     assert checkUtils.checkArrays(testGeom, refGeom)
 
+
 def test_doActiveLearning2(monkeypatch):
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
     monkeypatch.setattr(
@@ -344,17 +347,25 @@ def test_doActiveLearning2(monkeypatch):
     args.activeLearning = 2
     model = active_learning.ActiveLearningModel(args)
     model.prmtop = "water.prmtop"
-    folders = ["train", "valid_1"]
     model.doActiveLearning(7)
 
-    ntrain1 = len(os.listdir(os.path.join("model_1", "2_sampling", "7_cycle_7", "train"))) 
-    ntrain2 = len(os.listdir(os.path.join("model_2", "2_sampling", "7_cycle_7", "train"))) 
-    nvalid1 = len(os.listdir(os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_1"))) 
-    nvalid2 = len(os.listdir(os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_1"))) 
+    ntrain1 = len(
+        os.listdir(os.path.join("model_1", "2_sampling", "7_cycle_7", "train"))
+    )
+    ntrain2 = len(
+        os.listdir(os.path.join("model_2", "2_sampling", "7_cycle_7", "train"))
+    )
+    nvalid1 = len(
+        os.listdir(os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_1"))
+    )
+    nvalid2 = len(
+        os.listdir(os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_1"))
+    )
     assert ntrain1 == 1
     assert ntrain2 == 1
     assert nvalid1 == 2
     assert nvalid2 == 2
+
 
 def monkeyInitModel(self, args):
     self.restartCycle = random.randint(1, 10)
@@ -390,7 +401,7 @@ def test_init(monkeypatch):
             rmtree(f"model_{i}")
     mod = active_learning.ActiveLearningModel(args)
     for i in range(1, 4):
-        leap = os.path.join(f"model_{i}","1_opt", "leap.out")
+        leap = os.path.join(f"model_{i}", "1_opt", "leap.out")
         if os.path.isfile(leap):
             os.remove(leap)
     leap = os.path.join("1_opt", "leap.out")

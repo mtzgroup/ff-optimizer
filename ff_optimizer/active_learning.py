@@ -145,21 +145,32 @@ class ActiveLearningModel(AbstractModel):
             energies, forces = self.computeAll(geometries, prmtops)
             print(self.trainGeometries, self.validGeometries)
             if self.trainGeometries == self.validGeometries:
-                geometryIndices = self.chooseGeometries(energies, forces, self.trainGeometries)
+                geometryIndices = self.chooseGeometries(
+                    energies, forces, self.trainGeometries
+                )
                 newGeometries = [geometries[i] for i in geometryIndices]
                 for j in range(self.nmodels):
-                    self.writeGeoms(newGeometries, os.path.join(sampleDirs[j], dirs[j - k]))
+                    self.writeGeoms(
+                        newGeometries, os.path.join(sampleDirs[j], dirs[j - k])
+                    )
             else:
-                geometryIndices = self.chooseGeometries(energies, forces, self.trainGeometries)
+                geometryIndices = self.chooseGeometries(
+                    energies, forces, self.trainGeometries
+                )
                 trainGeometries = [geometries[i] for i in geometryIndices]
-                geometryIndices = self.chooseGeometries(energies, forces, self.validGeometries)
+                geometryIndices = self.chooseGeometries(
+                    energies, forces, self.validGeometries
+                )
                 validGeometries = [geometries[i] for i in geometryIndices]
                 for j in range(self.nmodels):
                     if j == k:
-                        self.writeGeoms(trainGeometries, os.path.join(sampleDirs[j], dirs[j - k]))
+                        self.writeGeoms(
+                            trainGeometries, os.path.join(sampleDirs[j], dirs[j - k])
+                        )
                     else:
-                        self.writeGeoms(validGeometries, os.path.join(sampleDirs[j], dirs[j - k]))
-                
+                        self.writeGeoms(
+                            validGeometries, os.path.join(sampleDirs[j], dirs[j - k])
+                        )
 
     def computeEnergyForce(self, geometries, prmtop):
 
@@ -217,7 +228,7 @@ class ActiveLearningModel(AbstractModel):
             elif self.validGeometries is None and k != j:
                 self.validGeometries = len(tempGeoms)
             geometries += tempGeoms
-         
+
         return geometries
 
     def collectGeometries(self, sampleDir):
@@ -226,9 +237,7 @@ class ActiveLearningModel(AbstractModel):
             if ".xyz" in f:
                 fPath = os.path.join(sampleDir, f)
                 if self.symbols is None:
-                    geometry, self.symbols = utils.readXYZ(
-                        fPath, readSymbols=True
-                    )
+                    geometry, self.symbols = utils.readXYZ(fPath, readSymbols=True)
                     geometries.append(geometry)
                 else:
                     geometries.append(utils.readXYZ(fPath))
