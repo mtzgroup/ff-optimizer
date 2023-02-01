@@ -51,6 +51,8 @@ def monkeyInit(self, args):
     self.models = [FakeModel(args) for i in range(self.nmodels)]
     self.symbols = None
     self.restartCycle = -1
+    self.trainGeometries = None
+    self.validGeometries = None
 
 
 @pytest.mark.amber
@@ -105,21 +107,71 @@ def test_computeEnergyForceAll(monkeypatch):
         checkUtils.checkArrays(results[i][1], forces[i])
 
 
-def test_collectGeometries(monkeypatch):
-    os.chdir(
-        os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries")
-    )
+def dontRemove(f):
+    if not os.path.isfile(f):
+        raise RuntimeError(f"File {f} not found")
+
+
+def test_collectAll(monkeypatch):
+    os.chdir(os.path.join(os.path.dirname(__file__), "active_learning"))
+    os.chdir("collectGeometries")
+
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
+    monkeypatch.setattr(os, "remove", dontRemove)
     args = FakeArgs()
     model = active_learning.ActiveLearningModel(args)
     model.restartCycle = -1
 
-    geometries = model.collectGeometries(7, 0)
+    geometries = model.collectAll(7, 0)
+    test1 = len(geometries)
+    geometries = model.collectAll(7, 1)
+    test2 = len(geometries)
+    geometries = model.collectAll(7, 2)
+    test3 = len(geometries)
+
+    assert test1 == 30
+    assert test2 == 24
+    assert test3 == 27
+
+
+def test_collectAll2(monkeypatch):
+    os.chdir(
+        os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries2")
+    )
+    monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
+    monkeypatch.setattr(os, "remove", dontRemove)
+    args = FakeArgs()
+    model = active_learning.ActiveLearningModel(args)
+    model.restartCycle = 7
+
+    geometries = model.collectAll(7, 0)
+    for i in range(1, 11):
+        os.remove(
+            os.path.join(f"model_1", "2_sampling", "7_cycle_7", "train", f"{i}.xyz")
+        )
+        os.remove(
+            os.path.join(f"model_2", "2_sampling", "7_cycle_7", "valid_1", f"{i}.xyz")
+        )
+        os.remove(
+            os.path.join(f"model_3", "2_sampling", "7_cycle_7", "valid_2", f"{i}.xyz")
+        )
     assert len(geometries) == 30
-    geometries = model.collectGeometries(7, 1)
-    assert len(geometries) == 24
-    geometries = model.collectGeometries(7, 2)
-    assert len(geometries) == 27
+
+
+def test_collectAll3(monkeypatch):
+    os.chdir(
+        os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries3")
+    )
+    monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
+    monkeypatch.setattr(os, "remove", dontRemove)
+    args = FakeArgs()
+    args.activeLearning = 2
+    model = active_learning.ActiveLearningModel(args)
+    model.restartCycle = 7
+
+    model.collectAll(7, 0)
+    assert model.trainGeometries == 1
+    assert model.validGeometries == 2
 
 
 def test_collectGeometries2(monkeypatch):
@@ -147,13 +199,15 @@ def test_collectGeometries2(monkeypatch):
 
 @pytest.mark.amber
 def test_computeAll(monkeypatch):
+    monkeypatch.setattr(os, "remove", dontRemove)
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
     os.chdir(
         os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries")
     )
+    monkeypatch.setattr(os, "remove", dontRemove)
     args = FakeArgs()
     model = active_learning.ActiveLearningModel(args)
-    geometries = model.collectGeometries(7, 1)
+    geometries = model.collectAll(7, 1)
     os.chdir(os.path.join("..", "computeAll"))
     prmtops = [f"prm{str(i)}.prmtop" for i in range(1, 4)]
     energies, forces = model.computeAll(geometries, prmtops)
@@ -176,7 +230,7 @@ def test_chooseGeometries3Models(monkeypatch):
     energies = np.asarray(energies, dtype=np.float32)
     forces = np.asarray(forces, dtype=np.float32)
     random.seed(404)
-    newGeoms = model.chooseGeometries(energies, forces)
+    newGeoms = model.chooseGeometries(energies, forces, 8)
     print(newGeoms)
     assert newGeoms == [6, 14, 18, 20, 7, 12, 15, 16]
 
@@ -196,7 +250,7 @@ def test_chooseGeometriesOdd(monkeypatch):
     energies = np.asarray(energies, dtype=np.float32)
     forces = np.asarray(forces, dtype=np.float32)
     random.seed(404)
-    newGeoms = model.chooseGeometries(energies, forces)
+    newGeoms = model.chooseGeometries(energies, forces, 7)
     print(newGeoms)
     assert newGeoms == [6, 14, 18, 20, 7, 13, 5]
 
@@ -217,7 +271,7 @@ def test_chooseGeometries2Models(monkeypatch):
     energies = np.asarray(energies, dtype=np.float32)
     forces = np.asarray(forces, dtype=np.float32)
     random.seed(404)
-    newGeoms = model.chooseGeometries(energies, forces)
+    newGeoms = model.chooseGeometries(energies, forces, 12)
     assert newGeoms == [6, 14, 18, 20, 3, 11, 7, 12, 15, 21, 19, 2]
 
 
@@ -228,7 +282,7 @@ def monkeyComputeAll(self, geometries, prmtops):
     return [0], []
 
 
-def monkeyChooseGeometries(self, energies, forces):
+def monkeyChooseGeometries(self, energies, forces, num):
     return energies
 
 
@@ -300,6 +354,42 @@ def test_doActiveLearning(monkeypatch):
     assert checkUtils.checkArrays(testGeom, refGeom)
 
 
+def test_doActiveLearning2(monkeypatch):
+    monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
+    monkeypatch.setattr(
+        active_learning.ActiveLearningModel, "computeAll", monkeyComputeAll
+    )
+    monkeypatch.setattr(
+        active_learning.ActiveLearningModel, "chooseGeometries", monkeyChooseGeometries
+    )
+    monkeypatch.setattr(os, "remove", dontRemove)
+    os.chdir(
+        os.path.join(os.path.dirname(__file__), "active_learning", "doActiveLearning2")
+    )
+    args = FakeArgs()
+    args.activeLearning = 2
+    model = active_learning.ActiveLearningModel(args)
+    model.prmtop = "water.prmtop"
+    model.doActiveLearning(7)
+
+    ntrain1 = len(
+        os.listdir(os.path.join("model_1", "2_sampling", "7_cycle_7", "train"))
+    )
+    ntrain2 = len(
+        os.listdir(os.path.join("model_2", "2_sampling", "7_cycle_7", "train"))
+    )
+    nvalid1 = len(
+        os.listdir(os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_1"))
+    )
+    nvalid2 = len(
+        os.listdir(os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_1"))
+    )
+    assert ntrain1 == 1
+    assert ntrain2 == 1
+    assert nvalid1 == 2
+    assert nvalid2 == 2
+
+
 def monkeyInitModel(self, args):
     self.restartCycle = random.randint(1, 10)
     options = {"nvalids": 1, "restart": self.restartCycle}
@@ -334,8 +424,12 @@ def test_init(monkeypatch):
             rmtree(f"model_{i}")
     mod = active_learning.ActiveLearningModel(args)
     for i in range(1, 4):
-        os.remove(os.path.join(f"model_{i}", "1_opt", "leap.out"))
-    os.remove(os.path.join("1_opt", "leap.out"))
+        leap = os.path.join(f"model_{i}", "1_opt", "leap.out")
+        if os.path.isfile(leap):
+            os.remove(leap)
+    leap = os.path.join("1_opt", "leap.out")
+    if os.path.isfile(leap):
+        os.remove(leap)
     assert mod.restartCycle == 2
     for i in range(1, 4):
         assert os.path.isfile(os.path.join(f"model_{i}", "1_opt", "opt_0.in"))
@@ -377,7 +471,9 @@ def test_restart(monkeypatch):
     args.restart = True
     os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "restart"))
     mod = active_learning.ActiveLearningModel(args)
-    os.remove(os.path.join("1_opt", "leap.out"))
+    leap = os.path.join("1_opt", "leap.out")
+    if os.path.isfile(leap):
+        os.remove(leap)
     assert mod.restartCycle == 2
     assert len(mod.models[0].optEngine.train) == 3
     assert len(mod.models[1].optEngine.train) == 4

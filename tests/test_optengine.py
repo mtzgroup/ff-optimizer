@@ -1,5 +1,4 @@
 import errno
-import pytest
 import os
 from shutil import copyfile, rmtree
 
