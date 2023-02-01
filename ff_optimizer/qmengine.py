@@ -182,7 +182,6 @@ class QMEngine:
         return energies, grads, coords, espXYZs, esps
 
     def restart(self, calcDir: str):
-        print("Restarting QM")
         xyzs = []
         os.chdir(calcDir)
         for f in os.listdir():

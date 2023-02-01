@@ -145,7 +145,6 @@ class Model(AbstractModel):
         os.chdir(self.home)
 
     def doMMSampling(self, i):
-        print(f"Doing MM sampling cycle {i}")
         # Make sampling directory and copy files into it
         sampleName = f"{str(i)}_cycle_{str(i)}"
         samplePath = os.path.join(self.sampledir, sampleName)
@@ -172,7 +171,6 @@ class Model(AbstractModel):
         os.chdir(self.home)
 
     def doQMCalculations(self, i):
-        print(f"Doing QM calculations cycle {i}")
         # Run QM calculations for each sampling trajectory
         os.chdir(os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}"))
         for f in os.listdir():
@@ -190,7 +188,6 @@ class Model(AbstractModel):
         os.chdir(self.home)
 
     def doParameterOptimization(self, i):
-        print(f"Doing parameter optimization cycle {i}")
         # Copy new QM data into appropriate folders
         trainFolder = os.path.join(self.optdir, "targets", f"train_{str(i)}")
         validFolders = [os.path.join(self.optdir, "targets", f"valid_{str(i)}")]
