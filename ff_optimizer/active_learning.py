@@ -44,6 +44,8 @@ class ActiveLearningModel(AbstractModel):
         self.nmodels = args.activeLearning
         self.nthreads = min(os.cpu_count(), self.nmodels)
         self.models = []
+        self.trainGeometries = None
+        self.validGeometries = None
         # account for the fact that models are in self.home/model_{i}
         args.dynamicsdir = os.path.join("..", args.dynamicsdir)
         args.nvalids = args.activeLearning - 1
@@ -139,12 +141,36 @@ class ActiveLearningModel(AbstractModel):
         for k in range(1, self.nmodels):
             dirs.append(f"valid_{str(k)}")
         for k in range(self.nmodels):
-            geometries = self.collectGeometries(i, k)
+            geometries = self.collectAll(i, k)
             energies, forces = self.computeAll(geometries, prmtops)
-            geometryIndices = self.chooseGeometries(energies, forces)
-            newGeometries = [geometries[i] for i in geometryIndices]
-            for j in range(self.nmodels):
-                self.writeGeoms(newGeometries, os.path.join(sampleDirs[j], dirs[j - k]))
+            print(self.trainGeometries, self.validGeometries)
+            if self.trainGeometries == self.validGeometries:
+                geometryIndices = self.chooseGeometries(
+                    energies, forces, self.trainGeometries
+                )
+                newGeometries = [geometries[i] for i in geometryIndices]
+                for j in range(self.nmodels):
+                    self.writeGeoms(
+                        newGeometries, os.path.join(sampleDirs[j], dirs[j - k])
+                    )
+            else:
+                geometryIndices = self.chooseGeometries(
+                    energies, forces, self.trainGeometries
+                )
+                trainGeometries = [geometries[i] for i in geometryIndices]
+                geometryIndices = self.chooseGeometries(
+                    energies, forces, self.validGeometries
+                )
+                validGeometries = [geometries[i] for i in geometryIndices]
+                for j in range(self.nmodels):
+                    if j == k:
+                        self.writeGeoms(
+                            trainGeometries, os.path.join(sampleDirs[j], dirs[j - k])
+                        )
+                    else:
+                        self.writeGeoms(
+                            validGeometries, os.path.join(sampleDirs[j], dirs[j - k])
+                        )
 
     def computeEnergyForce(self, geometries, prmtop):
 
@@ -166,7 +192,7 @@ class ActiveLearningModel(AbstractModel):
 
         return results
 
-    def collectGeometries(self, i, j):
+    def collectAll(self, i, j):
         geometries = []
         dirs = ["train"]
         for k in range(1, self.nmodels):
@@ -196,16 +222,26 @@ class ActiveLearningModel(AbstractModel):
                 for nc in ncs:
                     utils.convertNCtoXYZs(nc, self.symbols)
                 os.chdir(currentDir)
-            for f in os.listdir(sampleDir):
-                if ".xyz" in f:
-                    if self.symbols is None:
-                        geometry, self.symbols = utils.readXYZ(
-                            os.path.join(sampleDir, f), readSymbols=True
-                        )
-                        geometries.append(geometry)
-                    else:
-                        geometries.append(utils.readXYZ(os.path.join(sampleDir, f)))
-                    # os.remove(f)
+            tempGeoms = self.collectGeometries(sampleDir)
+            if self.trainGeometries is None and k == j:
+                self.trainGeometries = len(tempGeoms)
+            elif self.validGeometries is None and k != j:
+                self.validGeometries = len(tempGeoms)
+            geometries += tempGeoms
+
+        return geometries
+
+    def collectGeometries(self, sampleDir):
+        geometries = []
+        for f in os.listdir(sampleDir):
+            if ".xyz" in f:
+                fPath = os.path.join(sampleDir, f)
+                if self.symbols is None:
+                    geometry, self.symbols = utils.readXYZ(fPath, readSymbols=True)
+                    geometries.append(geometry)
+                else:
+                    geometries.append(utils.readXYZ(fPath))
+                os.remove(fPath)
         return geometries
 
     def computeAll(self, geometries, prmtops):
@@ -228,8 +264,7 @@ class ActiveLearningModel(AbstractModel):
 
         return allEnergies, allForces
 
-    def chooseGeometries(self, energies, forces):
-        geomsNeeded = int(energies.shape[1] / self.nmodels)
+    def chooseGeometries(self, energies, forces, geomsNeeded):
         if self.nmodels == 2:
             # energySpread = np.abs(energies[0,:] - energies[1,:])
             forceSpread = np.linalg.norm(forces[0, :, :] - forces[1, :, :], axis=1)
