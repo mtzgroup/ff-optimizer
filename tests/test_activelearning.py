@@ -51,8 +51,8 @@ def monkeyInit(self, args):
     self.models = [FakeModel(args) for i in range(self.nmodels)]
     self.symbols = None
     self.restartCycle = -1
-    self.trainGeometries = 1
-    self.validGeometries = 1
+    self.trainGeometries = None
+    self.validGeometries = None
 
 
 @pytest.mark.amber
@@ -157,6 +157,20 @@ def test_collectAll2(monkeypatch):
         )
     assert len(geometries) == 30
 
+def test_collectAll3(monkeypatch):
+    os.chdir(
+        os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries3")
+    )
+    monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
+    monkeypatch.setattr(os, "remove", dontRemove)
+    args = FakeArgs()
+    args.activeLearning = 2
+    model = active_learning.ActiveLearningModel(args)
+    model.restartCycle = 7
+
+    geometries = model.collectAll(7, 0)
+    assert model.trainGeometries == 1
+    assert model.validGeometries == 2
 
 @pytest.mark.amber
 def test_computeAll(monkeypatch):
@@ -314,6 +328,33 @@ def test_doActiveLearning(monkeypatch):
     )
     assert checkUtils.checkArrays(testGeom, refGeom)
 
+def test_doActiveLearning2(monkeypatch):
+    monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
+    monkeypatch.setattr(
+        active_learning.ActiveLearningModel, "computeAll", monkeyComputeAll
+    )
+    monkeypatch.setattr(
+        active_learning.ActiveLearningModel, "chooseGeometries", monkeyChooseGeometries
+    )
+    monkeypatch.setattr(os, "remove", dontRemove)
+    os.chdir(
+        os.path.join(os.path.dirname(__file__), "active_learning", "doActiveLearning2")
+    )
+    args = FakeArgs()
+    args.activeLearning = 2
+    model = active_learning.ActiveLearningModel(args)
+    model.prmtop = "water.prmtop"
+    folders = ["train", "valid_1"]
+    model.doActiveLearning(7)
+
+    ntrain1 = len(os.listdir(os.path.join("model_1", "2_sampling", "7_cycle_7", "train"))) 
+    ntrain2 = len(os.listdir(os.path.join("model_2", "2_sampling", "7_cycle_7", "train"))) 
+    nvalid1 = len(os.listdir(os.path.join("model_1", "2_sampling", "7_cycle_7", "valid_1"))) 
+    nvalid2 = len(os.listdir(os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_1"))) 
+    assert ntrain1 == 1
+    assert ntrain2 == 1
+    assert nvalid1 == 2
+    assert nvalid2 == 2
 
 def monkeyInitModel(self, args):
     self.restartCycle = random.randint(1, 10)

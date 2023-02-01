@@ -143,6 +143,7 @@ class ActiveLearningModel(AbstractModel):
         for k in range(self.nmodels):
             geometries = self.collectAll(i, k)
             energies, forces = self.computeAll(geometries, prmtops)
+            print(self.trainGeometries, self.validGeometries)
             if self.trainGeometries == self.validGeometries:
                 geometryIndices = self.chooseGeometries(energies, forces, self.trainGeometries)
                 newGeometries = [geometries[i] for i in geometryIndices]
