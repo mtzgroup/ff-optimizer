@@ -428,9 +428,6 @@ class OptEngine:
     # We assume that optimizeForcefield and all the functions it calls run in the args.optdir directory
     def optimizeForcefield(self, i):
         if i > 0:
-            print(
-                f"Optimizing params: {i}, {len(self.validPrevious)}, {len(self.train)}"
-            )
             copyfile(
                 os.path.join("result", f"opt_{str(i - 1)}", self.frcmod),
                 os.path.join("forcefield", self.frcmod),
@@ -453,7 +450,6 @@ class OptEngine:
                     self.readValid(f"valid_{str(i)}_previous.out")
                 )
             if len(self.train) <= i:
-                print("optimizing cycle " + str(i))
                 if self.respPriors is not None:
                     self.respPriors.updateRespPriors(
                         i, os.path.join("forcefield", self.mol2)
