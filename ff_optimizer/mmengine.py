@@ -187,6 +187,7 @@ class MMEngine:
 
     # This function is currently hard-coded to use .nc trajectory files
     def restart(self):
+        print("Restarting MM")
         self.prmtop = self.setup()
         for f in os.listdir():
             if os.path.isdir(f):
