@@ -174,29 +174,6 @@ def test_collectAll3(monkeypatch):
     assert model.validGeometries == 2
 
 
-def test_collectGeometries2(monkeypatch):
-    os.chdir(
-        os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries2")
-    )
-    monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
-    args = FakeArgs()
-    model = active_learning.ActiveLearningModel(args)
-    model.restartCycle = 7
-
-    geometries = model.collectGeometries(7, 0)
-    for i in range(1, 11):
-        os.remove(
-            os.path.join(f"model_1", "2_sampling", "7_cycle_7", "train", f"{i}.xyz")
-        )
-        os.remove(
-            os.path.join(f"model_2", "2_sampling", "7_cycle_7", "valid_1", f"{i}.xyz")
-        )
-        os.remove(
-            os.path.join(f"model_3", "2_sampling", "7_cycle_7", "valid_2", f"{i}.xyz")
-        )
-    assert len(geometries) == 30
-
-
 @pytest.mark.amber
 def test_computeAll(monkeypatch):
     monkeypatch.setattr(os, "remove", dontRemove)

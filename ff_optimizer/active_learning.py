@@ -82,7 +82,7 @@ class ActiveLearningModel(AbstractModel):
         if args.restart:
             self.restartCycle = min([m.restartCycle for m in self.models])
         else:
-            self.restartCyle = -1
+            self.restartCycle = -1
         self.symbols = None
 
     def initialCycle(self):
@@ -143,7 +143,6 @@ class ActiveLearningModel(AbstractModel):
         for k in range(self.nmodels):
             geometries = self.collectAll(i, k)
             energies, forces = self.computeAll(geometries, prmtops)
-            print(self.trainGeometries, self.validGeometries)
             if self.trainGeometries == self.validGeometries:
                 geometryIndices = self.chooseGeometries(
                     energies, forces, self.trainGeometries

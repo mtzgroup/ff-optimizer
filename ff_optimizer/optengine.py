@@ -453,7 +453,6 @@ class OptEngine:
                     self.readValid(f"valid_{str(i)}_previous.out")
                 )
             if len(self.train) <= i:
-                print("optimizing cycle " + str(i))
                 if self.respPriors is not None:
                     self.respPriors.updateRespPriors(
                         i, os.path.join("forcefield", self.mol2)
