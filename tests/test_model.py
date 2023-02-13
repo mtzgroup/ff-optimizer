@@ -1,4 +1,5 @@
 import os
+import pytest
 from shutil import copyfile, rmtree
 
 from ff_optimizer import model, optengine
@@ -203,11 +204,13 @@ def clean():
     for f in os.listdir():
         if f.endswith(".out"):
             os.remove(f)
-    os.chdir("targets")
-    for f in os.listdir():
-        rmtree(f)
-    os.chdir(os.path.join("..", ".."))
-
+    if os.path.isdir("targets"):
+        os.chdir("targets")
+        for f in os.listdir():
+            rmtree(f)
+        os.chdir(os.path.join("..", ".."))
+    else:
+        os.chdir("..")
 
 def test_doParameterOptimization(monkeypatch):
     args = FakeArgs()
@@ -251,7 +254,7 @@ def test_doParameterOptimization(monkeypatch):
         os.path.join(testDir, "qdata.txt"), os.path.join(refDir, "qdata.txt")
     )
     testDir = os.path.join("1_optimization", "targets", "valid_1")
-    refDir = os.path.join("2_mm_sampling", "1_cycle_1", "valid")
+    refDir = os.path.join("2_mm_sampling", "1_cycle_1", "valid_1")
     assert checkUtils.checkFiles(
         os.path.join(testDir, "all.mdcrd"), os.path.join(refDir, "all.mdcrd")
     )
@@ -259,7 +262,7 @@ def test_doParameterOptimization(monkeypatch):
         os.path.join(testDir, "qdata.txt"), os.path.join(refDir, "qdata.txt")
     )
     testDir = os.path.join("1_optimization", "targets", "valid_1_1")
-    refDir = os.path.join("2_mm_sampling", "1_cycle_1", "valid_1")
+    refDir = os.path.join("2_mm_sampling", "1_cycle_1", "valid_2")
     assert checkUtils.checkFiles(
         os.path.join(testDir, "all.mdcrd"), os.path.join(refDir, "all.mdcrd")
     )

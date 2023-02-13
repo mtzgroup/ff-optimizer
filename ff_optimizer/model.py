@@ -26,8 +26,28 @@ class AbstractModel:
         pass
 
 
+# Functions in this class assume that they are operating in the home directory
+# where the job was started. 
 class Model(AbstractModel):
     def __init__(self, args):
+        self.setArgs(args)
+        self.getMdFiles()
+        # Set up each engine
+        self.optEngine = self.initializeOptEngine(args)
+        self.qmEngine = self.initializeQMEngine(args)
+        self.mmEngine = self.initializeMMEngine(args)
+        self.restartCycle = self.optEngine.restartCycle
+
+    def getMdFiles(self):
+        self.mdFiles = []
+        self.heatCounter = 0
+        for f in os.listdir(self.sampledir):
+            if os.path.isfile(os.path.join(self.sampledir, f)):
+                self.mdFiles.append(f)
+                if f.startswith("heat"):
+                    self.heatCounter += 1
+
+    def setArgs(self, args):
         self.args = args
         # Set some miscellaneous variables
         self.home = os.getcwd()
@@ -41,22 +61,10 @@ class Model(AbstractModel):
         os.rename(
             os.path.join(args.optdir, args.opt0), os.path.join(args.optdir, "opt_0.in")
         )
-        self.mdFiles = []
-        self.heatCounter = 0
-        for f in os.listdir(args.sampledir):
-            if os.path.isfile(os.path.join(args.sampledir, f)):
-                self.mdFiles.append(f)
-                if f.startswith("heat"):
-                    self.heatCounter += 1
         if args.resp != 0 or args.respPriors != 0:
             self.doResp = True
         else:
             self.doResp = False
-        # Set up each engine
-        self.optEngine = self.initializeOptEngine(args)
-        self.qmEngine = self.initializeQMEngine(args)
-        self.mmEngine = self.initializeMMEngine(args)
-        self.restartCycle = self.optEngine.restartCycle
 
     def initializeOptEngine(self, args):
         optOptions = {}
@@ -116,6 +124,16 @@ class Model(AbstractModel):
         return mmEngine
 
     def initialCycle(self):
+        # Prepare initial target data
+        path = self.createTCData()
+        self.copyLeapFiles(path)
+
+        # Do initial optimization
+        os.chdir(self.optdir)
+        self.optEngine.optimizeForcefield(0)
+        os.chdir(self.home)
+
+    def createTCData(self):
         # Create initial target data from dynamics
         with open(os.path.join(self.optdir, self.args.opt0)) as f:
             for line in f.readlines():
@@ -137,16 +155,28 @@ class Model(AbstractModel):
             os.path.join(path, "qdata.txt"),
             os.path.join(path, "all.mdcrd"),
         )
-        for f in ["setup.leap", "conf.pdb", "setup_valid_initial.leap"]:
-            copyfile(os.path.join(self.optdir, f), os.path.join(path, f))
+        return path
 
-        os.chdir(self.optdir)
-        self.optEngine.optimizeForcefield(0)
-        os.chdir(self.home)
+    def copyLeapFiles(self, dest, validInitial=True):
+        files = ["setup.leap", "conf.pdb"]
+        if validInitial:
+            files += ["setup_valid_initial.leap"]
+        for f in files:
+            copyfile(os.path.join(self.optdir, f), os.path.join(dest, f))
 
     def doMMSampling(self, i):
-        print(f"Doing MM sampling cycle {i}")
         # Make sampling directory and copy files into it
+        samplePath = self.makeSampleDir(i)
+        self.copySamplingFiles(i, samplePath)
+        # Do MM sampling
+        os.chdir(samplePath)
+        if i == self.restartCycle:
+            self.mmEngine.restart()
+        else:
+            self.mmEngine.getMMSamples()
+        os.chdir(self.home)
+
+    def makeSampleDir(self, i):
         sampleName = f"{str(i)}_cycle_{str(i)}"
         samplePath = os.path.join(self.sampledir, sampleName)
         if not os.path.isdir(samplePath):
@@ -154,25 +184,22 @@ class Model(AbstractModel):
         elif self.restartCycle == -1:
             rmtree(samplePath)
             os.mkdir(samplePath)
-        for f in os.listdir(os.path.join(self.optdir, "result", f"opt_{str(i-1)}")):
+        return samplePath
+
+    def copyFFFiles(self, i, dest):
+        for f in os.listdir(os.path.join(self.optdir, "result", f"opt_{str(i)}")):
             copyfile(
-                os.path.join(self.optdir, "result", "opt_" + str(i - 1), f),
-                os.path.join(samplePath, f),
+                os.path.join(self.optdir, "result", "opt_" + str(i), f),
+                os.path.join(dest, f),
             )
-        for f in ["conf.pdb", "setup.leap"]:
-            copyfile(os.path.join(self.optdir, f), os.path.join(samplePath, f))
+
+    def copySamplingFiles(self, i, samplePath):
+        self.copyFFFiles(i-1, samplePath)
+        self.copyLeapFiles(samplePath, validInitial=False)
         for f in self.mdFiles:
             copyfile(os.path.join(self.sampledir, f), os.path.join(samplePath, f))
-        os.chdir(samplePath)
-        # Do MM sampling
-        if i == self.restartCycle:
-            self.mmEngine.restart()
-        else:
-            self.mmEngine.getMMSamples()
-        os.chdir(self.home)
 
     def doQMCalculations(self, i):
-        print(f"Doing QM calculations cycle {i}")
         # Run QM calculations for each sampling trajectory
         os.chdir(os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}"))
         for f in os.listdir():
@@ -181,67 +208,63 @@ class Model(AbstractModel):
                 if i == self.restartCycle:
                     self.qmEngine.restart(".")
                 else:
-                    xyzs = []
-                    for g in os.listdir():
-                        if g.endswith(".xyz"):
-                            xyzs.append(g)
+                    xyzs = self.getXYZs(".")
                     self.qmEngine.getQMRefData(xyzs, ".")
                 os.chdir("..")
         os.chdir(self.home)
 
-    def doParameterOptimization(self, i):
-        print(f"Doing parameter optimization cycle {i}")
-        # Copy new QM data into appropriate folders
-        trainFolder = os.path.join(self.optdir, "targets", f"train_{str(i)}")
-        validFolders = [os.path.join(self.optdir, "targets", f"valid_{str(i)}")]
+    def getXYZs(self, folder):
+        xyzs = []
+        for f in os.listdir(folder):
+            if f.endswith(".xyz"):
+                xyzs.append(f)
+        return xyzs
+
+    def makeFBTargets(self, i):
+        if not os.path.isdir(os.path.join(self.optdir, "targets")):
+            os.mkdir(os.path.join(self.optdir, "targets"))
+        folders = [os.path.join(self.optdir, "targets", f"train_{str(i)}"), os.path.join(self.optdir, "targets", f"valid_{str(i)}")]
         for j in range(1, self.nvalids):
-            validFolders.append(
+            folders.append(
                 os.path.join(self.optdir, "targets", f"valid_{str(i)}_{str(j)}")
             )
-        if not os.path.isdir(trainFolder):
-            os.mkdir(trainFolder)
-        for validFolder in validFolders:
-            if not os.path.isdir(validFolder):
-                os.mkdir(validFolder)
-        for f in ["setup.leap", "conf.pdb", "setup_valid_initial.leap"]:
-            copyfile(os.path.join(self.optdir, f), os.path.join(trainFolder, f))
-            for validFolder in validFolders:
-                copyfile(os.path.join(self.optdir, f), os.path.join(validFolder, f))
+        for f in folders:
+            if not os.path.isdir(f):
+                os.mkdir(f)
+        return folders
 
-        valids = []
-        # done this way to maintain back compatibility to when sampling folders were named
-        # based on index of initial geometry
-        for f in os.listdir(os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}")):
-            if f.startswith("train") and os.path.isdir(
-                os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}", f)
-            ):
-                mmTrainFolder = os.path.join(
-                    self.sampledir, f"{str(i)}_cycle_{str(i)}", f
-                )
-            elif f.startswith("valid") and os.path.isdir(
-                os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}", f)
-            ):
-                valids.append(
-                    os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}", f)
-                )
-        # consistent performance on tests
-        valids = sorted(valids)
 
-        for f in ["all.mdcrd", "qdata.txt"]:
-            copyfile(
-                os.path.join(mmTrainFolder, f),
-                os.path.join(self.optdir, "targets", f"train_{str(i)}", f),
-            )
-            for j in range(len(valids)):
-                copyfile(
-                    os.path.join(valids[j], f),
-                    os.path.join(validFolders[j], f),
-                )
+    def doParameterOptimization(self, i):
+        # Copy new QM data into appropriate folders
+        targetFolders = self.makeFBTargets(i)
+        for f in targetFolders:
+            self.copyLeapFiles(f) 
+        sampleFolders = self.getSampleFolders(i)
+        self.copyQMResults(sampleFolders, targetFolders)
 
         # Run ForceBalance on each input
         os.chdir(self.optdir)
         self.optEngine.optimizeForcefield(i)
         os.chdir(self.home)
+        self.getOptResults()
+
+    # sampleFolders and targetFolders should be ordered such that the train
+    # folder is index 0, with the valid folders in order behind it
+    def copyQMResults(self, sampleFolders, targetFolders):
+        for f in ["all.mdcrd", "qdata.txt"]:
+            for i in range(len(sampleFolders)):
+                copyfile(os.path.join(sampleFolders[i], f), os.path.join(targetFolders[i], f))
+        
+    def getSampleFolders(self, i):
+        sampleFolders = [os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}", "train")]
+        for i in range(1, self.nvalids+1):
+            sampleFolders.append(os.path.join(self.sampledir, f"{str(i)}_cycle_{str(i)}", f"valid_{i}"))
+        for f in sampleFolders:
+            if not os.path.isdir(f):
+                raise RuntimeError(f"QM results folder {f} could not be found")
+        return sampleFolders
+
+    def getOptResults(self):
         self.optResults = []
         self.optResults.append(self.optEngine.valid[-1])
         self.optResults.append(
@@ -250,5 +273,5 @@ class Model(AbstractModel):
         self.optResults.append(
             self.optEngine.valid[-1] - self.optEngine.validPrevious[-1]
         )
-        if i > 1:
+        if len(self.optEngine.valid) > 1:
             self.optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
