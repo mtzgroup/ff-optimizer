@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import numpy as np
 from chemcloud.models import AtomicResult
@@ -274,8 +275,8 @@ class TestQMEngine:
         )
 
     def test_restart(self, monkeypatch):
-        os.chdir(os.path.dirname(__file__))
-        qmEngine = qmengine.QMEngine("qmengine/tc.in", "qmengine/tc_backup.in")
+        os.chdir(Path(__file__).parent / "qmengine")
+        qmEngine = qmengine.QMEngine("tc.in", "tc_backup.in")
 
         def monkeyCompute(xyzs, folder):
             xyzs = sorted(xyzs)
@@ -285,7 +286,8 @@ class TestQMEngine:
             return xyzs
 
         monkeypatch.setattr(qmEngine, "getQMRefData", monkeyCompute)
-        qmEngine.restart(os.path.join("qmengine", "restart"))
+        os.chdir("restart")
+        qmEngine.restart()
         testXyzs = []
         with open("xyzs.txt", "r") as f:
             for line in f.readlines():

@@ -76,7 +76,8 @@ def test_getQMRefData(monkeypatch):
     monkeypatch.setattr(chemcloudEngine, "writeResult", monkeyWrite)
     monkeypatch.setattr(qmengine.QMEngine, "readQMRefData", monkeyRead)
     monkeypatch.setattr(qmengine.QMEngine, "writeFBdata", monkeyWrite)
-    chemcloudEngine.getQMRefData(xyzs, calcDir)
+    os.chdir(calcDir)
+    chemcloudEngine.getQMRefData(xyzs)
 
 
 def test_createAtomicInputsResp():

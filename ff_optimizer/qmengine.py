@@ -181,10 +181,9 @@ class QMEngine:
                     esps.append(esp)
         return energies, grads, coords, espXYZs, esps
 
-    def restart(self, calcDir: str):
+    def restart(self):
         print("Restarting QM")
         xyzs = []
-        os.chdir(calcDir)
         for f in os.listdir():
             if f.endswith(".xyz"):
                 name = f.split(".")[0]
@@ -203,7 +202,7 @@ class QMEngine:
         self.getQMRefData(xyzs, ".")
 
     # This is the function which must be implemented by inherited classes
-    def getQMRefData(self, xyzs: list, calcDir: str):
+    def getQMRefData(self, xyzs: list):
         pass
 
 
@@ -288,8 +287,7 @@ class SbatchEngine(QMEngine):
             raise RuntimeError(f"Slurm command {str(command)} failed")
         return output
 
-    def getQMRefData(self, xyzs: list, calcDir: str):
-        os.chdir(calcDir)
+    def getQMRefData(self, xyzs: list):
         jobIDs = []
         for xyz in xyzs:
             name = xyz.split(".")[0]
@@ -325,8 +323,7 @@ class DebugEngine(QMEngine):
     def __init__(self, inputFile, backupInputFile, doResp=False):
         super().__init__(inputFile, backupInputFile, doResp)
 
-    def getQMRefData(self, xyzs: list, calcDir: str):
-        os.chdir(calcDir)
+    def getQMRefData(self, xyzs: list):
         energies = []
         grads = []
         coords = []
@@ -504,9 +501,8 @@ class CCCloudEngine(QMEngine):
             )
         return retryXyzs
 
-    def getQMRefData(self, xyzs: list, calcDir: str):
+    def getQMRefData(self, xyzs: list):
         cwd = os.getcwd()
-        os.chdir(calcDir)
         retryXyzs = self.runJobs(xyzs)
         for _ in range(self.retries):
             if len(retryXyzs) == 0:

@@ -437,6 +437,7 @@ def monkeyRename(a, b):
     pass
 
 
+@pytest.mark.debug
 def test_restart(monkeypatch):
     monkeypatch.setattr(os, "system", monkeySystemNoLeap)
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)

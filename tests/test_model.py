@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import pytest
 from shutil import copyfile, rmtree
 
@@ -9,7 +10,7 @@ from . import checkUtils
 
 class FakeModel:
     def __init__(self, args):
-        self.sampledir = args.sampledir
+        self.sampledir = Path(args.sampledir)
         self.mmEngine = FakeMMEngine()
 
 
@@ -36,7 +37,7 @@ class FakeArgs:
         self.nvalids = 2
 
 
-def monkeyQMRestart(directory):
+def monkeyQMRestart():
     pass
 
 
@@ -49,11 +50,11 @@ class MonkeyQMEngine:
         self.xyzs = []
         self.dirs = []
 
-    def getQMRefData(self, xyzs, directory):
+    def getQMRefData(self, xyzs):
         self.xyzs.append(xyzs)
         self.dirs.append(os.getcwd().split("/")[-1])
 
-    def restart(self, directory):
+    def restart(self):
         self.dirs.append(os.getcwd().split("/")[-1])
 
 
@@ -63,7 +64,7 @@ def monkeyInitQM(self, args):
 
 def monkeyInitModel(self, args):
     self.home = os.getcwd()
-    self.sampledir = args.sampledir
+    self.sampledir = Path(args.sampledir)
     self.qmEngine = self.initializeQMEngine(args)
     self.restartCycle = 1
 
