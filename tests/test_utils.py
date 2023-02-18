@@ -31,9 +31,8 @@ def test_readGradFromTCout_TCCloud():
     assert checkUtils.checkArrays(grads, testGrads)
 
 
-def test_readOpt():
-    pass
-
+def test_convertTCtoFB():
+    assert False
 
 def test_readEsp():
     os.chdir(os.path.dirname(__file__))

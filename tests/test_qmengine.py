@@ -170,7 +170,7 @@ class TestQMEngine:
         energies = []
         grads = []
         for i in range(1, 26):
-            coords.append(utils.readPDB(f"qmengine/test/{str(i)}.pdb"))
+            coords.append(utils.readXYZ(f"qmengine/test/{str(i)}.xyz"))
             energy, grad = utils.readGradFromTCout(f"qmengine/test/tc_{str(i)}.out")
             energies.append(energy)
             grads.append(grad)
@@ -223,7 +223,7 @@ class TestQMEngine:
         espXYZs = []
         esps = []
         for i in range(1, 26):
-            coords.append(utils.readPDB(f"qmengine/test/{str(i)}.pdb"))
+            coords.append(utils.readXYZ(f"qmengine/test/{str(i)}.xyz"))
             energy, grad = utils.readGradFromTCout(f"qmengine/test/tc_{str(i)}.out")
             energies.append(energy)
             grads.append(grad)

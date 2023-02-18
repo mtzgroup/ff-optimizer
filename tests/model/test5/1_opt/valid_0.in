@@ -1,0 +1,6 @@
+$options
+jobtype             single
+forcefield          dasa.frcmod dasa.mol2
+backup              false
+$end
+

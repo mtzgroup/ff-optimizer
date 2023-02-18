@@ -32,14 +32,14 @@ class AbstractModel:
 class Model(AbstractModel):
     def __init__(self, args):
         self.setArgs(args)
-        self.getMdFiles()
+        self.getMDFiles()
         # Set up each engine
         self.optEngine = self.initializeOptEngine(args)
         self.qmEngine = self.initializeQMEngine(args)
         self.mmEngine = self.initializeMMEngine(args)
         self.restartCycle = self.optEngine.restartCycle
 
-    def getMdFiles(self):
+    def getMDFiles(self):
         self.mdFiles = []
         self.heatCounter = 0
         for f in os.listdir(self.sampledir):
@@ -54,6 +54,7 @@ class Model(AbstractModel):
         self.home = Path(".").cwd().absolute()
         self.optdir = Path(args.optdir)
         self.sampledir = Path(args.sampledir)
+        self.dynamicsdir = Path(args.dynamicsdir)
         self.nvalids = args.nvalids
         (self.optdir / args.valid0).rename(self.optdir / "valid_0.in")
         (self.optdir / args.opt0).rename(self.optdir / "opt_0.in")
@@ -201,14 +202,16 @@ class Model(AbstractModel):
                     self.qmEngine.restart()
                 else:
                     xyzs = self.getXYZs(".")
-                    self.qmEngine.getQMRefData(xyzs, )
+                    self.qmEngine.getQMRefData(xyzs)
                 os.chdir("..")
             os.chdir(self.home)
 
     def getXYZs(self, folder):
+        if type(folder) == str:
+            folder = Path(folder)
         xyzs = []
-        for f in os.listdir(folder):
-            if f.endswith(".xyz"):
+        for f in folder.iterdir():
+            if f.name.endswith(".xyz") and not f.name.startswith("esp"):
                 xyzs.append(f)
         return xyzs
 
@@ -248,8 +251,8 @@ class Model(AbstractModel):
         
     def getSampleFolders(self, i):
         sampleFolders = [self.sampledir / f"{str(i)}_cycle_{str(i)}" / "train"]
-        for i in range(1, self.nvalids+1):
-            sampleFolders.append(self.sampledir / f"{str(i)}_cycle_{str(i)}" / f"valid_{i}")
+        for j in range(1, self.nvalids+1):
+            sampleFolders.append(self.sampledir / f"{str(i)}_cycle_{str(i)}" / f"valid_{j}")
         for f in sampleFolders:
             if not f.is_dir():
                 raise RuntimeError(f"QM results folder {f} could not be found")
