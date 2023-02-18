@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
-import pytest
 
 import numpy as np
+import pytest
 from chemcloud.models import Molecule
 
 from ff_optimizer import utils
@@ -33,6 +33,7 @@ def test_readGradFromTCout_TCCloud():
     assert checkUtils.checkFloat(energy, testEnergy)
     assert checkUtils.checkArrays(grads, testGrads)
 
+
 # Needs faster test, but am lazy
 @pytest.mark.full
 def test_convertTCtoFB():
@@ -44,6 +45,7 @@ def test_convertTCtoFB():
     os.remove("qdata.txt")
     assert mdcrdCorrect
     assert qdataCorrect
+
 
 def test_readEsp():
     os.chdir(home)

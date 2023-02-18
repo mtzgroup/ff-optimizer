@@ -1,9 +1,9 @@
 import os
+from pathlib import Path
 from shutil import copyfile, rmtree
 
 from . import mmengine, optengine, qmengine
 from .utils import convertTCtoFB
-from pathlib import Path
 
 
 # Template class for ff models used by ff_optimizer
@@ -28,7 +28,7 @@ class AbstractModel:
 
 
 # Functions in this class assume that they are operating in the home directory
-# where the job was started. 
+# where the job was started.
 class Model(AbstractModel):
     def __init__(self, args):
         self.setArgs(args)
@@ -106,7 +106,7 @@ class Model(AbstractModel):
             mmOptions["start"] = args.start
             mmOptions["end"] = args.end
             mmOptions["split"] = args.split
-            mmOptions["coordPath"] = self.dynamicsdir / args.coors 
+            mmOptions["coordPath"] = self.dynamicsdir / args.coors
         else:
             mmOptions["start"] = None
             mmOptions["end"] = None
@@ -134,7 +134,7 @@ class Model(AbstractModel):
 
     def createTCData(self):
         # Create initial target data from dynamics
-        with open(self.optdir / "opt_0.in", 'r') as f:
+        with open(self.optdir / "opt_0.in", "r") as f:
             for line in f.readlines():
                 splitLine = line.split()
                 if len(splitLine) > 1:
@@ -188,15 +188,17 @@ class Model(AbstractModel):
             copyfile(f, dest / f.name)
 
     def copySamplingFiles(self, i, samplePath):
-        self.copyFFFiles(i-1, samplePath)
+        self.copyFFFiles(i - 1, samplePath)
         self.copyLeapFiles(samplePath, validInitial=False)
         for f in self.mdFiles:
             copyfile(self.sampledir / f, samplePath / f)
 
     def doQMCalculations(self, i):
         # Run QM calculations for each sampling trajectory
-        for f in (self.sampledir / f"{str(i)}_cycle_{str(i)}").iterdir(): 
-            if (f.name.startswith("train") or f.name.startswith("valid")) and f.is_dir():
+        for f in (self.sampledir / f"{str(i)}_cycle_{str(i)}").iterdir():
+            if (
+                f.name.startswith("train") or f.name.startswith("valid")
+            ) and f.is_dir():
                 os.chdir(f)
                 if i == self.restartCycle:
                     self.qmEngine.restart()
@@ -227,12 +229,11 @@ class Model(AbstractModel):
                 f.mkdir()
         return folders
 
-
     def doParameterOptimization(self, i):
         # Copy new QM data into appropriate folders
         targetFolders = self.makeFBTargets(i)
         for f in targetFolders:
-            self.copyLeapFiles(f) 
+            self.copyLeapFiles(f)
         sampleFolders = self.getSampleFolders(i)
         self.copyQMResults(sampleFolders, targetFolders)
 
@@ -248,11 +249,13 @@ class Model(AbstractModel):
         for f in ["all.mdcrd", "qdata.txt"]:
             for i in range(len(sampleFolders)):
                 copyfile(sampleFolders[i] / f, targetFolders[i] / f)
-        
+
     def getSampleFolders(self, i):
         sampleFolders = [self.sampledir / f"{str(i)}_cycle_{str(i)}" / "train"]
-        for j in range(1, self.nvalids+1):
-            sampleFolders.append(self.sampledir / f"{str(i)}_cycle_{str(i)}" / f"valid_{j}")
+        for j in range(1, self.nvalids + 1):
+            sampleFolders.append(
+                self.sampledir / f"{str(i)}_cycle_{str(i)}" / f"valid_{j}"
+            )
         for f in sampleFolders:
             if not f.is_dir():
                 raise RuntimeError(f"QM results folder {f} could not be found")

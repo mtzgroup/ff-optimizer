@@ -1,14 +1,13 @@
 import os
 from pathlib import Path
-import pytest
 from shutil import copyfile, rmtree
 
 from ff_optimizer import model, optengine
 
 from . import checkUtils
 
-
 home = Path(__name__).parent.absolute()
+
 
 class FakeModel:
     def __init__(self, args):
@@ -220,6 +219,7 @@ def clean():
     else:
         os.chdir("..")
 
+
 def test_doParameterOptimization(monkeypatch):
     args = FakeArgs()
     args.optdir = "1_optimization"
@@ -279,6 +279,7 @@ def test_doParameterOptimization(monkeypatch):
     )
     clean()
 
+
 def test_getMdFiles(monkeypatch):
     args = FakeArgs()
     os.chdir(home / "model" / "test2")
@@ -290,6 +291,7 @@ def test_getMdFiles(monkeypatch):
     assert "md.in" in m.mdFiles
     assert "heat1.in" in m.mdFiles
     assert m.heatCounter == 1
+
 
 def test_setArgs(monkeypatch):
     args = FakeArgs()
@@ -315,12 +317,14 @@ def test_setArgs(monkeypatch):
     assert moved
     assert m.doResp
 
+
 def monkeyConvert(a, b, c, d, e, qdata, mdcrd):
     ref = Path("ref")
     copyfile(ref / "qdata.txt", qdata)
     copyfile(ref / "all.mdcrd", mdcrd)
     return 1
-    
+
+
 def test_createTCData(monkeypatch):
     args = FakeArgs()
     os.chdir(home / "model" / "test5")
@@ -338,6 +342,7 @@ def test_createTCData(monkeypatch):
         hasFiles = False
     rmtree(target.parent)
     assert hasFiles
+
 
 def test_copyLeapFiles(monkeypatch):
     args = FakeArgs()
@@ -358,13 +363,14 @@ def test_copyLeapFiles(monkeypatch):
     dest.mkdir()
     m.copyLeapFiles(dest, False)
     test2 = True
-    for f in ["setup.leap", "conf.pdb" ]:
+    for f in ["setup.leap", "conf.pdb"]:
         if not (dest / f).is_file():
             test2 = False
     rmtree(dest)
 
     assert test1
     assert test2
+
 
 def test_makeSampleDir(monkeypatch):
     args = FakeArgs()
@@ -377,7 +383,7 @@ def test_makeSampleDir(monkeypatch):
     m.makeSampleDir(7)
     samplePath = m.sampledir / "7_cycle_7"
     test1 = samplePath.is_dir()
-    with open(samplePath / "hi.txt", 'w') as f:
+    with open(samplePath / "hi.txt", "w") as f:
         f.write("hi")
     m.makeSampleDir(7)
     test2 = (samplePath / "hi.txt").is_file()
@@ -387,6 +393,7 @@ def test_makeSampleDir(monkeypatch):
     assert test1
     assert test2
     assert test3
+
 
 def test_copyFFFiles(monkeypatch):
     args = FakeArgs()
@@ -405,6 +412,7 @@ def test_copyFFFiles(monkeypatch):
     rmtree(test)
     assert copied
 
+
 def test_copySamplingFiles(monkeypatch):
     args = FakeArgs()
     os.chdir(home / "model" / "test5")
@@ -416,11 +424,19 @@ def test_copySamplingFiles(monkeypatch):
     test.mkdir()
     m.copySamplingFiles(2, test)
     copied = True
-    for f in ["test.frcmod", "test.mol2", "setup.leap", "conf.pdb", "md.in", "heat1.in"]:
+    for f in [
+        "test.frcmod",
+        "test.mol2",
+        "setup.leap",
+        "conf.pdb",
+        "md.in",
+        "heat1.in",
+    ]:
         if not (test / f).is_file():
             copied = False
     rmtree(test)
     assert copied
+
 
 def test_getXYZs(monkeypatch):
     args = FakeArgs()
@@ -432,8 +448,9 @@ def test_getXYZs(monkeypatch):
     path = home / "qmengine" / "test"
     xyzs = m.getXYZs(path)
     assert len(xyzs) == 25
-    for i in range(1,26):
+    for i in range(1, 26):
         assert (path / f"{i}.xyz").is_file()
+
 
 def test_makeFBTargets(monkeypatch):
     args = FakeArgs()
@@ -453,6 +470,7 @@ def test_makeFBTargets(monkeypatch):
     rmtree(path)
     assert isMade
 
+
 def test_copyQMResults(monkeypatch):
     args = FakeArgs()
     args.nvalids = 3
@@ -467,12 +485,13 @@ def test_copyQMResults(monkeypatch):
     copiedCorrectly = True
     for d in dests:
         for f in ["all.mdcrd", "qdata.txt"]:
-            with open(d / f, 'r') as g:
+            with open(d / f, "r") as g:
                 name = g.readline().split()[0]
             if name != d.name:
                 copiedCorrectly = False
     rmtree(m.optdir / "targets")
     assert copiedCorrectly
+
 
 def test_getSampleFolders(monkeypatch):
     args = FakeArgs()
@@ -492,8 +511,8 @@ def test_getSampleFolders(monkeypatch):
         failed = True
     assert failed
     assert sampleFolders == refFolders
-    
-# Gonna add tests with feature to change initialCycle    
+
+
+# Gonna add tests with feature to change initialCycle
 def test_initialCycle():
     assert False
-

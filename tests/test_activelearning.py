@@ -506,7 +506,7 @@ def clean():
                 rmtree(f)
             os.chdir(os.path.join("..", "..", ".."))
         else:
-            os.chdir(os.path.join("..",".."))
+            os.chdir(os.path.join("..", ".."))
 
 
 def monkeyALInit(self, args):
