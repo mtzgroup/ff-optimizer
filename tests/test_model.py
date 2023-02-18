@@ -493,7 +493,7 @@ def test_getSampleFolders(monkeypatch):
     assert failed
     assert sampleFolders == refFolders
     
-    
+# Gonna add tests with feature to change initialCycle    
 def test_initialCycle():
     assert False
 
