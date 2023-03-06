@@ -33,7 +33,7 @@ def test_readGradFromTCout_TCCloud():
     assert checkUtils.checkFloat(energy, testEnergy)
     assert checkUtils.checkArrays(grads, testGrads)
 
-@pytest.mark.debug
+
 def test_convertTCtoFB():
     os.chdir(home / "utils" / "dynamics")
     utils.convertTCtoFB("tc.out", "coors.xyz", 100)
@@ -44,16 +44,16 @@ def test_convertTCtoFB():
     assert mdcrdCorrect
     assert qdataCorrect
 
-@pytest.mark.debug
+
 def test_convertTCtoFB2():
     os.chdir(home / "utils" / "dynamics")
     utils.convertTCtoFB("tc.out", "coors.xyz", 100, 100, 700)
     mdcrdCorrect = checkUtils.checkFileFloatsNoWhitespace("refAll2.mdcrd", "all.mdcrd")
-    qdataCorrect = checkUtils.checkFileFloatsNoWhitespace("refQdata2.txt", "qdata.txt")
+    checkUtils.checkFileFloatsNoWhitespace("refQdata2.txt", "qdata.txt")
     os.remove("all.mdcrd")
     os.remove("qdata.txt")
     assert mdcrdCorrect
-    #assert qdataCorrect
+    # assert qdataCorrect
 
 
 def test_readEsp():
