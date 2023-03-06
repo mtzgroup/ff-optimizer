@@ -116,7 +116,8 @@ def convertTCtoFB(
     usedIndices = []
     lastFrame = -stride - 37
     for i in range(len(indices)):
-        if gradIndex[indices[i][1]] >= start and gradIndex[indices[i][1]] <= end:
+    # Get first frame from timestep stride, not timestep 0
+        if gradIndex[indices[i][1]] >= start + stride - 1 and gradIndex[indices[i][1]] <= end:
             if gradIndex[indices[i][1]] - lastFrame >= stride:
                 lastFrame = gradIndex[indices[i][1]]
                 usedIndices.append(indices[i])
