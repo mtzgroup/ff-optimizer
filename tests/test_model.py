@@ -1,14 +1,17 @@
 import os
+from pathlib import Path
 from shutil import copyfile, rmtree
 
 from ff_optimizer import model, optengine
 
 from . import checkUtils
 
+home = Path(__name__).parent.absolute()
+
 
 class FakeModel:
     def __init__(self, args):
-        self.sampledir = args.sampledir
+        self.sampledir = Path(args.sampledir)
         self.mmEngine = FakeMMEngine()
 
 
@@ -33,9 +36,14 @@ class FakeArgs:
         self.tctemplate = "tc.in"
         self.tctemplate_long = "tc.in"
         self.nvalids = 2
+        self.tcout = "tc.out"
+        self.coors = "coors.xyz"
+        self.stride = 100
+        self.start = 0
+        self.end = -1
 
 
-def monkeyQMRestart(directory):
+def monkeyQMRestart():
     pass
 
 
@@ -48,11 +56,11 @@ class MonkeyQMEngine:
         self.xyzs = []
         self.dirs = []
 
-    def getQMRefData(self, xyzs, directory):
+    def getQMRefData(self, xyzs):
         self.xyzs.append(xyzs)
         self.dirs.append(os.getcwd().split("/")[-1])
 
-    def restart(self, directory):
+    def restart(self):
         self.dirs.append(os.getcwd().split("/")[-1])
 
 
@@ -62,14 +70,14 @@ def monkeyInitQM(self, args):
 
 def monkeyInitModel(self, args):
     self.home = os.getcwd()
-    self.sampledir = args.sampledir
+    self.sampledir = Path(args.sampledir)
     self.qmEngine = self.initializeQMEngine(args)
     self.restartCycle = 1
 
 
 def test_doQMCalculations(monkeypatch):
     args = FakeArgs()
-    os.chdir(os.path.join(os.path.dirname(__file__), "model", "test1"))
+    os.chdir(home / "model" / "test1")
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInitQM)
     monkeypatch.setattr(model.Model, "__init__", monkeyInitModel)
 
@@ -82,12 +90,12 @@ def test_doQMCalculations(monkeypatch):
     assert len(m.qmEngine.dirs) == 3
     for i in range(len(m.qmEngine.dirs)):
         for xyz in m.qmEngine.xyzs[i]:
-            assert xyz in testXyzs[m.qmEngine.dirs[i]]
+            assert xyz.name in testXyzs[m.qmEngine.dirs[i]]
 
 
 def test_doQMCalculationsRestart(monkeypatch):
     args = FakeArgs()
-    os.chdir(os.path.join(os.path.dirname(__file__), "model", "test1"))
+    os.chdir(home / "model" / "test1")
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInitQM)
     monkeypatch.setattr(model.Model, "__init__", monkeyInitModel)
 
@@ -123,7 +131,7 @@ def monkeyInitMM(self, args):
 
 def test_doMMsampling(monkeypatch):
     args = FakeArgs()
-    os.chdir(os.path.join(os.path.dirname(__file__), "model", "test2"))
+    os.chdir(home / "model" / "test2")
     path = os.path.join("2_sampling", "3_cycle_3")
     if os.path.isdir(path):
         rmtree(path)
@@ -151,7 +159,7 @@ def test_doMMsampling(monkeypatch):
 
 def test_doMMsamplingNoRestart(monkeypatch):
     args = FakeArgs()
-    os.chdir(os.path.join(os.path.dirname(__file__), "model", "test2"))
+    os.chdir(home / "model" / "test2")
     path = os.path.join("2_sampling", "3_cycle_3")
     if os.path.isdir(path):
         rmtree(path)
@@ -203,10 +211,13 @@ def clean():
     for f in os.listdir():
         if f.endswith(".out"):
             os.remove(f)
-    os.chdir("targets")
-    for f in os.listdir():
-        rmtree(f)
-    os.chdir(os.path.join("..", ".."))
+    if os.path.isdir("targets"):
+        os.chdir("targets")
+        for f in os.listdir():
+            rmtree(f)
+        os.chdir(os.path.join("..", ".."))
+    else:
+        os.chdir("..")
 
 
 def test_doParameterOptimization(monkeypatch):
@@ -214,7 +225,7 @@ def test_doParameterOptimization(monkeypatch):
     args.optdir = "1_optimization"
     args.sampledir = "2_mm_sampling"
     args.nvalids = 2
-    os.chdir(os.path.join(os.path.dirname(__file__), "model", "test3"))
+    os.chdir(home / "model" / "test3")
     clean()
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInit)
@@ -251,7 +262,7 @@ def test_doParameterOptimization(monkeypatch):
         os.path.join(testDir, "qdata.txt"), os.path.join(refDir, "qdata.txt")
     )
     testDir = os.path.join("1_optimization", "targets", "valid_1")
-    refDir = os.path.join("2_mm_sampling", "1_cycle_1", "valid")
+    refDir = os.path.join("2_mm_sampling", "1_cycle_1", "valid_1")
     assert checkUtils.checkFiles(
         os.path.join(testDir, "all.mdcrd"), os.path.join(refDir, "all.mdcrd")
     )
@@ -259,7 +270,7 @@ def test_doParameterOptimization(monkeypatch):
         os.path.join(testDir, "qdata.txt"), os.path.join(refDir, "qdata.txt")
     )
     testDir = os.path.join("1_optimization", "targets", "valid_1_1")
-    refDir = os.path.join("2_mm_sampling", "1_cycle_1", "valid_1")
+    refDir = os.path.join("2_mm_sampling", "1_cycle_1", "valid_2")
     assert checkUtils.checkFiles(
         os.path.join(testDir, "all.mdcrd"), os.path.join(refDir, "all.mdcrd")
     )
@@ -269,9 +280,239 @@ def test_doParameterOptimization(monkeypatch):
     clean()
 
 
+def test_getMdFiles(monkeypatch):
+    args = FakeArgs()
+    os.chdir(home / "model" / "test2")
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    m = model.Model(args)
+    m.getMDFiles()
+    assert "md.in" in m.mdFiles
+    assert "heat1.in" in m.mdFiles
+    assert m.heatCounter == 1
+
+
+def test_setArgs(monkeypatch):
+    args = FakeArgs()
+    args.respPriors = 1
+    args.valid0 = "v0.in"
+    args.opt0 = "o0.in"
+    os.chdir(home / "model" / "test4")
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    m = model.Model(args)
+    moved = True
+    v0 = Path("1_opt") / "valid_0.in"
+    if v0.is_file():
+        v0.rename(Path("1_opt") / "v0.in")
+    else:
+        moved = False
+    o0 = Path("1_opt") / "opt_0.in"
+    if o0.is_file():
+        o0.rename(Path("1_opt") / "o0.in")
+    else:
+        moved = False
+    assert moved
+    assert m.doResp
+
+
+def monkeyConvert(a, b, c, d, e, qdata, mdcrd):
+    ref = Path("ref")
+    copyfile(ref / "qdata.txt", qdata)
+    copyfile(ref / "all.mdcrd", mdcrd)
+    return 1
+
+
+def test_createTCData(monkeypatch):
+    args = FakeArgs()
+    os.chdir(home / "model" / "test5")
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    monkeypatch.setattr(model, "convertTCtoFB", monkeyConvert)
+    m = model.Model(args)
+    m.createTCData()
+    target = Path("1_opt") / "targets" / "initial"
+    hasFiles = True
+    if not (target / "qdata.txt").is_file():
+        hasFiles = False
+    if not (target / "all.mdcrd").is_file():
+        hasFiles = False
+    rmtree(target.parent)
+    assert hasFiles
+
+
+def test_copyLeapFiles(monkeypatch):
+    args = FakeArgs()
+    os.chdir(home / "model" / "test5")
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    m = model.Model(args)
+    dest = Path("test1")
+    dest.mkdir()
+    m.copyLeapFiles(dest)
+    test1 = True
+    for f in ["setup.leap", "conf.pdb", "setup_valid_initial.leap"]:
+        if not (dest / f).is_file():
+            test1 = False
+    rmtree(dest)
+    dest = Path("test2")
+    dest.mkdir()
+    m.copyLeapFiles(dest, False)
+    test2 = True
+    for f in ["setup.leap", "conf.pdb"]:
+        if not (dest / f).is_file():
+            test2 = False
+    rmtree(dest)
+
+    assert test1
+    assert test2
+
+
+def test_makeSampleDir(monkeypatch):
+    args = FakeArgs()
+    os.chdir(home / "model" / "test5")
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    m = model.Model(args)
+    m.restartCycle = 3
+    m.makeSampleDir(7)
+    samplePath = m.sampledir / "7_cycle_7"
+    test1 = samplePath.is_dir()
+    with open(samplePath / "hi.txt", "w") as f:
+        f.write("hi")
+    m.makeSampleDir(7)
+    test2 = (samplePath / "hi.txt").is_file()
+    m.restartCycle = -1
+    m.makeSampleDir(7)
+    test3 = not (samplePath / "hi.txt").is_file()
+    assert test1
+    assert test2
+    assert test3
+
+
+def test_copyFFFiles(monkeypatch):
+    args = FakeArgs()
+    os.chdir(home / "model" / "test5")
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    m = model.Model(args)
+    test = Path("test")
+    test.mkdir()
+    m.copyFFFiles(1, test)
+    copied = True
+    for f in ["test.frcmod", "test.mol2"]:
+        if not (test / f).is_file():
+            copied = False
+    rmtree(test)
+    assert copied
+
+
+def test_copySamplingFiles(monkeypatch):
+    args = FakeArgs()
+    os.chdir(home / "model" / "test5")
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    m = model.Model(args)
+    test = Path("test")
+    test.mkdir()
+    m.copySamplingFiles(2, test)
+    copied = True
+    for f in [
+        "test.frcmod",
+        "test.mol2",
+        "setup.leap",
+        "conf.pdb",
+        "md.in",
+        "heat1.in",
+    ]:
+        if not (test / f).is_file():
+            copied = False
+    rmtree(test)
+    assert copied
+
+
+def test_getXYZs(monkeypatch):
+    args = FakeArgs()
+    os.chdir(home / "model" / "test5")
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    m = model.Model(args)
+    path = home / "qmengine" / "test"
+    xyzs = m.getXYZs(path)
+    assert len(xyzs) == 25
+    for i in range(1, 26):
+        assert (path / f"{i}.xyz").is_file()
+
+
+def test_makeFBTargets(monkeypatch):
+    args = FakeArgs()
+    args.nvalids = 3
+    os.chdir(home / "model" / "test5")
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    m = model.Model(args)
+    m.makeFBTargets(3)
+    testFolders = ["train_3", "valid_3", "valid_3_1", "valid_3_2"]
+    isMade = True
+    path = m.optdir / "targets"
+    for f in testFolders:
+        if not (path / f).is_dir():
+            isMade = False
+    rmtree(path)
+    assert isMade
+
+
+def test_copyQMResults(monkeypatch):
+    args = FakeArgs()
+    args.nvalids = 3
+    os.chdir(home / "model" / "test6")
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    m = model.Model(args)
+    dests = m.makeFBTargets(7)
+    srcs = m.getSampleFolders(7)
+    m.copyQMResults(srcs, dests)
+    copiedCorrectly = True
+    for d in dests:
+        for f in ["all.mdcrd", "qdata.txt"]:
+            with open(d / f, "r") as g:
+                name = g.readline().split()[0]
+            if name != d.name:
+                copiedCorrectly = False
+    rmtree(m.optdir / "targets")
+    assert copiedCorrectly
+
+
+def test_getSampleFolders(monkeypatch):
+    args = FakeArgs()
+    args.nvalids = 3
+    os.chdir(home / "model" / "test6")
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    m = model.Model(args)
+    sampleFolders = m.getSampleFolders(7)
+    path = m.sampledir / "7_cycle_7"
+    refFolders = [path / "train", path / "valid_1", path / "valid_2", path / "valid_3"]
+    try:
+        m.getSampleFolders(6)
+        failed = False
+    except:
+        failed = True
+    assert failed
+    assert sampleFolders == refFolders
+
+
+# Gonna add tests with feature to change initialCycle
 def test_initialCycle():
-    pass
-
-
-def test_init():
-    pass
+    assert False

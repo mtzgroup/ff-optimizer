@@ -1,0 +1,26 @@
+$options
+jobtype             NewtonRaphson
+forcefield          dasa.frcmod dasa.mol2
+penalty_additive    0.01
+penalty_type        L2
+verbose_options     true
+backup              false
+constrain_charge    true
+priors                                           
+BONDSK                               : 2.0e+04
+BONDSB                               : 1.0e-01
+ANGLESK                              : 2.0e+02
+ANGLESB                              : 1.0e+02
+PDIHS1K                              : 1.0e+02
+PDIHS2K                              : 4.0e+01
+PDIHS3K                              : 1.0e+01
+IDIHSK                               : 2.0e+01
+COUL                                 : 2.0e+00
+/priors                                          
+$end
+
+$target
+type                abinitio_amber
+name                initial
+amber_leapcmd       setup.leap
+$end

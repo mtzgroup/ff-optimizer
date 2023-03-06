@@ -500,10 +500,13 @@ def clean():
         for f in os.listdir():
             if f.endswith(".out"):
                 os.remove(f)
-        os.chdir("targets")
-        for f in os.listdir():
-            rmtree(f)
-        os.chdir(os.path.join("..", "..", ".."))
+        if os.path.isdir("targets"):
+            os.chdir("targets")
+            for f in os.listdir():
+                rmtree(f)
+            os.chdir(os.path.join("..", "..", ".."))
+        else:
+            os.chdir(os.path.join("..", ".."))
 
 
 def monkeyALInit(self, args):
