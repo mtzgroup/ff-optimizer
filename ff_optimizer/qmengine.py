@@ -182,7 +182,6 @@ class QMEngine:
         return energies, grads, coords, espXYZs, esps
 
     def restart(self):
-        print("Restarting QM")
         xyzs = []
         for f in os.listdir():
             if f.endswith(".xyz"):
@@ -199,7 +198,7 @@ class QMEngine:
                         xyzs.append(f)
                 else:
                     xyzs.append(f)
-        self.getQMRefData(xyzs, ".")
+        self.getQMRefData(xyzs)
 
     # This is the function which must be implemented by inherited classes
     def getQMRefData(self, xyzs: list):
