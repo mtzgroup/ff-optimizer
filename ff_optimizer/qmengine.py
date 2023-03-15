@@ -162,42 +162,40 @@ class QMEngine:
         else:
             espXYZs = None
             esps = None
-        for f in os.listdir():
-            if f.endswith(".xyz"):
-                coord = utils.readXYZ(f)
-                name = f.split(".")[0]
-                json = f"tc_{name}.json"
-                result = self.readResult(json)
-                if not result.success:
-                    raise RuntimeError(
-                        f"Terachem job {json} in {os.getcwd()} did not succeed!"
-                    )
-                energies.append(result.properties.return_energy)
-                grads.append(result.return_result.flatten())
-                coords.append(coord)
-                if self.doResp:
-                    espXYZ, esp = utils.readEsp(f"esp_{name}.xyz")
-                    espXYZs.append(espXYZ)
-                    esps.append(esp)
+        for f in utils.getXYZs():
+            coord = utils.readXYZ(f)
+            name = utils.getName(f)
+            json = f"tc_{name}.json"
+            result = self.readResult(json)
+            if not result.success:
+                raise RuntimeError(
+                    f"Terachem job {json} in {os.getcwd()} did not succeed!"
+                )
+            energies.append(result.properties.return_energy)
+            grads.append(result.return_result.flatten())
+            coords.append(coord)
+            if self.doResp:
+                espXYZ, esp = utils.readEsp(f"esp_{name}.xyz")
+                espXYZs.append(espXYZ)
+                esps.append(esp)
         return energies, grads, coords, espXYZs, esps
 
     def restart(self):
         xyzs = []
-        for f in os.listdir():
-            if f.endswith(".xyz"):
-                name = f.split(".")[0]
-                json = f"tc_{name}.json"
-                if os.path.isfile(json):
-                    try:
-                        with open(json, "r") as j:
-                            result = AtomicResult(**json_loads(j.read()))
-                    except:
-                        xyzs.append(f)
-                        continue
-                    if not result.success:
-                        xyzs.append(f)
-                else:
+        for f in utils.getXYZs():
+            name = utils.getName(f)
+            json = f"tc_{name}.json"
+            if os.path.isfile(json):
+                try:
+                    with open(json, "r") as j:
+                        result = AtomicResult(**json_loads(j.read()))
+                except:
                     xyzs.append(f)
+                    continue
+                if not result.success:
+                    xyzs.append(f)
+            else:
+                xyzs.append(f)
         self.getQMRefData(xyzs)
 
     # This is the function which must be implemented by inherited classes
@@ -434,7 +432,7 @@ class CCCloudEngine(QMEngine):
         else:
             keywords = self.keywords
         for xyz in sorted(xyzs):
-            jobId = xyz.split(".")[0]
+            jobId = utils.getName(xyz)
             mol = Molecule.from_file(xyz)
             if self.doResp:
                 atomicInput = AtomicInput(

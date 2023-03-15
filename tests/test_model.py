@@ -442,18 +442,6 @@ def test_copySamplingFiles(monkeypatch):
     assert copied
 
 
-def test_getXYZs(monkeypatch):
-    args = FakeArgs()
-    os.chdir(home / "model" / "test5")
-    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
-    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
-    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
-    m = model.Model(args)
-    path = home / "qmengine" / "test"
-    xyzs = m.getXYZs(path)
-    assert len(xyzs) == 25
-    for i in range(1, 26):
-        assert (path / f"{i}.xyz").is_file()
 
 
 def test_makeFBTargets(monkeypatch):
