@@ -278,7 +278,7 @@ class TestQMEngine:
         os.chdir(Path(__file__).parent / "qmengine")
         qmEngine = qmengine.QMEngine("tc.in", "tc_backup.in")
 
-        def monkeyCompute(xyzs, folder):
+        def monkeyCompute(xyzs):
             xyzs = sorted(xyzs)
             with open("xyzs.txt", "w") as f:
                 for xyz in xyzs:

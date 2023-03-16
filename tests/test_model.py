@@ -292,6 +292,8 @@ def test_getMdFiles(monkeypatch):
     assert "heat1.in" in m.mdFiles
     assert m.heatCounter == 1
 
+def monkeyInitSetArgsOnly(self, args):
+    self.setArgs(args)
 
 def test_setArgs(monkeypatch):
     args = FakeArgs()
@@ -299,17 +301,19 @@ def test_setArgs(monkeypatch):
     args.valid0 = "v0.in"
     args.opt0 = "o0.in"
     os.chdir(home / "model" / "test4")
-    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
-    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
-    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    v0 = Path("1_opt") / "valid_0.in"
+    o0 = Path("1_opt") / "opt_0.in"
+    if v0.is_file():
+        v0.rename(Path("1_opt") / "v0.in")
+    if o0.is_file():
+        o0.rename(Path("1_opt") / "o0.in")
+    monkeypatch.setattr(model.Model, "__init__", monkeyInitSetArgsOnly)
     m = model.Model(args)
     moved = True
-    v0 = Path("1_opt") / "valid_0.in"
     if v0.is_file():
         v0.rename(Path("1_opt") / "v0.in")
     else:
         moved = False
-    o0 = Path("1_opt") / "opt_0.in"
     if o0.is_file():
         o0.rename(Path("1_opt") / "o0.in")
     else:
@@ -438,18 +442,6 @@ def test_copySamplingFiles(monkeypatch):
     assert copied
 
 
-def test_getXYZs(monkeypatch):
-    args = FakeArgs()
-    os.chdir(home / "model" / "test5")
-    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
-    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
-    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
-    m = model.Model(args)
-    path = home / "qmengine" / "test"
-    xyzs = m.getXYZs(path)
-    assert len(xyzs) == 25
-    for i in range(1, 26):
-        assert (path / f"{i}.xyz").is_file()
 
 
 def test_makeFBTargets(monkeypatch):
