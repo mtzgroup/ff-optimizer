@@ -3,7 +3,7 @@ from pathlib import Path
 from shutil import copyfile, rmtree
 
 from . import mmengine, optengine, qmengine, inputs
-from .utils import convertTCtoFB
+from .utils import convertTCtoFB, getXYZs
 
 
 # Template class for ff models used by ff_optimizer
@@ -160,19 +160,10 @@ class Model(AbstractModel):
                 if i == self.restartCycle:
                     self.qmEngine.restart()
                 else:
-                    xyzs = self.getXYZs(".")
+                    xyzs = getXYZs()
                     self.qmEngine.getQMRefData(xyzs)
                 os.chdir("..")
             os.chdir(self.home)
-
-    def getXYZs(self, folder):
-        if type(folder) == str:
-            folder = Path(folder)
-        xyzs = []
-        for f in folder.iterdir():
-            if f.name.endswith(".xyz") and not f.name.startswith("esp"):
-                xyzs.append(f)
-        return xyzs
 
     def makeFBTargets(self, i):
         targets = self.optdir / "targets"

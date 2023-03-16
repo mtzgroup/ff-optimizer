@@ -270,6 +270,8 @@ def test_getMdFiles(monkeypatch):
     assert "heat1.in" in m.mdFiles
     assert m.heatCounter == 1
 
+def monkeyInitSetArgsOnly(self, args):
+    self.setArgs(args)
 
 #def test_setArgs(monkeypatch):
 #    args = getDefaults()
