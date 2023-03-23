@@ -12,19 +12,21 @@ from .utils import convertTCtoFB
 # use the inherited class
 class AbstractModel:
     def __init__(self):
-        self.restartCycle = -1
+        #self.restartCycle = -1
+        #raise NotImplementedError
+        #commented in case using super becomes necessary
 
     def initialCycle(self):
-        pass
+        raise NotImplementedError
 
     def doMMSampling(self, i):
-        pass
+        raise NotImplementedError
 
     def doQMCalculations(self, i):
-        pass
+        raise NotImplementedError
 
     def doParameterOptimization(self, i):
-        pass
+        raise NotImplementedError
 
 
 # Functions in this class assume that they are operating in the home directory
