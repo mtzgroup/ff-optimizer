@@ -353,32 +353,15 @@ class CCCloudEngine(QMEngine):
         self.retries = 5
         self.client = CCClient()
         super().__init__(inputFile, backupInputFile, doResp)
+        self.setKeywords(doResp)
+
+    def setKeywords(self, doResp):
         self.keywords = {}
         self.backupKeywords = {}
-        for setting in self.inputSettings:
-            if setting[0] == "method":
-                self.method = setting[1]
-            elif setting[0] == "basis":
-                self.basis = setting[1]
-            else:
-                if len(setting) == 2:
-                    self.keywords[setting[0]] = setting[1]
-                else:
-                    keyword = setting[1]
-                    for token in setting[2:]:
-                        keyword += f" {token}"
-                    self.keywords[setting[0]] = keyword
-        for setting in self.backupInputSettings:
-            if setting[0] == "method" or setting[0] == "basis":
-                pass
-            else:
-                if len(setting) == 2:
-                    self.backupKeywords[setting[0]] = setting[1]
-                else:
-                    keyword = setting[1]
-                    for token in setting[2:]:
-                        keyword += f" {token}"
-                    self.backupKeywords[setting[0]] = keyword
+        self.specialKeywords = {}
+        self.keywords = self.sortSettings(self.inputSettings)
+        self.backupKeywords = self.sortSettings(self.backupInputSettings, True)
+        self.checkSpecialKeywords()
         if doResp:
             self.keywords["resp"] = "yes"
             # self.keywords["esp_restraint_a"] = "0"
@@ -386,6 +369,63 @@ class CCCloudEngine(QMEngine):
             self.backupKeywords["resp"] = "yes"
             # self.backupKeywords["esp_restraint_a"] = "0"
             # self.backupKeywords["esp_restraint_b"] = "0"
+
+    def sortSettings(self, settings, backup=False):
+        keywords = {}
+        specialSettings = ["method", "basis", "charge", "spinmult"]
+        for setting in settings:
+            if setting[0] in specialSettings and not backup:
+                self.specialKeywords[setting[0]] = setting[1]
+            else:
+                if len(setting) == 2:
+                    keywords[setting[0]] = setting[1]
+                else:
+                    keyword = setting[1]
+                    for token in setting[2:]:
+                        keyword += f" {token}"
+                    keywords[setting[0]] = keyword
+        return keywords
+
+    def loadMoleculeFromXYZ(self, xyz):
+        if "charge" in self.specialKeywords.keys():
+            if "spinmult" in self.specialKeywords.keys():
+                mol = Molecule.from_file(
+                    xyz,
+                    molecular_multiplicity=self.specialKeywords["spinmult"],
+                    molecular_charge=self.specialKeywords["charge"],
+                )
+            else:
+                mol = Molecule.from_file(
+                    xyz, molecular_charge=self.specialKeywords["charge"]
+                )
+        else:
+            if "spinmult" in self.specialKeywords.keys():
+                mol = Molecule.from_file(
+                    xyz, molecular_multiplicity=self.specialKeywords["spinmult"]
+                )
+            else:
+                mol = Molecule.from_file(xyz)
+        return mol
+
+    def checkSpecialKeywords(self):
+        if "method" not in self.specialKeywords.keys():
+            raise ValueError("ES method not specified in tc template file")
+        if "basis" not in self.specialKeywords.keys():
+            raise ValueError("ES basis not specified in tc template file")
+        if "charge" in self.specialKeywords.keys():
+            try:
+                self.specialKeywords["charge"] = float(self.specialKeywords["charge"])
+            except:
+                raise ValueError("Molecular charge must be a float")
+        if "spinmult" in self.specialKeywords.keys():
+            try:
+                self.specialKeywords["spinmult"] = int(self.specialKeywords["spinmult"])
+            except:
+                raise ValueError("Molecular spin multiplicity must be an integer")
+            if "charge" not in self.specialKeywords.keys():
+                print(
+                    "WARNING: spinmult specified, but charge is not. Assuming charge = 0."
+                )
 
     def computeBatch(self, atomicInputs: list):
         status = 0
@@ -424,8 +464,8 @@ class CCCloudEngine(QMEngine):
 
     def createAtomicInputs(self, xyzs: list, useBackup=False):
         mod = {}
-        mod["method"] = self.method
-        mod["basis"] = self.basis
+        mod["method"] = self.specialKeywords["method"]
+        mod["basis"] = self.specialKeywords["basis"]
         atomicInputs = []
         if useBackup:
             keywords = self.backupKeywords
@@ -433,7 +473,7 @@ class CCCloudEngine(QMEngine):
             keywords = self.keywords
         for xyz in sorted(xyzs):
             jobId = utils.getName(xyz)
-            mol = Molecule.from_file(xyz)
+            mol = self.loadMoleculeFromXYZ(xyz)
             if self.doResp:
                 atomicInput = AtomicInput(
                     molecule=mol,
