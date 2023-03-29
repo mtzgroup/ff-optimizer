@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 import numpy as np
-import pytest
 from chemcloud.models import Molecule
 
 from ff_optimizer import utils
@@ -10,12 +9,15 @@ from ff_optimizer import utils
 from . import checkUtils
 
 home = Path(__file__).parent.absolute()
+
+
 def test_getXYZs():
     path = home / "qmengine" / "test"
     xyzs = utils.getXYZs(path)
     assert len(xyzs) == 25
     for i in range(1, 26):
         assert (path / f"{i}.xyz").is_file()
+
 
 # check that grads and energies are being read in correctly
 def test_readGradFromTCout():

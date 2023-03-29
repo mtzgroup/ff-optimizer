@@ -292,8 +292,10 @@ def test_getMdFiles(monkeypatch):
     assert "heat1.in" in m.mdFiles
     assert m.heatCounter == 1
 
+
 def monkeyInitSetArgsOnly(self, args):
     self.setArgs(args)
+
 
 def test_setArgs(monkeypatch):
     args = FakeArgs()
@@ -440,8 +442,6 @@ def test_copySamplingFiles(monkeypatch):
             copied = False
     rmtree(test)
     assert copied
-
-
 
 
 def test_makeFBTargets(monkeypatch):
