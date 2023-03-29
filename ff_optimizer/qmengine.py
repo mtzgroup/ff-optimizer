@@ -473,7 +473,9 @@ class CCCloudEngine(QMEngine):
                 try:
                     f.write(result.native_files["esp.xyz"])
                 except:
-                    raise RuntimeError(f"Job {str(result.id)} in {os.getcwd()} is missing esp file!")
+                    raise RuntimeError(
+                        f"Job {str(result.id)} in {os.getcwd()} is missing esp file!"
+                    )
 
     def runJobs(self, xyzs: list, useBackup=False):
         atomicInputs = self.createAtomicInputs(xyzs, useBackup=useBackup)

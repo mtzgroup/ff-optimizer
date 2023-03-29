@@ -1,8 +1,8 @@
 import os
+from pathlib import Path
 
 import numpy as np
 import yaml
-from pathlib import Path
 from qcelemental.models import Molecule
 from scipy.io import netcdf_file
 
@@ -397,7 +397,7 @@ def convertNCtoXYZs(nc, symbols, offset=0):
     for i in range(coords.shape[0]):
         with open(f"{i+1+offset}.xyz", "w") as f:
             f.write(f"{natoms}\n")
-            f.write("Converted from {nc}, frame {i}\n")
+            f.write(f"Converted from {nc}, frame {i}\n")
             for j in range(natoms):
                 f.write(
                     "%3s %14.7f %14.7f %14.7f\n"
@@ -438,6 +438,7 @@ def getSymbolsFromPrmtop(prmtop):
         symbols.append(elementsByNumber[int(number)])
     return symbols
 
+
 def getXYZs(folder="."):
     if type(folder) == str:
         folder = Path(folder)
@@ -447,9 +448,10 @@ def getXYZs(folder="."):
             xyzs.append(f)
     return xyzs
 
+
 # Separate file name from extension
 def getName(f):
     if type(f) == str:
-        return f.split('.')[0]
+        return f.split(".")[0]
     else:
-        return f.name.split('.')[0]
+        return f.name.split(".")[0]
