@@ -36,6 +36,7 @@ class TestQMEngine:
             ["basis", "6-31gss"],
             ["method", "b3lyp"],
             ["charge", "0"],
+            ["spinmult", "1"],
             ["dftd", "d3"],
         ]
         backupInputSettings = [
