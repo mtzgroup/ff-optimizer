@@ -396,7 +396,7 @@ class CCCloudEngine(QMEngine):
         results = []
         stride = int(len(atomicInputs) / batchSize)
         try:
-            # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION
+            # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION?
             futureResults = [
                 self.client.compute(atomicInputs[i::stride], engine="terachem_fe")
                 for i in range(stride)
@@ -473,7 +473,9 @@ class CCCloudEngine(QMEngine):
                 try:
                     f.write(result.native_files["esp.xyz"])
                 except:
-                    print(f"Job {str(result.id)} in {os.getcwd()} is missing esp file!")
+                    raise RuntimeError(
+                        f"Job {str(result.id)} in {os.getcwd()} is missing esp file!"
+                    )
 
     def runJobs(self, xyzs: list, useBackup=False):
         atomicInputs = self.createAtomicInputs(xyzs, useBackup=useBackup)

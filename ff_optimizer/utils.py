@@ -1,8 +1,8 @@
 import os
+from pathlib import Path
 
 import numpy as np
 import yaml
-from pathlib import Path
 from qcelemental.models import Molecule
 from scipy.io import netcdf_file
 
@@ -438,6 +438,7 @@ def getSymbolsFromPrmtop(prmtop):
         symbols.append(elementsByNumber[int(number)])
     return symbols
 
+
 def getXYZs(folder="."):
     if type(folder) == str:
         folder = Path(folder)
@@ -447,9 +448,10 @@ def getXYZs(folder="."):
             xyzs.append(f)
     return xyzs
 
+
 # Separate file name from extension
 def getName(f):
     if type(f) == str:
-        return f.split('.')[0]
+        return f.split(".")[0]
     else:
-        return f.name.split('.')[0]
+        return f.name.split(".")[0]
