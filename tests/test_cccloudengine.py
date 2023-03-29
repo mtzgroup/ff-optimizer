@@ -9,13 +9,53 @@ from ff_optimizer import qmengine
 def test_init():
     os.chdir(os.path.dirname(__file__))
     chemcloudEngine = qmengine.CCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
-    assert chemcloudEngine.method == "b3lyp"
-    assert chemcloudEngine.basis == "6-31gss"
+    assert chemcloudEngine.specialKeywords["method"] == "b3lyp"
+    assert chemcloudEngine.specialKeywords["basis"] == "6-31gss"
     assert chemcloudEngine.keywords["dftd"] == "d3"
-    assert chemcloudEngine.keywords["charge"] == "0"
+    assert chemcloudEngine.specialKeywords["charge"] == 0
+    assert chemcloudEngine.specialKeywords["spinmult"] == 1
     assert chemcloudEngine.backupKeywords["threall"] == "1.0e-14"
     assert chemcloudEngine.backupKeywords["diismaxvecs"] == "40"
     assert chemcloudEngine.backupKeywords["maxit"] == "200"
+
+
+def test_loadMoleculeFromXYZ1():
+    os.chdir(os.path.dirname(__file__))
+    ccEngine = qmengine.CCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
+    ccEngine.specialKeywords["spinmult"] = 3
+    ccEngine.specialKeywords["charge"] = 0
+    mol = ccEngine.loadMoleculeFromXYZ("qmengine/1.xyz")
+    assert mol.molecular_multiplicity == 3
+    assert mol.molecular_charge == 0
+
+
+def test_loadMoleculeFromXYZ2():
+    os.chdir(os.path.dirname(__file__))
+    ccEngine = qmengine.CCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
+    ccEngine.specialKeywords = {}
+    ccEngine.specialKeywords["charge"] = 1
+    mol = ccEngine.loadMoleculeFromXYZ("qmengine/1.xyz")
+    assert mol.molecular_multiplicity == 2
+    assert mol.molecular_charge == 1
+
+
+def test_loadMoleculeFromXYZ3():
+    os.chdir(os.path.dirname(__file__))
+    ccEngine = qmengine.CCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
+    ccEngine.specialKeywords = {}
+    mol = ccEngine.loadMoleculeFromXYZ("qmengine/1.xyz")
+    assert mol.molecular_multiplicity == 1
+    assert mol.molecular_charge == 0
+
+
+def test_loadMoleculeFromXYZ4():
+    os.chdir(os.path.dirname(__file__))
+    ccEngine = qmengine.CCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
+    ccEngine.specialKeywords = {}
+    ccEngine.specialKeywords["spinmult"] = 3
+    mol = ccEngine.loadMoleculeFromXYZ("qmengine/1.xyz")
+    assert mol.molecular_multiplicity == 3
+    assert mol.molecular_charge == 0
 
 
 def test_initResp():
