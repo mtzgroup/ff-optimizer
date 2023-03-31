@@ -315,5 +315,7 @@ class ExternalOpenMMEngine(MMEngine):
         numXYZs = 0
         for frame in frames:
             name = str(frame)
-            os.system(f"python {os.path.join('..',mdin)} {self.prmtop} {name}.rst7 > {name}.out")
+            os.system(
+                f"python {os.path.join('..',mdin)} {self.prmtop} {name}.rst7 > {name}.out"
+            )
             numXYZs += utils.convertNCtoXYZs(f"{name}.nc", self.symbols, numXYZs)

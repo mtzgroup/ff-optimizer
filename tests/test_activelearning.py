@@ -436,6 +436,7 @@ def monkeyInitQM(self, arg1, arg2, doResp):
 def monkeyRename(a, b):
     pass
 
+
 def test_restart(monkeypatch):
     monkeypatch.setattr(os, "system", monkeySystemNoLeap)
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)

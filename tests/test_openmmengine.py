@@ -1,7 +1,5 @@
 import os
-from shutil import copyfile, rmtree
 
-import pytest
 from numpy import loadtxt
 
 from ff_optimizer import mmengine, utils
@@ -16,13 +14,16 @@ options["stride"] = 50
 options["coordPath"] = os.path.join("ff-optimizer", "tests", "mmengine", "coors.xyz")
 options["heatCounter"] = 8
 
+
 def monkeyGetIndices(self):
-    return 1,2,3
+    return 1, 2, 3
+
 
 def clean():
     for f in os.listdir():
         if f.endswith(".xyz") or f.endswith(".nc") or f.endswith(".out"):
             os.remove(f)
+
 
 def test_sample(monkeypatch):
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
@@ -35,8 +36,8 @@ def test_sample(monkeypatch):
     mmEngine.sample([12345], "md.py")
     passTest = True
     for i in range(1, 9):
-        testXYZ = loadtxt(f"{i}.xyz", usecols=(1,2,3), skiprows=2)
-        refXYZ = loadtxt(os.path.join("ref", f"{i}.xyz"), usecols=(1,2,3), skiprows=2)
+        testXYZ = loadtxt(f"{i}.xyz", usecols=(1, 2, 3), skiprows=2)
+        refXYZ = loadtxt(os.path.join("ref", f"{i}.xyz"), usecols=(1, 2, 3), skiprows=2)
         if not checkUtils.checkArrays(testXYZ, refXYZ, 1e-3):
             passTest = False
     clean()
