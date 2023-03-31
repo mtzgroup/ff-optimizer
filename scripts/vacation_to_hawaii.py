@@ -129,7 +129,7 @@ def checkArgs(args):
                     + " does not exist in "
                     + args.sampledir
                 )
-        if args.mmengine != "amber":
+        if args.mmengine != "amber" and args.mmengine != "openmm":
             raise ValueError(f"MM Engine {args.mmengine} is unsupported!")
         if args.nvalids < 1:
             raise ValueError(f"Must use at least one validation set for now")
