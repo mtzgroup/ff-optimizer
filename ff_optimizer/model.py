@@ -120,6 +120,8 @@ class Model(AbstractModel):
         mmOptions["heatCounter"] = self.heatCounter
         if args.mmengine == "amber":
             mmEngine = mmengine.ExternalAmberEngine(mmOptions)
+        elif args.mmengine == "openmm":
+            mmEngine = mmengine.ExternalOpenMMEngine(mmOptions)
         return mmEngine
 
     def initialCycle(self):

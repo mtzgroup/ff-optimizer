@@ -304,5 +304,18 @@ class ExternalAmberEngine(MMEngine):
 
 
 class ExternalOpenMMEngine(MMEngine):
-    def __init__():
-        super().__init__()
+    def __init__(self, options):
+        super().__init__(options)
+
+    # The OpenMM python file must satisfy the following conditions:
+    # 1. It accepts as arguments (in order) the .prmtop and .rst7 files
+    # 2. It performs all necessary equilibrations internally
+    # 3. It produces a {name}.nc file containing the sampled geometries
+    def sample(self, frames, mdin):
+        numXYZs = 0
+        for frame in frames:
+            name = str(frame)
+            os.system(
+                f"python {os.path.join('..',mdin)} {self.prmtop} {name}.rst7 > {name}.out"
+            )
+            numXYZs += utils.convertNCtoXYZs(f"{name}.nc", self.symbols, numXYZs)

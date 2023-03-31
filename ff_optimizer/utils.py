@@ -393,21 +393,28 @@ def convertNCtoXYZs(nc, symbols, offset=0):
     except:
         # if no coords, must be vels file
         return 0
-    natoms = coords.shape[1]
+
+    # Count number of real atoms
+    natoms = 0
+    for symbol in symbols:
+        if symbol != "X":
+            natoms += 1
     for i in range(coords.shape[0]):
         with open(f"{i+1+offset}.xyz", "w") as f:
             f.write(f"{natoms}\n")
             f.write(f"Converted from {nc}, frame {i}\n")
-            for j in range(natoms):
-                f.write(
-                    "%3s %14.7f %14.7f %14.7f\n"
-                    % (
-                        symbols[j],
-                        coords[i, j, 0],
-                        coords[i, j, 1],
-                        coords[i, j, 2],
+            for j in range(coords.shape[1]):
+                # skip not atoms
+                if symbols[j] != "X":
+                    f.write(
+                        "%3s %14.7f %14.7f %14.7f\n"
+                        % (
+                            symbols[j],
+                            coords[i, j, 0],
+                            coords[i, j, 1],
+                            coords[i, j, 2],
+                        )
                     )
-                )
     return coords.shape[0]
 
 
@@ -435,7 +442,12 @@ def getSymbolsFromPrmtop(prmtop):
 
     symbols = []
     for number in atomicNumbers:
-        symbols.append(elementsByNumber[int(number)])
+        # Some MM simulations use fake particles (e.g. OPC water model)
+        # Have to label those as not atoms
+        if int(number) > 0:
+            symbols.append(elementsByNumber[int(number)])
+        else:
+            symbols.append("X")
     return symbols
 
 
