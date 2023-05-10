@@ -14,18 +14,19 @@ class OptEngine:
 
     # We assume __init__ and all the functions it calls run from the top directory in the optimization
     # All other functions are called from within self.optdir
-    def __init__(self, options):
+    def __init__(self, inp):
         self.home = os.getcwd()
-        self.optdir = options["optdir"]
-        self.resp = options["resp"]
-        self.nvalids = options["nvalids"]
+        self.inp = inp
+        self.optdir = inp.optdir
+        self.resp = inp.resp
+        self.nvalids = inp.nvalids
         self.respPriors = None
         self.leap = "setup.leap"
-        if options["resp"] != 0:
+        if inp.resp != 0:
             self.doResp = True
         else:
             self.doResp = False
-        self.maxCycles = options["maxCycles"]
+        self.maxCycles = inp.maxcycles
         self.mol2 = None
         self.frcmod = None
         # test setting this
@@ -65,19 +66,16 @@ class OptEngine:
         os.chdir(self.home)
 
         # Initialize RESP priors
-        if options["respPriors"] != 0:
+        if self.inp.resppriors != 0:
             respOptions = {}
-            respOptions["sampledir"] = options["sampledir"]
-            respOptions["mol2"] = os.path.join(self.optdir, self.mol2)
-            respOptions["mode"] = options["respPriors"]
-            respOptions["prmtop"] = os.path.join(self.optdir, self.prmtop)
-            self.respPriors = resp_prior.RespPriors(respOptions)
+            mol2 = os.path.join(self.optdir, self.mol2)
+            self.respPriors = resp_prior.RespPriors(self.inp, mol2, self.prmtop)
 
         self.train = []
         self.valid = []
         self.validInitial = []
         self.validPrevious = []
-        if options["restart"]:
+        if inp.restart:
             self.determineRestart()
         else:
             self.restartCycle = -1

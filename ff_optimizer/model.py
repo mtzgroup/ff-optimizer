@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from shutil import copyfile, rmtree
 
-from . import mmengine, optengine, qmengine
+from . import mmengine, optengine, qmengine, inputs
 from .utils import convertTCtoFB
 
 
@@ -15,33 +15,34 @@ class AbstractModel:
         #self.restartCycle = -1
         #raise NotImplementedError
         #commented in case using super becomes necessary
+        pass
 
     def initialCycle(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def doMMSampling(self, i):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def doQMCalculations(self, i):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def doParameterOptimization(self, i):
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 # Functions in this class assume that they are operating in the home directory
 # where the job was started.
 class Model(AbstractModel):
-    def __init__(self, args):
-        self.setArgs(args)
-        self.getMDFiles()
+    def __init__(self, inp):
+        self.setParams(inp)
+        self.getMDFiles(inp)
         # Set up each engine
-        self.optEngine = self.initializeOptEngine(args)
-        self.qmEngine = self.initializeQMEngine(args)
-        self.mmEngine = self.initializeMMEngine(args)
+        self.optEngine = self.initializeOptEngine(inp)
+        self.qmEngine = self.initializeQMEngine(inp)
+        self.mmEngine = self.initializeMMEngine(inp)
         self.restartCycle = self.optEngine.restartCycle
 
-    def getMDFiles(self):
+    def getMDFiles(self, inp):
         self.mdFiles = []
         self.heatCounter = 0
         for f in os.listdir(self.sampledir):
@@ -49,79 +50,33 @@ class Model(AbstractModel):
                 self.mdFiles.append(f)
                 if f.startswith("heat"):
                     self.heatCounter += 1
+        # Easiest way to pass this to MMEngine is through the Inputs class
+        inp.heatCounter = self.heatCounter
 
-    def setArgs(self, args):
-        self.args = args
+    def setParams(self, inp):
         # Set some miscellaneous variables
         self.home = Path(".").cwd().absolute()
-        self.optdir = Path(args.optdir)
-        self.sampledir = Path(args.sampledir)
-        self.dynamicsdir = Path(args.dynamicsdir)
-        self.nvalids = args.nvalids
-        (self.optdir / args.valid0).rename(self.optdir / "valid_0.in")
-        (self.optdir / args.opt0).rename(self.optdir / "opt_0.in")
-        if args.resp != 0 or args.respPriors != 0:
-            self.doResp = True
-        else:
-            self.doResp = False
+        self.optdir = inp.optdir
+        self.sampledir = inp.sampledir
+        self.dynamicsdir = inp.dynamicsdir
+        self.inp = inp
 
-    def initializeOptEngine(self, args):
-        optOptions = {}
-        optOptions["optdir"] = args.optdir
-        optOptions["sampledir"] = args.sampledir
-        optOptions["respPriors"] = args.respPriors
-        optOptions["resp"] = args.resp
-        optOptions["maxCycles"] = args.maxcycles
-        optOptions["restart"] = args.restart
-        optOptions["nvalids"] = args.nvalids
-        optEngine = optengine.OptEngine(optOptions)
+    def initializeOptEngine(self, inp):
+        optEngine = optengine.OptEngine(inp)
         return optEngine
 
-    def initializeQMEngine(self, args):
-        tctemplate = self.sampledir / args.tctemplate
-        tctemplate_backup = self.sampledir / args.tctemplate_backup
-        if args.qmengine == "debug":
-            qmEngine = qmengine.DebugEngine(
-                tctemplate,
-                tctemplate_backup,
-                doResp=self.doResp,
-            )
-        elif args.qmengine == "queue":
-            qmEngine = qmengine.SbatchEngine(
-                tctemplate,
-                tctemplate_backup,
-                self.sampledir / args.sbatch,
-                os.getenv("USER"),
-                doResp=self.doResp,
-            )
-        elif args.qmengine == "chemcloud":
-            qmEngine = qmengine.CCCloudEngine(
-                tctemplate,
-                tctemplate_backup,
-                doResp=self.doResp,
-            )
+    def initializeQMEngine(self, inp):
+        if inp.qmengine == "debug":
+            qmEngine = qmengine.DebugEngine(inp)
+        elif inp.qmengine == "queue":
+            qmEngine = qmengine.SbatchEngine(inp)
+        elif inp.qmengine == "chemcloud":
+            qmEngine = qmengine.CCCloudEngine(inp)
         return qmEngine
 
-    def initializeMMEngine(self, args):
-        mmOptions = {}
-        if args.conformers is None:
-            mmOptions["start"] = args.start
-            mmOptions["end"] = args.end
-            mmOptions["split"] = args.split
-            mmOptions["coordPath"] = self.dynamicsdir / args.coors
-        else:
-            mmOptions["start"] = None
-            mmOptions["end"] = None
-            mmOptions["split"] = None
-            mmOptions["coordPath"] = self.dynamicsdir / args.conformers
-        mmOptions["conformers"] = args.conformersPerSet
-        mmOptions["nvalids"] = args.nvalids
-        mmOptions["trainMdin"] = args.trainMdin
-        mmOptions["validMdin"] = args.validMdin
-        mmOptions["leap"] = "setup.leap"
-        mmOptions["heatCounter"] = self.heatCounter
-        if args.mmengine == "amber":
-            mmEngine = mmengine.ExternalAmberEngine(mmOptions)
+    def initializeMMEngine(self, inp):
+        if inp.mmengine == "amber":
+            mmEngine = mmengine.ExternalAmberEngine(inp)
         return mmEngine
 
     def initialCycle(self):
@@ -142,14 +97,14 @@ class Model(AbstractModel):
                 if len(splitLine) > 1:
                     if splitLine[0] == "name":
                         initialTarget = splitLine[1]
-        path = self.optdir / "targets" / initialTarget
+        path = self.inp.optdir / "targets" / initialTarget
         path.mkdir(parents=True, exist_ok=True)
         l = convertTCtoFB(
-            self.dynamicsdir / self.args.tcout,
-            self.dynamicsdir / self.args.coors,
-            self.args.stride,
-            self.args.start,
-            self.args.end,
+            self.dynamicsdir / self.inp.tcout,
+            self.dynamicsdir / self.inp.coors,
+            self.inp.stride,
+            self.inp.start,
+            self.inp.end,
             path / "qdata.txt",
             path / "all.mdcrd",
         )
@@ -224,7 +179,7 @@ class Model(AbstractModel):
         if not targets.exists():
             targets.mkdir()
         folders = [targets / f"train_{i}", targets / f"valid_{i}"]
-        for j in range(1, self.nvalids):
+        for j in range(1, self.inp.nvalids):
             folders.append(targets / f"valid_{i}_{j}")
         for f in folders:
             if not f.is_dir():
@@ -254,7 +209,7 @@ class Model(AbstractModel):
 
     def getSampleFolders(self, i):
         sampleFolders = [self.sampledir / f"{str(i)}_cycle_{str(i)}" / "train"]
-        for j in range(1, self.nvalids + 1):
+        for j in range(1, self.inp.nvalids + 1):
             sampleFolders.append(
                 self.sampledir / f"{str(i)}_cycle_{str(i)}" / f"valid_{j}"
             )

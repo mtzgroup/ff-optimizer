@@ -4,21 +4,10 @@ from shutil import copyfile, rmtree
 from ff_optimizer import mmengine
 
 from . import checkUtils
+from .test_inputs import getDefaults
+from pathlib import Path
+import pytest
 
-
-def getOptions():
-    options = {}
-    options["start"] = 33
-    options["end"] = 2000
-    options["split"] = 777
-    options["stride"] = 50
-    options["nvalids"] = 1
-    options["trainMdin"] = "md.in"
-    options["validMdin"] = "md.in"
-    options["leap"] = "setup.leap"
-    options["conformers"] = 1
-    options["coordPath"] = "."
-    return options
 
 
 def monkeyGetIndices(self):
@@ -43,7 +32,7 @@ def monkeyGetFrame(self, frame, dest):
 
 def monkeyGetFrames(self):
     return [
-        i for i in range((self.options["nvalids"] + 1) * self.options["conformers"])
+        i for i in range((self.inp.nvalids + 1) * self.inp.conformersperset)
     ]
 
 
@@ -52,26 +41,22 @@ def monkeySetup(self):
 
 
 def test_getFrames1(monkeypatch):
-    options = getOptions()
-    coordPath = os.path.join("..", "coors.xyz")
-    options["coordPath"] = coordPath
+    options = getDefaults()
+    options.split = True
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
-    print(os.listdir())
+    options.dynamicsdir = Path("..").absolute()
     # monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     mmEngine = mmengine.MMEngine(options)
-    print(os.listdir())
     frames = mmEngine.getFrames()
-    print(os.listdir())
     assert len(frames) == 2
     assert mmEngine.splitIndex > frames[0]
     assert mmEngine.splitIndex <= frames[1]
 
 
 def test_getMMsamples(monkeypatch):
-    options = getOptions()
-    coordPath = os.path.join("..", "coors.xyz")
-    options["coordPath"] = coordPath
+    options = getDefaults()
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
+    options.dynamicsdir = Path(".").absolute()
     if os.path.isdir("testSetup"):
         rmtree("testSetup")
     os.mkdir("testSetup")
@@ -95,25 +80,23 @@ def test_getMMsamples(monkeypatch):
     assert trainCrds == ["0\n"]
     assert validCrds == ["1\n"]
 
-
 def test_getFrames2(monkeypatch):
-    options = getOptions()
-    coordPath = os.path.join("..", "coors.xyz")
-    options["coordPath"] = coordPath
+    options = getDefaults()
+    options.split = True
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
+    options.dynamicsdir = Path("..").absolute()
     # monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     mmEngine = mmengine.MMEngine(options)
     frames = mmEngine.getFrames()
+    print(frames)
     assert len(frames) == 2
     assert mmEngine.splitIndex > frames[0]
     assert mmEngine.splitIndex <= frames[1]
 
-
 def test_getMMsamples(monkeypatch):
-    options = getOptions()
-    coordPath = os.path.join("..", "coors.xyz")
-    options["coordPath"] = coordPath
+    options = getDefaults()
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
+    options.dynamicsdir = Path(".").absolute()
     if os.path.isdir("testSetup"):
         rmtree("testSetup")
     os.mkdir("testSetup")
@@ -140,23 +123,19 @@ def test_getMMsamples(monkeypatch):
 
 # Also tests utils.writeRst()
 def test_getFrame(monkeypatch):
-    options = getOptions()
-    monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
-    options["coordPath"] = os.path.join(
-        "ff-optimizer", "tests", "mmengine", "coors.xyz"
-    )
-    os.chdir(os.path.dirname(__file__))
-    options["start"] = None
+    options = getDefaults()
+    os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
+    options.dynamicsdir = Path(".").absolute()
     mmEngine = mmengine.MMEngine(options)
 
-    mmEngine.getFrame(23, "23.rst7")
+    mmEngine.getFrame(23, "temp.rst7")
     testCoors = []
-    with open("23.rst7", "r") as f:
+    with open("temp.rst7", "r") as f:
         for line in f.readlines()[2:]:
             testCoors.append(line.split())
-    os.remove("23.rst7")
+    os.remove("temp.rst7")
     refCoors = []
-    with open(os.path.join("mmengine", "23.rst7"), "r") as f:
+    with open("23.rst7", "r") as f:
         for line in f.readlines()[2:]:
             refCoors.append(line.split())
     checkUtils.checkArrays(testCoors, refCoors)
@@ -179,14 +158,13 @@ def monkeySetup(self):
 
 # Tests restarting a completed directory
 def test_restart1(monkeypatch):
-    options = getOptions()
+    options = getDefaults()
+    os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
+    options.dynamicsdir = Path("..").absolute()
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.MMEngine, "setup", monkeySetup)
     monkeypatch.setattr(mmengine.MMEngine, "getMMSamples", monkeyGetSamples)
     monkeypatch.setattr(mmengine.MMEngine, "sample", monkeySample)
-    coordPath = os.path.join("mmengine", "coors.xyz")
-    options["coordPath"] = coordPath
-    os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
     mmEngine = mmengine.MMEngine(options)
 
     mmEngine.restart()
@@ -207,12 +185,13 @@ def test_restart1(monkeypatch):
 # Tests restarting a directory with one IC complete
 # Tests restarting a directory with a partially complete IC
 def test_restart2(monkeypatch):
-    options = getOptions()
+    options = getDefaults()
+    os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart2"))
+    options.dynamicsdir = Path("..").absolute()
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.MMEngine, "setup", monkeySetup)
     monkeypatch.setattr(mmengine.MMEngine, "getMMSamples", monkeyGetSamples)
     monkeypatch.setattr(mmengine.MMEngine, "sample", monkeySample)
-    os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart2"))
     mmEngine = mmengine.MMEngine(options)
 
     mmEngine.restart()
@@ -240,14 +219,14 @@ def test_restart2(monkeypatch):
 
 # Tests restarting a directory with the wrong number of rsts
 def test_restart3(monkeypatch):
-    options = getOptions()
+    options = getDefaults()
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.MMEngine, "setup", monkeySetup)
     monkeypatch.setattr(mmengine.MMEngine, "sample", monkeySample)
     monkeypatch.setattr(mmengine.MMEngine, "getFrame", monkeyGetFrame)
     monkeypatch.setattr(mmengine.MMEngine, "getFrames", monkeyGetFrames)
-    options["nvalids"] = 2
-    options["conformers"] = 2
+    options.nvalids = 2
+    options.conformersperset = 2
     if not os.path.isdir(
         os.path.join(os.path.dirname(__file__), "mmengine", "restart3")
     ):
@@ -289,12 +268,12 @@ def test_restart3(monkeypatch):
 
 
 def test_getFrames3(monkeypatch):
-    options = getOptions()
-    options["conformers"] = 3
-    options["nvalids"] = 2
-    coordPath = os.path.join("..", "coors.xyz")
-    options["coordPath"] = coordPath
+    options = getDefaults()
+    options.split = True
+    options.conformersperset = 3
+    options.nvalids = 2
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "restart1"))
+    options.dynamicsdir = Path("..").absolute()
     # monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     mmEngine = mmengine.MMEngine(options)
     frames = mmEngine.getFrames()
@@ -306,12 +285,11 @@ def test_getFrames3(monkeypatch):
 
 
 def test_getMMsamples2(monkeypatch):
-    options = getOptions()
-    options["conformers"] = 3
-    options["nvalids"] = 2
-    coordPath = os.path.join("..", "coors.xyz")
-    options["coordPath"] = coordPath
+    options = getDefaults()
+    options.conformersperset = 3
+    options.nvalids = 2
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
+    options.dynamicsdir = Path(".").absolute()
     if os.path.isdir("testSetup"):
         rmtree("testSetup")
     os.mkdir("testSetup")
@@ -334,6 +312,9 @@ def test_getMMsamples2(monkeypatch):
 
     os.chdir("..")
     rmtree("testSetup")
+    print(trainCrds)
+    print(validCrds[0])
+    print(validCrds[1])
     assert trainCrds == ["0\n", "1\n", "2\n"]
     assert validCrds[0] == ["3\n", "4\n", "5\n"]
     assert validCrds[1] == ["6\n", "7\n", "8\n"]

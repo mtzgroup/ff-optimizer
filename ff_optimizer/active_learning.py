@@ -12,8 +12,8 @@ from .model import AbstractModel, Model
 # from time import perf_counter
 
 
-def mmSampleStar(args):
-    mmSampleParallel(*args)
+def mmSampleStar(inp):
+    mmSampleParallel(*inp)
 
 
 def mmSampleParallel(model, folder, i):
@@ -21,8 +21,8 @@ def mmSampleParallel(model, folder, i):
     model.doMMSampling(i)
 
 
-def paramOptStar(args):
-    model = paramOptParallel(*args)
+def paramOptStar(inp):
+    model = paramOptParallel(*inp)
     return model
 
 
@@ -39,17 +39,9 @@ def sanderEnergyForce(geometry):
 
 
 class ActiveLearningModel(AbstractModel):
-    def __init__(self, args):
-        self.home = os.getcwd()
-        self.nmodels = args.activeLearning
-        self.nthreads = min(os.cpu_count(), self.nmodels)
-        self.models = []
-        self.trainGeometries = None
-        self.validGeometries = None
-        # account for the fact that models are in self.home/model_{i}
-        args.dynamicsdir = os.path.join("..", args.dynamicsdir)
-        args.nvalids = args.activeLearning - 1
-        os.chdir(args.optdir)
+    def __init__(self, inp):
+        self.setParams(inp)
+        os.chdir(inp.optdir)
         os.system(f"tleap -f setup.leap > leap.out")
         self.prmtop = None
         for f in os.listdir():
@@ -61,29 +53,40 @@ class ActiveLearningModel(AbstractModel):
         for i in range(1, self.nmodels + 1):
             folder = f"model_{str(i)}"
             if os.path.isdir(folder):
-                if not args.restart:
+                if not inp.restart:
                     rmtree(folder)
             else:
                 os.mkdir(folder)
-            if not os.path.isdir(os.path.join(folder, args.optdir)):
-                copytree(args.optdir, os.path.join(folder, args.optdir))
-            if not os.path.isdir(os.path.join(folder, args.sampledir)):
-                copytree(args.sampledir, os.path.join(folder, args.sampledir))
+            if not os.path.isdir(os.path.join(folder, inp.optdir)):
+                copytree(inp.optdir, os.path.join(folder, inp.optdir))
+            if not os.path.isdir(os.path.join(folder, inp.sampledir)):
+                copytree(inp.sampledir, os.path.join(folder, inp.sampledir))
             os.chdir(folder)
             # Want to sample multiple validation sets, but don't need to evaluate them all
             # So we need to compute restart cycle manually from this level
             # There must be a better way to do this
-            self.models.append(Model(args))
+            self.models.append(Model(inp))
             self.models[-1].optEngine.nvalids = 1
-            if args.restart:
+            if inp.restart:
                 self.models[-1].optEngine.determineRestart()
                 self.models[-1].restartCycle = self.models[-1].optEngine.restartCycle
             os.chdir(self.home)
-        if args.restart:
+        if inp.restart:
             self.restartCycle = min([m.restartCycle for m in self.models])
         else:
             self.restartCycle = -1
         self.symbols = None
+
+    def setParams(self, inp):
+        inp.nvalids = inp.activelearning - 1
+        self.home = os.getcwd()
+        self.nmodels = inp.activelearning
+        self.nthreads = min(os.cpu_count(), self.nmodels)
+        self.models = []
+        self.trainGeometries = None
+        self.validGeometries = None
+        # account for the fact that models are in self.home/model_{i}
+        self.dynamicsdir = os.path.join("..", inp.dynamicsdir)
 
     def initialCycle(self):
         for i in range(1, self.nmodels + 1):

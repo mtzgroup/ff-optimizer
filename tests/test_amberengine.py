@@ -4,19 +4,12 @@ from shutil import copyfile, rmtree
 import GPUtil
 import pytest
 from numpy import loadtxt
+from pathlib import Path
 
 from ff_optimizer import mmengine, utils
 
 from . import checkUtils
-
-options = {}
-options["start"] = 33
-options["end"] = 2000
-options["split"] = 777
-options["stride"] = 50
-options["coordPath"] = os.path.join("ff-optimizer", "tests", "mmengine", "coors.xyz")
-options["heatCounter"] = 8
-
+from .test_inputs import getDefaults
 
 def monkeyGetIndices(self):
     return 1, 2, 3
@@ -36,8 +29,9 @@ def monkeySander(self, prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=None)
         pass
     return
 
-
 def test_AmberInit(monkeypatch):
+    options = getDefaults()
+    options.heatCounter = 1
     def monkeyFail(maxLoad=0):
         raise RuntimeError("Oops")
 
@@ -56,10 +50,12 @@ def test_AmberInit(monkeypatch):
 
 @pytest.mark.amber
 def test_runSander(monkeypatch):
+    inp = getDefaults()
+    inp.heatCounter = 1
+    inp.dynamicsdir = Path("tests") / "mmengine"
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
-    options["coordPath"] = os.path.join("tests", "mmengine", "coors.xyz")
-    mmEngine = mmengine.ExternalAmberEngine(options)
+    mmEngine = mmengine.ExternalAmberEngine(inp)
     mmEngine.amberExe = "pmemd"
     mmEngine.runSander(
         "water.prmtop", "md.in", "md.out", "1.rst7", "md.mdcrd", "md.rst7"
@@ -75,10 +71,12 @@ def test_runSander(monkeypatch):
 @pytest.mark.gpu
 @pytest.mark.amber
 def test_runSanderCUDA(monkeypatch):
+    inp = getDefaults()
+    inp.heatCounter = 1
+    inp.dynamicsdir = Path("tests") / "mmengine"
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
-    options["coordPath"] = os.path.join("tests", "mmengine", "coors.xyz")
-    mmEngine = mmengine.ExternalAmberEngine(options)
+    mmEngine = mmengine.ExternalAmberEngine(inp)
     mmEngine.amberExe = "pmemd.cuda"
     mmEngine.runSander(
         "water.prmtop", "md.in", "md.out", "1.rst7", "md.mdcrd", "md.rst7"
@@ -93,16 +91,19 @@ def test_runSanderCUDA(monkeypatch):
 
 @pytest.mark.amber
 def test_sample(monkeypatch):
+    inp = getDefaults()
+    inp.heatCounter = 1
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.ExternalAmberEngine, "runSander", monkeySander)
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "sample"))
+    inp.dynamicsdir = Path("..").absolute()
+
     if os.path.isdir("train"):
         rmtree("train")
     os.mkdir("train")
 
     copyfile("928.rst7", os.path.join("train", "928.rst7"))
-    options["coordPath"] = "coors.xyz"
-    mmEngine = mmengine.ExternalAmberEngine(options)
+    mmEngine = mmengine.ExternalAmberEngine(inp)
     mmEngine.prmtop = "water.prmtop"
     mmEngine.symbols = utils.getSymbolsFromPrmtop("water.prmtop")
 
@@ -122,11 +123,13 @@ def test_sample(monkeypatch):
 
 @pytest.mark.amber
 def test_sample_conformers(monkeypatch):
+    inp = getDefaults()
+    inp.heatCounter = 1
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     monkeypatch.setattr(mmengine.ExternalAmberEngine, "runSander", monkeySander)
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine", "sample_conformers"))
-    options["conformers"] = 3
-    mmEngine = mmengine.ExternalAmberEngine(options)
+    inp.dynamicsdir = Path("..").absolute()
+    mmEngine = mmengine.ExternalAmberEngine(inp)
     mmEngine.prmtop = "water.prmtop"
     mmEngine.symbols = utils.getSymbolsFromPrmtop("water.prmtop")
     if os.path.isdir("valid_1"):

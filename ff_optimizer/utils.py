@@ -396,7 +396,7 @@ def convertNCtoXYZs(nc, symbols, offset=0):
     for i in range(coords.shape[0]):
         with open(f"{i+1+offset}.xyz", "w") as f:
             f.write(f"{natoms}\n")
-            f.write("Converted from {nc}, frame {i}\n")
+            f.write(f"Converted from {nc}, frame {i}\n")
             for j in range(natoms):
                 f.write(
                     "%3s %14.7f %14.7f %14.7f\n"

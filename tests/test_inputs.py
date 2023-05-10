@@ -9,23 +9,25 @@ import pytest
 
 home = Path(__name__).parent.absolute()
 
+def fakePostInit(self):
+    self.pathify()
+
 def getDefaults():
-    os.chdir(home / "inputs" / "default") 
-    inp = inputs.Inputs.fromYaml("nothing.yaml")
+    setattr(inputs.Input, "__post_init__", fakePostInit)
+    with open("nothing.yaml",'w') as f:
+        f.write(" ")
+    inp = inputs.Input.fromYaml("nothing.yaml")
+    os.remove("nothing.yaml")
     return inp
 
 def test_defaults():
-    os.chdir(home / "inputs" / "default") 
-    inp = inputs.Inputs.fromYaml("nothing.yaml")
-    assert type(inp) is inputs.Inputs
-    assert type(inp.generalInput) is inputs.GeneralInput
-    assert type(inp.mmInput) is inputs.MMInput
-    assert type(inp.qmInput) is inputs.QMInput
+    inp = getDefaults()
+    assert type(inp) is inputs.Input
 
 def test_checkForFile1():
     os.chdir(home / "inputs")
     try:
-        inputs.checkForFile("default", "1_opt")
+        inputs.checkForFile(Path("default") / "1_opt")
         failed = False
     except FileNotFoundError:
         failed = True
@@ -34,7 +36,7 @@ def test_checkForFile1():
 def test_checkForFile2():
     os.chdir(home / "inputs")
     try:
-        inputs.checkForFile("default", "1_opt", isFile=False)
+        inputs.checkForFile(Path("default") / "1_opt", isFile=False)
         found = True
     except FileNotFoundError:
         found = False
