@@ -274,7 +274,6 @@ def test_getMdFiles(monkeypatch):
 def monkeyInitSetArgsOnly(self, args):
     self.setArgs(args)
 
-<<<<<<< HEAD
 #def test_setArgs(monkeypatch):
 #    args = getDefaults()
 #    args.respPriors = 1
@@ -298,34 +297,6 @@ def monkeyInitSetArgsOnly(self, args):
 #        moved = False
 #    assert moved
 #    assert m.doResp
-=======
-
-def test_setArgs(monkeypatch):
-    args = FakeArgs()
-    args.respPriors = 1
-    args.valid0 = "v0.in"
-    args.opt0 = "o0.in"
-    os.chdir(home / "model" / "test4")
-    v0 = Path("1_opt") / "valid_0.in"
-    o0 = Path("1_opt") / "opt_0.in"
-    if v0.is_file():
-        v0.rename(Path("1_opt") / "v0.in")
-    if o0.is_file():
-        o0.rename(Path("1_opt") / "o0.in")
-    monkeypatch.setattr(model.Model, "__init__", monkeyInitSetArgsOnly)
-    m = model.Model(args)
-    moved = True
-    if v0.is_file():
-        v0.rename(Path("1_opt") / "v0.in")
-    else:
-        moved = False
-    if o0.is_file():
-        o0.rename(Path("1_opt") / "o0.in")
-    else:
-        moved = False
-    assert moved
-    assert m.doResp
->>>>>>> Feature stdouts for failed jobs (#66)
 
 
 def monkeyConvert(a, b, c, d, e, qdata, mdcrd):
