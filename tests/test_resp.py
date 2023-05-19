@@ -1,5 +1,4 @@
 import os
-import pytest
 from shutil import copyfile
 
 from numpy import loadtxt
@@ -157,6 +156,7 @@ def test_getRepeats1():
         [41],
     ]
     assert checkUtils.checkLists(refRepeats, respPriors.repeats)
+
 
 def test_getRepeats2():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))

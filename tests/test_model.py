@@ -6,7 +6,6 @@ from ff_optimizer import model, optengine
 
 from . import checkUtils
 from .test_inputs import getDefaults
-import pytest
 
 home = Path(__name__).parent.absolute()
 
@@ -198,6 +197,7 @@ def clean():
     else:
         os.chdir("..")
 
+
 def test_doParameterOptimization(monkeypatch):
     args = getDefaults()
     args.optdir = Path("1_optimization")
@@ -274,7 +274,8 @@ def test_getMdFiles(monkeypatch):
 def monkeyInitSetArgsOnly(self, args):
     self.setArgs(args)
 
-#def test_setArgs(monkeypatch):
+
+# def test_setArgs(monkeypatch):
 #    args = getDefaults()
 #    args.respPriors = 1
 #    args.valid0 = "v0.in"

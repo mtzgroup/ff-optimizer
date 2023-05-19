@@ -6,7 +6,7 @@ from ff_optimizer import mmengine, utils
 
 from . import checkUtils
 from .test_inputs import getDefaults
-import pytest
+
 
 def monkeyGetIndices(self):
     return 1, 2, 3
@@ -16,6 +16,7 @@ def clean():
     for f in os.listdir():
         if f.endswith(".xyz") or f.endswith(".nc") or f.endswith(".out"):
             os.remove(f)
+
 
 def test_sample(monkeypatch):
     options = getDefaults()

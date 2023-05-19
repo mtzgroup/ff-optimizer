@@ -1,15 +1,16 @@
 import os
+from pathlib import Path
 from shutil import copyfile, rmtree
 
 import GPUtil
 import pytest
 from numpy import loadtxt
-from pathlib import Path
 
 from ff_optimizer import mmengine, utils
 
 from . import checkUtils
 from .test_inputs import getDefaults
+
 
 def monkeyGetIndices(self):
     return 1, 2, 3
@@ -29,9 +30,11 @@ def monkeySander(self, prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=None)
         pass
     return
 
+
 def test_AmberInit(monkeypatch):
     options = getDefaults()
     options.heatCounter = 1
+
     def monkeyFail(maxLoad=0):
         raise RuntimeError("Oops")
 

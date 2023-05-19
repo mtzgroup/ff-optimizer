@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from shutil import copyfile, rmtree
 
-from . import mmengine, optengine, qmengine, inputs
+from . import mmengine, optengine, qmengine
 from .utils import convertTCtoFB, getXYZs
 
 
@@ -12,9 +12,9 @@ from .utils import convertTCtoFB, getXYZs
 # use the inherited class
 class AbstractModel:
     def __init__(self):
-        #self.restartCycle = -1
-        #raise NotImplementedError
-        #commented in case using super becomes necessary
+        # self.restartCycle = -1
+        # raise NotImplementedError
+        # commented in case using super becomes necessary
         pass
 
     def initialCycle(self):

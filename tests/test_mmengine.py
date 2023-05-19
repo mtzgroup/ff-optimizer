@@ -1,13 +1,11 @@
 import os
+from pathlib import Path
 from shutil import copyfile, rmtree
 
 from ff_optimizer import mmengine
 
 from . import checkUtils
 from .test_inputs import getDefaults
-from pathlib import Path
-import pytest
-
 
 
 def monkeyGetIndices(self):
@@ -31,9 +29,7 @@ def monkeyGetFrame(self, frame, dest):
 
 
 def monkeyGetFrames(self):
-    return [
-        i for i in range((self.inp.nvalids + 1) * self.inp.conformersperset)
-    ]
+    return [i for i in range((self.inp.nvalids + 1) * self.inp.conformersperset)]
 
 
 def monkeySetup(self):
@@ -80,6 +76,7 @@ def test_getMMsamples(monkeypatch):
     assert trainCrds == ["0\n"]
     assert validCrds == ["1\n"]
 
+
 def test_getFrames2(monkeypatch):
     options = getDefaults()
     options.split = True
@@ -92,6 +89,7 @@ def test_getFrames2(monkeypatch):
     assert len(frames) == 2
     assert mmEngine.splitIndex > frames[0]
     assert mmEngine.splitIndex <= frames[1]
+
 
 def test_getMMsamples(monkeypatch):
     options = getDefaults()

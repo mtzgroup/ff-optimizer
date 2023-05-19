@@ -67,7 +67,6 @@ class OptEngine:
 
         # Initialize RESP priors
         if self.inp.resppriors != 0:
-            respOptions = {}
             mol2 = os.path.join(self.optdir, self.mol2)
             self.respPriors = resp_prior.RespPriors(self.inp, mol2, self.prmtop)
 

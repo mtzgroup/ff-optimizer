@@ -1,7 +1,6 @@
 import errno
 import os
 from shutil import copyfile, rmtree
-import pytest
 
 import numpy as np
 
@@ -39,11 +38,13 @@ def cleanOptDir(optdir, removeResult=False):
         ):
             os.remove(os.path.join(optdir, f))
 
+
 def makeFFfolder(frcmod, mol2):
     if not os.path.isdir("forcefield"):
         os.mkdir("forcefield")
     copyfile(frcmod, os.path.join("forcefield", frcmod))
     copyfile(mol2, os.path.join("forcefield", mol2))
+
 
 def test_init1():
     os.chdir(os.path.dirname(__file__))
@@ -414,6 +415,7 @@ def monkeyForceBalance(command):
             if f.endswith(".mol2"):
                 copyfile(os.path.join("forcefield", f), f"prev_{f}")
 
+
 def test_optimizeForcefield0(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
@@ -445,6 +447,7 @@ def test_optimizeForcefield0(monkeypatch):
     assert filesFound
     assert checkUtils.checkLists(testMol2Lines, refMol2Lines)
     assert checkUtils.checkLists(testLines, refLines)
+
 
 def test_optimizeForcefield1(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
@@ -574,8 +577,10 @@ def test_sortParams2():
     refParams = [1.6289e-01, 1.6289e-01, 1.4744e-01, 1.4744e-01, 1.4744e-01]
     assert checkUtils.checkArrays(refParams, optEngine.params[:5, 137])
 
+
 def monkeyGetUnits(self):
     self.units = 2
+
 
 def test_respPriors(monkeypatch):
     def monkeyGraph():
@@ -622,6 +627,7 @@ def test_respPriors(monkeypatch):
     cleanOptDir(options.optdir, removeResult=True)
     assert check1
     assert check2
+
 
 def test_restartResp(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
@@ -681,6 +687,7 @@ def test_setupInputFiles_multipleValids():
     checkUtils.checkLists(testLinesValid2, refLinesValid2)
     checkUtils.checkLists(testLinesValidInitial2, refLinesValidInitial2)
 
+
 def test_optimizeForcefield_multipleValids(monkeypatch):
     def monkeyForceBalance(command):
         split = command.split()
@@ -731,6 +738,7 @@ def test_optimizeForcefield_multipleValids(monkeypatch):
     cleanOptDir(options.optdir, removeResult=True)
     assert valid1 == 3
     assert valid2 == 3
+
 
 def test_determineRestart_multipleValids():
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
@@ -806,6 +814,7 @@ def setupFFdir(optdir):
     copyfile("dasa.frcmod", os.path.join("forcefield", "initial_dasa.frcmod"))
     copyfile("dasa.mol2", os.path.join("forcefield", "initial_dasa.mol2"))
     os.chdir("..")
+
 
 # Restart from new FB cycle
 def test_restart1Params(monkeypatch):

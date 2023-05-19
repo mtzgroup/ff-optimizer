@@ -1,16 +1,19 @@
-import yaml
-from pathlib import Path
 import errno
-from os import strerror
 from dataclasses import dataclass
+from os import strerror
+from pathlib import Path
 
-def checkForFile(f, isFile = True):
+import yaml
+
+
+def checkForFile(f, isFile=True):
     if isFile:
         if not f.is_file():
             raise FileNotFoundError(errno.ENOENT, strerror(errno.ENOENT), f.absolute())
     else:
         if not f.is_dir():
             raise FileNotFoundError(errno.ENOENT, strerror(errno.ENOENT), f.absolute())
+
 
 def checkDirectory(directory, fs):
     if type(directory) is str:
@@ -19,44 +22,45 @@ def checkDirectory(directory, fs):
     for f in fs:
         checkForFile(directory / f, True)
 
+
 # Flat list of options for now
 @dataclass
 class Input:
     # General parameters
-    dynamicsdir : str = "0_dynamics"
-    optdir : str = "1_opt"
-    sampledir : str = "2_sampling"
-    coors : str = "coors.xyz"
-    start : int = None
-    end : int = None
-    split : int = None
-    resp : float = 0
-    nvalids : int = 1
-    restart : bool = False
-    activelearning : int = 1
-    maxcycles : int = 30
+    dynamicsdir: str = "0_dynamics"
+    optdir: str = "1_opt"
+    sampledir: str = "2_sampling"
+    coors: str = "coors.xyz"
+    start: int = None
+    end: int = None
+    split: int = None
+    resp: float = 0
+    nvalids: int = 1
+    restart: bool = False
+    activelearning: int = 1
+    maxcycles: int = 30
     # MM-specific parameters
-    mmengine : str = "amber"
-    trainmdin : str = "md.in"
-    validmdin : str = "md.in"
-    conformers : str = None
-    conformersperset : int = 1
+    mmengine: str = "amber"
+    trainmdin: str = "md.in"
+    validmdin: str = "md.in"
+    conformers: str = None
+    conformersperset: int = 1
     # QM-specific parameters
-    qmengine : str = "chemcloud" 
-    #tctemplate : str = "tc_template.in"
-    #sbatchtemplate : str = "sbatch_template.sh"
-    #tctemplate_backup : str = "tc_template_backup.in"
+    qmengine: str = "chemcloud"
+    # tctemplate : str = "tc_template.in"
+    # sbatchtemplate : str = "sbatch_template.sh"
+    # tctemplate_backup : str = "tc_template_backup.in"
     # opt-specific parameters
-    resppriors : int = 0
-    #opt0 : str = "opt_0.in"
-    #valid0 : str = "valid_0.in"
-    stride : int = 50
-    tcout : str = "tc.out"
+    resppriors: int = 0
+    # opt0 : str = "opt_0.in"
+    # valid0 : str = "valid_0.in"
+    stride: int = 50
+    tcout: str = "tc.out"
 
     @classmethod
     def fromYaml(cls, inputs):
         if Path(inputs).is_file():
-            with open(inputs, 'r') as f:
+            with open(inputs, "r") as f:
                 di = yaml.safe_load(f)
         else:
             di = {}
@@ -84,13 +88,14 @@ class Input:
         if self.qmengine == "sbatch":
             sampleFiles.append("sbatch_template.sh")
         checkDirectory(self.sampledir, sampleFiles)
-        
-        
+
     def checkParams(self):
         if self.resppriors != 1 and self.resppriors != 2 and self.resppriors != 0:
             raise ValueError("RESP prior mode must be either 0, 1, or 2")
         if self.stride < 1:
-            raise ValueError("Stride for creating initial data from dynamics must be at least 1")
+            raise ValueError(
+                "Stride for creating initial data from dynamics must be at least 1"
+            )
         qmengines = ["chemcloud", "sbatch", "debug"]
         if self.qmengine not in qmengines:
             raise ValueError(f"QMEngine {self.qmengine} has not been implemented")
@@ -107,17 +112,23 @@ class Input:
                 raise ValueError(f"Start frame {self.start} must be > 0")
             if self.end is not None:
                 if self.end <= self.start:
-                    raise ValueError(f"Start frame {self.start} must be less than end frame {self.end}")
+                    raise ValueError(
+                        f"Start frame {self.start} must be less than end frame {self.end}"
+                    )
             if self.split is not None:
                 if self.split <= self.start:
-                    raise ValueError(f"Start frame {self.start} must be less than split frame {self.split}")
+                    raise ValueError(
+                        f"Start frame {self.start} must be less than split frame {self.split}"
+                    )
 
         if self.end is not None:
             if self.end < 0:
                 raise ValueError(f"End frame {self.end} must be > 0")
             if self.split is not None:
                 if self.split > self.end:
-                    raise ValueError(f"End frame {self.end} must be >= split frame {self.split}")
+                    raise ValueError(
+                        f"End frame {self.end} must be >= split frame {self.split}"
+                    )
         if self.resp > 1 or self.resp < 0:
             raise ValueError("RESP weight must be in [0, 1]")
         if self.nvalids < 1:
@@ -125,5 +136,6 @@ class Input:
         if self.activelearning < 1:
             raise ValueError("Must have at least one model")
         if self.maxcycles < 0:
-            raise ValueError("So you just don't want me to do anything? Check maxcycles.")
-        
+            raise ValueError(
+                "So you just don't want me to do anything? Check maxcycles."
+            )

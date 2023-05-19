@@ -1,5 +1,5 @@
 try:
-    import sander
+    pass
 except:
     pass
 import os
@@ -155,9 +155,7 @@ class MMEngine:
             if not os.path.isdir(validName):
                 os.mkdir(validName)
                 validFrames = frames[
-                    i
-                    * self.inp.conformersperset : (i + 1)
-                    * self.inp.conformersperset
+                    i * self.inp.conformersperset : (i + 1) * self.inp.conformersperset
                 ]
                 for frame in validFrames:
                     self.getFrame(frame, os.path.join(validName, f"{str(frame)}.rst7"))
@@ -227,7 +225,7 @@ class MMEngine:
         self.getMMSamples()
 
 
-#class AmberEngine(MMEngine):
+# class AmberEngine(MMEngine):
 #    def __init__(self, options):
 #        super().__init__(options)
 #        inputs = sander.gas_input()

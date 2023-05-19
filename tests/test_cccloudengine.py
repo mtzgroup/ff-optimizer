@@ -5,7 +5,7 @@ from qcelemental.util.serialization import json_loads
 
 from ff_optimizer import qmengine
 
-import pytest
+
 def test_init():
     os.chdir(os.path.dirname(__file__))
     chemcloudEngine = qmengine.CCCloudEngine("qmengine/tc.in", "qmengine/tc_backup.in")
@@ -17,6 +17,7 @@ def test_init():
     assert chemcloudEngine.backupKeywords["threall"] == "1.0e-14"
     assert chemcloudEngine.backupKeywords["diismaxvecs"] == "40"
     assert chemcloudEngine.backupKeywords["maxit"] == "200"
+
 
 def test_loadMoleculeFromXYZ1():
     os.chdir(os.path.dirname(__file__))

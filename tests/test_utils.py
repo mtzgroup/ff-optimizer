@@ -82,6 +82,7 @@ def test_convertPDBtoMolecule():
     for i in range(len(testMol.symbols)):
         assert testMol.symbols[i] == refMol.symbols[i]
 
+
 def test_writeRst():
     os.chdir(home)
     coords = np.loadtxt(
