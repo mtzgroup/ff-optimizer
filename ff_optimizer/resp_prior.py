@@ -11,21 +11,22 @@ from scipy.stats import norm
 
 
 class RespPriors:
-    def __init__(self, options: dict):
+    def __init__(self, inp, mol2, prmtop):
         # We run RespPriors from within optdir but initialize in the main directory
         # getCharges will determine automatically where we are
-        self.sampledir = options["sampledir"]
-        self.prmtop = options["prmtop"]
+        self.sampledir = inp.sampledir
+        self.prmtop = prmtop
         self.allEsp = []
         self.allResp = []
-        self.getRepeats(options["mol2"])
-        self.mode = options["mode"]
+        self.getRepeats(mol2)
+        self.mode = inp.resppriors
         self.getUnits()
 
     def getUnits(self):
         self.units = 0
         inResidues = False
         almostInResidues = False
+        print(os.getcwd())
         with open(self.prmtop, "r") as f:
             for line in f.readlines():
                 if "%FLAG" in line:

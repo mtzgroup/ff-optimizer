@@ -8,6 +8,7 @@ import pytest
 from ff_optimizer import active_learning, model, optengine, qmengine, utils
 
 from . import checkUtils
+from .test_inputs import getDefaults
 
 
 class FakeModel:
@@ -17,38 +18,13 @@ class FakeModel:
 
 
 class FakeMMEngine:
-    def __init__(self, options={}):
+    def __init__(self):
         self.prmtop = "amber.prmtop"
 
 
-class FakeArgs:
-    def __init__(self):
-        self.activeLearning = 3
-        self.sampledir = "2_sampling"
-        self.optdir = "1_opt"
-        self.dynamicsdir = "0_dynamics"
-        self.restart = False
-        self.valid0 = "valid_0.in"
-        self.opt0 = "opt_0.in"
-        self.resp = 0
-        self.respPriors = 0
-        self.maxcycles = 100
-        self.qmengine = "chemcloud"
-        self.tctemplate = "tc_template.in"
-        self.tctemplate_backup = "tc_template_long.in"
-        self.conformers = 1
-        self.mmengine = "amber"
-        self.conformers = "coors.xyz"
-        self.coors = "coors.xyz"
-        self.tcout = "tc.out"
-        self.trainMdin = "train_md.in"
-        self.validMdin = "valid_md.in"
-        self.conformersPerSet = 1
-
-
-def monkeyInit(self, args):
-    self.nmodels = args.activeLearning
-    self.models = [FakeModel(args) for i in range(self.nmodels)]
+def monkeyInit(self, inp):
+    self.nmodels = inp.activelearning
+    self.models = [FakeModel(inp) for i in range(self.nmodels)]
     self.symbols = None
     self.restartCycle = -1
     self.trainGeometries = None
@@ -59,7 +35,7 @@ def monkeyInit(self, args):
 def test_computeEnergyForceSP(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "active_learning"))
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
-    args = FakeArgs()
+    args = getDefaults()
     model = active_learning.ActiveLearningModel(args)
     geometry = np.loadtxt(
         "coords.xyz", usecols=(1, 2, 3), skiprows=2, max_rows=84
@@ -97,7 +73,7 @@ def readXYZTraj(filename):
 def test_computeEnergyForceAll(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "active_learning"))
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
-    args = FakeArgs()
+    args = getDefaults()
     model = active_learning.ActiveLearningModel(args)
     os.chdir(os.path.join(os.path.dirname(__file__), "active_learning"))
     frames = readXYZTraj("coords.xyz")
@@ -118,7 +94,8 @@ def test_collectAll(monkeypatch):
 
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
     monkeypatch.setattr(os, "remove", dontRemove)
-    args = FakeArgs()
+    args = getDefaults()
+    args.activelearning = 3
     model = active_learning.ActiveLearningModel(args)
     model.restartCycle = -1
 
@@ -140,7 +117,8 @@ def test_collectAll2(monkeypatch):
     )
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
     monkeypatch.setattr(os, "remove", dontRemove)
-    args = FakeArgs()
+    args = getDefaults()
+    args.activelearning = 3
     model = active_learning.ActiveLearningModel(args)
     model.restartCycle = 7
 
@@ -164,8 +142,8 @@ def test_collectAll3(monkeypatch):
     )
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
     monkeypatch.setattr(os, "remove", dontRemove)
-    args = FakeArgs()
-    args.activeLearning = 2
+    args = getDefaults()
+    args.activelearning = 2
     model = active_learning.ActiveLearningModel(args)
     model.restartCycle = 7
 
@@ -182,7 +160,7 @@ def test_computeAll(monkeypatch):
         os.path.join(os.path.dirname(__file__), "active_learning", "collectGeometries")
     )
     monkeypatch.setattr(os, "remove", dontRemove)
-    args = FakeArgs()
+    args = getDefaults()
     model = active_learning.ActiveLearningModel(args)
     geometries = model.collectAll(7, 1)
     os.chdir(os.path.join("..", "computeAll"))
@@ -197,7 +175,7 @@ def test_chooseGeometries3Models(monkeypatch):
     os.chdir(
         os.path.join(os.path.dirname(__file__), "active_learning", "chooseGeometries")
     )
-    args = FakeArgs()
+    args = getDefaults()
     model = active_learning.ActiveLearningModel(args)
     energies = []
     forces = []
@@ -217,7 +195,7 @@ def test_chooseGeometriesOdd(monkeypatch):
     os.chdir(
         os.path.join(os.path.dirname(__file__), "active_learning", "chooseGeometries")
     )
-    args = FakeArgs()
+    args = getDefaults()
     model = active_learning.ActiveLearningModel(args)
     energies = []
     forces = []
@@ -237,8 +215,8 @@ def test_chooseGeometries2Models(monkeypatch):
     os.chdir(
         os.path.join(os.path.dirname(__file__), "active_learning", "chooseGeometries")
     )
-    args = FakeArgs()
-    args.activeLearning = 2
+    args = getDefaults()
+    args.activelearning = 2
     model = active_learning.ActiveLearningModel(args)
     energies = []
     forces = []
@@ -274,7 +252,8 @@ def test_doActiveLearning(monkeypatch):
     os.chdir(
         os.path.join(os.path.dirname(__file__), "active_learning", "doActiveLearning")
     )
-    args = FakeArgs()
+    args = getDefaults()
+    args.activelearning = 3
     model = active_learning.ActiveLearningModel(args)
     model.prmtop = "amber.prmtop"
     folders = ["train", "valid_1", "valid_2"]
@@ -343,8 +322,8 @@ def test_doActiveLearning2(monkeypatch):
     os.chdir(
         os.path.join(os.path.dirname(__file__), "active_learning", "doActiveLearning2")
     )
-    args = FakeArgs()
-    args.activeLearning = 2
+    args = getDefaults()
+    args.activelearning = 2
     model = active_learning.ActiveLearningModel(args)
     model.prmtop = "water.prmtop"
     model.doActiveLearning(7)
@@ -393,8 +372,9 @@ def test_init(monkeypatch):
     monkeypatch.setattr(model.Model, "__init__", monkeyInitModel)
     monkeypatch.setattr(os, "system", monkeySystemNoLeap)
     random.seed(1015)
-    args = FakeArgs()
+    args = getDefaults()
     args.restart = True
+    args.activelearning = 3
     os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "init"))
     for i in range(1, 4):
         if os.path.isdir(f"model_{i}"):
@@ -416,20 +396,20 @@ def test_init(monkeypatch):
 def monkeyInitOpt(self, args):
     self.train = []
     self.valid = []
-    self.nvalids = args["nvalids"]
+    self.nvalids = args.nvalids
     self.validPrevious = []
     self.validInitial = []
-    self.maxCycles = args["maxCycles"]
-    self.optdir = args["optdir"]
-    self.restartCycle = self.determineRestart()
+    self.maxCycles = args.maxcycles
+    self.optdir = args.optdir
     self.respPriors = None
+    self.restartCycle = self.determineRestart()
 
 
 def monkeyInitMM(self, args):
     pass
 
 
-def monkeyInitQM(self, arg1, arg2, doResp):
+def monkeyInitQM(self, args):
     pass
 
 
@@ -444,7 +424,8 @@ def test_restart(monkeypatch):
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
     monkeypatch.setattr(os, "rename", monkeyRename)
 
-    args = FakeArgs()
+    args = getDefaults()
+    args.activelearning = 3
     args.restart = True
     os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "restart"))
     mod = active_learning.ActiveLearningModel(args)
@@ -470,8 +451,8 @@ def monkeyGraphResults(self):
 
 
 def monkeyOptInit(self, args):
-    self.nvalids = args["nvalids"]
-    for f in os.listdir(args["optdir"]):
+    self.nvalids = args.nvalids
+    for f in os.listdir(args.optdir):
         if f.endswith(".mol2"):
             self.mol2 = f
         elif f.endswith(".frcmod"):
@@ -511,8 +492,8 @@ def clean():
 
 def monkeyALInit(self, args):
     self.home = os.getcwd()
-    self.nmodels = args.activeLearning
-    args.nvalids = args.activeLearning
+    self.nmodels = args.activelearning
+    args.nvalids = args.activelearning
     self.models = []
     for i in range(1, self.nmodels + 1):
         folder = f"model_{str(i)}"
@@ -525,8 +506,8 @@ def monkeyALInit(self, args):
 
 
 def test_doParameterOptimization(monkeypatch):
-    args = FakeArgs()
-    args.activeLearning = 2
+    args = getDefaults()
+    args.activelearning = 2
     args.restart = True
     os.chdir(
         os.path.join(
@@ -590,7 +571,7 @@ def monkeyFB(command):
 #    monkeypatch.setattr(mmengine.MMEngine, "getMMSamples", monkeyMMSamples)
 #    monkeypatch.setattr(os, "system", monkeyFB)
 #
-#    args = FakeArgs()
+#    args = getDefaults()
 #    args.restart = True
 #    args.dynamicsdir = "../../1_dynamics/2_all"
 #    os.chdir("/home/curtie/7_FF_fitting/0_ff-optimizer/4_alanine_tetrapeptide/5_40_ppc/6_active_learning_3_models")

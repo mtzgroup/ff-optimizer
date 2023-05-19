@@ -200,7 +200,7 @@ class QMEngine:
 
     # This is the function which must be implemented by inherited classes
     def getQMRefData(self, xyzs: list):
-        pass
+        raise NotImplementedError()
 
 
 class SbatchEngine(QMEngine):

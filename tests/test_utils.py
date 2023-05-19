@@ -86,18 +86,20 @@ def test_convertPDBtoMolecule():
 def test_writeRst():
     os.chdir(home)
     coords = np.loadtxt(
-        os.path.join("mmengine", "23.xyz"), skiprows=2, usecols=(1, 2, 3)
+        os.path.join("mmengine", "test.xyz"), skiprows=2, usecols=(1, 2, 3)
     )
-    utils.writeRst(list(coords), coords.shape[0], "23.rst7")
+    utils.writeRst(list(coords), coords.shape[0], "test.rst7")
     testCoors = []
-    with open("23.rst7", "r") as f:
+    with open("test.rst7", "r") as f:
         for line in f.readlines()[2:]:
-            testCoors.append(line.split())
-    os.remove("23.rst7")
+            for token in line.split():
+                testCoors.append(token)
+    os.remove("test.rst7")
     refCoors = []
-    with open(os.path.join("mmengine", "23.rst7"), "r") as f:
+    with open(os.path.join("mmengine", "test.rst7"), "r") as f:
         for line in f.readlines()[2:]:
-            refCoors.append(line.split())
+            for token in line.split():
+                refCoors.append(token)
     checkUtils.checkArrays(testCoors, refCoors)
 
 

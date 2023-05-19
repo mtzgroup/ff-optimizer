@@ -5,15 +5,7 @@ from numpy import loadtxt
 from ff_optimizer import mmengine, utils
 
 from . import checkUtils
-
-options = {}
-options["start"] = 33
-options["end"] = 2000
-options["split"] = 777
-options["stride"] = 50
-options["coordPath"] = os.path.join("ff-optimizer", "tests", "mmengine", "coors.xyz")
-options["heatCounter"] = 8
-
+from .test_inputs import getDefaults
 
 def monkeyGetIndices(self):
     return 1, 2, 3
@@ -26,6 +18,7 @@ def clean():
 
 
 def test_sample(monkeypatch):
+    options = getDefaults()
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
     mmEngine = mmengine.ExternalOpenMMEngine(options)
