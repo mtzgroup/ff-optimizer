@@ -4,7 +4,10 @@ from random import sample
 from shutil import copytree, rmtree
 
 import numpy as np
-import sander
+try:
+    import sander
+except:
+    pass
 
 from . import utils
 from .model import AbstractModel, Model

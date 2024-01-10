@@ -13,12 +13,12 @@ coordinates = app.AmberInpcrdFile(rst)
 prmtop = app.AmberPrmtopFile(prmtopFile)
 system = prmtop.createSystem(
     nonbondedMethod=app.NoCutoff,
-    nonbondedCutoff=1 * unit.nanometer,
+    nonbondedCutoff=2 * unit.nanometer,
     removeCMMotion=True,
     constraints=None,
     rigidWater=True,
 )
-integrator = mm.VerletIntegrator(0.001 * unit.picoseconds)
+integrator = mm.VerletIntegrator(0.0002 * unit.picoseconds)
 integrator.setConstraintTolerance(1e-05)
 
 force = mm.CustomExternalForce("k*max(0, r-0.563)^2; r=sqrt(x*x+y*y+z*z)")
@@ -33,5 +33,5 @@ simulation = app.Simulation(prmtop.topology, system, integrator, platform)
 simulation.context.setPositions(coordinates.positions)
 simulation.minimizeEnergy(maxIterations=10)
 
-simulation.reporters.append(NetCDFReporter(f"{name}.nc", 10))
-simulation.step(80)
+simulation.reporters.append(NetCDFReporter(f"{name}.nc", 40))
+simulation.step(320)
