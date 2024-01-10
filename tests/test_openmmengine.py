@@ -7,6 +7,7 @@ from ff_optimizer import mmengine, utils
 from . import checkUtils
 from .test_inputs import getDefaults
 
+
 def monkeyGetIndices(self):
     return 1, 2, 3
 
