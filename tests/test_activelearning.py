@@ -402,6 +402,7 @@ def monkeyInitOpt(self, args):
     self.maxCycles = args.maxcycles
     self.optdir = args.optdir
     self.respPriors = None
+    self.inp = args
     self.restartCycle = self.determineRestart()
 
 
