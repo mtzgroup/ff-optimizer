@@ -1,6 +1,6 @@
 import os
-from shutil import copyfile
 from pathlib import Path
+from shutil import copyfile
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -12,7 +12,6 @@ mpl.use("Agg")
 
 
 class OptEngine:
-
     def setVariables(self, inp):
         self.home = os.getcwd()
         self.inp = inp
@@ -148,7 +147,10 @@ class OptEngine:
     def copyValids(self):
         for j in range(1, self.nvalids):
             copyfile(self.optdir / "valid_0.in", self.optdir / f"valid_0_{j}.in")
-            copyfile(self.optdir / "valid_0_initial.in", self.optdir / f"valid_0_{j}_initial.in")
+            copyfile(
+                self.optdir / "valid_0_initial.in",
+                self.optdir / f"valid_0_{j}_initial.in",
+            )
 
     # We assume __init__ and all the functions it calls run from the top directory in the optimization
     # All other functions are called from within self.optdir
@@ -176,7 +178,6 @@ class OptEngine:
         self.makeInitialValidIn()
         # duplicate inputs if using multiple validation sets
         self.copyValids()
-
 
     def readOpt(self, filename):
         inInitialParams = False
@@ -221,7 +222,6 @@ class OptEngine:
         results["initialParams"] = initialParams
         return status, results
 
-
     def addTargetLines(self, inputFile, targetLines, newTarget):
         addedLines = False
         with open(inputFile, "r") as f:
@@ -247,8 +247,18 @@ class OptEngine:
 
     def setupInputFiles(self, i):
         # Copy previous validation and optimization FB input files to current ones
-        oldFiles = [f"opt_{i - 1}.in", f"valid_{i - 1}.in", f"valid_{i - 1}_initial.in", f"opt_{i - 1}.in"]
-        newFiles = [f"opt_{i}.in", f"valid_{i}.in", f"valid_{i}_initial.in", f"opt_{i}.in"]
+        oldFiles = [
+            f"opt_{i - 1}.in",
+            f"valid_{i - 1}.in",
+            f"valid_{i - 1}_initial.in",
+            f"opt_{i - 1}.in",
+        ]
+        newFiles = [
+            f"opt_{i}.in",
+            f"valid_{i}.in",
+            f"valid_{i}_initial.in",
+            f"opt_{i}.in",
+        ]
         for j in range(1, self.nvalids):
             oldFiles.append(f"valid_{i - 1}_{j}.in")
             newFiles.append(f"valid_{i}_{j}.in")
@@ -294,7 +304,7 @@ class OptEngine:
         for k in range(len(types)):
             adds.append(False)
             sortedParams.append([])
-        #fig, ax = plt.subplots(figsize=(9, 6))
+        # fig, ax = plt.subplots(figsize=(9, 6))
         for k in range(len(self.labels)):
             for j in range(len(types)):
                 if types[j] in self.labels[k]:
@@ -308,7 +318,7 @@ class OptEngine:
         # ax.set_ylim([-100,100])
         # plt.legend(scs,legendLabels,fontsize=14)
         # plt.savefig('params.png',bbox_inches='tight')
-        #plt.close()
+        # plt.close()
         return sortedParams
 
     def computeMRC(self, sortedParamType):
@@ -389,28 +399,24 @@ class OptEngine:
                         break
 
     def copyResults(self, i):
-            copyfile(
-                os.path.join("result", f"opt_{i}", self.frcmod),
-                os.path.join("forcefield", self.frcmod),
-            )
-            copyfile(
-                os.path.join("result", f"opt_{i}", self.mol2),
-                os.path.join("forcefield", self.mol2),
-            )
+        copyfile(
+            os.path.join("result", f"opt_{i}", self.frcmod),
+            os.path.join("forcefield", self.frcmod),
+        )
+        copyfile(
+            os.path.join("result", f"opt_{i}", self.mol2),
+            os.path.join("forcefield", self.mol2),
+        )
 
     def runValidPrevious(self, i):
         # If we're just restarting, skip if this calculation finished
         if len(self.validPrevious) < i:
-            os.system(
-                f"ForceBalance.py valid_{i}.in > valid_{i}_previous.out"
-            )
+            os.system(f"ForceBalance.py valid_{i}.in > valid_{i}_previous.out")
             for j in range(1, self.nvalids):
                 os.system(
                     f"ForceBalance.py valid_{i}_{j}.in > valid_{i}_{j}_previous.out"
                 )
-            self.validPrevious.append(
-                self.readValid(f"valid_{i}_previous.out")
-            )
+            self.validPrevious.append(self.readValid(f"valid_{i}_previous.out"))
 
     def runTraining(self, i):
         if len(self.train) <= i:
@@ -433,16 +439,12 @@ class OptEngine:
         if len(self.valid) < i:
             os.system(f"ForceBalance.py valid_{i}.in > valid_{i}.out")
             for j in range(1, self.nvalids):
-                os.system(
-                    f"ForceBalance.py valid_{i}_{j}.in > valid_{i}_{j}.out"
-                )
+                os.system(f"ForceBalance.py valid_{i}_{j}.in > valid_{i}_{j}.out")
             self.valid.append(self.readValid(f"valid_{i}.out"))
 
     def runValidInitial(self, i):
         if len(self.validInitial) < i:
-            os.system(
-                f"ForceBalance.py valid_{i}_initial.in > valid_{i}_initial.out"
-            )
+            os.system(f"ForceBalance.py valid_{i}_initial.in > valid_{i}_initial.out")
             for j in range(1, self.nvalids):
                 os.system(
                     f"ForceBalance.py valid_{i}_{j}_initial.in > valid_{i}_{j}_initial.out"
@@ -494,9 +496,7 @@ class OptEngine:
         status, results = self.readOpt(self.optdir / f"opt_{i}.out")
         if status == 0:
             if i == 0:
-                self.params = np.zeros(
-                    (self.maxCycles + 2, len(results["labels"]))
-                )
+                self.params = np.zeros((self.maxCycles + 2, len(results["labels"])))
                 self.labels = results["labels"]
                 self.params[0, :] = results["initialParams"]
             self.train.append(results["obj"])
@@ -584,4 +584,3 @@ class OptEngine:
                 changeParameter(testFile, "adaptive_damping", str(adaptiveDamping))
             else:
                 return adaptiveDamping
-

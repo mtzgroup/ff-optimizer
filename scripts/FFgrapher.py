@@ -328,7 +328,7 @@ for j in range(len(types)):
         mrc[k] = np.mean(np.abs(diff[:, k]) / weights[:, k]) * 100
     # plt.plot(range(1,i+1),normalizedDiff,label=aliases[i],marker='o')
     ax.semilogy(range(i + 1), mrc, label=aliases[j], marker="o")
-    #plt.plot(range(i + 1), mrc, label=aliases[j], marker="o")
+    # plt.plot(range(i + 1), mrc, label=aliases[j], marker="o")
 plt.legend(fontsize=14)
 ax.tick_params(labelsize=14)
 ax.set_xlabel("Optimization Cycle", size=17)

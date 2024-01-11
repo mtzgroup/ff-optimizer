@@ -60,7 +60,10 @@ def checkArgs(args):
         raise RuntimeError(
             "MM sampling directory " + args.sampledir + " does not exist"
         )
-    if not os.path.isfile(os.path.join(args.sampledir, "heat1.in")) and args.mmengine == "amber":
+    if (
+        not os.path.isfile(os.path.join(args.sampledir, "heat1.in"))
+        and args.mmengine == "amber"
+    ):
         raise RuntimeError(
             "No sander input file for equilibration named heat1.in provided in "
             + args.sampledir
