@@ -17,13 +17,7 @@ def test_getIndices():
 
 
 def monkeyGetFrame(self, frame, dest):
-    folder = dest.split("/")[0]
-    with open(os.path.join(folder, "frames.txt"), "a") as f:
-        f.write(str(frame) + "\n")
-
-
-def monkeyGetFrame(self, frame, dest):
-    folder = dest.split("/")[0]
+    folder = dest.parent
     with open(os.path.join(folder, "frames.txt"), "a") as f:
         f.write(str(frame) + "\n")
 
@@ -173,9 +167,11 @@ def test_restart1(monkeypatch):
             if os.path.isfile(os.path.join(f, "sample.txt")):
                 passTest = False
                 os.remove(os.path.join(f, "sample.txt"))
+                print("oops, sampling")
     if os.path.isfile(os.path.join("valid_1", "MMFinished.txt")):
         os.remove(os.path.join("valid_1", "MMFinished.txt"))
     else:
+        print("oops, no mmfinished")
         passTest = False
     assert passTest
 
