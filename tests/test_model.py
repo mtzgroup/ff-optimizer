@@ -7,7 +7,7 @@ from ff_optimizer import model, optengine
 from . import checkUtils
 from .test_inputs import getDefaults
 
-home = Path(__name__).parent.absolute()
+home = Path(__file__).parent.absolute()
 
 
 class FakeModel:
