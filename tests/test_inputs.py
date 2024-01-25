@@ -3,7 +3,7 @@ from pathlib import Path
 
 from ff_optimizer import inputs
 
-home = Path(__name__).parent.absolute()
+home = Path(__file__).parent.absolute()
 
 
 def fakePostInit(self):
