@@ -15,6 +15,7 @@ def monkeyGetIndices(self):
 def test_getIndices():
     pass
 
+
 def test_checkForTCFormatting():
     options = getDefaults()
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
@@ -24,6 +25,7 @@ def test_checkForTCFormatting():
     test = mmEngine.checkForTCFormatting()
     assert test
 
+
 def test_checkForTCFormatting2():
     options = getDefaults()
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
@@ -32,7 +34,8 @@ def test_checkForTCFormatting2():
     mmEngine = mmengine.MMEngine(options)
     test = mmEngine.checkForTCFormatting()
     assert not test
-    
+
+
 def test_countFrames():
     options = getDefaults()
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
@@ -42,6 +45,7 @@ def test_countFrames():
     test = mmEngine.countFrames()
     assert test == 1000
 
+
 def test_countFrames2():
     options = getDefaults()
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
@@ -50,6 +54,7 @@ def test_countFrames2():
     mmEngine = mmengine.MMEngine(options)
     test = mmEngine.countFrames()
     assert test == 3
+
 
 def test_getIndices():
     options = getDefaults()
@@ -65,6 +70,7 @@ def test_getIndices():
     assert end == 2
     assert split == 1
 
+
 def test_getIndices2():
     options = getDefaults()
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
@@ -75,6 +81,7 @@ def test_getIndices2():
     assert start == 0
     assert end == 2
 
+
 def test_getIndices3():
     options = getDefaults()
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
@@ -82,11 +89,12 @@ def test_getIndices3():
     options.coors = "coors2.xyz"
     options.split = 2
     try:
-        mmEngine = mmengine.MMEngine(options)
+        mmengine.MMEngine(options)
         test = False
     except:
         test = True
     assert test
+
 
 def test_getIndices4():
     options = getDefaults()
@@ -95,11 +103,12 @@ def test_getIndices4():
     options.coors = "coors2.xyz"
     options.start = 2
     try:
-        mmEngine = mmengine.MMEngine(options)
+        mmengine.MMEngine(options)
         test = False
     except:
         test = True
     assert test
+
 
 def monkeyGetFrame(self, frame, dest):
     folder = dest.parent
