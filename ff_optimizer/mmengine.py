@@ -195,6 +195,22 @@ class MMEngine:
             self.symbols = utils.getSymbolsFromPrmtop(prmtop)
         return prmtop
 
+    def getConformerNames(self, f):
+        conformers = []
+        for g in os.listdir(f):
+            if g.endswith("rst7") and "heat" not in g and "_" not in g:
+                conformers.append(g)
+        return conformers
+
+    # This function is currently hard-coded to use .nc trajectory files
+    def getRedoFrames(self, f, conformers):
+        redoFrames = []
+        for conformer in conformers:
+            name = conformer.split(".")[0]
+            if not (f / f"{name}.nc").is_file():
+                redoFrames.append(int(name))
+        return redoFrames
+
     # This function is currently hard-coded to use .nc trajectory files
     def restart(self):
         self.prmtop = self.setup()
@@ -206,21 +222,13 @@ class MMEngine:
             if (f / "MMFinished.txt").is_file():
                 continue
             # get conformer names
-            conformers = []
-            for g in os.listdir(f):
-                if g.endswith("rst7") and "heat" not in g and "_" not in g:
-                    conformers.append(g)
+            conformers = self.getConformerNames(f)
             if len(conformers) < self.inp.conformersperset:
                 rmtree(f)
                 continue
-            redoFrames = []
             # record which initial conditions haven't had MD run yet
-            for conformer in conformers:
-                name = conformer.split(".")[0]
-                if not (f / f"{name}.nc").is_file():
-                    redoFrames.append(int(name))
+            redoFrames = self.getRedoFrames(f, conformers)
             # if some ICs haven't done MD yet, run it (with the right input file)
-            print(len(redoFrames))
             if len(redoFrames) > 0:
                 if f.name.startswith("train"):
                     mdin = self.inp.trainmdin
@@ -230,9 +238,7 @@ class MMEngine:
                 self.sample(redoFrames, mdin)
                 os.chdir("..")
             else:
-                print("writing mmfinished")
                 self.writeMMFinished(f)
-
         self.getMMSamples()
 
 
