@@ -1,7 +1,3 @@
-try:
-    pass
-except:
-    pass
 import os
 from random import randint
 from shutil import copyfile, rmtree
@@ -76,7 +72,7 @@ class MMEngine:
             try:
                 natoms = int(f.readline())
                 lines = list(f.readlines())
-                nlines = len(lines)
+                nlines = len(lines) + 1 # for the f.readline() call
                 for line in lines[::-1]:
                     if len(line.split()) == 0:
                         nlines -= 1
@@ -90,28 +86,30 @@ class MMEngine:
         return nframes
 
     # 0-indexed
-    # TODO: figure out what to do with this awful function
-    # It really shouldn't be my responsibility to untangle an awful coors.xyz file
     def getIndices(self):
         start = self.inp.start
         end = self.inp.end
         split = self.inp.split
-        terachemFormat = self.checkForTCFormatting()
         nframes = self.countFrames()
-        if terachemFormat:
-            start, end, split = self.readTCFormat()
+        # If we really need it, I can uncomment this. It's only useful if you 
+        # have concatenated several output/coors.xyz files from a trajectory
+        # that you've restarted many times. 
+        #terachemFormat = self.checkForTCFormatting()
+        #if terachemFormat:
+        #    start, end, split = self.readTCFormat()
+        print(nframes, start, end, split)
         if end is not None:
             if end > nframes - 1:
                 end = nframes - 1
         else:
             end = nframes - 1
         if split is not None:
-            if split > nframes - 1:
+            if split >= nframes - 1:
                 raise ValueError("There must be frames after split")
         else:
             split = 0
         if start is not None:
-            if start > nframes - 1:
+            if start >= nframes - 1:
                 raise ValueError("There must be frames after start")
         else:
             start = 0
