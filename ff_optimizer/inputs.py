@@ -52,17 +52,16 @@ class Input:
     stride: int = 50
     tcout: str = "tc.out"
 
-
     # there's no reason to change these, but they're here just in case
     # (so they're not documented, but it's useful to have them accessible
     # from this class)
-    tctemplate : str = "tc_template.in"
-    tctemplate_backup : str = "tc_template_backup.in"
-    sbatchtemplate : str = "sbatch_template.sh"
-    opt0 : str = "opt_0.in"
-    valid0 : str = "valid_0.in"
-    batchsize : int = 10
-    retries : int = 3
+    tctemplate: str = "tc_template.in"
+    tctemplate_backup: str = "tc_template_backup.in"
+    sbatchtemplate: str = "sbatch_template.sh"
+    opt0: str = "opt_0.in"
+    valid0: str = "valid_0.in"
+    batchsize: int = 10
+    retries: int = 3
 
     @classmethod
     def fromYaml(cls, inputs):

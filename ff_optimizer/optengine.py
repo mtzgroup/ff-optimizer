@@ -283,7 +283,7 @@ class OptEngine:
         return cycles, x, xticks
 
     def graphObjectiveFunction(self):
-        cycles, x, xticks = self.computeXTicks() 
+        cycles, x, xticks = self.computeXTicks()
         fig, ax = plt.subplots(figsize=(9, 6))
         ax.plot(x, self.valid, label="Validation, current parameters", marker="o")
         ax.plot(

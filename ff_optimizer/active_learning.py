@@ -1,9 +1,9 @@
 import os
+from copy import deepcopy
 from multiprocessing import Pool
+from pathlib import Path
 from random import sample
 from shutil import copytree, rmtree
-from pathlib import Path
-from copy import deepcopy
 
 import numpy as np
 

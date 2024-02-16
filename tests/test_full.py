@@ -104,6 +104,7 @@ def test_queue_full():
     # compareOpt(os.path.join("3_ref","opt_1.out"),os.path.join("1_opt","opt_1.out"))
     os.system("./clean.sh")
 
+
 @pytest.mark.full
 @pytest.mark.chemcloud
 def test_ffopt_full():
@@ -114,8 +115,9 @@ def test_ffopt_full():
         os.path.join("3_ref", "qdata.txt"),
         os.path.join("1_opt", "targets", "train_1", "qdata.txt"),
     )
-    compareOpt(os.path.join("3_ref","opt_1.out"),os.path.join("1_opt","opt_1.out"))
+    compareOpt(os.path.join("3_ref", "opt_1.out"), os.path.join("1_opt", "opt_1.out"))
     os.system("./clean.sh")
+
 
 @pytest.mark.full
 @pytest.mark.queue
@@ -127,5 +129,5 @@ def test_ffopt_queue():
         os.path.join("3_ref", "qdata.txt"),
         os.path.join("1_opt", "targets", "train_1", "qdata.txt"),
     )
-    compareOpt(os.path.join("3_ref","opt_1.out"),os.path.join("1_opt","opt_1.out"))
+    compareOpt(os.path.join("3_ref", "opt_1.out"), os.path.join("1_opt", "opt_1.out"))
     os.system("./clean.sh")

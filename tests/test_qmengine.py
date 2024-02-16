@@ -4,7 +4,6 @@ from pathlib import Path
 import numpy as np
 
 from ff_optimizer import qmengine, utils
-from qcio import SinglePointResults
 
 from . import checkUtils
 from .test_inputs import getDefaults
@@ -158,7 +157,6 @@ class TestQMEngine:
         os.remove(testPath)
         assert readSettings == inputSettings
 
-
     # check that pdbs are read in correctly
     def test_readPDB(self):
         os.chdir(os.path.dirname(__file__))
@@ -266,7 +264,7 @@ class TestQMEngine:
         os.remove("qdata.txt")
         os.remove("all.mdcrd")
 
-    '''
+    """
     def test_writeResult(self):
         qmEngine = qmengine.QMEngine("qmengine/tc.in", "qmengine/tc_backup.in")
         os.chdir(os.path.dirname(__file__))
@@ -284,7 +282,7 @@ class TestQMEngine:
         assert checkUtils.checkArrays(
             refResult.return_result, testResult.return_result, 0.00001
         )
-    '''
+    """
 
     def test_restart(self, monkeypatch):
         os.chdir(Path(__file__).parent / "qmengine")
@@ -313,4 +311,3 @@ class TestQMEngine:
         assert len(testXyzs) == len(refXyzs)
         for i in range(len(testXyzs)):
             assert testXyzs[i] == refXyzs[i]
-

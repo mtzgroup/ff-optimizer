@@ -1,6 +1,6 @@
 import errno
-import pytest
 import os
+from pathlib import Path
 from shutil import copyfile, rmtree
 
 import numpy as np
@@ -9,7 +9,6 @@ from ff_optimizer import optengine, resp_prior
 
 from . import checkUtils
 from .test_inputs import getDefaults
-from pathlib import Path
 
 
 def monkeyGraph():
@@ -937,6 +936,7 @@ def test_restart3Params(monkeypatch):
     os.chdir("..")
     assert len(lines) == 1
 
+
 def test_computeSortedParams(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
     monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
@@ -959,16 +959,17 @@ def test_computeSortedParams(monkeypatch):
     assert len(sortedParams[4]) == 41
     for i in range(5, 8):
         assert len(sortedParams[i]) == 0
-    assert checkUtils.checkFloats(sortedParams[0][0][0], 2.6650e+02)
-    assert checkUtils.checkFloats(sortedParams[1][0][0], 1.5317e+00)
-    assert checkUtils.checkFloats(sortedParams[0][-1][0], 4.0916e+02)
+    assert checkUtils.checkFloats(sortedParams[0][0][0], 2.6650e02)
+    assert checkUtils.checkFloats(sortedParams[1][0][0], 1.5317e00)
+    assert checkUtils.checkFloats(sortedParams[0][-1][0], 4.0916e02)
     assert checkUtils.checkFloats(sortedParams[1][-1][0], 9.7389e-01)
-    assert checkUtils.checkFloats(sortedParams[2][0][0], 4.5383e+01)
-    assert checkUtils.checkFloats(sortedParams[3][0][0], 1.0853e+02)
-    assert checkUtils.checkFloats(sortedParams[2][-1][0], 1.0212e+02)
-    assert checkUtils.checkFloats(sortedParams[3][-1][0], 1.1235e+02)
-    assert checkUtils.checkFloats(sortedParams[4][0][0], 1.0548e+00)
-    assert checkUtils.checkFloats(sortedParams[4][-1][0], -6.0860e+00)
+    assert checkUtils.checkFloats(sortedParams[2][0][0], 4.5383e01)
+    assert checkUtils.checkFloats(sortedParams[3][0][0], 1.0853e02)
+    assert checkUtils.checkFloats(sortedParams[2][-1][0], 1.0212e02)
+    assert checkUtils.checkFloats(sortedParams[3][-1][0], 1.1235e02)
+    assert checkUtils.checkFloats(sortedParams[4][0][0], 1.0548e00)
+    assert checkUtils.checkFloats(sortedParams[4][-1][0], -6.0860e00)
+
 
 def test_graphResults(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
@@ -988,4 +989,3 @@ def test_graphResults(monkeypatch):
     os.remove("ParameterChange.png")
     os.remove("ObjectiveFunction.png")
     cleanOptDir(".")
-    

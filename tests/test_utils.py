@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 import numpy as np
-from qcio import Molecule
 
 from ff_optimizer import utils
 
@@ -73,7 +72,7 @@ def test_readEsp():
     assert checkUtils.checkArrays(testEsp, refEsp, 0.00001)
 
 
-'''
+"""
 def test_convertPDBtoMolecule():
     os.chdir(home)
     testMol = utils.convertPDBtoMolecule(os.path.join("utils", "test.pdb"))
@@ -82,7 +81,8 @@ def test_convertPDBtoMolecule():
     assert len(testMol.symbols) == len(refMol.symbols)
     for i in range(len(testMol.symbols)):
         assert testMol.symbols[i] == refMol.symbols[i]
-'''
+"""
+
 
 def test_writeRst():
     os.chdir(home)

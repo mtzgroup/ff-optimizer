@@ -1,8 +1,8 @@
 import os
+from pathlib import Path
 from shutil import copyfile
 
 from numpy import loadtxt
-from pathlib import Path
 
 from ff_optimizer import resp_prior
 

@@ -1,11 +1,11 @@
 import os
 import random
+from copy import deepcopy
+from pathlib import Path
 from shutil import copyfile, rmtree
 
 import numpy as np
 import pytest
-from pathlib import Path
-from copy import deepcopy
 
 from ff_optimizer import active_learning, model, optengine, qmengine, utils
 
@@ -33,7 +33,7 @@ def monkeyInit(self, inp):
         if f.startswith("model"):
             tempInp = deepcopy(inp)
             tempInp.sampledir = (Path(f) / inp.sampledir.name).absolute()
-            tempInp.optdir = (Path(f)/ inp.optdir.name).absolute()
+            tempInp.optdir = (Path(f) / inp.optdir.name).absolute()
             os.chdir(f)
             self.models.append(FakeModel(tempInp))
             os.chdir("..")
@@ -101,6 +101,7 @@ def dontRemove(f):
     if not os.path.isfile(f):
         raise RuntimeError(f"File {f} not found")
 
+
 def test_collectAll(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "active_learning"))
     os.chdir("collectGeometries")
@@ -163,6 +164,7 @@ def test_collectAll3(monkeypatch):
     model.collectAll(7, 0)
     assert model.trainGeometries == 1
     assert model.validGeometries == 2
+
 
 @pytest.mark.amber
 def test_computeAll(monkeypatch):
@@ -320,6 +322,7 @@ def test_doActiveLearning(monkeypatch):
         os.path.join("model_2", "2_sampling", "7_cycle_7", "valid_2", "1.xyz")
     )
     assert checkUtils.checkArrays(testGeom, refGeom)
+
 
 def test_doActiveLearning2(monkeypatch):
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyInit)
@@ -518,6 +521,7 @@ def monkeyALInit(self, args):
         self.models[-1].optEngine.nvalids = 1
     self.restartCycle = 0
     self.nthreads = min(os.cpu_count(), self.nmodels)
+
 
 def test_doParameterOptimization(monkeypatch):
     os.chdir(

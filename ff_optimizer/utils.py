@@ -5,8 +5,6 @@ import numpy as np
 import yaml
 from scipy.io import netcdf_file
 
-from . import units
-
 
 def convertTCtoFB(
     tcout, coors, stride, start=None, end=None, qdata="qdata.txt", mdcrd="all.mdcrd"

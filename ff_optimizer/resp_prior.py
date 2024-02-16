@@ -2,8 +2,6 @@ import os
 
 import numpy as np
 from scipy.stats import norm
-from qcio import SinglePointResults
-from pathlib import Path
 
 # import matplotlib as mpl
 # import matplotlib.pyplot as plt

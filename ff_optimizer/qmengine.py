@@ -1,14 +1,12 @@
 import os
 import subprocess
 import traceback
+from shutil import copyfile, rmtree
 from time import sleep
 
-import numpy as np
 from chemcloud import CCClient
-from pathlib import Path
-from qcio import Provenance, SinglePointResults, Molecule, ProgramInput
+from qcio import Molecule, ProgramInput, SinglePointResults
 from qcparse import parse
-from shutil import rmtree, copyfile
 
 from . import utils
 
@@ -20,7 +18,9 @@ class QMEngine:
         else:
             self.doResp = True
         self.inputSettings = self.readInputFile(inp.sampledir / inp.tctemplate)
-        self.backupInputSettings = self.readInputFile(inp.sampledir / inp.tctemplate_backup)
+        self.backupInputSettings = self.readInputFile(
+            inp.sampledir / inp.tctemplate_backup
+        )
 
     def readInputFile(self, inputFile: str):
         settings = []
@@ -54,10 +54,10 @@ class QMEngine:
         with open(fileName, "w") as f:
             f.write(f"coordinates {coordinates}\n")
             f.write(f"run gradient\n")
-            #if self.doResp:
-                #f.write("resp yes\n")
-                # f.write("esp_restraint_a 0\n")
-                # f.write("esp_restraint_b 0\n")
+            # if self.doResp:
+            # f.write("resp yes\n")
+            # f.write("esp_restraint_a 0\n")
+            # f.write("esp_restraint_b 0\n")
             for setting in settings:
                 # reassemble setting (if > 2 tokens long)
                 for token in setting:
@@ -142,7 +142,7 @@ class QMEngine:
             name = utils.getName(f)
             out = f"tc_{name}.out"
             try:
-                result = parse(out, "terachem")
+                parse(out, "terachem")
             except Exception as e:
                 print(f)
                 print(e)
@@ -200,7 +200,7 @@ class SlurmEngine(QMEngine):
         while len(jobIDs) > 0:
             runningIDs = []
             sleep(10)
-            #status = self.slurmCommand(["squeue", "-o", "%.12i", "-u", self.user])
+            # status = self.slurmCommand(["squeue", "-o", "%.12i", "-u", self.user])
             status = self.slurmCommand(["squeue", "-o", "%.12i"])
             for runningID in (
                 status.replace(b" ", b"").replace(b'"', b"").split(b"\n")[1:]
@@ -228,7 +228,7 @@ class SlurmEngine(QMEngine):
             if self.doResp:
                 copyfile(f"scr.{name}/esp.xyz", f"esp_{name}.xyz")
             rmtree(f"scr.{name}")
-                
+
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
 
@@ -259,9 +259,7 @@ class DebugEngine(QMEngine):
 
 
 class ChemcloudEngine(QMEngine):
-    def __init__(
-        self, inp
-    ):
+    def __init__(self, inp):
         self.batchSize = inp.batchsize
         self.retries = inp.retries
         self.client = CCClient()
@@ -320,14 +318,18 @@ class ChemcloudEngine(QMEngine):
             except:
                 raise ValueError("Molecular charge must be an int")
         else:
-            raise ValueError("Molecular charge ('charge') must be specified in input file")
+            raise ValueError(
+                "Molecular charge ('charge') must be specified in input file"
+            )
         if "spinmult" in self.specialKeywords.keys():
             try:
                 self.specialKeywords["spinmult"] = int(self.specialKeywords["spinmult"])
             except:
                 raise ValueError("Molecular spin multiplicity must be an integer")
         else:
-            raise ValueError("Spin multiplicity ('spinmult') must be specified in input file")
+            raise ValueError(
+                "Spin multiplicity ('spinmult') must be specified in input file"
+            )
 
     def computeBatch(self, programInputs: list):
         status = 0
@@ -340,7 +342,9 @@ class ChemcloudEngine(QMEngine):
         try:
             # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION?
             futureResults = [
-                self.client.compute("terachem", programInputs[i::stride], collect_files=True)
+                self.client.compute(
+                    "terachem", programInputs[i::stride], collect_files=True
+                )
                 for i in range(stride)
             ]
             outputBatches = [futureResults[i].get() for i in range(stride)]
@@ -380,13 +384,13 @@ class ChemcloudEngine(QMEngine):
                 model=mod,
                 calctype="gradient",
                 keywords=keywords,
-                extras={'id':jobID}
+                extras={"id": jobID},
             )
             programInputs.append(programInput)
         return programInputs
 
     def writeResult(self, output):
-        jobID = output.input_data.extras['id']
+        jobID = output.input_data.extras["id"]
         out = f"tc_{jobID}.out"
         with open(out, "w") as f:
             f.write(output.stdout)
@@ -399,7 +403,7 @@ class ChemcloudEngine(QMEngine):
         for output in outputs:
             self.writeResult(output)
             if not output.success:
-                jobID = output.input_data.extras['id']
+                jobID = output.input_data.extras["id"]
                 retryXyzs.append(f"{jobID}.xyz")
         return retryXyzs
 

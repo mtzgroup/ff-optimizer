@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import os
 import sys
-from time import perf_counter
 from textwrap import dedent
+from time import perf_counter
 
-from ff_optimizer import active_learning, model, inputs
+from ff_optimizer import active_learning, inputs, model
+
 
 def printHelp():
     summary = dedent(
@@ -169,12 +169,14 @@ def printHelp():
     print(summary)
     print(keywords)
 
+
 def createModel(inp):
     if inp.activelearning > 1:
         ffModel = active_learning.ActiveLearningModel(inp)
     else:
         ffModel = model.Model(inp)
     return ffModel
+
 
 def getRestartCycle(inp):
     if inp.restart:
@@ -183,6 +185,7 @@ def getRestartCycle(inp):
     else:
         restartCycle = -1
     return restartCycle
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:

@@ -1,21 +1,23 @@
 import os
-import pytest
 from pathlib import Path
+from shutil import copyfile, copytree, rmtree
 
 from ff_optimizer import qmengine
-from .test_inputs import getDefaults
+
 from . import checkUtils
-from shutil import copytree, rmtree, copyfile
+from .test_inputs import getDefaults
+
 
 def clean():
     for f in Path(".").iterdir():
         if f.name.startswith("scr"):
-            rmtree(f) 
-        if (f.name.endswith("out") or f.name.endswith("in")):
+            rmtree(f)
+        if f.name.endswith("out") or f.name.endswith("in"):
             if f.name != "tc.in" and f.name != "tc_backup.in":
                 os.remove(f)
         if f.name == "all.mdcrd" or f.name == "qdata.txt":
             os.remove(f)
+
 
 class TestSbatchEngine:
 
@@ -75,7 +77,6 @@ class TestSbatchEngine:
         assert removed
         assert checkAllMdcrd
         assert checkQdata
-        
 
     def test_getQMRefDataResp(self, monkeypatch):
         os.chdir(os.path.dirname(__file__))
@@ -118,5 +119,3 @@ class TestSbatchEngine:
         assert copied
         assert checkAllMdcrd
         assert checkQdata
-        
-
