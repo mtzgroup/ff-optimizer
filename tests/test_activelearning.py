@@ -1,5 +1,7 @@
 import os
 import random
+from copy import deepcopy
+from pathlib import Path
 from shutil import copyfile, rmtree
 
 import numpy as np
@@ -23,12 +25,24 @@ class FakeMMEngine:
 
 
 def monkeyInit(self, inp):
+    self.home = os.getcwd()
+    inp.nvalids = inp.activelearning
     self.nmodels = inp.activelearning
-    self.models = [FakeModel(inp) for i in range(self.nmodels)]
+    self.models = []
+    for f in sorted(os.listdir()):
+        if f.startswith("model"):
+            tempInp = deepcopy(inp)
+            tempInp.sampledir = (Path(f) / inp.sampledir.name).absolute()
+            tempInp.optdir = (Path(f) / inp.optdir.name).absolute()
+            os.chdir(f)
+            self.models.append(FakeModel(tempInp))
+            os.chdir("..")
     self.symbols = None
     self.restartCycle = -1
     self.trainGeometries = None
     self.validGeometries = None
+    self.restartCycle = 0
+    self.nthreads = min(os.cpu_count(), self.nmodels)
 
 
 @pytest.mark.amber
@@ -161,8 +175,10 @@ def test_computeAll(monkeypatch):
     )
     monkeypatch.setattr(os, "remove", dontRemove)
     args = getDefaults()
+    args.activelearning = 3
     model = active_learning.ActiveLearningModel(args)
     geometries = model.collectAll(7, 1)
+    print(len(geometries))
     os.chdir(os.path.join("..", "computeAll"))
     prmtops = [f"prm{str(i)}.prmtop" for i in range(1, 4)]
     energies, forces = model.computeAll(geometries, prmtops)
@@ -186,7 +202,6 @@ def test_chooseGeometries3Models(monkeypatch):
     forces = np.asarray(forces, dtype=np.float32)
     random.seed(404)
     newGeoms = model.chooseGeometries(energies, forces, 8)
-    print(newGeoms)
     assert newGeoms == [6, 14, 18, 20, 7, 12, 15, 16]
 
 
@@ -206,7 +221,6 @@ def test_chooseGeometriesOdd(monkeypatch):
     forces = np.asarray(forces, dtype=np.float32)
     random.seed(404)
     newGeoms = model.chooseGeometries(energies, forces, 7)
-    print(newGeoms)
     assert newGeoms == [6, 14, 18, 20, 7, 13, 5]
 
 
@@ -369,13 +383,13 @@ def monkeySystemNoLeap(command):
 
 
 def test_init(monkeypatch):
+    os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "init"))
     monkeypatch.setattr(model.Model, "__init__", monkeyInitModel)
     monkeypatch.setattr(os, "system", monkeySystemNoLeap)
     random.seed(1015)
     args = getDefaults()
     args.restart = True
     args.activelearning = 3
-    os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "init"))
     for i in range(1, 4):
         if os.path.isdir(f"model_{i}"):
             rmtree(f"model_{i}")
@@ -421,14 +435,14 @@ def monkeyRename(a, b):
 def test_restart(monkeypatch):
     monkeypatch.setattr(os, "system", monkeySystemNoLeap)
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)
-    monkeypatch.setattr(qmengine.CCCloudEngine, "__init__", monkeyInitQM)
+    monkeypatch.setattr(qmengine.ChemcloudEngine, "__init__", monkeyInitQM)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
     monkeypatch.setattr(os, "rename", monkeyRename)
 
+    os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "restart"))
     args = getDefaults()
     args.activelearning = 3
     args.restart = True
-    os.chdir(os.path.join(os.path.dirname(__file__), "active_learning", "restart"))
     mod = active_learning.ActiveLearningModel(args)
     leap = os.path.join("1_opt", "leap.out")
     if os.path.isfile(leap):
@@ -499,7 +513,10 @@ def monkeyALInit(self, args):
     for i in range(1, self.nmodels + 1):
         folder = f"model_{str(i)}"
         os.chdir(folder)
-        self.models.append(model.Model(args))
+        tempInp = deepcopy(args)
+        tempInp.sampledir = Path(os.getcwd()) / args.sampledir.name
+        tempInp.optdir = Path(os.getcwd()) / args.optdir.name
+        self.models.append(model.Model(tempInp))
         os.chdir("..")
         self.models[-1].optEngine.nvalids = 1
     self.restartCycle = 0
@@ -507,15 +524,15 @@ def monkeyALInit(self, args):
 
 
 def test_doParameterOptimization(monkeypatch):
-    args = getDefaults()
-    args.activelearning = 2
-    args.restart = True
     os.chdir(
         os.path.join(
             os.path.dirname(__file__), "active_learning", "doParameterOptimization"
         )
     )
     clean()
+    args = getDefaults()
+    args.activelearning = 2
+    args.restart = True
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInitialize)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitialize)
     monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupFiles)
@@ -564,7 +581,7 @@ def monkeyFB(command):
 # @pytest.mark.debug
 # def test_restart(monkeypatch):
 #    #monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOpt)
-#    #monkeypatch.setattr(qmengine.CCCloudEngine, "__init__", monkeyInitQM)
+#    #monkeypatch.setattr(qmengine.ChemcloudEngine, "__init__", monkeyInitQM)
 #    #monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
 #    monkeypatch.setattr(os, "rename", monkeyRename)
 #

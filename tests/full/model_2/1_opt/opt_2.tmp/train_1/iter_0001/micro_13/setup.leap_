@@ -1,6 +1,0 @@
-loadamberparams sol.frcmod
-SOL = loadmol2 sol.mol2
-x = loadpdb conf.pdb
-saveamberparm x amber.prmtop amber.inpcrd
-quit
-

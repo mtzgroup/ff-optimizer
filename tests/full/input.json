@@ -1,0 +1,6 @@
+{
+  "stride": 1,
+  "split": 1,
+  "maxcycles": 1,
+  "qmengine": "chemcloud"
+} 

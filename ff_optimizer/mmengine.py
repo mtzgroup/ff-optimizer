@@ -97,20 +97,25 @@ class MMEngine:
         # terachemFormat = self.checkForTCFormatting()
         # if terachemFormat:
         #    start, end, split = self.readTCFormat()
-        print(nframes, start, end, split)
         if end is not None:
             if end > nframes - 1:
                 end = nframes - 1
+            if end < 0:
+                end = 0
         else:
             end = nframes - 1
         if split is not None:
-            if split >= nframes - 1:
+            if split > nframes - 1:
                 raise ValueError("There must be frames after split")
+            if split < 0:
+                split = 0
         else:
             split = 0
         if start is not None:
-            if start >= nframes - 1:
+            if start > nframes - 1:
                 raise ValueError("There must be frames after start")
+            if start < 0:
+                start = 0
         else:
             start = 0
         return start, end, split

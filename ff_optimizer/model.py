@@ -68,15 +68,17 @@ class Model(AbstractModel):
     def initializeQMEngine(self, inp):
         if inp.qmengine == "debug":
             qmEngine = qmengine.DebugEngine(inp)
-        elif inp.qmengine == "queue":
-            qmEngine = qmengine.SbatchEngine(inp)
+        elif inp.qmengine == "slurm":
+            qmEngine = qmengine.SlurmEngine(inp)
         elif inp.qmengine == "chemcloud":
-            qmEngine = qmengine.CCCloudEngine(inp)
+            qmEngine = qmengine.ChemcloudEngine(inp)
         return qmEngine
 
     def initializeMMEngine(self, inp):
         if inp.mmengine == "amber":
             mmEngine = mmengine.ExternalAmberEngine(inp)
+        if inp.mmengine == "openmm":
+            mmEngine = mmengine.ExternalOpenMMEngine(inp)
         return mmEngine
 
     def initialCycle(self):

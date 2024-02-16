@@ -47,15 +47,21 @@ class Input:
     conformersperset: int = 1
     # QM-specific parameters
     qmengine: str = "chemcloud"
-    # tctemplate : str = "tc_template.in"
-    # sbatchtemplate : str = "sbatch_template.sh"
-    # tctemplate_backup : str = "tc_template_backup.in"
     # opt-specific parameters
     resppriors: int = 0
-    # opt0 : str = "opt_0.in"
-    # valid0 : str = "valid_0.in"
     stride: int = 50
     tcout: str = "tc.out"
+
+    # there's no reason to change these, but they're here just in case
+    # (so they're not documented, but it's useful to have them accessible
+    # from this class)
+    tctemplate: str = "tc_template.in"
+    tctemplate_backup: str = "tc_template_backup.in"
+    sbatchtemplate: str = "sbatch_template.sh"
+    opt0: str = "opt_0.in"
+    valid0: str = "valid_0.in"
+    batchsize: int = 10
+    retries: int = 3
 
     @classmethod
     def fromYaml(cls, inputs):
@@ -75,9 +81,9 @@ class Input:
         self.checkFiles()
 
     def pathify(self):
-        self.dynamicsdir = Path(self.dynamicsdir)
-        self.optdir = Path(self.optdir)
-        self.sampledir = Path(self.sampledir)
+        self.dynamicsdir = Path(self.dynamicsdir).absolute()
+        self.optdir = Path(self.optdir).absolute()
+        self.sampledir = Path(self.sampledir).absolute()
 
     def checkFiles(self):
         dynamicsFiles = [self.tcout, self.coors, self.conformers]
@@ -85,8 +91,8 @@ class Input:
         optFiles = ["conf.pdb", "setup.leap", "opt_0.in", "valid_0.in"]
         checkDirectory(self.optdir, optFiles)
         sampleFiles = ["tc_template.in", "tc_template_backup.in"]
-        if self.qmengine == "sbatch":
-            sampleFiles.append("sbatch_template.sh")
+        if self.qmengine == "slurm":
+            sampleFiles.append(self.sbatchtemplate)
         checkDirectory(self.sampledir, sampleFiles)
 
     def checkParams(self):
@@ -96,10 +102,11 @@ class Input:
             raise ValueError(
                 "Stride for creating initial data from dynamics must be at least 1"
             )
-        qmengines = ["chemcloud", "sbatch", "debug"]
+        qmengines = ["chemcloud", "slurm", "debug"]
         if self.qmengine not in qmengines:
             raise ValueError(f"QMEngine {self.qmengine} has not been implemented")
-        if self.mmengine != "amber":
+        mmengines = ["amber", "openmm"]
+        if self.mmengine not in mmengines:
             raise ValueError(f"MMEngine {self.mmengine} is not implemented")
         if self.conformers is None:
             self.conformers = self.coors

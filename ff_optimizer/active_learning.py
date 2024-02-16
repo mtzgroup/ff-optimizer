@@ -1,5 +1,7 @@
 import os
+from copy import deepcopy
 from multiprocessing import Pool
+from pathlib import Path
 from random import sample
 from shutil import copytree, rmtree
 
@@ -43,6 +45,25 @@ def sanderEnergyForce(geometry):
 
 
 class ActiveLearningModel(AbstractModel):
+    def setupFolders(self, inp, i):
+        folder = Path(f"model_{str(i)}")
+        if folder.is_dir():
+            if not inp.restart:
+                rmtree(folder)
+        else:
+            os.mkdir(folder)
+        optdir = (folder / inp.optdir.name).absolute()
+        sampledir = (folder / inp.sampledir.name).absolute()
+        if not optdir.is_dir():
+            copytree(inp.optdir, optdir)
+        if not sampledir.is_dir():
+            copytree(inp.sampledir, sampledir)
+        os.chdir(folder)
+        tempInp = deepcopy(inp)
+        tempInp.sampledir = sampledir
+        tempInp.optdir = optdir
+        return tempInp
+
     def __init__(self, inp):
         self.setParams(inp)
         os.chdir(inp.optdir)
@@ -55,21 +76,11 @@ class ActiveLearningModel(AbstractModel):
             raise RuntimeError("setup.leap file did not produce a .prmtop file")
         os.chdir(self.home)
         for i in range(1, self.nmodels + 1):
-            folder = f"model_{str(i)}"
-            if os.path.isdir(folder):
-                if not inp.restart:
-                    rmtree(folder)
-            else:
-                os.mkdir(folder)
-            if not os.path.isdir(os.path.join(folder, inp.optdir)):
-                copytree(inp.optdir, os.path.join(folder, inp.optdir))
-            if not os.path.isdir(os.path.join(folder, inp.sampledir)):
-                copytree(inp.sampledir, os.path.join(folder, inp.sampledir))
-            os.chdir(folder)
+            tempInp = self.setupFolders(inp, i)
             # Want to sample multiple validation sets, but don't need to evaluate them all
             # So we need to compute restart cycle manually from this level
             # There must be a better way to do this
-            self.models.append(Model(inp))
+            self.models.append(Model(tempInp))
             self.models[-1].optEngine.nvalids = 1
             if inp.restart:
                 self.models[-1].optEngine.determineRestart()

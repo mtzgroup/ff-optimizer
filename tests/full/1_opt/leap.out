@@ -1,7 +1,7 @@
--I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/prep to search path.
--I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/lib to search path.
--I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/parm to search path.
--I: Adding /global/software/Amber/20-GCC-4.8.1/build2/dat/leap/cmd to search path.
+-I: Adding /global/software/Amber/23-CUDA-11.8.0/dat/leap/prep to search path.
+-I: Adding /global/software/Amber/23-CUDA-11.8.0/dat/leap/lib to search path.
+-I: Adding /global/software/Amber/23-CUDA-11.8.0/dat/leap/parm to search path.
+-I: Adding /global/software/Amber/23-CUDA-11.8.0/dat/leap/cmd to search path.
 -f: Source setup.leap.
 
 Welcome to LEaP!
