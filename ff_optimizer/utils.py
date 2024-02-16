@@ -3,7 +3,6 @@ from pathlib import Path
 
 import numpy as np
 import yaml
-from qcelemental.models import Molecule
 from scipy.io import netcdf_file
 
 from . import units
@@ -197,28 +196,6 @@ def writeXYZ(geometry: np.array, symbols: list, dest: str):
                     geometry[3 * i + 2],
                 )
             )
-
-
-# unused
-def convertPDBtoMolecule(pdb: str):
-    coords = []
-    symbols = []
-    with open(pdb, "r") as f:
-        for line in f.readlines():
-            if line.startswith("ATOM") or line.startswith("HETATM"):
-                coords.append(
-                    [
-                        line[30:38].replace(" ", ""),
-                        line[38:46].replace(" ", ""),
-                        line[46:54].replace(" ", ""),
-                    ]
-                )
-                symbols.append(line.split()[-1])
-    coords = np.asarray(coords, dtype=np.float32)
-    # Molecule class by default has coordinates in bohr
-    coords *= units.ANGSTROM_TO_AU
-    mol = Molecule(**{"symbols": symbols, "geometry": coords})
-    return mol
 
 
 # unused

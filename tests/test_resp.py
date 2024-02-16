@@ -2,6 +2,7 @@ import os
 from shutil import copyfile
 
 from numpy import loadtxt
+from pathlib import Path
 
 from ff_optimizer import resp_prior
 
@@ -13,7 +14,7 @@ def test_findRepeatIndex():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
     options.resppriors = 1
-    options.sampledir = "sample"
+    options.sampledir = Path("sample")
     mol2 = "acn.mol2"
     prmtop = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options, mol2, prmtop)
@@ -27,7 +28,7 @@ def test_readCharges():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
     options.resppriors = 1
-    options.sampledir = "sample"
+    options.sampledir = Path("sample")
     mol2 = "dasa.mol2"
     prmtop = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options, mol2, prmtop)
@@ -44,7 +45,7 @@ def test_getCharges(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
     options.resppriors = 1
-    options.sampledir = "sample"
+    options.sampledir = Path("sample")
     mol2 = "dasa.mol2"
     prmtop = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options, mol2, prmtop)
@@ -60,7 +61,7 @@ def test_setMol2Charges():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
     options.resppriors = 1
-    options.sampledir = "sample"
+    options.sampledir = Path("sample")
     mol2 = "dasa.mol2"
     prmtop = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options, mol2, prmtop)
@@ -75,7 +76,7 @@ def test_setPriors1():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
     options.resppriors = 1
-    options.sampledir = "sample"
+    options.sampledir = Path("sample")
     mol2 = "dasa.mol2"
     prmtop = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options, mol2, prmtop)
@@ -91,7 +92,7 @@ def test_setPriors2():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
     options.resppriors = 1
-    options.sampledir = "sample"
+    options.sampledir = Path("sample")
     mol2 = "dasa.mol2"
     prmtop = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options, mol2, prmtop)
@@ -107,7 +108,7 @@ def test_getRepeats1():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
     options.resppriors = 1
-    options.sampledir = "sample"
+    options.sampledir = Path("sample")
     mol2 = "dasa.mol2"
     prmtop = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options, mol2, prmtop)
@@ -162,7 +163,7 @@ def test_getRepeats2():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
     options.resppriors = 1
-    options.sampledir = "sample"
+    options.sampledir = Path("sample")
     mol2 = "acn.mol2"
     prmtop = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options, mol2, prmtop)
@@ -174,32 +175,32 @@ def test_computeChargeDistribution():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
     options.resppriors = 1
-    options.sampledir = "sample"
+    options.sampledir = Path("sample")
     mol2 = "dasa.mol2"
     prmtop = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options, mol2, prmtop)
     respPriors.getCharges(1)
     respPriors.computeChargeDistributions()
-    assert checkUtils.checkFloat(respPriors.espMeans[0], 0.7691842)
-    assert checkUtils.checkFloat(respPriors.espStdevs[0], 0.071253054)
-    assert checkUtils.checkFloat(respPriors.espMeans[5], 0.13353156)
-    assert checkUtils.checkFloat(respPriors.espStdevs[5], 0.01762259)
+    assert checkUtils.checkFloats(respPriors.espMeans[0], 0.7691842)
+    assert checkUtils.checkFloats(respPriors.espStdevs[0], 0.071253054)
+    assert checkUtils.checkFloats(respPriors.espMeans[5], 0.13353156)
+    assert checkUtils.checkFloats(respPriors.espStdevs[5], 0.01762259)
 
 
 def test_computePriors():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
     options.resppriors = 2
-    options.sampledir = "sample"
+    options.sampledir = Path("sample")
     mol2 = "dasa.mol2"
     prmtop = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options, mol2, prmtop)
     respPriors.getCharges(1)
     respPriors.computeChargeDistributions()
     priors = respPriors.computePriors()
-    assert checkUtils.checkFloat(priors[5], 0.05675933895)
+    assert checkUtils.checkFloats(priors[5], 0.05675933895)
     assert priors[6] == -1
-    assert checkUtils.checkFloat(priors[0], 0.1956745629)
+    assert checkUtils.checkFloats(priors[0], 0.1956745629)
 
 
 # All individual functions are tested, so we just need to make sure this runs
@@ -208,7 +209,7 @@ def test_updateRespPriors():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
     options.resppriors = 1
-    options.sampledir = "sample"
+    options.sampledir = Path("sample")
     mol2 = "dasa.mol2"
     prmtop = "dasa.prmtop"
     respPriors = resp_prior.RespPriors(options, mol2, prmtop)

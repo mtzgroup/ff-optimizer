@@ -87,7 +87,7 @@ def test_getIndices3():
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
     options.dynamicsdir = Path(".").absolute()
     options.coors = "coors2.xyz"
-    options.split = 2
+    options.split = 3
     try:
         mmengine.MMEngine(options)
         test = False
@@ -101,7 +101,7 @@ def test_getIndices4():
     os.chdir(os.path.join(os.path.dirname(__file__), "mmengine"))
     options.dynamicsdir = Path(".").absolute()
     options.coors = "coors2.xyz"
-    options.start = 2
+    options.start = 3
     try:
         mmengine.MMEngine(options)
         test = False

@@ -1,4 +1,5 @@
 import errno
+import pytest
 import os
 from shutil import copyfile, rmtree
 
@@ -8,6 +9,7 @@ from ff_optimizer import optengine, resp_prior
 
 from . import checkUtils
 from .test_inputs import getDefaults
+from pathlib import Path
 
 
 def monkeyGraph():
@@ -35,6 +37,7 @@ def cleanOptDir(optdir, removeResult=False):
             or f.endswith(".prmtop")
             or f == "leap.out"
             or f == "leap.log"
+            or f.endswith(".png")
         ):
             os.remove(os.path.join(optdir, f))
 
@@ -341,7 +344,7 @@ def test_readValid1():
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     test = optEngine.readValid("valid.out")
-    assert checkUtils.checkFloat(test, 1.39869922, 0.000000001)
+    assert checkUtils.checkFloats(test, 1.39869922, 0.000000001)
 
 
 def test_readValid2():
@@ -501,10 +504,10 @@ def test_determineRestart1():
     options.restart = True
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
-    assert checkUtils.checkFloat(optEngine.params[0, 0], 266.5)
-    assert checkUtils.checkFloat(optEngine.params[0, -1], -6.0860)
-    assert checkUtils.checkFloat(optEngine.params[4, 0], 235.8)
-    assert checkUtils.checkFloat(optEngine.params[4, -1], -4.4187)
+    assert checkUtils.checkFloats(optEngine.params[0, 0], 266.5)
+    assert checkUtils.checkFloats(optEngine.params[0, -1], -6.0860)
+    assert checkUtils.checkFloats(optEngine.params[4, 0], 235.8)
+    assert checkUtils.checkFloats(optEngine.params[4, -1], -4.4187)
     assert len(optEngine.validPrevious) == 3
     assert len(optEngine.train) == 4
     assert len(optEngine.validInitial) == 3
@@ -536,12 +539,12 @@ def test_determineRestart3():
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     print(optEngine.params[:6, 0])
-    assert checkUtils.checkFloat(optEngine.params[0, 0], 297.1)
-    assert checkUtils.checkFloat(optEngine.params[1, 0], 223.05)
-    assert checkUtils.checkFloat(optEngine.params[2, 0], 216.97)
-    assert checkUtils.checkFloat(optEngine.params[3, 0], 245.75)
-    assert checkUtils.checkFloat(optEngine.params[4, 0], 245.28)
-    assert checkUtils.checkFloat(optEngine.params[5, 0], 0)
+    assert checkUtils.checkFloats(optEngine.params[0, 0], 297.1)
+    assert checkUtils.checkFloats(optEngine.params[1, 0], 223.05)
+    assert checkUtils.checkFloats(optEngine.params[2, 0], 216.97)
+    assert checkUtils.checkFloats(optEngine.params[3, 0], 245.75)
+    assert checkUtils.checkFloats(optEngine.params[4, 0], 245.28)
+    assert checkUtils.checkFloats(optEngine.params[5, 0], 0)
     assert len(optEngine.train) == 4
     assert len(optEngine.valid) == 3
     assert len(optEngine.validPrevious) == 3
@@ -589,8 +592,8 @@ def test_respPriors(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     monkeypatch.setattr(resp_prior.RespPriors, "getUnits", monkeyGetUnits)
     options = getDefaults()
-    options.optdir = "restart1"
-    options.sampledir = os.path.join("..", "resp", "sample")
+    options.optdir = Path("restart1")
+    options.sampledir = Path(os.path.join("..", "resp", "sample")).absolute()
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     options.resppriors = 1
@@ -636,16 +639,16 @@ def test_restartResp(monkeypatch):
         if "4" in f:
             os.remove(os.path.join("restart1", f))
     options = getDefaults()
-    options.optdir = "restart1"
+    options.optdir = Path("restart1")
     options.resppriors = 1
-    options.sampledir = os.path.join("..", "resp", "sample")
+    options.sampledir = Path(os.path.join("..", "resp", "sample"))
     options.restart = True
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     arr = np.asarray(optEngine.respPriors.allResp, dtype=np.float32)
     print(arr)
-    assert checkUtils.checkFloat(arr[5, 0], 2.0)
-    assert checkUtils.checkFloat(arr[8, 0], 3.0)
+    assert checkUtils.checkFloats(arr[5, 0], 2.0)
+    assert checkUtils.checkFloats(arr[8, 0], 3.0)
 
 
 def test_setupInputFiles_multipleValids():
@@ -933,3 +936,56 @@ def test_restart3Params(monkeypatch):
     cleanOptDir(".")
     os.chdir("..")
     assert len(lines) == 1
+
+def test_computeSortedParams(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    testDir = "params1"
+
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    options.optdir = testDir
+    options.restart = True
+    cleanOptDir(options.optdir)
+    optEngine = optengine.OptEngine(options)
+    setupFFdir(testDir)
+    os.chdir(testDir)
+    sortedParams = optEngine.computeSortedParams()
+    cleanOptDir(".")
+    assert len(sortedParams[0]) == 18
+    assert len(sortedParams[1]) == 18
+    assert len(sortedParams[2]) == 29
+    assert len(sortedParams[3]) == 29
+    assert len(sortedParams[4]) == 41
+    for i in range(5, 8):
+        assert len(sortedParams[i]) == 0
+    assert checkUtils.checkFloats(sortedParams[0][0][0], 2.6650e+02)
+    assert checkUtils.checkFloats(sortedParams[1][0][0], 1.5317e+00)
+    assert checkUtils.checkFloats(sortedParams[0][-1][0], 4.0916e+02)
+    assert checkUtils.checkFloats(sortedParams[1][-1][0], 9.7389e-01)
+    assert checkUtils.checkFloats(sortedParams[2][0][0], 4.5383e+01)
+    assert checkUtils.checkFloats(sortedParams[3][0][0], 1.0853e+02)
+    assert checkUtils.checkFloats(sortedParams[2][-1][0], 1.0212e+02)
+    assert checkUtils.checkFloats(sortedParams[3][-1][0], 1.1235e+02)
+    assert checkUtils.checkFloats(sortedParams[4][0][0], 1.0548e+00)
+    assert checkUtils.checkFloats(sortedParams[4][-1][0], -6.0860e+00)
+
+def test_graphResults(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    testDir = Path("params1")
+
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    options.optdir = testDir
+    options.restart = True
+    options.pathify()
+    cleanOptDir(options.optdir)
+    optEngine = optengine.OptEngine(options)
+    setupFFdir(testDir)
+    os.chdir(testDir)
+    optEngine.graphResults()
+    os.remove("ParameterChange.png")
+    os.remove("ObjectiveFunction.png")
+    cleanOptDir(".")
+    

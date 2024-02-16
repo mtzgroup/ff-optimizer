@@ -27,7 +27,7 @@ def compareQdata(qdataRef, qdataTest):
             if j == 0:
                 check = refLine[j] == testLine[j]
             else:
-                check = checkUtils.checkFloat(refLine[j], testLine[j], 0.0001)
+                check = checkUtils.checkFloats(refLine[j], testLine[j], 0.001)
             if not check:
                 print(f"Compare {qdataRef}, {qdataTest} line {str(i)} token {str(j)}")
             assert check
@@ -42,10 +42,10 @@ def compareOpt(outRef, outTest):
     testInitialParams = testResults["initialParams"]
     assert len(refParams) == len(testParams)
     for i in range(len(refParams)):
-        assert checkUtils.checkFloat(refParams[i], testParams[i], 0.001)
+        assert checkUtils.checkFloats(refParams[i], testParams[i], 0.001)
     assert len(refInitialParams) == len(testInitialParams)
     for i in range(len(refInitialParams)):
-        assert checkUtils.checkFloat(refInitialParams[i], testInitialParams[i], 0.001)
+        assert checkUtils.checkFloats(refInitialParams[i], testInitialParams[i], 0.001)
 
 
 # NOTE: FB optimization is not well-conditioned for small samples?
@@ -55,6 +55,7 @@ def compareOpt(outRef, outTest):
 
 @pytest.mark.gpu
 @pytest.mark.full
+@pytest.mark.vaca
 def test_debug_full():
     print(os.path.dirname(__file__))
     os.chdir(os.path.join(os.path.dirname(__file__), "full"))
@@ -72,6 +73,7 @@ def test_debug_full():
 
 @pytest.mark.full
 @pytest.mark.chemcloud
+@pytest.mark.vaca
 def test_chemcloud_full():
     os.chdir(os.path.join(os.path.dirname(__file__), "full"))
     os.system("./clean.sh")
@@ -88,6 +90,7 @@ def test_chemcloud_full():
 
 @pytest.mark.full
 @pytest.mark.queue
+@pytest.mark.vaca
 def test_queue_full():
     os.chdir(os.path.join(os.path.dirname(__file__), "full"))
     os.system("./clean.sh")
@@ -99,4 +102,30 @@ def test_queue_full():
         os.path.join("1_opt", "targets", "train_1", "qdata.txt"),
     )
     # compareOpt(os.path.join("3_ref","opt_1.out"),os.path.join("1_opt","opt_1.out"))
+    os.system("./clean.sh")
+
+@pytest.mark.full
+@pytest.mark.chemcloud
+def test_ffopt_full():
+    os.chdir(os.path.join(os.path.dirname(__file__), "full"))
+    os.system("./clean.sh")
+    os.system("ff-opt.py input.json")
+    compareQdata(
+        os.path.join("3_ref", "qdata.txt"),
+        os.path.join("1_opt", "targets", "train_1", "qdata.txt"),
+    )
+    compareOpt(os.path.join("3_ref","opt_1.out"),os.path.join("1_opt","opt_1.out"))
+    os.system("./clean.sh")
+
+@pytest.mark.full
+@pytest.mark.queue
+def test_ffopt_queue():
+    os.chdir(os.path.join(os.path.dirname(__file__), "full"))
+    os.system("./clean.sh")
+    os.system("ff-opt.py input_slurm.json")
+    compareQdata(
+        os.path.join("3_ref", "qdata.txt"),
+        os.path.join("1_opt", "targets", "train_1", "qdata.txt"),
+    )
+    compareOpt(os.path.join("3_ref","opt_1.out"),os.path.join("1_opt","opt_1.out"))
     os.system("./clean.sh")

@@ -5,19 +5,22 @@ from time import sleep
 
 import numpy as np
 from chemcloud import CCClient
-from chemcloud.models import AtomicInput, AtomicResult, FailedOperation, to_file
-from qcelemental.models import Molecule, Provenance
-from qcelemental.models.results import AtomicResultProperties
-from qcelemental.util.serialization import json_loads
+from pathlib import Path
+from qcio import Provenance, SinglePointResults, Molecule, ProgramInput
+from qcparse import parse
+from shutil import rmtree, copyfile
 
 from . import utils
 
 
 class QMEngine:
-    def __init__(self, inputFile: str, backupInputFile: str, doResp=False):
-        self.inputSettings = self.readInputFile(inputFile)
-        self.backupInputSettings = self.readInputFile(backupInputFile)
-        self.doResp = doResp
+    def __init__(self, inp):
+        if inp.resp == 0 and inp.resppriors == 0:
+            self.doResp = False
+        else:
+            self.doResp = True
+        self.inputSettings = self.readInputFile(inp.sampledir / inp.tctemplate)
+        self.backupInputSettings = self.readInputFile(inp.sampledir / inp.tctemplate_backup)
 
     def readInputFile(self, inputFile: str):
         settings = []
@@ -43,14 +46,16 @@ class QMEngine:
                             else:
                                 break
                         settings.append(setting)
+        if self.doResp:
+            settings.append(["resp", "yes"])
         return settings
 
     def writeInputFile(self, settings: list, coordinates: str, fileName: str):
         with open(fileName, "w") as f:
             f.write(f"coordinates {coordinates}\n")
             f.write(f"run gradient\n")
-            if self.doResp:
-                f.write("resp yes\n")
+            #if self.doResp:
+                #f.write("resp yes\n")
                 # f.write("esp_restraint_a 0\n")
                 # f.write("esp_restraint_b 0\n")
             for setting in settings:
@@ -100,56 +105,8 @@ class QMEngine:
                 if tokenCounter != 1:
                     f.write("\n")
 
-    def writeResult(self, tcOut, xyz):
-        energy, grad = utils.readGradFromTCout(tcOut)
-        mol = Molecule.from_file(xyz)
-        properties = AtomicResultProperties()
-        model = {"method": "see tc.in", "basis": "see tc.in"}
-        provenance = Provenance(**{"creator": "ffoptimizer (file-based)"})
-        name = tcOut.split(".")[0]
-        jobId = name.replace("tc_", "")
-        if type(grad) == int:
-            if grad == -1:
-                result = AtomicResult(
-                    **{
-                        "molecule": mol,
-                        "driver": "gradient",
-                        "model": model,
-                        "provenance": provenance,
-                        "properties": properties,
-                        "return_result": np.zeros(mol.geometry.shape),
-                        "success": False,
-                        "id": jobId,
-                    }
-                )
-                with open(f"{name}.json", "w") as f:
-                    f.write(result.json())
-                return
-        properties = AtomicResultProperties(**{"return_energy": energy})
-        result = AtomicResult(
-            **{
-                "molecule": mol,
-                "driver": "gradient",
-                "model": model,
-                "provenance": provenance,
-                "properties": properties,
-                "return_result": grad,
-                "success": True,
-                "id": jobId,
-            }
-        )
-        # os.remove(tcOut)
-        with open(f"{name}.json", "w") as f:
-            f.write(result.json())
-
     def readResult(self, js):
-        with open(js, "r") as f:
-            try:
-                result = AtomicResult(**json_loads(f.read()))
-            except Exception as e:
-                print(e)
-                result = FailedOperation(**json_loads(f.read()))
-
+        result = SinglePointResults.open(js)
         return result
 
     def readQMRefData(self):
@@ -165,14 +122,13 @@ class QMEngine:
         for f in utils.getXYZs():
             coord = utils.readXYZ(f)
             name = utils.getName(f)
-            json = f"tc_{name}.json"
-            result = self.readResult(json)
-            if not result.success:
+            result = parse(f"tc_{name}.out", "terachem")
+            if result.energy is None or result.gradient is None:
                 raise RuntimeError(
-                    f"Terachem job {json} in {os.getcwd()} did not succeed!"
+                    f"Terachem job tc_{name}.out in {os.getcwd()} did not succeed!"
                 )
-            energies.append(result.properties.return_energy)
-            grads.append(result.return_result.flatten())
+            energies.append(result.energy)
+            grads.append(result.gradient.flatten())
             coords.append(coord)
             if self.doResp:
                 espXYZ, esp = utils.readEsp(f"esp_{name}.xyz")
@@ -184,17 +140,12 @@ class QMEngine:
         xyzs = []
         for f in utils.getXYZs():
             name = utils.getName(f)
-            json = f"tc_{name}.json"
-            if os.path.isfile(json):
-                try:
-                    with open(json, "r") as j:
-                        result = AtomicResult(**json_loads(j.read()))
-                except:
-                    xyzs.append(f)
-                    continue
-                if not result.success:
-                    xyzs.append(f)
-            else:
+            out = f"tc_{name}.out"
+            try:
+                result = parse(out, "terachem")
+            except Exception as e:
+                print(f)
+                print(e)
                 xyzs.append(f)
         self.getQMRefData(xyzs)
 
@@ -203,74 +154,35 @@ class QMEngine:
         raise NotImplementedError()
 
 
-class SbatchEngine(QMEngine):
+class SlurmEngine(QMEngine):
     def __init__(
         self,
-        inputFile: str,
-        backupInputFile: str,
-        sbatchFile: str,
-        user: str,
-        doResp=False,
+        inp,
     ):
-        self.user = user
-        self.readSbatchFile(sbatchFile)
-        super().__init__(inputFile, backupInputFile, doResp)
+        self.readSbatchFile(inp.sampledir / inp.sbatchtemplate)
+        self.inp = inp
+        super().__init__(inp)
 
     def readSbatchFile(self, sbatchFile: str):
-        tcVersion = None  # "TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176"
-        sbatchLines = []
         with open(sbatchFile, "r") as f:
-            for line in f.readlines():
-                if line.startswith("#SBATCH"):
-                    # Grab option from #SBATCH option=value
-                    option = line.split()[1].split("=")[0]
-                    # exclude options we're setting ourselves
-                    if option != "--fin" and option != "--fout" and option != "-J":
-                        sbatchLines.append(line)
-                    self.optionsEnd = len(sbatchLines)
-                # get TC version from ml line
-                elif "TeraChem" in line and not line.startswith("#"):
-                    if "ml" in line or "module load" in line:
-                        for token in line.split():
-                            if token.startswith("TeraChem"):
-                                tcVersion = token
-                                sbatchLines.append(line)
-                                break
-                else:
-                    sbatchLines.append(line)
-        if tcVersion == None:
-            sbatchLines.append(
-                "module load TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176\n"
-            )
-        self.sbatchLines = sbatchLines
+            self.sbatchLines = f.readlines()
+
+    def replaceVars(self, line, index):
+        tcin = f"tc_{index}.in"
+        tcbackup = f"tc_backup_{index}.in"
+        line = line.replace("JOBID", index)
+        line = line.replace("TCTEMPLATEBACKUP", tcbackup)
+        line = line.replace("TCTEMPLATE", tcin)
+        return line
 
     def writeSbatchFile(self, index: str, fileName: str):
-        sbatchLines = self.sbatchLines.copy()
         index = str(index)
-        if self.doResp:
-            sbatchLines.insert(
-                self.optionsEnd, f"#SBATCH --fout=tc_{index}.out,esp_{index}.xyz\n"
-            )
-        else:
-            sbatchLines.insert(self.optionsEnd, f"#SBATCH --fout=tc_{index}.out\n")
-        sbatchLines.insert(
-            self.optionsEnd,
-            f"#SBATCH --fin=tc_{index}.in,{index}.xyz,tc_{index}_backup.in\n",
-        )
-        sbatchLines.insert(self.optionsEnd, f"#SBATCH -J FB_ref_gradient_{index}\n")
         with open(fileName, "w") as f:
-            for line in sbatchLines:
-                f.write(line)
-            f.write(f"terachem tc_{index}.in > tc_{index}.out\n")
-            f.write(f'if [ $(grep -c "Job finished" tc_{index}.out) -ne 1 ]\n')
-            f.write("then\n")
-            f.write(f"  terachem tc_{index}_backup.in > tc_{index}.out\n")
-            f.write("fi\n")
-            if self.doResp:
-                f.write(f"mv scr.{index}/esp.xyz esp_{index}.xyz\n")
+            for line in self.sbatchLines:
+                f.write(self.replaceVars(line, index))
 
     def slurmCommand(self, command: list):
-        maxTries = 100
+        maxTries = 10
         i = 1
         done = False
         while i < maxTries and not done:
@@ -284,22 +196,12 @@ class SbatchEngine(QMEngine):
             raise RuntimeError(f"Slurm command {str(command)} failed")
         return output
 
-    def getQMRefData(self, xyzs: list):
-        jobIDs = []
-        for xyz in xyzs:
-            name = xyz.split(".")[0]
-            super().writeInputFile(self.inputSettings, xyz, f"tc_{name}.in")
-            super().writeInputFile(
-                self.backupInputSettings, xyz, f"tc_{name}_backup.in"
-            )
-            self.writeSbatchFile(name, f"sbatch_{name}.sh")
-            job = self.slurmCommand(["sbatch", f"sbatch_{name}.sh"])
-            jobIDs.append(job.split()[3])
-
+    def waitForJobs(self, jobIDs):
         while len(jobIDs) > 0:
             runningIDs = []
             sleep(10)
-            status = self.slurmCommand(["squeue", "-o", "%.12i", "-u", self.user])
+            #status = self.slurmCommand(["squeue", "-o", "%.12i", "-u", self.user])
+            status = self.slurmCommand(["squeue", "-o", "%.12i"])
             for runningID in (
                 status.replace(b" ", b"").replace(b'"', b"").split(b"\n")[1:]
             ):
@@ -308,17 +210,32 @@ class SbatchEngine(QMEngine):
                         runningIDs.append(runningID)
             jobIDs = runningIDs
 
+    def getQMRefData(self, xyzs: list):
+        jobIDs = []
         for xyz in xyzs:
-            name = xyz.split(".")[0]
-            super().writeResult(f"tc_{name}.out", xyz)
+            name = xyz.name.split(".")[0]
+            super().writeInputFile(self.inputSettings, xyz, f"tc_{name}.in")
+            super().writeInputFile(
+                self.backupInputSettings, xyz, f"tc_{name}_backup.in"
+            )
+            self.writeSbatchFile(name, f"sbatch_{name}.sh")
+            job = self.slurmCommand(["sbatch", f"sbatch_{name}.sh"])
+            jobIDs.append(job.split()[3])
+        self.waitForJobs(jobIDs)
 
+        for xyz in xyzs:
+            name = xyz.name.split(".")[0]
+            if self.doResp:
+                copyfile(f"scr.{name}/esp.xyz", f"esp_{name}.xyz")
+            rmtree(f"scr.{name}")
+                
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
 
 
 class DebugEngine(QMEngine):
-    def __init__(self, inputFile, backupInputFile, doResp=False):
-        super().__init__(inputFile, backupInputFile, doResp)
+    def __init__(self, inp):
+        super().__init__(inp)
 
     def getQMRefData(self, xyzs: list):
         energies = []
@@ -336,24 +253,20 @@ class DebugEngine(QMEngine):
                 os.system(f"terachem tc_{name}_backup.in > tc_{name}.out")
             if self.doResp:
                 espXYZ, esps = utils.readEsp(f"scr.{name}/esp.xyz")
-            super().writeResult(f"tc_{name}.out", xyz)
 
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
 
 
-class CCCloudEngine(QMEngine):
+class ChemcloudEngine(QMEngine):
     def __init__(
-        self, inputFile: str, backupInputFile: str, batchSize=None, doResp=False
+        self, inp
     ):
-        if batchSize is None:
-            self.batchSize = 10
-        else:
-            self.batchSize = batchSize
-        self.retries = 5
+        self.batchSize = inp.batchsize
+        self.retries = inp.retries
         self.client = CCClient()
-        super().__init__(inputFile, backupInputFile, doResp)
-        self.setKeywords(doResp)
+        super().__init__(inp)
+        self.setKeywords(self.doResp)
 
     def setKeywords(self, doResp):
         self.keywords = {}
@@ -387,24 +300,13 @@ class CCCloudEngine(QMEngine):
         return keywords
 
     def loadMoleculeFromXYZ(self, xyz):
+        tempMol = Molecule.open(xyz)
+        kwargs = tempMol.model_dump()
         if "charge" in self.specialKeywords.keys():
-            if "spinmult" in self.specialKeywords.keys():
-                mol = Molecule.from_file(
-                    xyz,
-                    molecular_multiplicity=self.specialKeywords["spinmult"],
-                    molecular_charge=self.specialKeywords["charge"],
-                )
-            else:
-                mol = Molecule.from_file(
-                    xyz, molecular_charge=self.specialKeywords["charge"]
-                )
-        else:
-            if "spinmult" in self.specialKeywords.keys():
-                mol = Molecule.from_file(
-                    xyz, molecular_multiplicity=self.specialKeywords["spinmult"]
-                )
-            else:
-                mol = Molecule.from_file(xyz)
+            kwargs["charge"] = self.specialKeywords["charge"]
+        if "spinmult" in self.specialKeywords.keys():
+            kwargs["multiplicity"] = self.specialKeywords["spinmult"]
+        mol = Molecule(**kwargs)
         return mol
 
     def checkSpecialKeywords(self):
@@ -414,38 +316,37 @@ class CCCloudEngine(QMEngine):
             raise ValueError("ES basis not specified in tc template file")
         if "charge" in self.specialKeywords.keys():
             try:
-                self.specialKeywords["charge"] = float(self.specialKeywords["charge"])
+                self.specialKeywords["charge"] = int(self.specialKeywords["charge"])
             except:
-                raise ValueError("Molecular charge must be a float")
+                raise ValueError("Molecular charge must be an int")
+        else:
+            raise ValueError("Molecular charge ('charge') must be specified in input file")
         if "spinmult" in self.specialKeywords.keys():
             try:
                 self.specialKeywords["spinmult"] = int(self.specialKeywords["spinmult"])
             except:
                 raise ValueError("Molecular spin multiplicity must be an integer")
-            if "charge" not in self.specialKeywords.keys():
-                print(
-                    "WARNING: spinmult specified, but charge is not. Assuming charge = 0."
-                )
+        else:
+            raise ValueError("Spin multiplicity ('spinmult') must be specified in input file")
 
-    def computeBatch(self, atomicInputs: list):
+    def computeBatch(self, programInputs: list):
         status = 0
         # If there are no jobs to run after restart
-        if len(atomicInputs) == 0:
+        if len(programInputs) == 0:
             return status, []
-        batchSize = min(self.batchSize, len(atomicInputs))
-        results = []
-        stride = int(len(atomicInputs) / batchSize)
+        batchSize = min(self.batchSize, len(programInputs))
+        outputs = []
+        stride = int(len(programInputs) / batchSize)
         try:
             # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION?
             futureResults = [
-                self.client.compute(atomicInputs[i::stride], engine="terachem_fe")
+                self.client.compute("terachem", programInputs[i::stride], collect_files=True)
                 for i in range(stride)
             ]
-            to_file(futureResults, "jobs.txt")
-            resultBatches = [futureResults[i].get() for i in range(stride)]
-            for batch in resultBatches:
-                for result in batch:
-                    results.append(result)
+            outputBatches = [futureResults[i].get() for i in range(stride)]
+            for batch in outputBatches:
+                for output in batch:
+                    outputs.append(output)
         except Exception as e:
             traceback.print_exc()
             print(e)
@@ -456,84 +357,60 @@ class CCCloudEngine(QMEngine):
             # sleep(30)
             if self.batchSize < 2:
                 status = -1
-                return status, results
-            tempStatus, results = self.computeBatch(atomicInputs)
+                return status, outputs
+            tempStatus, outputs = self.computeBatch(programInputs)
             if tempStatus == -1:
                 status = -1
-        return status, results
+        return status, outputs
 
-    def createAtomicInputs(self, xyzs: list, useBackup=False):
+    def createProgramInputs(self, xyzs: list, useBackup=False):
         mod = {}
         mod["method"] = self.specialKeywords["method"]
         mod["basis"] = self.specialKeywords["basis"]
-        atomicInputs = []
+        programInputs = []
         if useBackup:
             keywords = self.backupKeywords
         else:
             keywords = self.keywords
         for xyz in sorted(xyzs):
-            jobId = utils.getName(xyz)
+            jobID = utils.getName(xyz)
             mol = self.loadMoleculeFromXYZ(xyz)
-            if self.doResp:
-                atomicInput = AtomicInput(
-                    molecule=mol,
-                    model=mod,
-                    driver="gradient",
-                    keywords=keywords,
-                    id=jobId,
-                    protocols={"native_files": "all"},
-                    extras={
-                        "tcfe:keywords": {"native_files": ["esp.xyz"], "stdout": True}
-                    },
-                )
-            else:
-                atomicInput = AtomicInput(
-                    molecule=mol,
-                    model=mod,
-                    driver="gradient",
-                    keywords=keywords,
-                    id=jobId,
-                    extras={"stdout": True},
-                )
-            atomicInputs.append(atomicInput)
-        return atomicInputs
+            programInput = ProgramInput(
+                molecule=mol,
+                model=mod,
+                calctype="gradient",
+                keywords=keywords,
+                extras={'id':jobID}
+            )
+            programInputs.append(programInput)
+        return programInputs
 
-    def writeResult(self, result: AtomicResult):
-        if result.success:
-            json = f"tc_{str(result.id)}.json"
-        else:
-            jobId = result.input_data["id"]
-            if jobId is None:
-                jobId = result.input_data["input_data"]["id"]
-            json = f"tc_{str(jobId)}.json"
-        with open(json, "w") as f:
-            f.write(result.json())
-        if self.doResp and result.success:
-            with open(f"esp_{str(result.id)}.xyz", "w") as f:
-                try:
-                    f.write(result.native_files["esp.xyz"])
-                except:
-                    raise RuntimeError(
-                        f"Job {str(result.id)} in {os.getcwd()} is missing esp file!"
-                    )
+    def writeResult(self, output):
+        jobID = output.input_data.extras['id']
+        out = f"tc_{jobID}.out"
+        with open(out, "w") as f:
+            f.write(output.stdout)
+        if self.doResp and output.success:
+            with open(f"esp_{jobID}.xyz", "w") as f:
+                f.write(output.files["esp.xyz"])
+
+    def getFailedJobs(self, outputs):
+        retryXyzs = []
+        for output in outputs:
+            self.writeResult(output)
+            if not output.success:
+                jobID = output.input_data.extras['id']
+                retryXyzs.append(f"{jobID}.xyz")
+        return retryXyzs
 
     def runJobs(self, xyzs: list, useBackup=False):
-        atomicInputs = self.createAtomicInputs(xyzs, useBackup=useBackup)
-        status, results = self.computeBatch(atomicInputs)
-        if len(results) != len(atomicInputs):
+        programInputs = self.createProgramInputs(xyzs, useBackup=useBackup)
+        status, outputs = self.computeBatch(programInputs)
+        if len(outputs) != len(programInputs):
             raise RuntimeError(
-                "TCCloud did not return the same number of results as inputs"
+                "ChemCloud did not return the same number of outputs as inputs"
             )
-        retryXyzs = []
-        for result in results:
-            self.writeResult(result)
-            if not result.success:
-                jobId = result.input_data["id"]
-                if jobId is None:
-                    print("Oops")
-                    jobId = result.input_data["input_data"]["id"]
-                retryXyzs.append(f"{jobId}.xyz")
-
+        retryXyzs = self.getFailedJobs(outputs)
         if status == -1:
             raise RuntimeError(
                 "Batch resubmission reached size 1; QM calculations incomplete"

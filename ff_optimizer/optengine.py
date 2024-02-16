@@ -275,12 +275,15 @@ class OptEngine:
             else:
                 self.addTargetLines(newFile, self.validTargetLines, f"valid_{i}")
 
-    def graphObjectiveFunction(self):
+    def computeXTicks(self):
         cycles = len(self.valid)
         x = np.arange(cycles) + 1
-        x0 = np.arange(cycles + 1)
         tickInterval = max(int(cycles / 12), 1)
         xticks = np.arange(0, cycles + 1, tickInterval)
+        return cycles, x, xticks
+
+    def graphObjectiveFunction(self):
+        cycles, x, xticks = self.computeXTicks() 
         fig, ax = plt.subplots(figsize=(9, 6))
         ax.plot(x, self.valid, label="Validation, current parameters", marker="o")
         ax.plot(
@@ -289,16 +292,27 @@ class OptEngine:
         ax.plot(
             x, self.validInitial, label="Validation, initial parameters", marker="o"
         )
+        x0 = np.arange(cycles + 1)
         ax.plot(x0, self.train, label="Training", marker="o")
         ax.set_xlabel("Optimization cycle", size=17)
         ax.set_ylabel("Objective function", size=17)
         ax.set_xticks(xticks)
         fig.set_dpi(200)
         plt.legend(fontsize=14)
-        plt.savefig(os.path.join("..", "ObjectiveFunction.png"), bbox_inches="tight")
+        plt.savefig(self.optdir / "ObjectiveFunction.png", bbox_inches="tight")
         plt.close()
 
     def computeSortedParams(self):
+        types = [
+            "BONDSK",
+            "BONDSB",
+            "ANGLESK",
+            "ANGLESB",
+            "DIHS",
+            "VDWS",
+            "VDWT",
+            "COUL",
+        ]
         adds = []
         sortedParams = []
         for k in range(len(types)):
@@ -321,7 +335,8 @@ class OptEngine:
         # plt.close()
         return sortedParams
 
-    def computeMRC(self, sortedParamType):
+    def computeMRC(self, sortedParamsType):
+        cycles = len(self.valid)
         sortedParams = np.asarray(sortedParamsType, dtype=np.float32)
         diff = (sortedParams - np.roll(sortedParams, 1, axis=1))[:, 1:]
         weights = np.maximum(
@@ -335,16 +350,6 @@ class OptEngine:
         return mrc
 
     def graphMRC(self):
-        types = [
-            "BONDSK",
-            "BONDSB",
-            "ANGLESK",
-            "ANGLESB",
-            "DIHS",
-            "VDWS",
-            "VDWT",
-            "COUL",
-        ]
         aliases = [
             "Bond strength",
             "Bond length",
@@ -368,8 +373,9 @@ class OptEngine:
 
         sortedParams = self.computeSortedParams()
         fig, ax = plt.subplots(figsize=(9, 6))
+        cycles, x, xticks = self.computeXTicks()
         ax.set_xticks(xticks)
-        for j in range(len(types)):
+        for j in range(len(aliases)):
             if len(sortedParams[j]) == 0:
                 continue
             mrc = self.computeMRC(sortedParams[j])
@@ -379,7 +385,7 @@ class OptEngine:
         ax.set_xlabel("Optimization Cycle", size=17)
         # ax.set_ylabel('Normalized RMS parameter change',size=17)
         ax.set_ylabel("Mean relative parameter change / %", size=17)
-        plt.savefig(os.path.join("..", "ParameterChange.png"), bbox_inches="tight")
+        plt.savefig(self.optdir / "ParameterChange.png", bbox_inches="tight")
         plt.close()
 
     def graphResults(self):
@@ -500,7 +506,6 @@ class OptEngine:
                 self.labels = results["labels"]
                 self.params[0, :] = results["initialParams"]
             self.train.append(results["obj"])
-            print(results["obj"], i)
             self.sortParams(results, i)
         else:
             raise RuntimeError("ForceBalance failed!")
@@ -515,7 +520,6 @@ class OptEngine:
             return
         # Determine cycle for restart, set restart variables
         for i in range(self.maxCycles + 2):
-            print("hi", i)
             if i > 0:
                 # check if valid previous finished
                 try:

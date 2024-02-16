@@ -31,6 +31,7 @@ def pytest_addoption(parser):
         default=False,
         help="run tests which use the queue",
     )
+    parser.addoption("--vaca", action="store_true", default=False, help="run tests on old vacation_to_hawaii script")
     parser.addoption("--all", action="store_true", default=False, help="run all tests")
 
 
@@ -49,6 +50,7 @@ def pytest_configure(config):
         "markers", "queue: test runs on queue and may take long to run"
     )
     config.addinivalue_line("markers", "debug: run only these tests")
+    config.addinivalue_line("markers", "vaca: runs full tests on vacation_to_hawaii script")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -58,6 +60,7 @@ def pytest_collection_modifyitems(config, items):
     skips["full"] = pytest.mark.skip(reason="need --full option to run")
     skips["gpu"] = pytest.mark.skip(reason="need --gpu option to run")
     skips["queue"] = pytest.mark.skip(reason="need --queue option to run")
+    skips["vaca"] = pytest.mark.skip(reason="need --vaca option to run")
     debug = pytest.mark.skip(reason="skipping unmarked tests in debug mode")
     items2 = []
     for item in items:

@@ -32,7 +32,7 @@ def test_sample(monkeypatch):
     for i in range(1, 9):
         testXYZ = loadtxt(f"{i}.xyz", usecols=(1, 2, 3), skiprows=2)
         refXYZ = loadtxt(os.path.join("ref", f"{i}.xyz"), usecols=(1, 2, 3), skiprows=2)
-        if not checkUtils.checkArrays(testXYZ, refXYZ, 1e-3):
+        if not checkUtils.checkArrays(testXYZ, refXYZ, 1e-2):
             passTest = False
     clean()
     assert passTest

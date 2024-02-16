@@ -1,3 +1,0 @@
-loadcrd 0.nc coors
-crdout coors 0.pdb multi
-exit

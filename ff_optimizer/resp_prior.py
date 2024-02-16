@@ -1,9 +1,9 @@
 import os
 
 import numpy as np
-from chemcloud.models import AtomicResult
-from qcelemental.util.serialization import json_loads
 from scipy.stats import norm
+from qcio import SinglePointResults
+from pathlib import Path
 
 # import matplotlib as mpl
 # import matplotlib.pyplot as plt
@@ -81,38 +81,26 @@ class RespPriors:
         return esp, resp
 
     def getCharges(self, i: int):
-        cycleDir = f"{str(i)}_cycle_{str(i)}"
-        # Determine if we're in main directory
-        if os.path.isdir(self.sampledir):
-            path = os.path.join(self.sampledir, cycleDir)
-        # Else we're in optdir
-        else:
-            path = os.path.join("..", self.sampledir, cycleDir)
+        cycleDir = f"{i}_cycle_{i}"
+        path = self.sampledir.absolute() / cycleDir
         trainDir = ""
-        for f in os.listdir(path):
-            if f.startswith("train") and os.path.isdir(os.path.join(path, f)):
-                trainDir = os.path.join(path, f)
+        for f in path.iterdir():
+            if f.name.startswith("train") and (path / f).is_dir():
+                trainDir = path / f
         if trainDir == "":
             raise RuntimeError(
                 f"No training directory found in {os.path.join(self.sampledir, cycleDir)}"
             )
-        jsons = []
+        outs = []
         for f in os.listdir(trainDir):
-            if f.startswith("tc") and f.endswith("json"):
-                jsons.append(f)
+            if f.startswith("tc") and f.endswith(".out"):
+                outs.append(f)
 
-        jsons = sorted(jsons)
-        for j in jsons:
-            try:
-                with open(os.path.join(trainDir, j), "r") as js:
-                    result = AtomicResult(**json_loads(js.read()))
-                lines = result.stdout.split("\n")
-                esp, resp = self.readCharges(lines)
-            except:
-                name = j.split(".")[0]
-                with open(os.path.join(trainDir, f"{name}.out"), "r") as tcout:
-                    lines = tcout.readlines()
-                esp, resp = self.readCharges(lines)
+        outs = sorted(outs)
+        for out in outs:
+            with open(trainDir / out, "r") as tcout:
+                lines = tcout.readlines()
+            esp, resp = self.readCharges(lines)
             self.allEsp.append(esp)
             self.allResp.append(resp)
 

@@ -1,20 +1,17 @@
 #!/bin/bash
 
-#SBATCH -t 2:00:00
-#SBATCH -J FB_ref_gradient_XXX
-#SBATCH --gres gpu:2
-#SBATCH -p gpu_shortq
-#SBATCH --qos=gpu_short
+#SBATCH -t 1:00:00
+#SBATCH -J FB_ref_gradient_JOBID
+#SBATCH --gres gpu:1
+#SBATCH -p gpuq
 #SBATCH --mem=16GB
-#SBATCH --fin=tc_XXX.in,XXX.pdb,tc_XXX_long.in
-#SBATCH --fout=tc_XXX.out
-#SBATCH --exclude=fire-11-01
+cp JOBID.xyz TCTEMPLATE TCTEMPLATEBACKUP $SCRATCH/.
 cd $SCRATCH
 
-module unload MPICH2
-ml TeraChem/2021.02-intel-2017.8.262-CUDA-9.0.176
-terachem tc_XXX.in > tc_XXX.out
-if [ $(grep -c "Job finished" tc_XXX.out) -ne 1 ]
+ml TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1
+terachem TCTEMPLATE > tc_JOBID.out
+if [ $(grep -c "Job finished" tc_JOBID.out) -ne 1 ]
 then
-  terachem tc_XXX_long.in > tc_XXX.out
+  rm -rf scr*
+  terachem TCTEMPLATEBACKUP > tc_JOBID.out
 fi

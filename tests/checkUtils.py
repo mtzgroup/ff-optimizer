@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def checkFloat(f1, f2, thresh=0.00001):
+def checkFloats(f1, f2, thresh=0.00001):
     f1 = float(f1)
     f2 = float(f2)
     return abs(f1 - f2) < thresh
@@ -35,7 +35,7 @@ def checkListsFloats(list1, list2, thresh=0.000001):
         return False
     for i in range(len(list1)):
         try:
-            isSame = checkFloat(float(list1[i]), float(list2[i]), thresh=thresh)
+            isSame = checkFloats(float(list1[i]), float(list2[i]), thresh=thresh)
         except:
             isSame = list1[i] == list2[i]
         if not isSame:
