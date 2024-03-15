@@ -230,10 +230,10 @@ parser.add_argument(
     default="1_opt",
 )
 parser.add_argument(
-    "--vsplit", help="Compute split validation sets", action="store_false", default=True
+    "--vsplit", help="Compute split validation sets", action="store_true", default=False
 )
 parser.add_argument(
-    "--vweave", help="Compute woven validation sets", action="store_false", default=True
+    "--vweave", help="Compute woven validation sets", action="store_true", default=False
 )
 args = parser.parse_args()
 
@@ -316,8 +316,8 @@ if totalCycles <= 0:
     raise RuntimeError("No opts completed!")
 
 print(
-    "%7s%15s%15s%20s%23s"
-    % ("Epoch", "Validation", "Valid ratio", "Current-Previous", "Current-last Current")
+    "%7s%15s%15s%20s%20s%23s"
+    % ("Epoch", "Validation", "Valid ratio", "Current-Previous", "Diff percentage", "Current-last Current")
 )
 print(
     "%7d%15.8f%15.8f%20.8f"
@@ -325,12 +325,13 @@ print(
 )
 for i in range(1, totalCycles):
     print(
-        "%7d%15.8f%15.8f%20.8f%23.8f"
+        "%7d%15.8f%15.8f%20.8f%20.8f%23.8f"
         % (
             i + 1,
             valid[i],
             valid[i] / validInitial[i],
             valid[i] - validPrevious[i],
+            (valid[i] - validPrevious[i]) / valid[i] * 100,
             valid[i] - valid[i - 1],
         )
     )
