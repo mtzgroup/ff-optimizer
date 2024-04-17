@@ -1,0 +1,280 @@
+| Startfile from command line: tc.in
+
+
+|       ***********************************************************
+|       *                 TeraChem v1.9-2023.11-dev               *
+|       *                   Development Version                   *
+|       *           Chemistry at the Speed of Graphics!           *
+|       ***********************************************************
+|       * This program may only be used in connection with        *
+|       * a valid license from PetaChem, LLC. Use of this program *
+|       * or results thereof indicates acceptance of all terms    *
+|       * and conditions stated in the license and that a valid   *
+|       * license agreement between the user and PetaChem, LLC    *
+|       * exists. PetaChem, LLC does not warrant the correctness  *
+|       * of results or their suitability for any purpose.        *
+|       * Please email bugs, suggestions, and comments to         *
+|       *                  help@petachem.com                      *
+|       *                                                         *
+|       ***********************************************************
+
+
+|       ***********************************************************
+|       *  Compiled by admin        2023-11-20T16:40:57-08:00     *
+|       *  Supported architecture SMs: 52 61 70 80 90             *
+|       *  Build cuda_12.2.r12.2/compiler.33053471_0              *
+|       *  Git Version: a9eb8ff89612a9a1d48fcafd0c6ead58e98146ef  *
+|       ***********************************************************
+
+
+| Job started   Wed Apr 17 14:15:13 2024
+| On fire-09-06 (available memory: 122544 MB)
+
+| ######################################### RUNTIME INFO ##########################################
+| terachem  tc.in 
+
+|  NVRM version: NVIDIA UNIX x86_64 Kernel Module  525.89.02  Wed Feb  1 23:23:25 UTC 2023
+|  GCC version:  gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04) 
+
+|  	linux-vdso.so.1 (0x00007fff1c379000)
+|  	libcurl.so.4 => /lib/x86_64-linux-gnu/libcurl.so.4 (0x00007f963ab23000)
+|  	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f963ab07000)
+|  	libmpi.so.12 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libmpi.so.12 (0x00007f9639000000)
+|  	libdftbplus.so => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libdftbplus.so (0x00007f9638ca8000)
+|  	libfsockets.so => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libfsockets.so (0x00007f963aaff000)
+|  	libxmlf90.so => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libxmlf90.so (0x00007f963aad4000)
+|  	libthcbox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libthcbox.so.1 (0x00007f9636e8b000)
+|  	libOpenMM.so => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libOpenMM.so (0x00007f9636a31000)
+|  	libnvToolsExt.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libnvToolsExt.so.1 (0x00007f9636800000)
+|  	libgpubox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libgpubox.so.1 (0x00007f9636a26000)
+|  	libcpubox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libcpubox.so.1 (0x00007f9636a20000)
+|  	libtensorbox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libtensorbox.so.1 (0x00007f96367e4000)
+|  	libiobox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libiobox.so.1 (0x00007f9636a1a000)
+|  	libintbox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libintbox.so.1 (0x00007f95de699000)
+|  	libatmx2cbox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libatmx2cbox.so.1 (0x00007f95de5d8000)
+|  	libsqmbox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libsqmbox.so.1 (0x00007f95de22c000)
+|  	libgridbox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libgridbox.so.1 (0x00007f95dd710000)
+|  	libdftbox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libdftbox.so.1 (0x00007f95dd621000)
+|  	libcibox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libcibox.so.1 (0x00007f95dcfd5000)
+|  	libccbox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libccbox.so.1 (0x00007f95dcb44000)
+|  	libsimbox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libsimbox.so.1 (0x00007f95dcb27000)
+|  	liboptbox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/liboptbox.so.1 (0x00007f95dcaf2000)
+|  	libprotobuf.so.25 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libprotobuf.so.25 (0x00007f95dc81f000)
+|  	libcommbox.so.1 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libcommbox.so.1 (0x00007f95dc7be000)
+|  	libssl.so.3 => /lib/x86_64-linux-gnu/libssl.so.3 (0x00007f95dc71a000)
+|  	libcrypto.so.3 => /lib/x86_64-linux-gnu/libcrypto.so.3 (0x00007f95dc2d7000)
+|  	libcuda.so.1 => /lib/x86_64-linux-gnu/libcuda.so.1 (0x00007f95da5f7000)
+|  	libcudart.so.12 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libcudart.so.12 (0x00007f95da200000)
+|  	libcublas.so.12 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libcublas.so.12 (0x00007f95d3a00000)
+|  	libcufft.so.11 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libcufft.so.11 (0x00007f95c8c00000)
+|  	libcusparse.so.12 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libcusparse.so.12 (0x00007f95b8e00000)
+|  	libcusolver.so.11 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libcusolver.so.11 (0x00007f95b1c00000)
+|  	libcublasLt.so.12 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libcublasLt.so.12 (0x00007f958f400000)
+|  	libimf.so => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libimf.so (0x00007f958f016000)
+|  	libsvml.so => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libsvml.so (0x00007f958d9e7000)
+|  	libirng.so => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libirng.so (0x00007f958d600000)
+|  	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f958d3d4000)
+|  	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f95da510000)
+|  	libiomp5.so => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libiomp5.so (0x00007f958ce00000)
+|  	libcilkrts.so.5 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libcilkrts.so.5 (0x00007f958ca00000)
+|  	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f95da4f0000)
+|  	libintlc.so.5 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libintlc.so.5 (0x00007f95d3988000)
+|  	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f958c7d7000)
+|  	/lib64/ld-linux-x86-64.so.2 (0x00007f963abdb000)
+|  	libnghttp2.so.14 => /lib/x86_64-linux-gnu/libnghttp2.so.14 (0x00007f95da4c6000)
+|  	libidn2.so.0 => /lib/x86_64-linux-gnu/libidn2.so.0 (0x00007f95da1df000)
+|  	librtmp.so.1 => /lib/x86_64-linux-gnu/librtmp.so.1 (0x00007f95da1c0000)
+|  	libssh.so.4 => /lib/x86_64-linux-gnu/libssh.so.4 (0x00007f95b8d93000)
+|  	libpsl.so.5 => /lib/x86_64-linux-gnu/libpsl.so.5 (0x00007f95da4b2000)
+|  	libgssapi_krb5.so.2 => /lib/x86_64-linux-gnu/libgssapi_krb5.so.2 (0x00007f95d3934000)
+|  	libldap-2.5.so.0 => /lib/x86_64-linux-gnu/libldap-2.5.so.0 (0x00007f95c8ba1000)
+|  	liblber-2.5.so.0 => /lib/x86_64-linux-gnu/liblber-2.5.so.0 (0x00007f95b8d82000)
+|  	libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1 (0x00007f95b8cb3000)
+|  	libbrotlidec.so.1 => /lib/x86_64-linux-gnu/libbrotlidec.so.1 (0x00007f95b8ca5000)
+|  	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f95da4ad000)
+|  	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f95da4a8000)
+|  	libifport.so.5 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libifport.so.5 (0x00007f95b8c7b000)
+|  	libifcoremt.so.5 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libifcoremt.so.5 (0x00007f958d25a000)
+|  	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f95b8c76000)
+|  	libnvJitLink.so.12 => /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/lib/libnvJitLink.so.12 (0x00007f9589600000)
+|  	libunistring.so.2 => /lib/x86_64-linux-gnu/libunistring.so.2 (0x00007f958cc56000)
+|  	libgnutls.so.30 => /lib/x86_64-linux-gnu/libgnutls.so.30 (0x00007f9589415000)
+|  	libhogweed.so.6 => /lib/x86_64-linux-gnu/libhogweed.so.6 (0x00007f95b1bb8000)
+|  	libnettle.so.8 => /lib/x86_64-linux-gnu/libnettle.so.8 (0x00007f95b1b72000)
+|  	libgmp.so.10 => /lib/x86_64-linux-gnu/libgmp.so.10 (0x00007f958d965000)
+|  	libkrb5.so.3 => /lib/x86_64-linux-gnu/libkrb5.so.3 (0x00007f958934a000)
+|  	libk5crypto.so.3 => /lib/x86_64-linux-gnu/libk5crypto.so.3 (0x00007f95b8c45000)
+|  	libcom_err.so.2 => /lib/x86_64-linux-gnu/libcom_err.so.2 (0x00007f95b1b6c000)
+|  	libkrb5support.so.0 => /lib/x86_64-linux-gnu/libkrb5support.so.0 (0x00007f95b1b5e000)
+|  	libsasl2.so.2 => /lib/x86_64-linux-gnu/libsasl2.so.2 (0x00007f95b1b43000)
+|  	libbrotlicommon.so.1 => /lib/x86_64-linux-gnu/libbrotlicommon.so.1 (0x00007f958d942000)
+|  	libp11-kit.so.0 => /lib/x86_64-linux-gnu/libp11-kit.so.0 (0x00007f958920f000)
+|  	libtasn1.so.6 => /lib/x86_64-linux-gnu/libtasn1.so.6 (0x00007f95b1b2b000)
+|  	libkeyutils.so.1 => /lib/x86_64-linux-gnu/libkeyutils.so.1 (0x00007f958d93b000)
+|  	libresolv.so.2 => /lib/x86_64-linux-gnu/libresolv.so.2 (0x00007f958d927000)
+|  	libffi.so.8 => /lib/x86_64-linux-gnu/libffi.so.8 (0x00007f958d91a000)
+| #################################################################################################
+
+| Checking Amazon Cloud instance ID...   Not found
+| Cannot find license.dat file /global/software/TeraChem/2023.11-intel-2023.2.0-CUDA-12.2.1/license.dat
+
+
+| TRYING THE NETWORK LICENSE...
+| Connecting to license server '54.208.252.40' port '8877'...
+| Connected!
+| Checking your license...
+
+| **************************************************************
+|  Greetings, Martinez Group! You have 1000 licenses in total
+|  IN USE: 10
+|  AVAILABLE: 990
+| **************************************************************
+
+-----------------------------------
+Processed Input file:
+                   method b3lyp
+                     dftd d3
+                   charge 0
+              coordinates 3.xyz
+                    basis 6-31gss
+                      run gradient
+-----------------------------------
+Jobname: 3
+Scratch data will be generated
+Scratch directory: ./scr.3
+| Random number seed: 1656160247
+
+XYZ coordinates 3.xyz
+Molden File Output: ./scr.3/3.molden
+Using basis set: 6-31gss
+dmrgstart not found
+Spin multiplicity: 1
+DIIS will use up to 10 vectors.
+Condition number limit for the DIIS overlap matrix is            0
+WF convergence threshold: 3.00e-05
+Using DIIS algorithm to converge WF
+Maximum number of SCF iterations: 100
+Incremental fock with rebuild every 8 iterations
+Will switch to conventional Fock if diffuse functions are detected
+X-matrix tolerance: 1.00e-04
+PRECISION: DYNAMIC
+TeraChem will select linear algebra engine
+DFT Functional requested: b3lyp
+Method: B3LYP  with dispersion correction
+  Hartree-Fock exact exchange:          0.20 
+  Slater exchange functional:           0.80 
+  Becke 1988 exchange functional:       0.72 
+  Lee-Yang-Parr correlation functional: 0.81 
+  VWN(I) correlation functional:        0.19 
+Wavefunction: RESTRICTED
+
+ DFT-D code reimplemented following the
+ code by S.Grimme, University Bonn 
+ based on DFTD3 V3.2 Rev 0         
+ 
+Please cite DFT-D3 work done with this code as:
+S. Grimme, J. Antony, S. Ehrlich and H. Krieg,
+J. Chem. Phys. 132 (2010), 154104
+If used with BJ-damping cite also
+S. Grimme, S. Ehrlich and L. Goerigk,
+J. Comput. Chem. 32 (2011), 1456-1465
+For DFT-D2 the reference is
+S. Grimme, J. Comput. Chem., 27 (2006), 1787-1799
+DFT grid type: 1
+Using dynamic DFT grids.
+Initial guess generated by maximum overlap
+
+********************************************
+**** SINGLE POINT GRADIENT CALCULATIONS ****
+********************************************
+SCF:   Initial guess is taken from previous step
+Starting TensorBox...
+| TeraChem will select linear algebra engine
+| Using cuSolver for matrix diagonalization
+
+| using 1 out of 1 CUDA devices
+|   Device 0: NVIDIA GeForce RTX 3080, 10009MB, CC 8.6 -- CPU THREAD 0
+| -------------------------------------------------------------------
+| CPU Memory Available: 18127.88 MegaWords 
+| GPU Memory Available: 995.18 MegaWords 
+| Maximum recommended basis set size: 11200 basis functions
+|  (limited by GPU memory)
+| -------------------------------------------------------------------
+| Initialize GPUBox with 128 MW of memory
+
+****** QM coordinates ******
+O         0.6840000000        -1.7170000000        -2.0850000000  
+H         0.3970000000        -1.1190000000        -1.4460000000  
+H         1.1780000000        -2.1830000000        -2.8040000000  
+O        -0.6100000000         1.0670000000         0.4600000000  
+H        -0.3160000000         0.1760000000         0.3530000000  
+H        -0.9200000000         1.9650000000         0.6300000000  
+
+Basis set:       6-31gss
+Total atoms:     6
+Total charge:    0
+Total electrons: 20 (10-alpha, 10-beta)
+Number electrons modeled by ECPs: 0
+Total orbitals:  50
+Total AO shells: 24 (14 S-shells; 8 P-shells; 2 D-shells; 0 F-shells; 0 G-shells)
+Spin multiplicity: 1
+Nuclear repulsion energy (QM atoms): 31.788228466141 a.u.
+
+DFTD Energy:    -0.0016190 hartree
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6272 (1045 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 17440 (2906 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying guess...
+| Trace of guess  20.00000000, trace of guess*guess  20.00000000,  electron number  20.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| THRESPDP set to 1.00e+00
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.5423669878    -151.9050940710    19.9999867197   -14.3771599363    -151.9050940710     0.11  
+|                 >>> SWITCHING TO GRID 0 <<<
+|    2     0.4680358838      -0.2581043350    20.0000580789   -16.0263517444    -152.1631984059     0.04  
+|    3     0.0473384661      -0.5637905022    20.0000298733   -15.0393065423    -152.7269889081     0.04  
+|    4     0.0054620388      -0.0080336234    20.0000343026   -15.1246388917    -152.7350225315     0.04  
+| THRESPDP set to 3.24e-02
+|                 >>> SWITCHING TO GRID 1 <<<
+|    5     0.0013657155      -0.0001051519    19.9999908264   -15.1332208635    -152.7351276834     0.06  
+|    6     0.0005428788      -0.0000033982    19.9999907754   -15.1344791800    -152.7351310816     0.06  
+|    7     0.0000906904      -0.0000006315    19.9999907889   -15.1346133440    -152.7351317132     0.06  
+|    8     0.0000092379      +0.0000000163    19.9999907914   -15.1346949356    -152.7351316969     0.06  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -152.7351316969 a.u.
+DISPERSION CONTRIBUTION TO ENERGY: -0.0016190206 a.u.
+HOMO-LUMO GAP: 7.531 eV
+CENTER OF MASS: {0.042344, -0.321111, -0.812976} ANGS
+DIPOLE MOMENT: {0.409355, 0.395814, -0.021765} (|D| = 0.569837) DEBYE
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+   -0.0038779486     0.0687206789     0.0477909375
+   -0.0100013167    -0.0285454194    -0.0068587158
+    0.0141400568    -0.0414870477    -0.0396218068
+    0.0043598779    -0.0204879690     0.0079636428
+    0.0055793960    -0.0110821018    -0.0108230220
+   -0.0102000638     0.0328818574     0.0015489625
+---------------------------------------------------
+Net gradient:  1.616091e-09 -1.605331e-09 -1.868630e-09
+Net torque:    8.592279e-05  3.576845e-05 -4.542549e-05
+
+Writing out molden info
+| Total processing time: 0.62 sec 
+
+| Job finished: Wed Apr 17 14:15:22 2024
+

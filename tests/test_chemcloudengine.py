@@ -24,6 +24,8 @@ def test_init():
     assert chemcloudEngine.backupKeywords["threall"] == "1.0e-14"
     assert chemcloudEngine.backupKeywords["diismaxvecs"] == "40"
     assert chemcloudEngine.backupKeywords["maxit"] == "200"
+    assert "method" not in chemcloudEngine.keywords.keys()
+    assert "method" not in chemcloudEngine.backupKeywords.keys()
 
 
 def test_loadMoleculeFromXYZ1():
@@ -92,7 +94,6 @@ def test_initResp():
     chemcloudEngine = qmengine.ChemcloudEngine(inp)
     assert chemcloudEngine.keywords["resp"] == "yes"
     assert chemcloudEngine.backupKeywords["resp"] == "yes"
-
 
 def test_getQMRefData(monkeypatch):
     os.chdir(os.path.dirname(__file__))
