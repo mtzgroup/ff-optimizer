@@ -285,8 +285,9 @@ class ChemcloudEngine(QMEngine):
         keywords = {}
         specialSettings = ["method", "basis", "charge", "spinmult"]
         for setting in settings:
-            if setting[0] in specialSettings and not backup:
-                self.specialKeywords[setting[0]] = setting[1]
+            if setting[0] in specialSettings:
+                if not backup:
+                    self.specialKeywords[setting[0]] = setting[1]
             else:
                 if len(setting) == 2:
                     keywords[setting[0]] = setting[1]
@@ -339,6 +340,9 @@ class ChemcloudEngine(QMEngine):
         batchSize = min(self.batchSize, len(programInputs))
         outputs = []
         stride = int(len(programInputs) / batchSize)
+        #import pickle
+        #with open("inputs.pickle", "wb") as f:
+        #    pickle.dump(programInputs, f)
         try:
             # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION?
             futureResults = [

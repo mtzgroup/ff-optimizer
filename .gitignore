@@ -1,6 +1,7 @@
 # Test outputs
-*.out
+#*.out
 *.prmtop
+leap.out
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
