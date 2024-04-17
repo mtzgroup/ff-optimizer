@@ -13,6 +13,7 @@ mpl.use("Agg")
 
 class OptEngine:
     def setVariables(self, inp):
+        self.converged = False
         self.home = os.getcwd()
         self.inp = inp
         self.optdir = Path(inp.optdir)
@@ -488,6 +489,8 @@ class OptEngine:
             self.runValidInitial(i)
             # make some pretty graphs
             self.graphResults()
+            # check if iterative optimization is done yet
+            self.checkConvergence()
         else:
             # special setup for first-time training
             self.runInitialTraining()
@@ -497,6 +500,30 @@ class OptEngine:
         for j in range(1, self.nvalids):
             self.readValid(self.optdir / f"valid_{i}_{j}{suffix}.out")
         return v
+
+    def computeValidDiff(self):
+        vDiff = []
+        for i in range(len(self.valid)):
+            vDiff.append((self.valid[i] - self.validPrevious[i]) / self.valid[i] * 100)
+        return vDiff
+
+    def checkConvergence(self):
+        patience = 5
+        inPatience = False
+        cutoff = -1 # Cutoff is 1% change in performance
+        lastCycle = -1
+        validDiff = self.computeValidDiff()
+        for j in range(len(self.valid)):
+            if not inPatience and validDiff[j] > cutoff:
+                inPatience = True
+                patienceCycle = j
+            if inPatience and validDiff[j] < cutoff:
+                inPatience = False
+            if inPatience and j - patienceCycle > patience:
+                lastCycle = j
+                self.converged = True
+                break
+        return lastCycle
 
     def checkOpt(self, i):
         status, results = self.readOpt(self.optdir / f"opt_{i}.out")

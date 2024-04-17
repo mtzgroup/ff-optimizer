@@ -103,6 +103,9 @@ def readValidDiff(optdir="1_opt"):
 vj = readValidDiff()
 for i in range(vj.shape[1]):
     finalCycle = getStoppingPoint(vj[:,i])
-    best = getFinalValidations(i, finalCycle)
-    print(best)
+    if finalCycle is not None:
+        best = getFinalValidations(i, finalCycle)
+        print(best)
+    else:
+        print("Not converged yet")
 #np.savetxt("validPrev.txt", validPrev, fmt="%10.3e")

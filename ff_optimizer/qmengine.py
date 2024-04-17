@@ -435,7 +435,7 @@ class ChemcloudEngine(QMEngine):
             #    )
             #    print(result.error.error_message)
             raise RuntimeError(
-                f"Job ids {[xyz.split('.')[0] for xyz in retryXyzs]} in {os.getcwd()} failed {str(self.retries)} times!"
+                f"Job ids {sorted([xyz.split('.')[0] for xyz in retryXyzs])} in {os.getcwd()} failed {str(self.retries)} times!"
             )
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)

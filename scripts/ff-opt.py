@@ -266,3 +266,6 @@ if __name__ == "__main__":
                     fbTime,
                 )
             )
+
+        if ffModel.converged:
+            break
