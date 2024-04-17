@@ -1,4 +1,5 @@
 import errno
+import pytest
 import os
 from pathlib import Path
 from shutil import copyfile, rmtree
@@ -630,7 +631,6 @@ def test_respPriors(monkeypatch):
     assert check1
     assert check2
 
-
 def test_restartResp(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     monkeypatch.setattr(resp_prior.RespPriors, "getUnits", monkeyGetUnits)
@@ -645,7 +645,6 @@ def test_restartResp(monkeypatch):
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     arr = np.asarray(optEngine.respPriors.allResp, dtype=np.float32)
-    print(arr)
     assert checkUtils.checkFloats(arr[5, 0], 2.0)
     assert checkUtils.checkFloats(arr[8, 0], 3.0)
 

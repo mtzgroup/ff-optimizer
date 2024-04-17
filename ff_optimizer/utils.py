@@ -433,7 +433,7 @@ def getXYZs(folder="."):
     for f in folder.iterdir():
         if f.name.endswith(".xyz") and not f.name.startswith("esp"):
             xyzs.append(f)
-    return xyzs
+    return sorted(xyzs)
 
 
 # Separate file name from extension

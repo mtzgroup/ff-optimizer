@@ -1,4 +1,5 @@
 import os
+import pytest
 from pathlib import Path
 from shutil import copyfile
 
@@ -186,7 +187,6 @@ def test_computeChargeDistribution():
     assert checkUtils.checkFloats(respPriors.espMeans[5], 0.13353156)
     assert checkUtils.checkFloats(respPriors.espStdevs[5], 0.01762259)
 
-
 def test_computePriors():
     os.chdir(os.path.join(os.path.dirname(__file__), "resp"))
     options = getDefaults()
@@ -198,6 +198,7 @@ def test_computePriors():
     respPriors.getCharges(1)
     respPriors.computeChargeDistributions()
     priors = respPriors.computePriors()
+    print(priors)
     assert checkUtils.checkFloats(priors[5], 0.05675933895)
     assert priors[6] == -1
     assert checkUtils.checkFloats(priors[0], 0.1956745629)
