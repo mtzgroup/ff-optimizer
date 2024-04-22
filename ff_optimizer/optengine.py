@@ -519,7 +519,7 @@ class OptEngine:
                 patienceCycle = j
             if inPatience and validDiff[j] < cutoff:
                 inPatience = False
-            if inPatience and j - patienceCycle > patience:
+            if inPatience and j - patienceCycle >= patience:
                 lastCycle = j
                 self.converged = True
                 break

@@ -988,3 +988,79 @@ def test_graphResults(monkeypatch):
     os.remove("ParameterChange.png")
     os.remove("ObjectiveFunction.png")
     cleanOptDir(".")
+
+def test_checkValids1(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    testDir = Path("restart4")
+    options = getDefaults()
+    options.optdir = testDir
+    options.nvalids = 3
+    optEngine = optengine.OptEngine(options)
+
+    v = optEngine.checkValids(1, "_previous")
+    cleanOptDir(".")
+    assert checkUtils.checkFloats(v, 9.08189e-01)
+
+def test_checkValids2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    testDir = Path("restart4")
+    options.optdir = testDir
+    options.nvalids = 3
+    optEngine = optengine.OptEngine(options)
+    try:
+        v = optEngine.checkValids(2, "")
+        failed = False
+    except:
+        failed = True
+    cleanOptDir(".")
+    assert failed
+
+def test_computeValidDiff(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    testDir = Path("restart4")
+    options.optdir = testDir
+    optEngine = optengine.OptEngine(options)
+    
+    optEngine.valid = list(np.loadtxt("valids.txt"))
+    optEngine.validPrevious = list(np.loadtxt("previous.txt"))
+    vref = np.loadtxt("vj.txt")
+    vtest = np.asarray(optEngine.computeValidDiff())
+    assert checkUtils.checkArrays(vref, vtest)
+
+def test_checkConvergence1(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    testDir = Path("restart4")
+    options.optdir = testDir
+    optEngine = optengine.OptEngine(options)
+    
+    optEngine.valid = list(np.loadtxt("valids2.txt"))
+    optEngine.validPrevious = list(np.loadtxt("previous.txt"))
+    j = optEngine.checkConvergence()
+    assert j == 12
+    assert optEngine.converged
+
+def test_checkConvergence2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    testDir = Path("restart4")
+    options.optdir = testDir
+    optEngine = optengine.OptEngine(options)
+    
+    optEngine.valid = list(np.loadtxt("valids3.txt"))
+    optEngine.validPrevious = list(np.loadtxt("previous.txt"))
+    j = optEngine.checkConvergence()
+    assert j == -1
+    assert not optEngine.converged
