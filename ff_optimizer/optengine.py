@@ -513,7 +513,7 @@ class OptEngine:
         cutoff = -1 # Cutoff is 1% change in performance
         lastCycle = -1
         validDiff = self.computeValidDiff()
-        for j in range(len(self.valid)):
+        for j in range(len(validDiff)):
             if not inPatience and validDiff[j] > cutoff:
                 inPatience = True
                 patienceCycle = j
