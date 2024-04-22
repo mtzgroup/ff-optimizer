@@ -64,17 +64,7 @@ class ActiveLearningModel(AbstractModel):
         tempInp.optdir = optdir
         return tempInp
 
-    def __init__(self, inp):
-        self.setParams(inp)
-        os.chdir(inp.optdir)
-        os.system(f"tleap -f setup.leap > leap.out")
-        self.prmtop = None
-        for f in os.listdir():
-            if f.endswith(".prmtop"):
-                self.prmtop = f
-        if self.prmtop == None:
-            raise RuntimeError("setup.leap file did not produce a .prmtop file")
-        os.chdir(self.home)
+    def setupModels(self, inp):
         for i in range(1, self.nmodels + 1):
             tempInp = self.setupFolders(inp, i)
             # Want to sample multiple validation sets, but don't need to evaluate them all
@@ -86,6 +76,22 @@ class ActiveLearningModel(AbstractModel):
                 self.models[-1].optEngine.determineRestart()
                 self.models[-1].restartCycle = self.models[-1].optEngine.restartCycle
             os.chdir(self.home)
+
+    def setupLeap(self, inp):
+        os.chdir(inp.optdir)
+        os.system(f"tleap -f setup.leap > leap.out")
+        self.prmtop = None
+        for f in os.listdir():
+            if f.endswith(".prmtop"):
+                self.prmtop = f
+        if self.prmtop == None:
+            raise RuntimeError("setup.leap file did not produce a .prmtop file")
+        os.chdir(self.home)
+
+    def __init__(self, inp):
+        self.setParams(inp)
+        self.setupLeap(inp)
+        self.setupModels(inp)
         if inp.restart:
             self.restartCycle = min([m.restartCycle for m in self.models])
         else:
@@ -102,6 +108,7 @@ class ActiveLearningModel(AbstractModel):
         self.validGeometries = None
         # account for the fact that models are in self.home/model_{i}
         self.dynamicsdir = os.path.join("..", inp.dynamicsdir)
+        self.converged = False
 
     def initialCycle(self):
         for i in range(1, self.nmodels + 1):
@@ -141,6 +148,10 @@ class ActiveLearningModel(AbstractModel):
             self.models = p.map(paramOptStar, tasks)
         # for now we arbitrarily print only the first model's info
         self.optResults = self.models[0].optResults
+        # check for convergence
+        self.converged = True
+        for model in self.models:
+            self.converged = self.converged and model.converged
 
     def doActiveLearning(self, i):
         sampleDirs = [

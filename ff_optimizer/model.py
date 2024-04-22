@@ -60,6 +60,7 @@ class Model(AbstractModel):
         self.sampledir = inp.sampledir
         self.dynamicsdir = inp.dynamicsdir
         self.inp = inp
+        self.converged = False
 
     def initializeOptEngine(self, inp):
         optEngine = optengine.OptEngine(inp)
@@ -212,6 +213,7 @@ class Model(AbstractModel):
         return sampleFolders
 
     def getOptResults(self):
+        self.converged = self.optEngine.converged
         self.optResults = []
         self.optResults.append(self.optEngine.valid[-1])
         self.optResults.append(

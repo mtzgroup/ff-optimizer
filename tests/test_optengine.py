@@ -15,6 +15,15 @@ from .test_inputs import getDefaults
 def monkeyGraph():
     pass
 
+def monkeyInit(self, inp):
+    self.setVariables(inp)
+
+def monkeyInit2(self, inp):
+    self.setVariables(inp)
+    self.readFileNames()
+    self.initializeRespPriors()
+    self.determineRestart()
+    self.readTargetLines()
 
 def cleanOptDir(optdir, removeResult=False):
     try:
@@ -241,7 +250,8 @@ def test_init1_RESP():
     cleanOptDir(options.optdir)
 
 
-def test_readOpt1():
+def test_readOpt1(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
     os.chdir(os.path.dirname(__file__))
     options = getDefaults()
     options.optdir = os.path.join("optengine", "opt1")
@@ -253,7 +263,8 @@ def test_readOpt1():
     assert status == 2
 
 
-def test_readOpt2():
+def test_readOpt2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
     os.chdir(os.path.dirname(__file__))
     options = getDefaults()
     options.optdir = os.path.join("optengine", "opt1")
@@ -264,7 +275,8 @@ def test_readOpt2():
     assert status == -1
 
 
-def test_readOpt3():
+def test_readOpt3(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
     os.chdir(os.path.dirname(__file__))
     options = getDefaults()
     options.optdir = os.path.join("optengine", "opt1")
@@ -296,7 +308,8 @@ def test_readOpt3():
     assert checkUtils.checkLists(refLabels, results["labels"])
 
 
-def test_addTargetLines1():
+def test_addTargetLines1(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = "opt1"
@@ -313,7 +326,8 @@ def test_addTargetLines1():
     assert checkUtils.checkLists(refLines, testLines)
 
 
-def test_addTargetLines2():
+def test_addTargetLines2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = "opt1"
@@ -337,7 +351,8 @@ def test_addTargetLines2():
     assert checkUtils.checkLists(refLines, testLines)
 
 
-def test_readValid1():
+def test_readValid1(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = "opt1"
@@ -347,7 +362,8 @@ def test_readValid1():
     assert checkUtils.checkFloats(test, 1.39869922, 0.000000001)
 
 
-def test_readValid2():
+def test_readValid2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = "opt1"
@@ -494,7 +510,8 @@ def test_optimizeForcefield1(monkeypatch):
 
 
 # Finished FB cycle
-def test_determineRestart1():
+def test_determineRestart1(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     for f in os.listdir("restart1"):
         if "4" in f:
@@ -516,7 +533,8 @@ def test_determineRestart1():
 
 
 # Failed in opt
-def test_determineRestart2():
+def test_determineRestart2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = "restart2"
@@ -531,7 +549,8 @@ def test_determineRestart2():
 
 
 # Failed in valid_initial
-def test_determineRestart3():
+def test_determineRestart3(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = "restart3"
@@ -552,7 +571,8 @@ def test_determineRestart3():
     assert optEngine.restartCycle == 3
 
 
-def test_sortParams1():
+def test_sortParams1(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     for f in os.listdir("restart1"):
         if "4" in f:
@@ -570,7 +590,8 @@ def test_sortParams1():
     checkUtils.checkArrays(refParams, optEngine.params[:5, -1])
 
 
-def test_sortParams2():
+def test_sortParams2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = "restart3"
@@ -649,7 +670,8 @@ def test_restartResp(monkeypatch):
     assert checkUtils.checkFloats(arr[8, 0], 3.0)
 
 
-def test_setupInputFiles_multipleValids():
+def test_setupInputFiles_multipleValids(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = "opt1"
@@ -741,7 +763,8 @@ def test_optimizeForcefield_multipleValids(monkeypatch):
     assert valid2 == 3
 
 
-def test_determineRestart_multipleValids():
+def test_determineRestart_multipleValids(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     for f in os.listdir("restart4"):
         if "4" in f:
@@ -937,6 +960,7 @@ def test_restart3Params(monkeypatch):
 
 
 def test_computeSortedParams(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
     monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
     monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
     testDir = "params1"
@@ -971,6 +995,7 @@ def test_computeSortedParams(monkeypatch):
 
 
 def test_graphResults(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
     monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
     monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
     testDir = Path("params1")
@@ -988,3 +1013,95 @@ def test_graphResults(monkeypatch):
     os.remove("ParameterChange.png")
     os.remove("ObjectiveFunction.png")
     cleanOptDir(".")
+
+def test_checkValids1(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    testDir = Path("restart4")
+    options = getDefaults()
+    options.optdir = testDir
+    options.nvalids = 3
+    optEngine = optengine.OptEngine(options)
+
+    v = optEngine.checkValids(1, "_previous")
+    cleanOptDir(".")
+    assert checkUtils.checkFloats(v, 9.08189e-01)
+
+def test_checkValids2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    testDir = Path("restart4")
+    options.optdir = testDir
+    options.nvalids = 3
+    optEngine = optengine.OptEngine(options)
+    try:
+        v = optEngine.checkValids(2, "")
+        failed = False
+    except:
+        failed = True
+    cleanOptDir(".")
+    assert failed
+
+def test_computeValidDiff(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    testDir = Path("restart4")
+    options.optdir = testDir
+    optEngine = optengine.OptEngine(options)
+    
+    optEngine.valid = list(np.loadtxt("valids.txt"))
+    optEngine.validPrevious = list(np.loadtxt("validPrevious.txt"))
+    vref = np.loadtxt("vj.txt")
+    vtest = np.asarray(optEngine.computeValidDiff())
+    assert checkUtils.checkArrays(vref, vtest)
+
+def monkeyGetFinalValidations(self, a, b):
+    return 0
+
+def test_checkConvergence1(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
+    monkeypatch.setattr(optengine.OptEngine, "getFinalValidations", monkeyGetFinalValidations)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    testDir = Path("restart4")
+    options.optdir = testDir
+    optEngine = optengine.OptEngine(options)
+    optEngine.valid = list(np.loadtxt("valids2.txt"))
+    optEngine.validPrevious = list(np.loadtxt("validPrevious.txt"))
+    j = optEngine.checkConvergence()
+    assert j == 12
+    assert optEngine.converged
+
+def test_checkConvergence2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
+    monkeypatch.setattr(optengine.OptEngine, "getFinalValidations", monkeyGetFinalValidations)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    testDir = Path("restart4")
+    options.optdir = testDir
+    optEngine = optengine.OptEngine(options)
+    
+    optEngine.valid = list(np.loadtxt("valids3.txt"))
+    optEngine.validPrevious = list(np.loadtxt("validPrevious.txt"))
+    j = optEngine.checkConvergence()
+    assert j == -1
+    assert not optEngine.converged
+
+def monkeyRunValidFinal(self, i, lastCycle):
+    out = f"ref/valid_{i}_final.out"
+    return self.readValid(out)
+
+def test_getFinalValidations(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
+    monkeypatch.setattr(optengine.OptEngine, "runValidFinal", monkeyRunValidFinal)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    testDir = Path("finalValidations")
+    options.optdir = testDir
+    optEngine = optengine.OptEngine(options)
+    os.chdir(testDir)
+    best = optEngine.getFinalValidations(13, 5)
+    assert best == 12
+

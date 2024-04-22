@@ -164,7 +164,7 @@ def monkeyGraphResults(self):
 
 
 def monkeyOptInit(self, args):
-    self.nvalids = args.nvalids
+    self.setVariables(args)
     for f in os.listdir(args.optdir):
         if f.endswith(".mol2"):
             self.mol2 = f
@@ -175,7 +175,6 @@ def monkeyOptInit(self, args):
     self.valid = []
     self.validInitial = []
     self.restartCycle = 0
-    self.respPriors = None
 
 
 def monkeyForceBalance(command):
