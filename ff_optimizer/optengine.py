@@ -458,6 +458,12 @@ class OptEngine:
                 )
             self.validInitial.append(self.readValid(f"valid_{i}_initial.out"))
 
+    def runValidFinal(self, i, lastCycle):
+        self.copyResults(i)
+        out = f"valid_{i}_final.out"
+        os.system(f"ForceBalance.py valid_{lastCycle}.in > {out}")
+        return self.readValid(out)
+
     def runInitialTraining(self):
         os.system("ForceBalance.py opt_0.in > opt_0.out")
         self.copyResults(0)
@@ -522,8 +528,23 @@ class OptEngine:
             if inPatience and j - patienceCycle >= patience:
                 lastCycle = j
                 self.converged = True
+                print(f"Optimization has converged at cycle {j}")
+                print("Running final validations to determine optimal parameters")
+                best = self.getFinalValidations(j, patience)
+                print(f"Optimal parameters are from iteration {best}")
                 break
         return lastCycle
+
+    def getFinalValidations(self, lastCycle, patience):
+        vs = []
+        for j in range(lastCycle - patience, lastCycle + 1):
+            try:
+                v = self.readValid(f"valid_{j}_final.out")
+            except:
+                v = self.runValidFinal(j, lastCycle)
+            vs.append(v)
+        vs = np.asarray(vs)
+        return  np.argmin(vs) + lastCycle - patience
 
     def checkOpt(self, i):
         status, results = self.readOpt(self.optdir / f"opt_{i}.out")

@@ -1057,8 +1057,12 @@ def test_computeValidDiff(monkeypatch):
     vtest = np.asarray(optEngine.computeValidDiff())
     assert checkUtils.checkArrays(vref, vtest)
 
+def monkeyGetFinalValidations(self, a, b):
+    return 0
+
 def test_checkConvergence1(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
+    monkeypatch.setattr(optengine.OptEngine, "getFinalValidations", monkeyGetFinalValidations)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     testDir = Path("restart4")
@@ -1067,12 +1071,12 @@ def test_checkConvergence1(monkeypatch):
     optEngine.valid = list(np.loadtxt("valids2.txt"))
     optEngine.validPrevious = list(np.loadtxt("validPrevious.txt"))
     j = optEngine.checkConvergence()
-    print(j)
     assert j == 12
     assert optEngine.converged
 
 def test_checkConvergence2(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
+    monkeypatch.setattr(optengine.OptEngine, "getFinalValidations", monkeyGetFinalValidations)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     testDir = Path("restart4")
@@ -1082,6 +1086,22 @@ def test_checkConvergence2(monkeypatch):
     optEngine.valid = list(np.loadtxt("valids3.txt"))
     optEngine.validPrevious = list(np.loadtxt("validPrevious.txt"))
     j = optEngine.checkConvergence()
-    print(j)
     assert j == -1
     assert not optEngine.converged
+
+def monkeyRunValidFinal(self, i, lastCycle):
+    out = f"ref/valid_{i}_final.out"
+    return self.readValid(out)
+
+def test_getFinalValidations(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
+    monkeypatch.setattr(optengine.OptEngine, "runValidFinal", monkeyRunValidFinal)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    testDir = Path("finalValidations")
+    options.optdir = testDir
+    optEngine = optengine.OptEngine(options)
+    os.chdir(testDir)
+    best = optEngine.getFinalValidations(13, 5)
+    assert best == 12
+
