@@ -95,6 +95,7 @@ def test_initResp():
     assert chemcloudEngine.keywords["resp"] == "yes"
     assert chemcloudEngine.backupKeywords["resp"] == "yes"
 
+
 def test_getQMRefData(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()

@@ -340,8 +340,8 @@ class ChemcloudEngine(QMEngine):
         batchSize = min(self.batchSize, len(programInputs))
         outputs = []
         stride = int(len(programInputs) / batchSize)
-        #import pickle
-        #with open("inputs.pickle", "wb") as f:
+        # import pickle
+        # with open("inputs.pickle", "wb") as f:
         #    pickle.dump(programInputs, f)
         try:
             # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION?

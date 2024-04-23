@@ -1,10 +1,10 @@
 import errno
-import pytest
 import os
 from pathlib import Path
 from shutil import copyfile, rmtree
 
 import numpy as np
+import pytest
 
 from ff_optimizer import optengine, resp_prior
 
@@ -15,8 +15,10 @@ from .test_inputs import getDefaults
 def monkeyGraph():
     pass
 
+
 def monkeyInit(self, inp):
     self.setVariables(inp)
+
 
 def monkeyInit2(self, inp):
     self.setVariables(inp)
@@ -24,6 +26,7 @@ def monkeyInit2(self, inp):
     self.initializeRespPriors()
     self.determineRestart()
     self.readTargetLines()
+
 
 def cleanOptDir(optdir, removeResult=False):
     try:
@@ -652,6 +655,7 @@ def test_respPriors(monkeypatch):
     assert check1
     assert check2
 
+
 def test_restartResp(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     monkeypatch.setattr(resp_prior.RespPriors, "getUnits", monkeyGetUnits)
@@ -1014,6 +1018,7 @@ def test_graphResults(monkeypatch):
     os.remove("ObjectiveFunction.png")
     cleanOptDir(".")
 
+
 def test_checkValids1(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
@@ -1027,6 +1032,7 @@ def test_checkValids1(monkeypatch):
     cleanOptDir(".")
     assert checkUtils.checkFloats(v, 9.08189e-01)
 
+
 def test_checkValids2(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
@@ -1036,12 +1042,13 @@ def test_checkValids2(monkeypatch):
     options.nvalids = 3
     optEngine = optengine.OptEngine(options)
     try:
-        v = optEngine.checkValids(2, "")
+        optEngine.checkValids(2, "")
         failed = False
     except:
         failed = True
     cleanOptDir(".")
     assert failed
+
 
 def test_computeValidDiff(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
@@ -1050,19 +1057,23 @@ def test_computeValidDiff(monkeypatch):
     testDir = Path("restart4")
     options.optdir = testDir
     optEngine = optengine.OptEngine(options)
-    
+
     optEngine.valid = list(np.loadtxt("valids.txt"))
     optEngine.validPrevious = list(np.loadtxt("validPrevious.txt"))
     vref = np.loadtxt("vj.txt")
     vtest = np.asarray(optEngine.computeValidDiff())
     assert checkUtils.checkArrays(vref, vtest)
 
+
 def monkeyGetFinalValidations(self, a, b):
     return 0
 
+
 def test_checkConvergence1(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
-    monkeypatch.setattr(optengine.OptEngine, "getFinalValidations", monkeyGetFinalValidations)
+    monkeypatch.setattr(
+        optengine.OptEngine, "getFinalValidations", monkeyGetFinalValidations
+    )
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     testDir = Path("restart4")
@@ -1074,24 +1085,29 @@ def test_checkConvergence1(monkeypatch):
     assert j == 12
     assert optEngine.converged
 
+
 def test_checkConvergence2(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
-    monkeypatch.setattr(optengine.OptEngine, "getFinalValidations", monkeyGetFinalValidations)
+    monkeypatch.setattr(
+        optengine.OptEngine, "getFinalValidations", monkeyGetFinalValidations
+    )
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     testDir = Path("restart4")
     options.optdir = testDir
     optEngine = optengine.OptEngine(options)
-    
+
     optEngine.valid = list(np.loadtxt("valids3.txt"))
     optEngine.validPrevious = list(np.loadtxt("validPrevious.txt"))
     j = optEngine.checkConvergence()
     assert j == -1
     assert not optEngine.converged
 
+
 def monkeyRunValidFinal(self, i, lastCycle):
     out = f"ref/valid_{i}_final.out"
     return self.readValid(out)
+
 
 def test_getFinalValidations(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
@@ -1104,6 +1120,7 @@ def test_getFinalValidations(monkeypatch):
     os.chdir(testDir)
     best = optEngine.getFinalValidations(13, 5)
     assert best == 12
+
 
 @pytest.mark.debug
 def test_sortParams(monkeypatch):

@@ -499,7 +499,7 @@ class OptEngine:
             self.runValidInitial(i)
             # make some pretty graphs
             # broken - do not use until further notice
-            #self.graphResults()
+            # self.graphResults()
             # check if iterative optimization is done yet
             self.checkConvergence()
         else:
@@ -521,7 +521,7 @@ class OptEngine:
     def checkConvergence(self):
         patience = 5
         inPatience = False
-        cutoff = -1 # Cutoff is 1% change in performance
+        cutoff = -1  # Cutoff is 1% change in performance
         lastCycle = -1
         validDiff = self.computeValidDiff()
         for j in range(len(validDiff)):
@@ -549,7 +549,7 @@ class OptEngine:
                 v = self.runValidFinal(j, lastCycle)
             vs.append(v)
         vs = np.asarray(vs)
-        return  np.argmin(vs) + lastCycle - patience
+        return np.argmin(vs) + lastCycle - patience
 
     def checkOpt(self, i):
         status, results = self.readOpt(self.optdir / f"opt_{i}.out")

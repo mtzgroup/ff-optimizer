@@ -1,6 +1,5 @@
-from qcio import Molecule, ProgramInput, SinglePointOutput
-
 from chemcloud import CCClient
+from qcio import Molecule, ProgramInput, SinglePointOutput
 
 water = Molecule(
     symbols=["O", "H", "H"],
