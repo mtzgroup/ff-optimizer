@@ -1105,3 +1105,14 @@ def test_getFinalValidations(monkeypatch):
     best = optEngine.getFinalValidations(13, 5)
     assert best == 12
 
+@pytest.mark.debug
+def test_sortParams(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    options = getDefaults()
+    testDir = Path("sortParams")
+    options.optdir = testDir
+    optEngine = optengine.OptEngine(options)
+    os.chdir(testDir)
+    results = optEngine.readResults("opt_1.out")
+    optEngine.sortParams(1, results)
