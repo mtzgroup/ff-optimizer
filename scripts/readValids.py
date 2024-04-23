@@ -1,11 +1,13 @@
 import os
-import numpy as np
 from pathlib import Path
 from shutil import copyfile
 
-def readValid(path, reweight = False):
+import numpy as np
+
+
+def readValid(path, reweight=False):
     targets = 0
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         for line in f.readlines():
             if "Setup for target" in line:
                 targets += 1
@@ -22,7 +24,8 @@ def readValid(path, reweight = False):
                 return obj
     raise RuntimeError(f"{path} failed")
 
-def readValids(suffix, optdir="1_opt", nvalids=10): 
+
+def readValids(suffix, optdir="1_opt", nvalids=10):
     valids = []
     cycle = 1
     while True:
@@ -41,10 +44,11 @@ def readValids(suffix, optdir="1_opt", nvalids=10):
                 print(f"read of {validPath} failed")
         if len(validTemp) < 10:
             break
-        else:   
+        else:
             valids.append(validTemp)
         cycle += 1
     return np.asarray(valids)
+
 
 def getStoppingPoint(vj):
     patience = 5
@@ -61,6 +65,7 @@ def getStoppingPoint(vj):
             break
     return lastCycle
 
+
 def runValid(optdir, inp, out, parmFolder, frcmod, mol2):
     home = os.getcwd()
     optdir = Path(optdir)
@@ -73,11 +78,14 @@ def runValid(optdir, inp, out, parmFolder, frcmod, mol2):
     os.chdir(home)
     return v
 
-def getFinalValidations(i, lastCycle, optdir="1_opt", patience=5, frcmod="dasa.frcmod", mol2="dasa.mol2"):
+
+def getFinalValidations(
+    i, lastCycle, optdir="1_opt", patience=5, frcmod="dasa.frcmod", mol2="dasa.mol2"
+):
     optdir = Path(optdir)
     vs = []
     # only check the parameters in the patience region
-    for j in range(lastCycle-patience, lastCycle + 1):
+    for j in range(lastCycle - patience, lastCycle + 1):
         if i == 0:
             inp = f"valid_{lastCycle}.in"
         else:
@@ -90,22 +98,26 @@ def getFinalValidations(i, lastCycle, optdir="1_opt", patience=5, frcmod="dasa.f
             vs.append(readValid(optdir / out))
     vs = np.asarray(vs)
     print(vs)
-    return np.argmin(vs) + 1 + lastCycle - patience # account for one-indexing of validations
-        
+    return (
+        np.argmin(vs) + 1 + lastCycle - patience
+    )  # account for one-indexing of validations
+
+
 def readValidDiff(optdir="1_opt"):
     valid = readValids("", optdir)
     previous = readValids("_previous", optdir)
     ncycles = min(valid.shape[0], previous.shape[0])
-    validPrev = valid[:ncycles,:] - previous[:ncycles,:]
-    vj = validPrev / valid[:ncycles,:] * 100
+    validPrev = valid[:ncycles, :] - previous[:ncycles, :]
+    vj = validPrev / valid[:ncycles, :] * 100
     return vj
+
 
 vj = readValidDiff()
 for i in range(vj.shape[1]):
-    finalCycle = getStoppingPoint(vj[:,i])
+    finalCycle = getStoppingPoint(vj[:, i])
     if finalCycle is not None:
         best = getFinalValidations(i, finalCycle)
         print(best)
     else:
         print("Not converged yet")
-#np.savetxt("validPrev.txt", validPrev, fmt="%10.3e")
+# np.savetxt("validPrev.txt", validPrev, fmt="%10.3e")

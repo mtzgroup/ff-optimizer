@@ -336,6 +336,8 @@ class OptEngine:
         # plt.close()
         return sortedParams
 
+    # Mean relative change (MRC) is the average % change in parameters, where
+    # the denominator is chosen as the larger of the present and past parameter
     def computeMRC(self, sortedParamsType):
         cycles = len(self.valid)
         sortedParams = np.asarray(sortedParamsType, dtype=np.float32)
@@ -394,9 +396,11 @@ class OptEngine:
         self.graphObjectiveFunction()
         self.graphMRC()
 
+    # Doesn't work if you increase the number of parameters you're optimizing
+    # during the optimization. That would take some effort to fix.
     def sortParams(self, results, i):
         self.params[i + 1, :] = self.params[i, :]
-        for j in range(len(results["labels"])):
+        for j in range(len(self.labels)):
             if self.labels[j] == results["labels"][j]:
                 self.params[i + 1, j] = results["params"][j]
             else:
@@ -494,7 +498,8 @@ class OptEngine:
             # evaluate new validation set with initial parameters
             self.runValidInitial(i)
             # make some pretty graphs
-            self.graphResults()
+            # broken - do not use until further notice
+            # self.graphResults()
             # check if iterative optimization is done yet
             self.checkConvergence()
         else:
@@ -516,7 +521,7 @@ class OptEngine:
     def checkConvergence(self):
         patience = 5
         inPatience = False
-        cutoff = -1 # Cutoff is 1% change in performance
+        cutoff = -1  # Cutoff is 1% change in performance
         lastCycle = -1
         validDiff = self.computeValidDiff()
         for j in range(len(validDiff)):
@@ -544,7 +549,7 @@ class OptEngine:
                 v = self.runValidFinal(j, lastCycle)
             vs.append(v)
         vs = np.asarray(vs)
-        return  np.argmin(vs) + lastCycle - patience
+        return np.argmin(vs) + lastCycle - patience
 
     def checkOpt(self, i):
         status, results = self.readOpt(self.optdir / f"opt_{i}.out")

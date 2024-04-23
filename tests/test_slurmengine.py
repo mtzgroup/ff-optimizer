@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 from shutil import copyfile, copytree, rmtree
-import pytest
 
 from ff_optimizer import qmengine
 

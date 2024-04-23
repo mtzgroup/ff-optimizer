@@ -317,7 +317,14 @@ if totalCycles <= 0:
 
 print(
     "%7s%15s%15s%20s%20s%23s"
-    % ("Epoch", "Validation", "Valid ratio", "Current-Previous", "Diff percentage", "Current-last Current")
+    % (
+        "Epoch",
+        "Validation",
+        "Valid ratio",
+        "Current-Previous",
+        "Diff percentage",
+        "Current-last Current",
+    )
 )
 print(
     "%7d%15.8f%15.8f%20.8f"
