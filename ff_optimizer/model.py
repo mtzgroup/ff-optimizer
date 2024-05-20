@@ -83,14 +83,21 @@ class Model(AbstractModel):
         return mmEngine
 
     def initialCycle(self):
-        # Prepare initial target data
-        path = self.createTCData()
-        self.copyLeapFiles(path)
+        if self.inp.initialtraining:
+            # Prepare initial target data
+            path = self.createTCData()
+            self.copyLeapFiles(path)
 
-        # Do initial optimization
-        os.chdir(self.optdir)
-        self.optEngine.optimizeForcefield(0)
-        os.chdir(self.home)
+            # Do initial optimization
+            os.chdir(self.optdir)
+            self.optEngine.optimizeForcefield(0)
+            os.chdir(self.home)
+        else:
+            # just put ff parameters where the next iteration expects them to be
+            path = self.optdir / "result" / "opt_0"
+            path.mkdir(exist_ok=True, parents=True)
+            copyfile(self.optEngine.mol2, path / self.optEngine.mol2)
+            copyfile(self.optEngine.frcmod, path / self.optEngine.frcmod)
 
     def createTCData(self):
         # Create initial target data from dynamics

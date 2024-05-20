@@ -1,0 +1,5 @@
+$options                                 
+jobtype             single               
+forcefield          ref_water.frcmod ref_water.mol2
+backup              false                
+$end                               

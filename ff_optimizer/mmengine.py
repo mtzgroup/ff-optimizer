@@ -68,6 +68,8 @@ class MMEngine:
         return startIndex, endIndex, splitIndex
 
     def countFrames(self):
+        print(str(self.coordPath))
+        print(os.getcwd())
         with open(self.coordPath, "r") as f:
             try:
                 natoms = int(f.readline())

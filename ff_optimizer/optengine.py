@@ -80,7 +80,7 @@ class OptEngine:
 
     def readTargetLines(self):
         inTarget = False
-        with open(os.path.join(self.optdir, "opt_0.in"), "r") as f:
+        with open(self.optdir / self.inp.opt0, "r") as f:
             for line in f.readlines():
                 if len(line.split()) == 0:
                     continue
@@ -94,9 +94,18 @@ class OptEngine:
                     if line.split()[0] == "amber_leapcmd":
                         line = line.replace(line.split()[1], "setup_valid_initial.leap")
                     self.validInitialTargetLines.append(line)
+        if len(self.targetLines) == 0:
+            print(f"WARNING: no target lines in ForceBalance input file {self.inp.opt0}!")
+            print("Using defaults; you should check to make sure that this is what you want")
+            self.targetLines = ["$target\n", "type                abinitio_amber\n", 
+                "name                train_1\n", "amber_leapcmd       setup.leap\n", "$end\n"]
+            self.validTargetLines = self.targetLines.copy()
+            self.validInitialTargetLines = self.targetLines.copy()
+            self.validInitialTargetLines[3] = "amber_leapcmd       setup_valid_initial.leap\n"
         if self.doResp:
-            self.targetLines.insert(1, f"w_resp {str(self.resp)}\n")
-            self.targetLines.insert(1, "resp 1\n")
+            for lines in [self.targetLines, self.validTargetLines, self.validInitialTargetLines]:
+                lines.insert(1, f"w_resp {str(self.resp)}\n")
+                lines.insert(1, "resp 1\n")
 
     def writeValidInitialLeap(self):
         with open(os.path.join(self.optdir, "setup.leap"), "r") as leapRead:
@@ -134,6 +143,8 @@ class OptEngine:
         os.rename(self.optdir / "temp.txt", self.optdir / "valid_0.in")
 
     def makeInitialValidIn(self):
+        if not self.inp.validinitial:
+            return 
         with open(self.optdir / "valid_0.in", "r") as srcValid:
             with open(self.optdir / "valid_0_initial.in", "w") as destValid:
                 for line in srcValid.readlines():
@@ -148,10 +159,11 @@ class OptEngine:
     def copyValids(self):
         for j in range(1, self.nvalids):
             copyfile(self.optdir / "valid_0.in", self.optdir / f"valid_0_{j}.in")
-            copyfile(
-                self.optdir / "valid_0_initial.in",
-                self.optdir / f"valid_0_{j}_initial.in",
-            )
+            if self.validinitial:
+                copyfile(
+                    self.optdir / "valid_0_initial.in",
+                    self.optdir / f"valid_0_{j}_initial.in",
+                )
 
     # We assume __init__ and all the functions it calls run from the top directory in the optimization
     # All other functions are called from within self.optdir
@@ -267,6 +279,8 @@ class OptEngine:
             newFiles.append(f"valid_{i}_{j}_initial.in")
 
         for oldFile, newFile in zip(oldFiles, newFiles):
+            if "initial" in newFile and not self.inp.validinitial:
+                continue
             copyfile(oldFile, newFile)
             # Add new targets section to each FB input file
             if "opt" in newFile:
@@ -471,16 +485,9 @@ class OptEngine:
     def runInitialTraining(self):
         os.system("ForceBalance.py opt_0.in > opt_0.out")
         self.copyResults(0)
-        status, results = self.readOpt("opt_0.out")
-        if status != 0:
-            raise RuntimeError("ForceBalance optimization of opt_0.in failed")
-        self.train.append(results["obj"])
-        self.labels = results["labels"]
-        self.params = np.zeros((self.maxCycles + 2, len(self.labels)))
-        self.params[0, :] = np.asarray(results["initialParams"])
-        self.sortParams(results, 0)
+        self.checkOpt(0)
 
-    # We assume that optimizeForcefield and all the functions it calls run in the args.optdir directory
+    # We assume that optimizeForcefield and all the functions it calls run in the inp.optdir directory
     def optimizeForcefield(self, i):
         if i > 0:
             # copy ff files from previous cycle (important if restarting)
@@ -496,7 +503,8 @@ class OptEngine:
             # evaluate new validation set with new parameters
             self.runValid(i)
             # evaluate new validation set with initial parameters
-            self.runValidInitial(i)
+            if self.inp.validinitial:
+                self.runValidInitial(i)
             # make some pretty graphs
             # broken - do not use until further notice
             # self.graphResults()
@@ -519,9 +527,8 @@ class OptEngine:
         return vDiff
 
     def checkConvergence(self):
-        patience = 5
         inPatience = False
-        cutoff = -1  # Cutoff is 1% change in performance
+        cutoff = self.inp.cutoff  # Cutoff is 1% change in performance
         lastCycle = -1
         validDiff = self.computeValidDiff()
         for j in range(len(validDiff)):
@@ -530,31 +537,32 @@ class OptEngine:
                 patienceCycle = j
             if inPatience and validDiff[j] < cutoff:
                 inPatience = False
-            if inPatience and j - patienceCycle >= patience:
+            if inPatience and j - patienceCycle >= self.inp.patience:
                 lastCycle = j
                 self.converged = True
                 print(f"Optimization has converged at cycle {j}")
                 print("Running final validations to determine optimal parameters")
-                best = self.getFinalValidations(j, patience)
+                best = self.getFinalValidations(j)
                 print(f"Optimal parameters are from iteration {best}")
                 break
         return lastCycle
 
-    def getFinalValidations(self, lastCycle, patience):
+    def getFinalValidations(self, lastCycle):
         vs = []
-        for j in range(lastCycle - patience, lastCycle + 1):
+        for j in range(lastCycle - self.inp.patience, lastCycle + 1):
             try:
                 v = self.readValid(f"valid_{j}_final.out")
             except:
                 v = self.runValidFinal(j, lastCycle)
             vs.append(v)
         vs = np.asarray(vs)
-        return np.argmin(vs) + lastCycle - patience
+        return np.argmin(vs) + lastCycle - self.inp.patience
 
     def checkOpt(self, i):
         status, results = self.readOpt(self.optdir / f"opt_{i}.out")
         if status == 0:
-            if i == 0:
+            # setup params and labels after first optimization
+            if i - (not self.inp.initialtraining) == 0 :
                 self.params = np.zeros((self.maxCycles + 2, len(results["labels"])))
                 self.labels = results["labels"]
                 self.params[0, :] = results["initialParams"]
@@ -573,6 +581,8 @@ class OptEngine:
             return
         # Determine cycle for restart, set restart variables
         for i in range(self.maxCycles + 2):
+            if i == 0 and not self.inp.initialtraining:
+                continue
             if i > 0:
                 # check if valid previous finished
                 try:
@@ -593,11 +603,12 @@ class OptEngine:
                     break
                 self.valid.append(v)
                 # check if validation with initial params finished
-                try:
-                    vInitial = self.checkValids(i, "_initial")
-                except:
-                    break
-                self.validInitial.append(vInitial)
+                if self.inp.validinitial:
+                    try:
+                        vInitial = self.checkValids(i, "_initial")
+                    except:
+                        break
+                    self.validInitial.append(vInitial)
                 if self.respPriors is not None:
                     self.respPriors.getCharges(i)
         self.restartCycle = i

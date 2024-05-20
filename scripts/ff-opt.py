@@ -32,7 +32,7 @@ def printHelp():
     )
     keywords = dedent(
         """\
-    Keywords are to be provided in a .json file. Example:
+    Keywords are to be provided in a .yaml file. Example:
     {
     "restart": False,
     "mmengine": "amber",
@@ -54,6 +54,22 @@ def printHelp():
     "sampledir": str, specifies the directory where MM sampling and QM 
                     calculations will be run; contains MM and QM inputs.
                     Default = "2_sampling"
+
+    "easymode": str, specifies an xyz file for parameter optimization. The 
+                    setup populates all files/folders with reasonable defaults,
+                    and prepares everything for an amber/chemcloud calculation 
+                    without initial training.
+                    Default = None
+
+    "initialtraining": bool, specifies whether or not to perform a parameter optimization
+                    prior to beginning the first round of sampling. If so, the program
+                    uses the MD trajectory in dynamicsdir to create an initial target
+                    for optimization.
+                    Default = True
+
+    "validinitial": bool, specifies whether or not to evaluate the initial 
+                    parameters on the validation set at each iteration.
+                    Default = False
 
     "coors": str, specifies the name of the coordinates file in dynamicsdir.
                     Default = "coors.xyz"

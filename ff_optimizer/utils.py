@@ -166,7 +166,7 @@ def readPDB(pdb: str):
     return np.asarray(coords, dtype=np.float32)
 
 
-def readXYZ(xyz: str, readSymbols=False):
+def readXYZ(xyz, readSymbols=False):
     if readSymbols:
         symbols = np.loadtxt(xyz, skiprows=2, usecols=(0), dtype=str)
         geometry = np.loadtxt(
@@ -334,31 +334,53 @@ def writeRst(frame, natoms, dest):
                 f.write("\n")
 
 
-# unused
-def writePDB(geometry, dest, template):
-    with open(template, "r") as f:
-        templateLines = f.readlines()
+def writePDB(geometry, dest, atoms=None, resname=None, template=None):
+    if template is None:
+        assert atoms is not None
+        assert resname is not None
+        atomTypes = {}
+        atomNames = []
+        for atom in atoms:
+            setAtom = False
+            for key in atomTypes.keys():
+                if atom == key:
+                    atomTypes[atom] += 1
+                    token = atom + "%0" + str(3-len(atom)) + "d"
+                    atomNames.append(token % atomTypes[atom])
+                    setAtom = True
+            if setAtom == False:    
+                atomTypes[atom] = 1
+                token = atom + "%0" + str(3-len(atom)) + "d"
+                atomNames.append(token % atomTypes[atom])
+        with open(dest, "w") as f:
+            f.write("COMPND   " + resname + "\n")
+            for i in range(len(atoms)):
+                f.write("ATOM  %5d  %3s %3s     1    %8.3f%8.3f%8.3f  1.00  0.00          %2s\n" % 
+                (i+1,atomNames[i],resname,float(geometry[3*i]),float(geometry[3*i+1]),float(geometry[3*i+2]),atoms[i]))
 
-    i = 0
-    with open(dest, "w") as f:
-        for line in templateLines:
-            if i > len(geometry):
-                break
-            if line.startswith("ATOM") or line.startswith("HETATM"):
-                f.write(
-                    "%s%8.3f%8.3f%8.3f%s"
-                    % (
-                        line[:30],
-                        geometry[i],
-                        geometry[i + 1],
-                        geometry[i + 2],
-                        line[54:],
+    else:
+        with open(template, "r") as f:
+            templateLines = f.readlines()
+        i = 0
+        with open(dest, "w") as f:
+            for line in templateLines:
+                if i > len(geometry):
+                    break
+                if line.startswith("ATOM") or line.startswith("HETATM"):
+                    f.write(
+                        "%s%8.3f%8.3f%8.3f%s"
+                        % (
+                            line[:30],
+                            geometry[i],
+                            geometry[i + 1],
+                            geometry[i + 2],
+                            line[54:],
+                        )
                     )
-                )
-                i += 3
+                    i += 3
 
-            else:
-                f.write(line)
+                else:
+                    f.write(line)
 
 
 def convertNCtoXYZs(nc, symbols, offset=0):
