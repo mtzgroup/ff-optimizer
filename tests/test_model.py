@@ -204,6 +204,7 @@ def test_doParameterOptimization(monkeypatch):
     args.optdir = Path("1_optimization")
     args.sampledir = Path("2_mm_sampling")
     args.nvalids = 2
+    args.validinitial = True
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInit)
     monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupFiles)
@@ -214,7 +215,7 @@ def test_doParameterOptimization(monkeypatch):
 
     m = model.Model(args)
     m.doParameterOptimization(1)
-    assert len(m.optResults) == 3
+    assert len(m.optResults) == 4
     m.doParameterOptimization(2)
     assert len(m.optResults) == 4
     files = [

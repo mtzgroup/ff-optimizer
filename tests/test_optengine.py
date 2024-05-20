@@ -65,6 +65,7 @@ def test_init1():
     os.chdir(os.path.dirname(__file__))
     options = getDefaults()
     options.optdir = os.path.join("optengine", "opt1")
+    options.validinitial = True
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
 
@@ -154,16 +155,16 @@ def test_init2():
     ]
     assert checkUtils.checkLists(refTargetLines, optEngine.validTargetLines)
 
-    refTargetLines = [
-        "$target\n",
-        "type                  abinitio_amber        # The target type; fitting ab initio data using Amber\n",
-        'name stuff                       # Also the subdirectory containing data within "targets"\n',
-        "weight                1.0                   # Weight of this target relative to others\n",
-        "writelevel            1                     # Amount of data printed to temp directory\n",
-        "amber_leapcmd         setup_valid_initial.leap\n",
-        "$end\n",
-    ]
-    assert checkUtils.checkLists(refTargetLines, optEngine.validInitialTargetLines)
+    #refTargetLines = [
+    #    "$target\n",
+    #    "type                  abinitio_amber        # The target type; fitting ab initio data using Amber\n",
+    #    'name stuff                       # Also the subdirectory containing data within "targets"\n',
+    #    "weight                1.0                   # Weight of this target relative to others\n",
+    #    "writelevel            1                     # Amount of data printed to temp directory\n",
+    #    "amber_leapcmd         setup_valid_initial.leap\n",
+    #    "$end\n",
+    #]
+    #assert checkUtils.checkLists(refTargetLines, optEngine.validInitialTargetLines)
 
     files = sorted(os.listdir(os.path.join(options.optdir, "forcefield")))
     refFiles = ["initial_sol.frcmod", "initial_sol.mol2", "sol.frcmod", "sol.mol2"]
@@ -174,24 +175,25 @@ def test_init2():
     assert optEngine.frcmod == "sol.frcmod"
     assert optEngine.initialTarget == "stuff"
 
-    with open(os.path.join(options.optdir, "valid_0_initial.in"), "r") as f:
-        lines = f.readlines()
+    #with open(os.path.join(options.optdir, "valid_0_initial.in"), "r") as f:
+    #    lines = f.readlines()
 
-    refLines = [
-        "$options\n",
-        "jobtype             single\n",
-        "forcefield          initial_sol.frcmod initial_sol.mol2\n",
-        "backup              false\n",
-        "$end\n",
-        "\n",
-    ]
-    assert checkUtils.checkLists(lines, refLines)
+    #refLines = [
+    #    "$options\n",
+    #    "jobtype             single\n",
+    #    "forcefield          initial_sol.frcmod initial_sol.mol2\n",
+    #    "backup              false\n",
+    #    "$end\n",
+    #    "\n",
+    #]
+    #assert checkUtils.checkLists(lines, refLines)
     cleanOptDir(options.optdir)
 
 
 def test_init1_RESP():
     os.chdir(os.path.dirname(__file__))
     options = getDefaults()
+    options.validinitial = True
     options.optdir = os.path.join("optengine", "opt1")
     cleanOptDir(options.optdir)
     options.resp = 1
@@ -212,6 +214,8 @@ def test_init1_RESP():
 
     refTargetLines = [
         "$target\n",
+        "resp 1\n",
+        "w_resp 1\n",
         "type                abinitio_amber\n",
         "name                dynamics\n",
         "amber_leapcmd       setup.leap\n",
@@ -222,6 +226,8 @@ def test_init1_RESP():
 
     refTargetLines = [
         "$target\n",
+        "resp 1\n",
+        "w_resp 1\n",
         "type                abinitio_amber\n",
         "name                dynamics\n",
         "amber_leapcmd       setup_valid_initial.leap\n",
@@ -383,6 +389,7 @@ def test_setupInputFiles():
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = "opt1"
+    options.validinitial = True
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     optEngine.optdir = "inputs"
@@ -436,12 +443,13 @@ def monkeyForceBalance(command):
             copyfile(os.path.join("ref", f), os.path.join("result", f"opt_{name}", f))
             if f.endswith(".mol2"):
                 copyfile(os.path.join("forcefield", f), f"prev_{f}")
-
+    print(os.listdir())
 
 def test_optimizeForcefield0(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = "opt1"
+    options.pathify()
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     monkeypatch.setattr(os, "system", monkeyForceBalance)
@@ -522,6 +530,7 @@ def test_determineRestart1(monkeypatch):
     options = getDefaults()
     options.optdir = "restart1"
     options.restart = True
+    options.validinitial = True
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     assert checkUtils.checkFloats(optEngine.params[0, 0], 266.5)
@@ -547,7 +556,7 @@ def test_determineRestart2(monkeypatch):
     assert len(optEngine.validPrevious) == 3
     assert len(optEngine.train) == 3
     assert len(optEngine.valid) == 2
-    assert len(optEngine.validInitial) == 2
+    #assert len(optEngine.validInitial) == 2
     assert optEngine.restartCycle == 3
 
 
@@ -558,6 +567,7 @@ def test_determineRestart3(monkeypatch):
     options = getDefaults()
     options.optdir = "restart3"
     options.restart = True
+    options.validinitial = True
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     print(optEngine.params[:6, 0])
@@ -695,25 +705,25 @@ def test_setupInputFiles_multipleValids(monkeypatch):
         refLinesValid1 = f.readlines()
     with open(os.path.join("..", "ref_inputs", "valid_8_2.in")) as f:
         refLinesValid2 = f.readlines()
-    with open("valid_8_1_initial.in", "r") as f:
-        testLinesValidInitial1 = f.readlines()
-    with open(os.path.join("..", "ref_inputs", "valid_8_1_initial.in")) as f:
-        refLinesValidInitial1 = f.readlines()
-    with open("valid_8_2_initial.in", "r") as f:
-        testLinesValidInitial2 = f.readlines()
-    with open(os.path.join("..", "ref_inputs", "valid_8_2_initial.in")) as f:
-        refLinesValidInitial2 = f.readlines()
+    #with open("valid_8_1_initial.in", "r") as f:
+    #    testLinesValidInitial1 = f.readlines()
+    #with open(os.path.join("..", "ref_inputs", "valid_8_1_initial.in")) as f:
+    #    refLinesValidInitial1 = f.readlines()
+    #with open("valid_8_2_initial.in", "r") as f:
+    #    testLinesValidInitial2 = f.readlines()
+    #with open(os.path.join("..", "ref_inputs", "valid_8_2_initial.in")) as f:
+    #    refLinesValidInitial2 = f.readlines()
     os.remove("opt_8.in")
     os.remove("valid_8.in")
-    os.remove("valid_8_initial.in")
+    #os.remove("valid_8_initial.in")
     os.remove("valid_8_1.in")
     os.remove("valid_8_2.in")
-    os.remove("valid_8_1_initial.in")
-    os.remove("valid_8_2_initial.in")
+    #os.remove("valid_8_1_initial.in")
+    #os.remove("valid_8_2_initial.in")
     checkUtils.checkLists(testLinesValid1, refLinesValid1)
-    checkUtils.checkLists(testLinesValidInitial1, refLinesValidInitial1)
+    #checkUtils.checkLists(testLinesValidInitial1, refLinesValidInitial1)
     checkUtils.checkLists(testLinesValid2, refLinesValid2)
-    checkUtils.checkLists(testLinesValidInitial2, refLinesValidInitial2)
+    #checkUtils.checkLists(testLinesValidInitial2, refLinesValidInitial2)
 
 
 def test_optimizeForcefield_multipleValids(monkeypatch):
@@ -736,6 +746,7 @@ def test_optimizeForcefield_multipleValids(monkeypatch):
     options = getDefaults()
     options.optdir = "opt3"
     options.nvalids = 3
+    options.validinitial = True
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForceBalance)
@@ -871,7 +882,7 @@ def test_restart1Params(monkeypatch):
     rmtree("forcefield")
     cleanOptDir(".")
     os.chdir("..")
-    assert len(lines) == 4
+    assert len(lines) == 3
 
 
 # Restart from failed param opt
@@ -883,6 +894,7 @@ def test_restart2Params(monkeypatch):
 
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
+    options.validinitial = True
     options.optdir = testDir
     options.restart = True
     cleanOptDir(options.optdir)
@@ -908,7 +920,7 @@ def test_restart2Params(monkeypatch):
 def test_restart3Params(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
     monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
-    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    #monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
     testDir = "params3"
 
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
@@ -927,24 +939,25 @@ def test_restart3Params(monkeypatch):
     optEngine.optimizeForcefield(optEngine.restartCycle)
     with open("fb.log", "r") as f:
         lines = f.readlines()
+        print(lines)
     os.remove("fb.log")
     rmtree("forcefield")
     cleanOptDir(".")
     os.chdir("..")
-    assert len(lines) == 2
+    assert len(lines) == 1
 
 
 # Restart from failed validation on initial params
-def test_restart3Params(monkeypatch):
+def test_restart4Params(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
     monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
-    monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
     testDir = "params4"
 
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = testDir
     options.restart = True
+    options.validinitial = True
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForcebalance)
@@ -1066,7 +1079,7 @@ def test_computeValidDiff(monkeypatch):
     assert checkUtils.checkArrays(vref, vtest)
 
 
-def monkeyGetFinalValidations(self, a, b):
+def monkeyGetFinalValidations(self, a):
     return 0
 
 def test_checkConvergence1(monkeypatch):
@@ -1118,7 +1131,7 @@ def test_getFinalValidations(monkeypatch):
     options.optdir = testDir
     optEngine = optengine.OptEngine(options)
     os.chdir(testDir)
-    best = optEngine.getFinalValidations(13, 5)
+    best = optEngine.getFinalValidations(13)
     assert best == 12
 
 

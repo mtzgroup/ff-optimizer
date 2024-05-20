@@ -545,7 +545,7 @@ def test_doParameterOptimization(monkeypatch):
     m.doParameterOptimization(1)
     assert len(m.optResults) == 3
     m.doParameterOptimization(2)
-    assert len(m.optResults) == 4
+    assert len(m.optResults) == 3
     clean()
 
 

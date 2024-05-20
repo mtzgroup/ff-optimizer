@@ -1,8 +1,0 @@
-source leaprc.protein.ff14SB
-addatomtypes { { "CA" "C" "sp2" } { "OA" "O" "sp2" } { "NA" "N" "sp2" } }
-addatomtypes { { "HA" "H" "sp3" } { "H2" "H" "sp3" } { "CU" "C" "sp2" } }
-addatomtypes { { "CY" "C" "sp3" } { "HD" "H" "sp3" } }
-AAA = loadmol2 pep.mol2
-loadamberparams pep.frcmod
-saveamberparm AAA ala.prmtop test.inpcrd
-quit
