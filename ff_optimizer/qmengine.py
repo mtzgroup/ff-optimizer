@@ -415,11 +415,13 @@ class ChemcloudEngine(QMEngine):
         programInputs = self.createProgramInputs(xyzs, useBackup=useBackup)
         status, outputs = self.computeBatch(programInputs)
         if len(outputs) != len(programInputs):
+            dumpFailedJobs(programInputs, outputs)
             raise RuntimeError(
                 "ChemCloud did not return the same number of outputs as inputs"
             )
         retryXyzs = self.getFailedJobs(outputs)
         if status == -1:
+            dumpFailedJobs(programInputs, outputs)
             raise RuntimeError(
                 "Batch resubmission reached size 1; QM calculations incomplete"
             )
@@ -444,3 +446,11 @@ class ChemcloudEngine(QMEngine):
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
         os.chdir(cwd)
+
+def dumpFailedJobs(programInputs, outputs):
+    for inp in programInputs:
+        name = inp.extras["id"] + "_input.yaml"
+        inp.save(name)
+    for out in outputs:
+        name = out.input_data.extras["id"] + "_output.yaml"
+        out.save(name)
