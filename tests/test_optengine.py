@@ -561,16 +561,17 @@ def test_determineRestart3(monkeypatch):
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     print(optEngine.params[:6, 0])
+    print(optEngine.restartCycle)
+    assert len(optEngine.train) == 4
+    assert len(optEngine.valid) == 3
+    assert len(optEngine.validPrevious) == 3
+    assert len(optEngine.validInitial) == 2
     assert checkUtils.checkFloats(optEngine.params[0, 0], 297.1)
     assert checkUtils.checkFloats(optEngine.params[1, 0], 223.05)
     assert checkUtils.checkFloats(optEngine.params[2, 0], 216.97)
     assert checkUtils.checkFloats(optEngine.params[3, 0], 245.75)
     assert checkUtils.checkFloats(optEngine.params[4, 0], 245.28)
     assert checkUtils.checkFloats(optEngine.params[5, 0], 0)
-    assert len(optEngine.train) == 4
-    assert len(optEngine.valid) == 3
-    assert len(optEngine.validPrevious) == 3
-    assert len(optEngine.validInitial) == 2
     assert optEngine.restartCycle == 3
 
 
@@ -1121,7 +1122,6 @@ def test_getFinalValidations(monkeypatch):
     assert best == 12
 
 
-#@pytest.mark.debug
 #def test_sortParams(monkeypatch):
 #    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
 #    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))

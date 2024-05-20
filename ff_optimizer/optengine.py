@@ -411,10 +411,12 @@ class OptEngine:
         self.graphMRC()
 
     # Doesn't work if you increase the number of parameters you're optimizing
-    # during the optimization. That would take some effort to fix.
+    # during the optimization. That would take some effort to fix. So we assume
+    # len(self.params) >= len(results["labels"])
     def sortParams(self, results, i):
         self.params[i + 1, :] = self.params[i, :]
-        for j in range(len(self.labels)):
+        nparams = min(len(self.labels), len(results["labels"]))
+        for j in range(nparams):
             if self.labels[j] == results["labels"][j]:
                 self.params[i + 1, j] = results["params"][j]
             else:
@@ -593,7 +595,7 @@ class OptEngine:
             # check if parameter optimization finished
             try:
                 self.checkOpt(i)
-            except:
+            except Exception as e:
                 break
             if i > 0:
                 # check if validation finished
