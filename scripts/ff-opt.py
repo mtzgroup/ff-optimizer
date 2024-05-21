@@ -61,6 +61,12 @@ def printHelp():
                     without initial training.
                     Default = None
 
+    "setuponly": bool, if True, sets up the force field optimization, makes all
+                    necessary files, etc., then stops before running anything. 
+                    Good if you just want to check that you have all the files
+                    you need.
+                    Default = False
+
     "initialtraining": bool, specifies whether or not to perform a parameter optimization
                     prior to beginning the first round of sampling. If so, the program
                     uses the MD trajectory in dynamicsdir to create an initial target

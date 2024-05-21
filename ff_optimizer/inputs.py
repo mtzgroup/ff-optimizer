@@ -54,6 +54,7 @@ class Input:
     initialtraining: bool = True
     validinitial: bool = False
     easymode: str = None
+    setuponly: bool = False
 
     # there's no reason to change these, but they're here just in case
     # (so they're not documented, but it's useful to have them accessible
@@ -97,6 +98,8 @@ class Input:
             self.checkFiles()
         else:
             checkDirectory(".", [self.easymode])
+        if self.setuponly:
+            self.maxcycles = -1
 
     def pathify(self):
         self.dynamicsdir = Path(self.dynamicsdir).absolute()
