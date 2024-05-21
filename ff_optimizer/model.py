@@ -83,14 +83,20 @@ class Model(AbstractModel):
         return mmEngine
 
     def initialCycle(self):
-        # Prepare initial target data
-        path = self.createTCData()
-        self.copyLeapFiles(path)
-
-        # Do initial optimization
-        os.chdir(self.optdir)
-        self.optEngine.optimizeForcefield(0)
-        os.chdir(self.home)
+        if self.inp.initialtraining:
+            # Prepare initial target data
+            path = self.createTCData()
+            self.copyLeapFiles(path)
+            # Do initial optimization
+            os.chdir(self.optdir)
+            self.optEngine.optimizeForcefield(0)
+            os.chdir(self.home)
+        else:
+            # just put ff parameters where the next iteration expects them to be
+            path = self.optdir / "result" / "opt_0"
+            path.mkdir(exist_ok=True, parents=True)
+            copyfile(self.optdir / self.optEngine.mol2, path / self.optEngine.mol2)
+            copyfile(self.optdir / self.optEngine.frcmod, path / self.optEngine.frcmod)
 
     def createTCData(self):
         # Create initial target data from dynamics
@@ -115,7 +121,8 @@ class Model(AbstractModel):
 
     def copyLeapFiles(self, dest, validInitial=True):
         files = ["setup.leap", "conf.pdb"]
-        if validInitial:
+        # default is to copy the valid initial leap if the input wants to
+        if validInitial and self.inp.validinitial:
             files += ["setup_valid_initial.leap"]
         for f in files:
             copyfile(self.optdir / f, dest / f)
@@ -215,12 +222,16 @@ class Model(AbstractModel):
     def getOptResults(self):
         self.converged = self.optEngine.converged
         self.optResults = []
+        self.optResults.append(self.optEngine.train[-1])
         self.optResults.append(self.optEngine.valid[-1])
         self.optResults.append(
-            self.optEngine.valid[-1] / self.optEngine.validInitial[-1]
+            (self.optEngine.validPrevious[-1] - self.optEngine.valid[-1])
+            / self.optEngine.valid[-1]
+            * 100
         )
-        self.optResults.append(
-            self.optEngine.valid[-1] - self.optEngine.validPrevious[-1]
-        )
-        if len(self.optEngine.valid) > 1:
-            self.optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])
+        if self.inp.validinitial:
+            self.optResults.append(
+                self.optEngine.valid[-1] / self.optEngine.validInitial[-1]
+            )
+        # if len(self.optEngine.valid) > 1:
+        #    self.optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])

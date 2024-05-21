@@ -32,7 +32,7 @@ def printHelp():
     )
     keywords = dedent(
         """\
-    Keywords are to be provided in a .json file. Example:
+    Keywords are to be provided in a .yaml file. Example:
     {
     "restart": False,
     "mmengine": "amber",
@@ -54,6 +54,28 @@ def printHelp():
     "sampledir": str, specifies the directory where MM sampling and QM 
                     calculations will be run; contains MM and QM inputs.
                     Default = "2_sampling"
+
+    "easymode": str, specifies an xyz file for parameter optimization. The 
+                    setup populates all files/folders with reasonable defaults,
+                    and prepares everything for an amber/chemcloud calculation 
+                    without initial training.
+                    Default = None
+
+    "setuponly": bool, if True, sets up the force field optimization, makes all
+                    necessary files, etc., then stops before running anything. 
+                    Good if you just want to check that you have all the files
+                    you need.
+                    Default = False
+
+    "initialtraining": bool, specifies whether or not to perform a parameter optimization
+                    prior to beginning the first round of sampling. If so, the program
+                    uses the MD trajectory in dynamicsdir to create an initial target
+                    for optimization.
+                    Default = True
+
+    "validinitial": bool, specifies whether or not to evaluate the initial 
+                    parameters on the validation set at each iteration.
+                    Default = False
 
     "coors": str, specifies the name of the coordinates file in dynamicsdir.
                     Default = "coors.xyz"
@@ -207,13 +229,13 @@ if __name__ == "__main__":
 
     # Begin sampling/optimization cycling
     print(
-        "%7s%15s%15s%20s%23s%8s%8s%8s"
+        "%7s%15s%15s%22s%25s%8s%8s%8s"
         % (
             "Epoch",
+            "Training",
             "Validation",
-            "Valid ratio",
-            "Current-Previous",
-            "Current-last Current",
+            "Validation change / %",
+            "Validation, initial params",
             "MM time",
             "QM time",
             "FB time",
@@ -238,15 +260,15 @@ if __name__ == "__main__":
         fbEnd = perf_counter()
         fbTime = fbEnd - qmEnd
 
-        if i == 1:
+        if inp.validinitial:
             print(
-                "%7d%15.8f%15.8f%20.8f%23s%8.1f%8.1f%8.1f"
+                "%7d%15.8f%15.8f%22.8f%25.8f%8.1f%8.1f%8.1f"
                 % (
                     i,
                     optResults[0],
                     optResults[1],
                     optResults[2],
-                    "",
+                    optResults[3],
                     mmTime,
                     qmTime,
                     fbTime,
@@ -254,13 +276,13 @@ if __name__ == "__main__":
             )
         else:
             print(
-                "%7d%15.8f%15.8f%20.8f%23.8f%8.1f%8.1f%8.1f"
+                "%7d%15.8f%15.8f%22.8f%25.8f%8.1f%8.1f%8.1f"
                 % (
                     i,
                     optResults[0],
                     optResults[1],
                     optResults[2],
-                    optResults[3],
+                    "",
                     mmTime,
                     qmTime,
                     fbTime,

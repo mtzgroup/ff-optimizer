@@ -122,12 +122,21 @@ def test_readPDB2():
 def test_writePDB():
     os.chdir(os.path.join(home, "utils"))
     coords = utils.readPDB("3.pdb")
-    utils.writePDB(coords, "3_test.pdb", "2.pdb")
+    utils.writePDB(coords, "3_test.pdb", template="2.pdb")
     with open("3_test.pdb", "r") as f:
         testLines = f.readlines()
     with open("3.pdb", "r") as f:
         refLines = f.readlines()
     assert testLines == refLines
+
+
+def test_writePDB2():
+    os.chdir(os.path.join(home, "utils"))
+    coords, symbols = utils.readXYZ("test.xyz", readSymbols=True)
+    utils.writePDB(coords, "temp.pdb", atoms=symbols, resname="WAT")
+    test = checkUtils.checkFiles("temp.pdb", "ref.pdb")
+    os.remove("temp.pdb")
+    assert test
 
 
 def test_readXYZ1():

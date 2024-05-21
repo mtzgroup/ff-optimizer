@@ -6,6 +6,7 @@ from ff_optimizer import model, optengine
 
 from . import checkUtils
 from .test_inputs import getDefaults
+from .test_optengine import cleanOptDir, monkeyForceBalance
 
 home = Path(__file__).parent.absolute()
 
@@ -177,7 +178,7 @@ def monkeyOptInit(self, args):
     self.restartCycle = 0
 
 
-def monkeyForceBalance(command):
+def monkeyForceBalanceSimple(command):
     out = command.split()[3]
     out.split("_")[1].split(".")[0]
     copyfile(os.path.join("reference", out), out)
@@ -204,17 +205,18 @@ def test_doParameterOptimization(monkeypatch):
     args.optdir = Path("1_optimization")
     args.sampledir = Path("2_mm_sampling")
     args.nvalids = 2
+    args.validinitial = True
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInit)
     monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupFiles)
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyOptInit)
-    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    monkeypatch.setattr(os, "system", monkeyForceBalanceSimple)
     monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
     monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
 
     m = model.Model(args)
     m.doParameterOptimization(1)
-    assert len(m.optResults) == 3
+    assert len(m.optResults) == 4
     m.doParameterOptimization(2)
     assert len(m.optResults) == 4
     files = [
@@ -328,6 +330,7 @@ def test_createTCData(monkeypatch):
 def test_copyLeapFiles(monkeypatch):
     os.chdir(home / "model" / "test5")
     args = getDefaults()
+    args.validinitial = True
     monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
@@ -348,9 +351,27 @@ def test_copyLeapFiles(monkeypatch):
         if not (dest / f).is_file():
             test2 = False
     rmtree(dest)
-
     assert test1
     assert test2
+
+
+def test_copyLeapFiles2(monkeypatch):
+    os.chdir(home / "model" / "test5")
+    args = getDefaults()
+    args.validinitial = False
+    monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    m = model.Model(args)
+    dest = Path("test1")
+    dest.mkdir()
+    m.copyLeapFiles(dest)
+    test = True
+    for f in ["setup.leap", "conf.pdb"]:
+        if not (dest / f).is_file():
+            test = False
+    rmtree(dest)
+    assert test
 
 
 def test_makeSampleDir(monkeypatch):
@@ -480,6 +501,54 @@ def test_getSampleFolders(monkeypatch):
     assert sampleFolders == refFolders
 
 
-# Gonna add tests with feature to change initialCycle
-def test_initialCycle():
-    assert False
+def monkeyInitOptEngine(self, inp):
+    self.setVariables(inp)
+    self.readFileNames()
+    self.initializeRespPriors()
+    self.determineRestart()
+    self.readTargetLines()
+    self.writeValidInitialLeap()
+    self.copyFiles()
+
+
+def test_initialCycle1(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOptEngine)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    monkeypatch.setattr(model, "convertTCtoFB", monkeyConvert)
+    os.chdir(home / "model" / "initial1")
+    inp = getDefaults()
+    inp.validinitial = True
+    m = model.Model(inp)
+    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    m.initialCycle()
+    copied = True
+    if not (m.optdir / "result" / "opt_0" / "dasa.mol2").is_file():
+        copied = False
+    if not (m.optdir / "result" / "opt_0" / "dasa.frcmod").is_file():
+        copied = False
+    opt = (m.optdir / "opt_0.out").is_file()
+    if opt:
+        os.remove(m.optdir / "opt_0.out")
+    cleanOptDir(m.optdir, True)
+    rmtree(m.optdir / "targets")
+    assert copied
+    assert opt
+
+
+def test_initialCycle2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOptEngine)
+    monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
+    monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    os.chdir(home / "model" / "initial2")
+    inp = getDefaults()
+    inp.initialtraining = False
+    m = model.Model(inp)
+    m.initialCycle()
+    copied = True
+    if not (m.optdir / "result" / "opt_0" / "dasa.mol2").is_file():
+        copied = False
+    if not (m.optdir / "result" / "opt_0" / "dasa.frcmod").is_file():
+        copied = False
+    cleanOptDir(m.optdir, True)
+    assert copied

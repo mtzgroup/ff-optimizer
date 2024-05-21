@@ -51,6 +51,10 @@ class Input:
     resppriors: int = 0
     stride: int = 50
     tcout: str = "tc.out"
+    initialtraining: bool = True
+    validinitial: bool = False
+    easymode: str = None
+    setuponly: bool = False
 
     # there's no reason to change these, but they're here just in case
     # (so they're not documented, but it's useful to have them accessible
@@ -62,6 +66,8 @@ class Input:
     valid0: str = "valid_0.in"
     batchsize: int = 10
     retries: int = 3
+    patience: int = 5
+    cutoff: float = -1.0
 
     @classmethod
     def fromYaml(cls, inputs):
@@ -75,10 +81,25 @@ class Input:
             di = {}
         return cls(**di)
 
+    def toYaml(self, dest):
+        data = vars(self)
+        # convert pathlib Paths back to strs
+        for key in data.keys():
+            if isinstance(data[key], Path):
+                data[key] = str(data[key])
+        with open(dest, "w") as f:
+            yaml.dump(vars(self), f)
+
     def __post_init__(self):
+        # in easymode, files/folders aren't set up yet
         self.pathify()
-        self.checkParams()
-        self.checkFiles()
+        if self.easymode is None:
+            self.checkParams()
+            self.checkFiles()
+        else:
+            checkDirectory(".", [self.easymode])
+        if self.setuponly:
+            self.maxcycles = -1
 
     def pathify(self):
         self.dynamicsdir = Path(self.dynamicsdir).absolute()
@@ -86,8 +107,9 @@ class Input:
         self.sampledir = Path(self.sampledir).absolute()
 
     def checkFiles(self):
-        dynamicsFiles = [self.tcout, self.coors, self.conformers]
-        checkDirectory(self.dynamicsdir, dynamicsFiles)
+        if self.initialtraining:
+            dynamicsFiles = [self.tcout, self.coors, self.conformers]
+            checkDirectory(self.dynamicsdir, dynamicsFiles)
         optFiles = ["conf.pdb", "setup.leap", "opt_0.in", "valid_0.in"]
         checkDirectory(self.optdir, optFiles)
         sampleFiles = ["tc_template.in", "tc_template_backup.in"]

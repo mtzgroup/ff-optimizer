@@ -447,6 +447,7 @@ class ChemcloudEngine(QMEngine):
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
         os.chdir(cwd)
 
+
 def dumpFailedJobs(programInputs, outputs):
     for inp in programInputs:
         name = inp.extras["id"] + "_input.yaml"
