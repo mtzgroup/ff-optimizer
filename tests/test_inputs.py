@@ -1,5 +1,4 @@
 import os
-import pytest
 from pathlib import Path
 
 from ff_optimizer import inputs
@@ -20,6 +19,7 @@ def getDefaults():
     setattr(inputs.Input, "__post_init__", postInit)
     os.remove("nothing.yaml")
     return inp
+
 
 def test_defaults():
     inp = getDefaults()
@@ -46,11 +46,13 @@ def test_checkForFile2():
         found = False
     assert found
 
-#@pytest.mark.debug
+
+# @pytest.mark.debug
 def test_post_init():
     os.chdir(home / "inputs")
     inp = inputs.Input.fromYaml("input.yaml")
     assert inp.maxcycles == -1
     assert inp.easymode == "h.xyz"
+
 
 # Should be more tests here?

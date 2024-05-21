@@ -225,11 +225,13 @@ class Model(AbstractModel):
         self.optResults.append(self.optEngine.train[-1])
         self.optResults.append(self.optEngine.valid[-1])
         self.optResults.append(
-            (self.optEngine.validPrevious[-1] - self.optEngine.valid[-1]) / self.optEngine.valid[-1] * 100
+            (self.optEngine.validPrevious[-1] - self.optEngine.valid[-1])
+            / self.optEngine.valid[-1]
+            * 100
         )
         if self.inp.validinitial:
             self.optResults.append(
                 self.optEngine.valid[-1] / self.optEngine.validInitial[-1]
             )
-        #if len(self.optEngine.valid) > 1:
+        # if len(self.optEngine.valid) > 1:
         #    self.optResults.append(self.optEngine.valid[-1] - self.optEngine.valid[-2])

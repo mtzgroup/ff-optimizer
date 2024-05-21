@@ -2,19 +2,18 @@ import os
 from pathlib import Path
 from shutil import copyfile, rmtree
 
-import numpy as np
-import pytest
-
-from ff_optimizer import setup, inputs, model
+from ff_optimizer import inputs, model, setup
 
 from . import checkUtils
 from .test_inputs import getDefaults
+
 
 def test_getCharge():
     os.chdir(os.path.dirname(__file__))
     sampledir = Path("setup")
     charge = setup.getCharge(sampledir)
     assert charge == 0
+
 
 def test_writeTCFiles():
     os.chdir(os.path.dirname(__file__))
@@ -26,19 +25,21 @@ def test_writeTCFiles():
     os.remove("tc_template.in")
     os.remove("tc_template_backup.in")
     assert test1 and test2
-    
+
+
 def test_writeMDFiles():
     os.chdir(os.path.dirname(__file__))
     os.chdir("setup")
-    inp = getDefaults()
+    getDefaults()
     setup.writeMDFiles()
     test = True
-    for i in range(1,9):
+    for i in range(1, 9):
         test = test and checkUtils.checkFiles(f"heat{i}.in", f"ref_heat{i}.in")
         os.remove(f"heat{i}.in")
     test = test and checkUtils.checkFiles(f"md.in", "ref_md.in")
     os.remove("md.in")
     assert test
+
 
 def test_setupFF():
     os.chdir(os.path.dirname(__file__))
@@ -54,6 +55,7 @@ def test_setupFF():
     os.remove("water.mol2")
     os.remove("water.frcmod")
     assert test
+
 
 def test_setupForceBalance():
     os.chdir(os.path.dirname(__file__))
@@ -71,6 +73,7 @@ def test_setupForceBalance():
     os.remove("setup.leap")
     assert test
 
+
 def test_editFrcmod():
     os.chdir(os.path.dirname(__file__))
     os.chdir("setup")
@@ -80,15 +83,16 @@ def test_editFrcmod():
     os.remove("test.frcmod")
     assert test
 
+
 def test_setup():
     os.chdir(os.path.dirname(__file__))
     os.chdir("setup")
     os.chdir("test")
     inp = inputs.Input.fromYaml("input.yaml")
-    # if the new input file and model get initialized and pass all their 
+    # if the new input file and model get initialized and pass all their
     # internal checks, then we pass this test as well
     newInp = setup.setup(inp)
-    test = model.Model(newInp)
+    model.Model(newInp)
     rmtree("1_opt")
     rmtree("2_sampling")
     os.remove("new_input.yaml")

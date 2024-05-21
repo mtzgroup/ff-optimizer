@@ -95,15 +95,30 @@ class OptEngine:
                         line = line.replace(line.split()[1], "setup_valid_initial.leap")
                     self.validInitialTargetLines.append(line)
         if len(self.targetLines) == 0:
-            print(f"WARNING: no target lines in ForceBalance input file {self.inp.opt0}!")
-            print("Using defaults; you should check to make sure that this is what you want")
-            self.targetLines = ["$target\n", "type                abinitio_amber\n", 
-                "name                train_1\n", "amber_leapcmd       setup.leap\n", "$end\n"]
+            print(
+                f"WARNING: no target lines in ForceBalance input file {self.inp.opt0}!"
+            )
+            print(
+                "Using defaults; you should check to make sure that this is what you want"
+            )
+            self.targetLines = [
+                "$target\n",
+                "type                abinitio_amber\n",
+                "name                train_1\n",
+                "amber_leapcmd       setup.leap\n",
+                "$end\n",
+            ]
             self.validTargetLines = self.targetLines.copy()
             self.validInitialTargetLines = self.targetLines.copy()
-            self.validInitialTargetLines[3] = "amber_leapcmd       setup_valid_initial.leap\n"
+            self.validInitialTargetLines[
+                3
+            ] = "amber_leapcmd       setup_valid_initial.leap\n"
         if self.doResp:
-            for lines in [self.targetLines, self.validTargetLines, self.validInitialTargetLines]:
+            for lines in [
+                self.targetLines,
+                self.validTargetLines,
+                self.validInitialTargetLines,
+            ]:
                 lines.insert(1, f"w_resp {str(self.resp)}\n")
                 lines.insert(1, "resp 1\n")
 
@@ -144,7 +159,7 @@ class OptEngine:
 
     def makeInitialValidIn(self):
         if not self.inp.validinitial:
-            return 
+            return
         with open(self.optdir / "valid_0.in", "r") as srcValid:
             with open(self.optdir / "valid_0_initial.in", "w") as destValid:
                 for line in srcValid.readlines():
@@ -565,7 +580,7 @@ class OptEngine:
         status, results = self.readOpt(self.optdir / f"opt_{i}.out")
         if status == 0:
             # setup params and labels after first optimization
-            if i - (not self.inp.initialtraining) == 0 :
+            if i - (not self.inp.initialtraining) == 0:
                 self.params = np.zeros((self.maxCycles + 2, len(results["labels"])))
                 self.labels = results["labels"]
                 self.params[0, :] = results["initialParams"]
@@ -596,7 +611,7 @@ class OptEngine:
             # check if parameter optimization finished
             try:
                 self.checkOpt(i)
-            except Exception as e:
+            except Exception:
                 break
             if i > 0:
                 # check if validation finished

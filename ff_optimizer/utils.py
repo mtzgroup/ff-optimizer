@@ -345,18 +345,28 @@ def writePDB(geometry, dest, atoms=None, resname=None, template=None):
             for key in atomTypes.keys():
                 if atom == key:
                     atomTypes[atom] += 1
-                    token = atom + "%0" + str(3-len(atom)) + "d"
+                    token = atom + "%0" + str(3 - len(atom)) + "d"
                     atomNames.append(token % atomTypes[atom])
                     setAtom = True
-            if setAtom == False:    
+            if setAtom == False:
                 atomTypes[atom] = 1
-                token = atom + "%0" + str(3-len(atom)) + "d"
+                token = atom + "%0" + str(3 - len(atom)) + "d"
                 atomNames.append(token % atomTypes[atom])
         with open(dest, "w") as f:
             f.write("COMPND   " + resname + "\n")
             for i in range(len(atoms)):
-                f.write("ATOM  %5d  %3s %3s     1    %8.3f%8.3f%8.3f  1.00  0.00          %2s\n" % 
-                (i+1,atomNames[i],resname,float(geometry[3*i]),float(geometry[3*i+1]),float(geometry[3*i+2]),atoms[i]))
+                f.write(
+                    "ATOM  %5d  %3s %3s     1    %8.3f%8.3f%8.3f  1.00  0.00          %2s\n"
+                    % (
+                        i + 1,
+                        atomNames[i],
+                        resname,
+                        float(geometry[3 * i]),
+                        float(geometry[3 * i + 1]),
+                        float(geometry[3 * i + 2]),
+                        atoms[i],
+                    )
+                )
 
     else:
         with open(template, "r") as f:

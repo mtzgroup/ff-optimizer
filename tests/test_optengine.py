@@ -4,7 +4,6 @@ from pathlib import Path
 from shutil import copyfile, rmtree
 
 import numpy as np
-import pytest
 
 from ff_optimizer import optengine, resp_prior
 
@@ -155,7 +154,7 @@ def test_init2():
     ]
     assert checkUtils.checkLists(refTargetLines, optEngine.validTargetLines)
 
-    #refTargetLines = [
+    # refTargetLines = [
     #    "$target\n",
     #    "type                  abinitio_amber        # The target type; fitting ab initio data using Amber\n",
     #    'name stuff                       # Also the subdirectory containing data within "targets"\n',
@@ -163,8 +162,8 @@ def test_init2():
     #    "writelevel            1                     # Amount of data printed to temp directory\n",
     #    "amber_leapcmd         setup_valid_initial.leap\n",
     #    "$end\n",
-    #]
-    #assert checkUtils.checkLists(refTargetLines, optEngine.validInitialTargetLines)
+    # ]
+    # assert checkUtils.checkLists(refTargetLines, optEngine.validInitialTargetLines)
 
     files = sorted(os.listdir(os.path.join(options.optdir, "forcefield")))
     refFiles = ["initial_sol.frcmod", "initial_sol.mol2", "sol.frcmod", "sol.mol2"]
@@ -175,18 +174,18 @@ def test_init2():
     assert optEngine.frcmod == "sol.frcmod"
     assert optEngine.initialTarget == "stuff"
 
-    #with open(os.path.join(options.optdir, "valid_0_initial.in"), "r") as f:
+    # with open(os.path.join(options.optdir, "valid_0_initial.in"), "r") as f:
     #    lines = f.readlines()
 
-    #refLines = [
+    # refLines = [
     #    "$options\n",
     #    "jobtype             single\n",
     #    "forcefield          initial_sol.frcmod initial_sol.mol2\n",
     #    "backup              false\n",
     #    "$end\n",
     #    "\n",
-    #]
-    #assert checkUtils.checkLists(lines, refLines)
+    # ]
+    # assert checkUtils.checkLists(lines, refLines)
     cleanOptDir(options.optdir)
 
 
@@ -444,6 +443,7 @@ def monkeyForceBalance(command):
             if f.endswith(".mol2"):
                 copyfile(os.path.join("forcefield", f), f"prev_{f}")
 
+
 def test_optimizeForcefield0(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
@@ -555,7 +555,7 @@ def test_determineRestart2(monkeypatch):
     assert len(optEngine.validPrevious) == 3
     assert len(optEngine.train) == 3
     assert len(optEngine.valid) == 2
-    #assert len(optEngine.validInitial) == 2
+    # assert len(optEngine.validInitial) == 2
     assert optEngine.restartCycle == 3
 
 
@@ -704,25 +704,25 @@ def test_setupInputFiles_multipleValids(monkeypatch):
         refLinesValid1 = f.readlines()
     with open(os.path.join("..", "ref_inputs", "valid_8_2.in")) as f:
         refLinesValid2 = f.readlines()
-    #with open("valid_8_1_initial.in", "r") as f:
+    # with open("valid_8_1_initial.in", "r") as f:
     #    testLinesValidInitial1 = f.readlines()
-    #with open(os.path.join("..", "ref_inputs", "valid_8_1_initial.in")) as f:
+    # with open(os.path.join("..", "ref_inputs", "valid_8_1_initial.in")) as f:
     #    refLinesValidInitial1 = f.readlines()
-    #with open("valid_8_2_initial.in", "r") as f:
+    # with open("valid_8_2_initial.in", "r") as f:
     #    testLinesValidInitial2 = f.readlines()
-    #with open(os.path.join("..", "ref_inputs", "valid_8_2_initial.in")) as f:
+    # with open(os.path.join("..", "ref_inputs", "valid_8_2_initial.in")) as f:
     #    refLinesValidInitial2 = f.readlines()
     os.remove("opt_8.in")
     os.remove("valid_8.in")
-    #os.remove("valid_8_initial.in")
+    # os.remove("valid_8_initial.in")
     os.remove("valid_8_1.in")
     os.remove("valid_8_2.in")
-    #os.remove("valid_8_1_initial.in")
-    #os.remove("valid_8_2_initial.in")
+    # os.remove("valid_8_1_initial.in")
+    # os.remove("valid_8_2_initial.in")
     checkUtils.checkLists(testLinesValid1, refLinesValid1)
-    #checkUtils.checkLists(testLinesValidInitial1, refLinesValidInitial1)
+    # checkUtils.checkLists(testLinesValidInitial1, refLinesValidInitial1)
     checkUtils.checkLists(testLinesValid2, refLinesValid2)
-    #checkUtils.checkLists(testLinesValidInitial2, refLinesValidInitial2)
+    # checkUtils.checkLists(testLinesValidInitial2, refLinesValidInitial2)
 
 
 def test_optimizeForcefield_multipleValids(monkeypatch):
@@ -919,7 +919,7 @@ def test_restart2Params(monkeypatch):
 def test_restart3Params(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
     monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
-    #monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
+    # monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupInputFiles)
     testDir = "params3"
 
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
@@ -1081,6 +1081,7 @@ def test_computeValidDiff(monkeypatch):
 def monkeyGetFinalValidations(self, a):
     return 0
 
+
 def test_checkConvergence1(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
     monkeypatch.setattr(
@@ -1134,7 +1135,7 @@ def test_getFinalValidations(monkeypatch):
     assert best == 12
 
 
-#def test_sortParams(monkeypatch):
+# def test_sortParams(monkeypatch):
 #    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)
 #    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
 #    options = getDefaults()

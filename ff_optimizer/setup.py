@@ -1,9 +1,11 @@
-from .inputs import Input
+import os
 from pathlib import Path
 from shutil import copyfile
-import os
-from .utils import readXYZ, writePDB
 from textwrap import dedent
+
+from .inputs import Input
+from .utils import readXYZ, writePDB
+
 
 def setup(inp, opt=True, mm=True, qm=True):
     home = Path(".").absolute()
@@ -28,6 +30,7 @@ def setup(inp, opt=True, mm=True, qm=True):
     newInp = Input.fromYaml("new_input.yaml")
     return newInp
 
+
 def setupOpt(inp):
     xyz = inp.easymode
     setupDir = inp.optdir / "setup"
@@ -40,16 +43,19 @@ def setupOpt(inp):
     setupForceBalance(inp, frcmod, mol2, resname)
     editFrcmod(frcmod)
 
+
 def setupMM(inp):
     print("Creating Amber MD input files")
     print("Head to https://ambermd.org/index.php for documentation")
     os.chdir(inp.sampledir)
     writeMDFiles()
 
+
 def setupQM(inp):
     charge = getCharge(inp.optdir)
     os.chdir(inp.sampledir)
     writeTCFiles(inp, charge)
+
 
 def getCharge(optdir):
     os.chdir(optdir)
@@ -72,21 +78,28 @@ def getCharge(optdir):
     print(charge)
     return round(charge)
 
+
 def writeTCFiles(inp, charge):
     print("Writing TeraChem input files")
     print("Head to http://www.petachem.com/doc/userguide.pdf for documentation")
     print("Defaulting to wB97X-D3/def2-svp and a spin multiplicity of 1")
     with open(inp.tctemplate, "w") as f:
-        f.write(dedent(f"""\
+        f.write(
+            dedent(
+                f"""\
             basis         def2-svp  
             method        wb97x-d3
             charge        {charge}        
             run           gradient 
             dftd          d3       
             spinmult      1        
-        """))
+        """
+            )
+        )
     with open(inp.tctemplate_backup, "w") as f:
-        f.write(dedent(f"""\
+        f.write(
+            dedent(
+                f"""\
             basis         def2-svp  
             method        wb97x-d3
             charge        {charge}        
@@ -96,13 +109,18 @@ def writeTCFiles(inp, charge):
             threall       1.0e-14
             diismaxvecs   40
             maxit         200
-        """))
+        """
+            )
+        )
+
 
 def writeMDFiles():
     print("Writing inputs to equilibrate to 400K")
     for i in range(8):
         with open(f"heat{i+1}.in", "w") as f:
-            f.write(dedent(f"""\
+            f.write(
+                dedent(
+                    f"""\
                 heat molecule
                  &cntrl
                   imin=0,irest=0,ntx=1,
@@ -116,12 +134,16 @@ def writeMDFiles():
                   ntr=0,
                   nmropt=0
                 /
-            """))
+            """
+                )
+            )
     print("Writing input for sampling trajectory at 400K")
     print("The number of samples is nstlim/ntwx = 200")
     print("(nstlim = number of MD steps, ntwx = frequency of writing out coordinates)")
     with open("md.in", "w") as f:
-        f.write(dedent(f"""\
+        f.write(
+            dedent(
+                f"""\
             sample conformations
             &cntrl
               imin=0,irest=1,ntx=5,
@@ -135,7 +157,10 @@ def writeMDFiles():
               ntr=0,
               nmropt=0
             /
-        """))
+        """
+            )
+        )
+
 
 def setupFF(xyz, optdir):
     name = xyz.replace(".xyz", "")
@@ -146,7 +171,7 @@ def setupFF(xyz, optdir):
     frcmod = name + ".frcmod"
     print(f"Converting xyz {xyz} to a pdb with residue name {resname}")
     writePDB(coords, pdb, atoms=atoms, resname=resname, template=None)
-    
+
     print(f"Creating Amber forcefield files")
     print("Making mol2 file with antechamber")
     print("Using AM1-BCC to create charges; this should be done with HF/6-31g* RESP")
@@ -158,11 +183,16 @@ def setupFF(xyz, optdir):
     copyfile(pdb, optdir / "conf.pdb")
     return frcmod, mol2, resname
 
+
 def setupForceBalance(inp, frcmod, mol2, resname):
     print("Writing ForceBalance input files")
-    print("Head to https://leeping.github.io/forcebalance/doc/html/index.html for documentation")
+    print(
+        "Head to https://leeping.github.io/forcebalance/doc/html/index.html for documentation"
+    )
     with open(inp.opt0, "w") as f:
-        f.write(dedent(f"""\
+        f.write(
+            dedent(
+                f"""\
             $options
             jobtype             NewtonRaphson
             forcefield          {frcmod} {mol2}
@@ -188,26 +218,37 @@ def setupForceBalance(inp, frcmod, mol2, resname):
             name                train_1
             amber_leapcmd       setup.leap
             $end                              
-            """))
+            """
+            )
+        )
 
     with open(inp.valid0, "w") as f:
-        f.write(dedent(f"""\
+        f.write(
+            dedent(
+                f"""\
             $options                                 
             jobtype             single               
             forcefield          {frcmod} {mol2}
             backup              false                
             $end                               
-            """))
+            """
+            )
+        )
 
     with open("setup.leap", "w") as f:
-        f.write(dedent(f"""\
+        f.write(
+            dedent(
+                f"""\
             source leaprc.gaff
             loadamberparams {frcmod}
             {resname} = loadmol2 {mol2}
             x = loadpdb conf.pdb
             saveamberparm x ff.prmtop coord.inpcrd
             quit                                  
-            """))
+            """
+            )
+        )
+
 
 def editFrcmod(frcmod):
     print("Labeling frcmod file to optimize all bonds, angles, and torsions")

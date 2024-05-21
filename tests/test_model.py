@@ -6,8 +6,7 @@ from ff_optimizer import model, optengine
 
 from . import checkUtils
 from .test_inputs import getDefaults
-from .test_optengine import monkeyForceBalance, cleanOptDir
-import pytest
+from .test_optengine import cleanOptDir, monkeyForceBalance
 
 home = Path(__file__).parent.absolute()
 
@@ -355,6 +354,7 @@ def test_copyLeapFiles(monkeypatch):
     assert test1
     assert test2
 
+
 def test_copyLeapFiles2(monkeypatch):
     os.chdir(home / "model" / "test5")
     args = getDefaults()
@@ -372,6 +372,7 @@ def test_copyLeapFiles2(monkeypatch):
             test = False
     rmtree(dest)
     assert test
+
 
 def test_makeSampleDir(monkeypatch):
     os.chdir(home / "model" / "test5")
@@ -533,6 +534,7 @@ def test_initialCycle1(monkeypatch):
     rmtree(m.optdir / "targets")
     assert copied
     assert opt
+
 
 def test_initialCycle2(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOptEngine)

@@ -1,5 +1,4 @@
 import os
-import pytest
 from pathlib import Path
 
 import numpy as np
@@ -130,6 +129,7 @@ def test_writePDB():
         refLines = f.readlines()
     assert testLines == refLines
 
+
 def test_writePDB2():
     os.chdir(os.path.join(home, "utils"))
     coords, symbols = utils.readXYZ("test.xyz", readSymbols=True)
@@ -137,6 +137,7 @@ def test_writePDB2():
     test = checkUtils.checkFiles("temp.pdb", "ref.pdb")
     os.remove("temp.pdb")
     assert test
+
 
 def test_readXYZ1():
     os.chdir(os.path.join(home, "utils"))
