@@ -159,7 +159,7 @@ class OptEngine:
     def copyValids(self):
         for j in range(1, self.nvalids):
             copyfile(self.optdir / "valid_0.in", self.optdir / f"valid_0_{j}.in")
-            if self.validinitial:
+            if self.inp.validinitial:
                 copyfile(
                     self.optdir / "valid_0_initial.in",
                     self.optdir / f"valid_0_{j}_initial.in",
@@ -304,9 +304,10 @@ class OptEngine:
         ax.plot(
             x, self.validPrevious, label="Validation, previous parameters", marker="o"
         )
-        ax.plot(
-            x, self.validInitial, label="Validation, initial parameters", marker="o"
-        )
+        if self.inp.validinitial:
+            ax.plot(
+                x, self.validInitial, label="Validation, initial parameters", marker="o"
+            )
         x0 = np.arange(cycles + 1)
         ax.plot(x0, self.train, label="Training", marker="o")
         ax.set_xlabel("Optimization cycle", size=17)

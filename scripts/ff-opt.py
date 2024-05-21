@@ -223,13 +223,13 @@ if __name__ == "__main__":
 
     # Begin sampling/optimization cycling
     print(
-        "%7s%15s%15s%20s%23s%8s%8s%8s"
+        "%7s%15s%15s%22s%25s%8s%8s%8s"
         % (
             "Epoch",
+            "Training",
             "Validation",
-            "Valid ratio",
-            "Current-Previous",
-            "Current-last Current",
+            "Validation change / %",
+            "Validation, initial params",
             "MM time",
             "QM time",
             "FB time",
@@ -254,15 +254,15 @@ if __name__ == "__main__":
         fbEnd = perf_counter()
         fbTime = fbEnd - qmEnd
 
-        if i == 1:
+        if inp.validinitial:
             print(
-                "%7d%15.8f%15.8f%20.8f%23s%8.1f%8.1f%8.1f"
+                "%7d%15.8f%15.8f%22.8f%25.8f%8.1f%8.1f%8.1f"
                 % (
                     i,
                     optResults[0],
                     optResults[1],
                     optResults[2],
-                    "",
+                    optResults[3],
                     mmTime,
                     qmTime,
                     fbTime,
@@ -270,13 +270,13 @@ if __name__ == "__main__":
             )
         else:
             print(
-                "%7d%15.8f%15.8f%20.8f%23.8f%8.1f%8.1f%8.1f"
+                "%7d%15.8f%15.8f%22.8f%25.8f%8.1f%8.1f%8.1f"
                 % (
                     i,
                     optResults[0],
                     optResults[1],
                     optResults[2],
-                    optResults[3],
+                    "",
                     mmTime,
                     qmTime,
                     fbTime,

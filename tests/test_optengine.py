@@ -443,7 +443,6 @@ def monkeyForceBalance(command):
             copyfile(os.path.join("ref", f), os.path.join("result", f"opt_{name}", f))
             if f.endswith(".mol2"):
                 copyfile(os.path.join("forcefield", f), f"prev_{f}")
-    print(os.listdir())
 
 def test_optimizeForcefield0(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
