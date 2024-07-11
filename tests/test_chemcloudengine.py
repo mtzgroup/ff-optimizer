@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from qcio import Molecule, ProgramFailure, ProgramInput, Provenance, SinglePointOutput
+from qcio import Structure, ProgramInput, Provenance, ProgramOutput
 from qcparse import parse
 
 from ff_optimizer import qmengine
@@ -28,7 +28,7 @@ def test_init():
     assert "method" not in chemcloudEngine.backupKeywords.keys()
 
 
-def test_loadMoleculeFromXYZ1():
+def test_loadStructureFromXYZ1():
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
     inp.tctemplate = "qmengine/tc.in"
@@ -37,12 +37,12 @@ def test_loadMoleculeFromXYZ1():
     chemcloudEngine = qmengine.ChemcloudEngine(inp)
     chemcloudEngine.specialKeywords["spinmult"] = 3
     chemcloudEngine.specialKeywords["charge"] = 0
-    mol = chemcloudEngine.loadMoleculeFromXYZ("qmengine/1.xyz")
+    mol = chemcloudEngine.loadStructureFromXYZ("qmengine/1.xyz")
     assert mol.multiplicity == 3
     assert mol.charge == 0
 
 
-def test_loadMoleculeFromXYZ2():
+def test_loadStructureFromXYZ2():
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
     inp.tctemplate = "qmengine/tc_wrong.in"
@@ -57,7 +57,7 @@ def test_loadMoleculeFromXYZ2():
     assert passTest
 
 
-def test_loadMoleculeFromXYZ3():
+def test_loadStructureFromXYZ3():
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
     inp.tctemplate = "qmengine/tc.in"
@@ -65,12 +65,12 @@ def test_loadMoleculeFromXYZ3():
     inp.sampledir = Path("")
     chemcloudEngine = qmengine.ChemcloudEngine(inp)
     chemcloudEngine.specialKeywords = {}
-    mol = chemcloudEngine.loadMoleculeFromXYZ("qmengine/1.xyz")
+    mol = chemcloudEngine.loadStructureFromXYZ("qmengine/1.xyz")
     assert mol.multiplicity == 1
     assert mol.charge == 0
 
 
-def test_loadMoleculeFromXYZ4():
+def test_loadStructureFromXYZ4():
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
     inp.tctemplate = "qmengine/tc.in"
@@ -79,7 +79,7 @@ def test_loadMoleculeFromXYZ4():
     chemcloudEngine = qmengine.ChemcloudEngine(inp)
     chemcloudEngine.specialKeywords = {}
     chemcloudEngine.specialKeywords["spinmult"] = 3
-    mol = chemcloudEngine.loadMoleculeFromXYZ("qmengine/1.xyz")
+    mol = chemcloudEngine.loadStructureFromXYZ("qmengine/1.xyz")
     assert mol.multiplicity == 3
     assert mol.charge == 0
 
@@ -95,7 +95,6 @@ def test_initResp():
     assert chemcloudEngine.keywords["resp"] == "yes"
     assert chemcloudEngine.backupKeywords["resp"] == "yes"
 
-
 def test_getQMRefData(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
@@ -110,22 +109,24 @@ def test_getQMRefData(monkeypatch):
     mod = {"method": "hf", "basis": "sto-3g"}
     for i in range(1, 11):
         xyzs.append(f"{i}.xyz")
-        mol = Molecule.open(calcDir / f"{i}.xyz")
+        mol = Structure.open(calcDir / f"{i}.xyz")
         sp = ProgramInput(model=mod, molecule=mol, calctype="energy", extras={"id": i})
         try:
             res = parse(calcDir / f"tc_{i}.out", "terachem")
-            out = SinglePointOutput(input_data=sp, results=res, provenance=prov)
+            out = ProgramOutput(input_data=sp, results=res, provenance=prov, success=True)
+            #out = SinglePointOutput(input_data=sp, results=res, provenance=prov)
         except Exception:
-            out = ProgramFailure(input_data=sp, results={}, provenance=prov)
+            out = ProgramOutput(input_data=sp, provenance=prov, success=False, traceback="Oops")
+            #out = ProgramFailure(input_data=sp, results={}, provenance=prov)
         outputs.append(out)
 
     refIds = ["3", "6", "9"]
     retryOutputs = []
     for i in refIds:
-        mol = Molecule.open(calcDir / f"{i}.xyz")
+        mol = Structure.open(calcDir / f"{i}.xyz")
         sp = ProgramInput(model=mod, molecule=mol, calctype="energy", extras={"id": i})
         res = parse(calcDir / f"tc_{i}_success.out", "terachem")
-        out = SinglePointOutput(input_data=sp, results=res, provenance=prov)
+        out = ProgramOutput(input_data=sp, results=res, provenance=prov, success=True)
         retryOutputs.append(out)
 
     def monkeyComputeBatch(programInputs):
@@ -285,7 +286,7 @@ def test_writeResultResp(monkeypatch):
     chemcloudEngine = qmengine.ChemcloudEngine(inp)
     prov = Provenance(program="terachem")
     mod = {"method": "hf", "basis": "sto-3g"}
-    mol = Molecule.open("qmengine/test/1.xyz")
+    mol = Structure.open("qmengine/test/1.xyz")
     sp = ProgramInput(model=mod, molecule=mol, calctype="energy", extras={"id": 999})
     res = parse("qmengine/test/tc_1.out", "terachem")
     with open("qmengine/test/esp_1.xyz", "r") as f:
@@ -295,8 +296,8 @@ def test_writeResultResp(monkeypatch):
     stdout = "".join(stdoutLines)
     esp = "".join(espLines)
     files = {"esp.xyz": esp}
-    out = SinglePointOutput(
-        input_data=sp, results=res, provenance=prov, files=files, stdout=stdout
+    out = ProgramOutput(
+        input_data=sp, results=res, provenance=prov, files=files, stdout=stdout, success=True
     )
     out.stdout
     chemcloudEngine.writeResult(out)

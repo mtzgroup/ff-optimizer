@@ -5,7 +5,7 @@ from shutil import copyfile, rmtree
 from time import sleep
 
 from chemcloud import CCClient
-from qcio import Molecule, ProgramInput, SinglePointResults
+from qcio import Structure, ProgramInput, SinglePointResults
 from qcparse import parse
 
 from . import utils
@@ -298,14 +298,14 @@ class ChemcloudEngine(QMEngine):
                     keywords[setting[0]] = keyword
         return keywords
 
-    def loadMoleculeFromXYZ(self, xyz):
-        tempMol = Molecule.open(xyz)
+    def loadStructureFromXYZ(self, xyz):
+        tempMol = Structure.open(xyz)
         kwargs = tempMol.model_dump()
         if "charge" in self.specialKeywords.keys():
             kwargs["charge"] = self.specialKeywords["charge"]
         if "spinmult" in self.specialKeywords.keys():
             kwargs["multiplicity"] = self.specialKeywords["spinmult"]
-        mol = Molecule(**kwargs)
+        mol = Structure(**kwargs)
         return mol
 
     def checkSpecialKeywords(self):
@@ -382,7 +382,7 @@ class ChemcloudEngine(QMEngine):
             keywords = self.keywords
         for xyz in sorted(xyzs):
             jobID = utils.getName(xyz)
-            mol = self.loadMoleculeFromXYZ(xyz)
+            mol = self.loadStructureFromXYZ(xyz)
             programInput = ProgramInput(
                 molecule=mol,
                 model=mod,

@@ -4,10 +4,11 @@ from shutil import copyfile
 from textwrap import dedent
 
 from .inputs import Input
-from .utils import readXYZ, writePDB
+from .utils import readXYZ, writePDB, checkForAmber
 
 
 def setup(inp, opt=True, mm=True, qm=True):
+    checkForAmber()
     home = Path(".").absolute()
     inp.optdir.mkdir(parents=True, exist_ok=True)
     inp.sampledir.mkdir(parents=True, exist_ok=True)

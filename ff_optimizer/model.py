@@ -145,7 +145,8 @@ class Model(AbstractModel):
         if not samplePath.exists():
             samplePath.mkdir()
         elif self.restartCycle == -1:
-            rmtree(samplePath)
+            rmtree(samplePath, ignore_errors=True)
+            rmtree(samplePath, ignore_errors=True)
             samplePath.mkdir()
         return samplePath
 
