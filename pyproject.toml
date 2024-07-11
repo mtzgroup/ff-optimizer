@@ -38,6 +38,8 @@ scipy = "<=1.14.0"
 gputil = "^1.4.0"
 qcparse = "^0.6.0"
 matplotlib = "<=3.9.1"
+parmed = "^4.2.2"
+qcio = "^0.10.1"
 
 
 [tool.poetry.group.dev.dependencies]
