@@ -10,6 +10,9 @@ from .test_optengine import cleanOptDir, monkeyForceBalance
 
 home = Path(__file__).parent.absolute()
 
+def rmdir(path):
+    rmtree(path, ignore_errors=True)
+    
 
 class FakeModel:
     def __init__(self, args):
@@ -113,7 +116,7 @@ def test_doMMsampling(monkeypatch):
     args = getDefaults()
     path = os.path.join("2_sampling", "3_cycle_3")
     if os.path.isdir(path):
-        rmtree(path)
+        rmdir(path)
     monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
@@ -129,7 +132,7 @@ def test_doMMsampling(monkeypatch):
         testLines = f.readlines()
     with open(os.path.join("1_opt", "result", "opt_2", "sol.frcmod"), "r") as f:
         refLines = f.readlines()
-    rmtree(path)
+    rmdir(path)
     assert isFile
     assert isDir
     assert m.mmEngine.didRestart
@@ -141,14 +144,14 @@ def test_doMMsamplingNoRestart(monkeypatch):
     args = getDefaults()
     path = os.path.join("2_sampling", "3_cycle_3")
     if os.path.isdir(path):
-        rmtree(path)
+        rmdir(path)
     monkeypatch.setattr(model.Model, "initializeOptEngine", monkeyInitOpt)
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
     m = model.Model(args)
     m.restartCycle = -1
     m.doMMSampling(3)
-    rmtree(path)
+    rmdir(path)
     assert not m.mmEngine.didRestart
 
 
@@ -192,7 +195,7 @@ def clean():
     if os.path.isdir("targets"):
         os.chdir("targets")
         for f in os.listdir():
-            rmtree(f)
+            rmdir(f)
         os.chdir(os.path.join("..", ".."))
     else:
         os.chdir("..")
@@ -323,7 +326,7 @@ def test_createTCData(monkeypatch):
         hasFiles = False
     if not (target / "all.mdcrd").is_file():
         hasFiles = False
-    rmtree(target.parent.absolute())
+    rmdir(target.parent.absolute())
     assert hasFiles
 
 
@@ -336,21 +339,21 @@ def test_copyLeapFiles(monkeypatch):
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
     m = model.Model(args)
     dest = Path("test1")
-    dest.mkdir()
+    dest.mkdir(exist_ok=True)
     m.copyLeapFiles(dest)
     test1 = True
     for f in ["setup.leap", "conf.pdb", "setup_valid_initial.leap"]:
         if not (dest / f).is_file():
             test1 = False
-    rmtree(dest)
+    rmdir(dest)
     dest = Path("test2")
-    dest.mkdir()
+    dest.mkdir(exist_ok=True)
     m.copyLeapFiles(dest, False)
     test2 = True
     for f in ["setup.leap", "conf.pdb"]:
         if not (dest / f).is_file():
             test2 = False
-    rmtree(dest)
+    rmdir(dest)
     assert test1
     assert test2
 
@@ -364,13 +367,13 @@ def test_copyLeapFiles2(monkeypatch):
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
     m = model.Model(args)
     dest = Path("test1")
-    dest.mkdir()
+    dest.mkdir(exist_ok=True)
     m.copyLeapFiles(dest)
     test = True
     for f in ["setup.leap", "conf.pdb"]:
         if not (dest / f).is_file():
             test = False
-    rmtree(dest)
+    rmdir(dest)
     assert test
 
 
@@ -405,13 +408,13 @@ def test_copyFFFiles(monkeypatch):
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
     m = model.Model(args)
     test = Path("test")
-    test.mkdir()
+    test.mkdir(exist_ok=True)
     m.copyFFFiles(1, test)
     copied = True
     for f in ["test.frcmod", "test.mol2"]:
         if not (test / f).is_file():
             copied = False
-    rmtree(test)
+    rmdir(test)
     assert copied
 
 
@@ -423,7 +426,7 @@ def test_copySamplingFiles(monkeypatch):
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
     m = model.Model(args)
     test = Path("test")
-    test.mkdir()
+    test.mkdir(exist_ok=True)
     m.copySamplingFiles(2, test)
     copied = True
     for f in [
@@ -436,7 +439,7 @@ def test_copySamplingFiles(monkeypatch):
     ]:
         if not (test / f).is_file():
             copied = False
-    rmtree(test)
+    rmdir(test)
     assert copied
 
 
@@ -455,7 +458,7 @@ def test_makeFBTargets(monkeypatch):
     for f in testFolders:
         if not (path / f).is_dir():
             isMade = False
-    rmtree(path)
+    rmdir(path)
     assert isMade
 
 
@@ -477,7 +480,7 @@ def test_copyQMResults(monkeypatch):
                 name = g.readline().split()[0]
             if name != d.name:
                 copiedCorrectly = False
-    rmtree(m.optdir / "targets")
+    rmdir(m.optdir / "targets")
     assert copiedCorrectly
 
 
@@ -510,12 +513,15 @@ def monkeyInitOptEngine(self, inp):
     self.writeValidInitialLeap()
     self.copyFiles()
 
+def monkeyMDFiles(self, inp):
+    inp.heatCounter = 2
 
 def test_initialCycle1(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOptEngine)
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
     monkeypatch.setattr(model, "convertTCtoFB", monkeyConvert)
+    monkeypatch.setattr(model.Model, "getMDFiles", monkeyMDFiles)
     os.chdir(home / "model" / "initial1")
     inp = getDefaults()
     inp.validinitial = True
@@ -531,7 +537,7 @@ def test_initialCycle1(monkeypatch):
     if opt:
         os.remove(m.optdir / "opt_0.out")
     cleanOptDir(m.optdir, True)
-    rmtree(m.optdir / "targets")
+    rmdir(m.optdir / "targets")
     assert copied
     assert opt
 
@@ -540,6 +546,7 @@ def test_initialCycle2(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOptEngine)
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitMM)
+    monkeypatch.setattr(model.Model, "getMDFiles", monkeyMDFiles)
     os.chdir(home / "model" / "initial2")
     inp = getDefaults()
     inp.initialtraining = False

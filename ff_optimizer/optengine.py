@@ -6,7 +6,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import resp_prior
+from . import resp_prior, utils
 
 mpl.use("Agg")
 
@@ -63,6 +63,7 @@ class OptEngine:
             )
 
     def testTleap(self):
+        utils.checkForAmber()
         os.chdir(self.optdir)
         os.system(f"tleap -f {self.leap} > leap.out")
         self.prmtop = None

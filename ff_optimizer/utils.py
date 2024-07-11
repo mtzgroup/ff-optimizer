@@ -6,6 +6,15 @@ import yaml
 from scipy.io import netcdf_file
 
 
+def checkForAmber(raiseException=True):
+    value = os.getenv("AMBERHOME")
+    if value is None:
+        if raiseException:
+            raise RuntimeError("Amber is not available in the environment path!")
+        print("No Amber available!")
+        return False
+    return True
+
 def convertTCtoFB(
     tcout, coors, stride, start=None, end=None, qdata="qdata.txt", mdcrd="all.mdcrd"
 ):
