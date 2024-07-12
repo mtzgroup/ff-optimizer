@@ -4,7 +4,7 @@ import sys
 from textwrap import dedent
 from time import perf_counter
 
-from ff_optimizer import active_learning, inputs, model
+from ff_optimizer import active_learning, inputs, model, setup
 
 
 def printHelp():
@@ -220,6 +220,8 @@ if __name__ == "__main__":
 
     inputFile = sys.argv[1]
     inp = inputs.Input.fromYaml(inputFile)
+    if inp.easymode is not None:
+        inp = setup.setup(inp)
     ffModel = createModel(inp)
     restartCycle = getRestartCycle(inp)
 
