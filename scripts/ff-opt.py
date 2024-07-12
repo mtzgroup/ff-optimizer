@@ -231,13 +231,13 @@ if __name__ == "__main__":
 
     # Begin sampling/optimization cycling
     print(
-        "%7s%15s%15s%22s%25s%8s%8s%8s"
+        "%7s%15s%15s%25s%30s%8s%8s%8s"
         % (
             "Epoch",
             "Training",
             "Validation",
-            "Validation change / %",
-            "Validation, initial params",
+            "Validation change %",
+            "Validation on initial params",
             "MM time",
             "QM time",
             "FB time",
@@ -264,7 +264,7 @@ if __name__ == "__main__":
 
         if inp.validinitial:
             print(
-                "%7d%15.8f%15.8f%22.8f%25.8f%8.1f%8.1f%8.1f"
+                "%7d%15.8f%15.8f%25.8f%30.8f%8.1f%8.1f%8.1f"
                 % (
                     i,
                     optResults[0],
@@ -278,7 +278,7 @@ if __name__ == "__main__":
             )
         else:
             print(
-                "%7d%15.8f%15.8f%22.8f%25.8f%8.1f%8.1f%8.1f"
+                "%7d%15.8f%15.8f%25.8f%30.8f%8.1f%8.1f%8.1f"
                 % (
                     i,
                     optResults[0],

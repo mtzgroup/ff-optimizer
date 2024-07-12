@@ -164,7 +164,3 @@ class Input:
             raise ValueError("Must use at least one validation set (for now)")
         if self.activelearning < 1:
             raise ValueError("Must have at least one model")
-        if self.maxcycles < 0:
-            raise ValueError(
-                "So you just don't want me to do anything? Check maxcycles."
-            )

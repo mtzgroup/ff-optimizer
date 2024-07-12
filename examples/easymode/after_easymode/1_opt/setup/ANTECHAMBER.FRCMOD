@@ -1,0 +1,25 @@
+Remark line goes here
+MASS
+oh 16.000        0.465
+ho 1.008         0.135
+ho 1.008         0.135
+
+BOND
+ho-oh  535.51   0.973
+ho-oh  535.51   0.973
+
+ANGLE
+ho-oh-ho   55.890     106.570
+ho-oh-ho   55.890     106.570
+
+DIHE
+
+IMPROPER
+
+NONBON
+  oh          1.8200  0.0930
+  ho          0.3019  0.0047
+  ho          0.3019  0.0047
+
+
+
