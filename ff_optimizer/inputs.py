@@ -107,12 +107,13 @@ class Input:
         self.sampledir = Path(self.sampledir).absolute()
 
     def checkFiles(self):
+        dynamicsFiles = [self.coors, self.conformers]
         if self.initialtraining:
-            dynamicsFiles = [self.tcout, self.coors, self.conformers]
-            checkDirectory(self.dynamicsdir, dynamicsFiles)
-        optFiles = ["conf.pdb", "setup.leap", "opt_0.in", "valid_0.in"]
+            dynamicsFiles += self.tcout
+        checkDirectory(self.dynamicsdir, dynamicsFiles)
+        optFiles = ["conf.pdb", "setup.leap", self.opt0, self.valid0]
         checkDirectory(self.optdir, optFiles)
-        sampleFiles = ["tc_template.in", "tc_template_backup.in"]
+        sampleFiles = [self.tctemplate, self.tctemplate_backup]
         if self.qmengine == "slurm":
             sampleFiles.append(self.sbatchtemplate)
         checkDirectory(self.sampledir, sampleFiles)
