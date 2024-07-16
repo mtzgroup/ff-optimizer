@@ -1,0 +1,9 @@
+#source leaprc.water.opc # water model and ions
+source leaprc.water.opc3
+loadamberparams bicarb.frcmod
+CO3 = loadmol2 bicarb.mol2
+cluster = loadpdb conf.pdb
+check cluster
+saveamberparm cluster bicarb_cluster.prmtop cluster.inpcrd
+quit
+

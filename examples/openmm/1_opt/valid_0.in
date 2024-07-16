@@ -1,0 +1,6 @@
+$options
+jobtype             single
+forcefield          bicarb.frcmod bicarb.mol2
+backup              false
+$end
+

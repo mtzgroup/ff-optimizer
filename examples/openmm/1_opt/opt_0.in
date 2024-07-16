@@ -1,0 +1,29 @@
+$options
+jobtype             NewtonRaphson
+forcefield          bicarb.frcmod bicarb.mol2
+penalty_additive    0.01
+penalty_type        L2
+verbose_options     true
+backup              false
+constrain_charge    true
+priors
+BONDSK                               : 4.0e+02
+BONDSK/c-oh                          : 1.0e+01
+BONDSB                               : 1.0e-02
+ANGLESK                              : 5.0e+01
+ANGLESB                              : 1.0e+00
+PDIHS1K                              : 1.0e+01
+PDIHS2K                              : 1.0e+01
+PDIHS3K                              : 2.0e+00
+IDIHSK                               : 2.0e+01
+VDWS                                 : 1.0e-02
+VDWT                                 : 4.0e-01
+COUL                                 : 2.0e+00
+/priors
+$end
+
+$target
+type                abinitio_amber
+name                dynamics
+amber_leapcmd       setup.leap
+$end
