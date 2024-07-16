@@ -1,0 +1,9 @@
+{
+"restart": True,
+"mmengine": "amber",
+"qmengine": "slurm",
+"maxcycles": 25,
+"dynamicsdir": "0_dynamics" ,
+"split": 20000,
+"start": 10000
+}

@@ -76,7 +76,9 @@ def getCharge(optdir):
                     inAtoms = False
             if "@<TRIPOS>ATOM" in line:
                 inAtoms = True
-    print(charge)
+    print("Total charge in mol2: ", charge)
+    if abs(charge) > 1e-6:
+        print("WARNING: charges do not sum to 0, you may want to edit {mol2} in {optdir.name}")
     return round(charge)
 
 

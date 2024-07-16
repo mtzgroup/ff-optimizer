@@ -1,0 +1,4 @@
+mmengine: openmm
+trainmdin: md.py
+validmdin: md.py
+tcout: md.out

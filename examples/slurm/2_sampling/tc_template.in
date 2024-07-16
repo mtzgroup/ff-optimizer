@@ -1,0 +1,7 @@
+basis         6-31gss
+method        b3lyp
+charge        0
+coordinates   XXX.pdb
+run           gradient
+dftd          d3
+spinmult      1

@@ -1,0 +1,9 @@
+basis         aug-cc-pvdz
+method        wb97x
+charge        -1
+run           gradient
+dftd          d3
+threall       1.0e-14
+diismaxvecs   40
+maxit         200
+
