@@ -1,5 +1,5 @@
 {
   maxcycles: 30,
-  setuponly: True,
-  easymode: "h.xyz",
+  dryrun: True,
+  skipchecks: True,
 }

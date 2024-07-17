@@ -52,7 +52,6 @@ def test_post_init():
     os.chdir(home / "inputs")
     inp = inputs.Input.fromYaml("input.yaml")
     assert inp.maxcycles == -1
-    assert inp.easymode == "h.xyz"
 
 
 # Should be more tests here?

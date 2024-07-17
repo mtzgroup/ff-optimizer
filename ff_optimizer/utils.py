@@ -176,16 +176,19 @@ def readPDB(pdb: str):
 
 
 def readXYZ(xyz, readSymbols=False):
-    if readSymbols:
-        symbols = np.loadtxt(xyz, skiprows=2, usecols=(0), dtype=str)
-        geometry = np.loadtxt(
-            xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
-        ).flatten()
-        return geometry, symbols
-    else:
-        return np.loadtxt(
-            xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
-        ).flatten()
+    try:
+        if readSymbols:
+            symbols = np.loadtxt(xyz, skiprows=2, usecols=(0), dtype=str)
+            geometry = np.loadtxt(
+                xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
+            ).flatten()
+            return geometry, symbols
+        else:
+            return np.loadtxt(
+                xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
+            ).flatten()
+    except:
+        raise RuntimeError(f"XYZ file {xyz} is formatted incorrectly!")
 
 
 def writeXYZ(geometry: np.array, symbols: list, dest: str):

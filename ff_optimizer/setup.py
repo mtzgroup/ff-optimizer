@@ -4,12 +4,15 @@ from shutil import copyfile
 from textwrap import dedent
 
 from .inputs import Input
-from .utils import readXYZ, writePDB, checkForAmber
+from .utils import readXYZ, writePDB, checkForAmber, readXYZ
 
 
-def setup(inp, opt=True, mm=True, qm=True):
+def setup(xyz, opt=True, mm=True, qm=True):
+    xyz = Path(xyz)
+    readXYZ(xyz) # easy way to check that xyz is formatted correctly and exists
     checkForAmber()
     home = Path(".").absolute()
+    inp = Input(**{"skipchecks": True})
     inp.optdir.mkdir(parents=True, exist_ok=True)
     inp.sampledir.mkdir(parents=True, exist_ok=True)
     # This setup code is meant for amber and chemcloud
@@ -17,7 +20,8 @@ def setup(inp, opt=True, mm=True, qm=True):
     inp.mmengine = "amber"
     inp.qmengine = "chemcloud"
     inp.dynamicsdir = "."
-    inp.coors = inp.easymode
+    inp.coors = xyz
+    inp.conformers = inp.coors
     if opt:
         setupOpt(inp)
     if mm:
@@ -25,15 +29,14 @@ def setup(inp, opt=True, mm=True, qm=True):
     if qm:
         setupQM(inp)
     # when we initialize the new input, it'll check for files and folder
-    inp.easymode = None
     os.chdir(home)
-    inp.toYaml("new_input.yaml")
-    newInp = Input.fromYaml("new_input.yaml")
+    inp.toYaml("input.yaml")
+    newInp = Input.fromYaml("input.yaml")
     return newInp
 
 
 def setupOpt(inp):
-    xyz = inp.easymode
+    xyz = inp.coors
     setupDir = inp.optdir / "setup"
     print(f"Making FF setup directory {str(setupDir)}")
     setupDir.mkdir(exist_ok=True)
@@ -77,6 +80,10 @@ def getCharge(optdir):
             if "@<TRIPOS>ATOM" in line:
                 inAtoms = True
     print(charge)
+    diff = charge - round(charge)
+    if abs(diff) > 1e-6:
+        print(f"WARNING: residual charge of %13.9f in mol2 file" % diff)
+        print("Consider adjusting a charge by %13.9f to cancel it" % -diff)
     return round(charge)
 
 
@@ -164,7 +171,7 @@ def writeMDFiles():
 
 
 def setupFF(xyz, optdir):
-    name = xyz.replace(".xyz", "")
+    name = xyz.name.replace(".xyz", "")
     resname = name[:3].upper()
     coords, atoms = readXYZ(xyz, True)
     pdb = name + ".pdb"
