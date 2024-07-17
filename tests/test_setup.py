@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from shutil import copyfile, rmtree
 
-from ff_optimizer import inputs, model, setup
+from ff_optimizer import setup
 
 from . import checkUtils
 from .test_inputs import getDefaults
@@ -83,13 +83,14 @@ def test_editFrcmod():
     os.remove("test.frcmod")
     assert test
 
+
 def test_setup():
     os.chdir(os.path.dirname(__file__))
     os.chdir("setup")
     os.chdir("test")
     # if the new input file and model get initialized and pass all their
     # internal checks, then we pass this test as well
-    newInp = setup.setup("wat.xyz")
+    setup.setup("wat.xyz")
     rmtree("1_opt")
     rmtree("2_sampling")
     os.remove("new_input.yaml")

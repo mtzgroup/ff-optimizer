@@ -1,27 +1,29 @@
 #!/usr/bin/env python
 
-import sys
-import typer
+from dataclasses import fields
 from textwrap import dedent
 from time import perf_counter
 from typing import get_type_hints
-from dataclasses import fields
+
+import typer
 
 from ff_optimizer import active_learning, inputs, model
 from ff_optimizer import setup as st
 
 app = typer.Typer()
 
+
 def print_info(cls=inputs.Input):
     type_hints = get_type_hints(cls)
     for field in fields(cls):
         fname = field.name
         ftype = type_hints.get(fname, None)
-        ftypestr = ftype.__name__ if ftype else 'None'
+        ftypestr = ftype.__name__ if ftype else "None"
         fdefault = field.default if field.default != field.default_factory else None
         fcomment = field.metadata.get("comment", "")
         print(f"{fname}: {ftypestr}, Default = {str(fdefault)}")
         print(fcomment.strip("\n"))
+
 
 @app.command()
 def print_manual():
@@ -85,9 +87,11 @@ def getRestartCycle(inp):
         restartCycle = -1
     return restartCycle
 
+
 @app.command()
 def setup(xyz: str):
     st.setup(xyz)
+
 
 @app.command()
 def optimize(input_file: str):

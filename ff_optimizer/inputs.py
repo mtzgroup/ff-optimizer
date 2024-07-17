@@ -2,8 +2,8 @@ import errno
 from dataclasses import dataclass, field
 from os import strerror
 from pathlib import Path
+
 import yaml
-from textwrap import dedent
 
 
 def checkForFile(f, isFile=True):
@@ -27,73 +27,105 @@ def checkDirectory(directory, fs):
 @dataclass
 class Input:
     # General parameters
-    dynamicsdir: str = field(default="0_dynamics", metadata={"comment":
-        """
+    dynamicsdir: str = field(
+        default="0_dynamics",
+        metadata={
+            "comment": """
         Specifies the directory containing QM energies,
         gradients, and coordinates from an MD trajectory.
         """
-    } )
-    optdir: str = field(default="1_opt", metadata={"comment":
-        """
+        },
+    )
+    optdir: str = field(
+        default="1_opt",
+        metadata={
+            "comment": """
         Specifies the directory where ForceBalance optimization will
         be run; contains FB inputs and initial parameters.
         """
-    } )
-    sampledir: str = field(default="2_sampling", metadata={"comment":
-        """
+        },
+    )
+    sampledir: str = field(
+        default="2_sampling",
+        metadata={
+            "comment": """
         Specifies the directory where MM sampling and QM 
         calculations will be run; contains MM and QM inputs.
         """
-    } )
-    coors: str = field(default="coors.xyz", metadata={"comment":
-        """
+        },
+    )
+    coors: str = field(
+        default="coors.xyz",
+        metadata={
+            "comment": """
         Specifies the name of the coordinates file in dynamicsdir.
         """
-    } )
-    start: int = field(default=None, metadata={"comment":
-        """
+        },
+    )
+    start: int = field(
+        default=None,
+        metadata={
+            "comment": """
         Specifies the first frame of the coors file to sample from
         to create the initial dataset. 0-indexed. If not provided, 
         default is the first frame.
         """
-    } )
-    end: int = field(default=None, metadata={"comment":
-        """
+        },
+    )
+    end: int = field(
+        default=None,
+        metadata={
+            "comment": """
         Specifies the last frame of the coors file to sample from. 
         0-indexed. If not provided, defaults to last frame in coors file.
         """
-    } )
-    split: int = field(default=None, metadata={"comment":
-        """
+        },
+    )
+    split: int = field(
+        default=None,
+        metadata={
+            "comment": """
         Divides the coors file in two at the provided frame number.
         If provided, initial coordinates for MM MD for the training
         set will come from before split, and ICs for the validation
         set will come from after. 0-indexed.
         """
-    } )
-    resp: float = field(default=0, metadata={"comment":
-        """
+        },
+    )
+    resp: float = field(
+        default=0,
+        metadata={
+            "comment": """
         Specifies the weight of RESP fits for the charges in the
         objective function. If nonzero, QM calculations will
         include RESP fits, and parameter optimization will attempt
         to match the ESP in those QM calculations. Can severely
         slow down force field fitting.
         """
-    } )
-    nvalids: int = field(default=1, metadata={"comment":
-        """
+        },
+    )
+    nvalids: int = field(
+        default=1,
+        metadata={
+            "comment": """
         Specifies how many validation sets to produce and evaluate.
         """
-    } )
-    restart: bool = field(default=False, metadata={"comment":
-        """
+        },
+    )
+    restart: bool = field(
+        default=False,
+        metadata={
+            "comment": """
         Specifies whether or not to restart the force field
         optimization. If True, it will automatically determine
         where to restart.
         """
-    } )
-    activelearning: int = field(default=1, metadata={"comment":
-        """
+        },
+    )
+    activelearning: int = field(
+        default=1,
+        metadata={
+            "comment": """
         Specifies how many different models to train. If
         activelearning > 1, then an active learning procedure is
         used to generate the new data points. In the MM MD step,
@@ -106,15 +138,21 @@ class Input:
         training set for the model which did the MM MD, and a
         validation set for the other models.
         """
-    } )
-    maxcycles: int = field(default=30, metadata={"comment":
-        """
+        },
+    )
+    maxcycles: int = field(
+        default=30,
+        metadata={
+            "comment": """
         Specifies how many cycles to run before stopping.
         """
-    } )
+        },
+    )
     # MM-specific parameters
-    mmengine: str = field(default="amber", metadata={"comment":
-        """
+    mmengine: str = field(
+        default="amber",
+        metadata={
+            "comment": """
          specifies which software will run MM MD. Options are
         "amber" and "openmm".
         If "amber", provided MD input files must be valid inputs
@@ -132,34 +170,49 @@ class Input:
             be passed to the QM engine to augment the dataset.
         An example can be found in examples/openmm/2_sampling.
         """
-    } )
-    trainmdin: str = field(default="md.in", metadata={"comment":
-        """
+        },
+    )
+    trainmdin: str = field(
+        default="md.in",
+        metadata={
+            "comment": """
         Specifies the input file for MM MD. This input will be
         used to generate the training set.
         """
-    } )
-    validmdin: str = field(default="md.in", metadata={"comment":
-        """
+        },
+    )
+    validmdin: str = field(
+        default="md.in",
+        metadata={
+            "comment": """
         Specifies the input file for MM MD. This input will be
         used to generate validation sets.
         """
-    } )
-    conformers: str = field(default=None, metadata={"comment":
-        """
+        },
+    )
+    conformers: str = field(
+        default=None,
+        metadata={
+            "comment": """
         Specifies the name of a conformers coordinates file in 
         dynamicsdir. If provided, initial coordinates for MM sampling 
         will be drawn from this file instead of the coordinates file.
         """
-    } )
-    conformersperset: int = field(default=1, metadata={"comment":
-        """
+        },
+    )
+    conformersperset: int = field(
+        default=1,
+        metadata={
+            "comment": """
         Specifies how many unique MM MD trajectories to run per dataset.
         """
-    } )
+        },
+    )
     # QM-specific parameters
-    qmengine: str = field(default="chemcloud", metadata={"comment":
-        """
+    qmengine: str = field(
+        default="chemcloud",
+        metadata={
+            "comment": """
         Specifies which qmengine to use to run QM calculations.
         Options are "chemcloud", "slurm", and "debug".
         If "chemcloud", options are read from a valid TeraChem input
@@ -169,10 +222,13 @@ class Input:
         SLURM scheduler.                                            
         If "debug", TeraChem will be run locally, one job at a time.
         """
-    } )
+        },
+    )
     # opt-specific parameters
-    resppriors: int = field(default=0, metadata={"comment":
-        """
+    resppriors: int = field(
+        default=0,
+        metadata={
+            "comment": """
         Specifies an alternative to using RESP calculations
         without incorporating the RESP fit into the objective
         function. Instead, a prior is calculated for each atomic
@@ -184,104 +240,149 @@ class Input:
         If 2, the width will be determined based on the RESP and ESP
         charges for that atom in the training set.
         """
-    } )
-    stride: int = field(default=50, metadata={"comment":
-        """
+        },
+    )
+    stride: int = field(
+        default=50,
+        metadata={
+            "comment": """
         Specifies stride in sampling initial training data from the
         QM trajectory in coors.
         """
-    } )
-    tcout: str = field(default="tc.out", metadata={"comment":
-        """
+        },
+    )
+    tcout: str = field(
+        default="tc.out",
+        metadata={
+            "comment": """
         Specifies TeraChem output file with energies and gradients
         from the QM trajectory in coors.
         """
-    } )
-    initialtraining: bool = field(default=True, metadata={"comment":
-        """
+        },
+    )
+    initialtraining: bool = field(
+        default=True,
+        metadata={
+            "comment": """
         Specifies whether or not to sample initial training data from 
         a QM trajectory and optimize parameters before beginning MM 
         sampling in the first iteration. If False, an xyz file
         must still be provided in dynamicsdir as starting coordinates
         for MM sampling, but tcout is not used.
         """
-    } )
-    validinitial: bool = field(default=False, metadata={"comment":
-        """
+        },
+    )
+    validinitial: bool = field(
+        default=False,
+        metadata={
+            "comment": """
         If true, compute validation set performance on the initial
         parameters at every iteration.
         """
-    } )
-    dryrun: bool = field(default=False, metadata={"comment":
-        """
+        },
+    )
+    dryrun: bool = field(
+        default=False,
+        metadata={
+            "comment": """
         If true, check all folders and files, initialize everything,
         then stop before running any calculations.
         """
-    } )
-    skipchecks: bool = field(default=False, metadata={"comment":
-        """
+        },
+    )
+    skipchecks: bool = field(
+        default=False,
+        metadata={
+            "comment": """
         If true, skip checking for files and folders. Useful for
         debugging or if you just want to initialize an Input full
         of defaults for something. If you do this, you'll need to 
         call Input.__post_init__() later.
         """
-    } )
+        },
+    )
     # there's no reason to change these, but it's useful to have them accessible
     # from this class)
-    tctemplate: str = field(default="tc_template.in", metadata={"comment":
-        """
+    tctemplate: str = field(
+        default="tc_template.in",
+        metadata={
+            "comment": """
         Name of template TeraChem input file in sampledir. Should contain
         all relevant keywords, but ff-opt will take care of the 
         coordinates keyword for you.
         """
-    } )
-    tctemplate_backup: str = field(default="tc_template_backup.in", metadata={"comment":
-        """
+        },
+    )
+    tctemplate_backup: str = field(
+        default="tc_template_backup.in",
+        metadata={
+            "comment": """
         Name of backup template TeraChem input file in sampledir. Only
         used if the calculation with tctemplate fails first.
         """
-    } )
-    sbatchtemplate: str = field(default="sbatch_template.sh", metadata={"comment":
-        """
+        },
+    )
+    sbatchtemplate: str = field(
+        default="sbatch_template.sh",
+        metadata={
+            "comment": """
         Name of slurm sbatch template submission script. Should contain
         all relevant SBATCH options, as well as a script which runs
         the TeraChem input files. See examples/slurm/2_sampling for an
         example.
         """
-    } )
-    opt0: str = field(default="opt_0.in", metadata={"comment":
-        """
+        },
+    )
+    opt0: str = field(
+        default="opt_0.in",
+        metadata={
+            "comment": """
         Name of the template ForceBalance parameter optimization 
         input file. Should contain all relevant keywords and an 
         example target section which ff-opt will use as targets are added.
         """
-    } )
-    valid0: str = field(default="valid_0.in", metadata={"comment":
-        """
+        },
+    )
+    valid0: str = field(
+        default="valid_0.in",
+        metadata={
+            "comment": """
         Name of the template ForceBalance validation set evaluation
         input file. An example target section is unnecessary here.
         """
-    } )
-    batchsize: int = field(default=10, metadata={"comment":
-        """
+        },
+    )
+    batchsize: int = field(
+        default=10,
+        metadata={
+            "comment": """
         Number of calculations to bundle together to send to a 
         ChemCloud server. You shouldn't mess with this number, except
         to decrease it if you're running a very large system.
         """
-    } )
-    retries: int = field(default=3, metadata={"comment":
-        """
+        },
+    )
+    retries: int = field(
+        default=3,
+        metadata={
+            "comment": """
         Number of times failed calculations on ChemCloud are retried.
         """
-    } )
-    patience: int = field(default=5, metadata={"comment":
-        """
+        },
+    )
+    patience: int = field(
+        default=5,
+        metadata={
+            "comment": """
         Number of consecutive iterations where the convergence criterion 
         must be satisfied before ending the calculation early. 
         """
-    } )
-    cutoff: float = field(default=-1.0, metadata={"comment":
-        """
+        },
+    )
+    cutoff: float = field(
+        default=-1.0,
+        metadata={
+            "comment": """
         Cutoff for percentage change in validation criterion:
         If (\Chi_V(r_j, \Theta_j) - \Chi_V(r_j, \Theta_{j-1}) / 
             \Chi_V(r_j, \Theta_j) * 100 > cutoff, then we enter the
@@ -289,7 +390,8 @@ class Input:
         if the force field is improving, so cutoff should always be 
         a small, negative number.
         """
-    } )
+        },
+    )
 
     @classmethod
     def fromYaml(cls, inputs):
@@ -384,4 +486,3 @@ class Input:
             raise ValueError(
                 "So you just don't want me to do anything? Check maxcycles."
             )
-

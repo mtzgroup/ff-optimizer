@@ -10,9 +10,10 @@ from .test_optengine import cleanOptDir, monkeyForceBalance
 
 home = Path(__file__).parent.absolute()
 
+
 def rmdir(path):
     rmtree(path, ignore_errors=True)
-    
+
 
 class FakeModel:
     def __init__(self, args):
@@ -513,8 +514,10 @@ def monkeyInitOptEngine(self, inp):
     self.writeValidInitialLeap()
     self.copyFiles()
 
+
 def monkeyMDFiles(self, inp):
     inp.heatCounter = 2
+
 
 def test_initialCycle1(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOptEngine)

@@ -4,12 +4,12 @@ from shutil import copyfile
 from textwrap import dedent
 
 from .inputs import Input
-from .utils import readXYZ, writePDB, checkForAmber, readXYZ
+from .utils import checkForAmber, readXYZ, writePDB
 
 
 def setup(xyz, opt=True, mm=True, qm=True):
     xyz = Path(xyz)
-    readXYZ(xyz) # easy way to check that xyz is formatted correctly and exists
+    readXYZ(xyz)  # easy way to check that xyz is formatted correctly and exists
     checkForAmber()
     home = Path(".").absolute()
     inp = Input(**{"skipchecks": True})

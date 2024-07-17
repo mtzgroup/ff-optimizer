@@ -5,7 +5,7 @@ from shutil import copyfile, rmtree
 from time import sleep
 
 from chemcloud import CCClient
-from qcio import Structure, ProgramInput, SinglePointResults
+from qcio import ProgramInput, SinglePointResults, Structure
 from qcparse import parse
 
 from . import utils

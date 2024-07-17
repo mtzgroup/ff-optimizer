@@ -15,6 +15,7 @@ def checkForAmber(raiseException=True):
         return False
     return True
 
+
 def convertTCtoFB(
     tcout, coors, stride, start=None, end=None, qdata="qdata.txt", mdcrd="all.mdcrd"
 ):

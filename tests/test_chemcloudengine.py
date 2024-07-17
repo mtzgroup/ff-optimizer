@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from qcio import Structure, ProgramInput, Provenance, ProgramOutput
+from qcio import ProgramInput, ProgramOutput, Provenance, Structure
 from qcparse import parse
 
 from ff_optimizer import qmengine
@@ -95,6 +95,7 @@ def test_initResp():
     assert chemcloudEngine.keywords["resp"] == "yes"
     assert chemcloudEngine.backupKeywords["resp"] == "yes"
 
+
 def test_getQMRefData(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
@@ -113,11 +114,15 @@ def test_getQMRefData(monkeypatch):
         sp = ProgramInput(model=mod, molecule=mol, calctype="energy", extras={"id": i})
         try:
             res = parse(calcDir / f"tc_{i}.out", "terachem")
-            out = ProgramOutput(input_data=sp, results=res, provenance=prov, success=True)
-            #out = SinglePointOutput(input_data=sp, results=res, provenance=prov)
+            out = ProgramOutput(
+                input_data=sp, results=res, provenance=prov, success=True
+            )
+            # out = SinglePointOutput(input_data=sp, results=res, provenance=prov)
         except Exception:
-            out = ProgramOutput(input_data=sp, provenance=prov, success=False, traceback="Oops")
-            #out = ProgramFailure(input_data=sp, results={}, provenance=prov)
+            out = ProgramOutput(
+                input_data=sp, provenance=prov, success=False, traceback="Oops"
+            )
+            # out = ProgramFailure(input_data=sp, results={}, provenance=prov)
         outputs.append(out)
 
     refIds = ["3", "6", "9"]
@@ -297,7 +302,12 @@ def test_writeResultResp(monkeypatch):
     esp = "".join(espLines)
     files = {"esp.xyz": esp}
     out = ProgramOutput(
-        input_data=sp, results=res, provenance=prov, files=files, stdout=stdout, success=True
+        input_data=sp,
+        results=res,
+        provenance=prov,
+        files=files,
+        stdout=stdout,
+        success=True,
     )
     out.stdout
     chemcloudEngine.writeResult(out)
