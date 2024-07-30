@@ -73,12 +73,12 @@ class QMEngine:
                 f.write(f"JOB {i+1}\n")
                 coordLine = "COORDS "
                 for coord in coords[i]:
-                    coordLine = coordLine + str(round(float(coord), 3)) + " "
+                    coordLine = coordLine + str(round(float(coord), 5)) + " "
                 gradLine = "FORCES "
                 for grad in grads[i]:
-                    gradLine = gradLine + str(round(float(grad), 5)) + " "
+                    gradLine = gradLine + str(round(float(grad), 8)) + " "
                 f.write(coordLine + "\n")
-                f.write(f"ENERGY {str(round(float(energies[i]),6))}\n")
+                f.write(f"ENERGY {str(round(float(energies[i]),7))}\n")
                 f.write(gradLine + "\n")
                 if espXYZs is not None:
                     espXYZLine = "ESPXYZ "
