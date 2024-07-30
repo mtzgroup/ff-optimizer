@@ -7,6 +7,7 @@ from time import sleep
 from chemcloud import CCClient
 from qcio import ProgramInput, SinglePointResults, Structure
 from qcparse import parse
+from pathlib import Path
 
 from . import utils
 
@@ -216,7 +217,7 @@ class SlurmEngine(QMEngine):
             name = xyz.name.split(".")[0]
             super().writeInputFile(self.inputSettings, xyz, f"tc_{name}.in")
             super().writeInputFile(
-                self.backupInputSettings, xyz, f"tc_{name}_backup.in"
+                self.backupInputSettings, xyz, f"tc_backup_{name}.in"
             )
             self.writeSbatchFile(name, f"sbatch_{name}.sh")
             job = self.slurmCommand(["sbatch", f"sbatch_{name}.sh"])
@@ -227,7 +228,9 @@ class SlurmEngine(QMEngine):
             name = xyz.name.split(".")[0]
             if self.doResp:
                 copyfile(f"scr.{name}/esp.xyz", f"esp_{name}.xyz")
-            rmtree(f"scr.{name}")
+            scr = Path(f"scr.{name}")
+            if scr.is_dir():
+                rmtree(scr)
 
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)

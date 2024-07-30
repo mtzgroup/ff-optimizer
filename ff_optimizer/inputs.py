@@ -428,7 +428,9 @@ class Input:
         self.sampledir = Path(self.sampledir).absolute()
 
     def checkFiles(self):
-        dynamicsFiles = [self.coors, self.conformers]
+        dynamicsFiles = [self.coors]
+        if self.conformers is not None:
+            dynamicsFiles.append(self.conformers)
         if self.initialtraining:
             dynamicsFiles.append(self.tcout)
         checkDirectory(self.dynamicsdir, dynamicsFiles)

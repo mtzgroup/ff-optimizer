@@ -79,7 +79,7 @@ def createModel(inp):
     return ffModel
 
 
-def getRestartCycle(inp):
+def getRestartCycle(inp, ffModel):
     if inp.restart:
         restartCycle = ffModel.restartCycle
         print(f"Restarting optimization at cycle {restartCycle}")
@@ -97,7 +97,7 @@ def setup(xyz: str):
 def optimize(input_file: str):
     inp = inputs.Input.fromYaml(input_file)
     ffModel = createModel(inp)
-    restartCycle = getRestartCycle(inp)
+    restartCycle = getRestartCycle(inp, ffModel)
 
     # First optimization cycle is not necessary if restarting from somewhere later
     if restartCycle < 0:
@@ -151,6 +151,7 @@ def optimize(input_file: str):
                 )
             )
         else:
+            import pdb; pdb.set_trace()
             print(
                 "%7d%15.8f%15.8f%22.8f%25.8f%8.1f%8.1f%8.1f"
                 % (
