@@ -151,9 +151,8 @@ def optimize(input_file: str):
                 )
             )
         else:
-            import pdb; pdb.set_trace()
             print(
-                "%7d%15.8f%15.8f%22.8f%25.8f%8.1f%8.1f%8.1f"
+                "%7d%15.8f%15.8f%22.8f%25.8s%8.1f%8.1f%8.1f"
                 % (
                     i,
                     optResults[0],
