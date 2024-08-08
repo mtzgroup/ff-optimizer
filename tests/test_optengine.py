@@ -1,4 +1,5 @@
 import errno
+import pytest
 import os
 from pathlib import Path
 from shutil import copyfile, rmtree
@@ -482,7 +483,7 @@ def test_optimizeForcefield1(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.restart = True
-    options.optdir = "restart1"
+    options.optdir = Path("restart1").absolute()
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     monkeypatch.setattr(os, "system", monkeyForceBalance)
@@ -626,7 +627,7 @@ def test_respPriors(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     monkeypatch.setattr(resp_prior.RespPriors, "getUnits", monkeyGetUnits)
     options = getDefaults()
-    options.optdir = Path("restart1")
+    options.optdir = Path("restart1").absolute()
     options.sampledir = Path(os.path.join("..", "resp", "sample")).absolute()
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
@@ -724,7 +725,6 @@ def test_setupInputFiles_multipleValids(monkeypatch):
     checkUtils.checkLists(testLinesValid2, refLinesValid2)
     # checkUtils.checkLists(testLinesValidInitial2, refLinesValidInitial2)
 
-
 def test_optimizeForcefield_multipleValids(monkeypatch):
     def monkeyForceBalance(command):
         split = command.split()
@@ -746,6 +746,7 @@ def test_optimizeForcefield_multipleValids(monkeypatch):
     options.optdir = "opt3"
     options.nvalids = 3
     options.validinitial = True
+    options.pathify()
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(os, "system", monkeyForceBalance)
@@ -1134,6 +1135,32 @@ def test_getFinalValidations(monkeypatch):
     best = optEngine.getFinalValidations(13)
     assert best == 12
 
+def test_editOpt0_1(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    copyfile("opt_0_test1.in", "opt_0.in")
+    options = getDefaults()
+    options.optdir = "."
+    optEngine = optengine.OptEngine(options)
+    optEngine.editOpt0()
+    test = checkUtils.checkFiles("opt_0.in", "opt_0_ref1.in")
+    os.remove("opt_0.in")
+    assert test
+    assert optEngine.initialTarget == "dynamics"
+
+def test_editOpt0_2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
+    os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
+    copyfile("opt_0_test2.in", "opt_0.in")
+    options = getDefaults()
+    options.optdir = "."
+    options.initialtraining = False
+    optEngine = optengine.OptEngine(options)
+    optEngine.editOpt0()
+    test = checkUtils.checkFiles("opt_0.in", "opt_0_ref2.in")
+    os.remove("opt_0.in")
+    assert test
+    assert optEngine.initialTarget == "train_1"
 
 # def test_sortParams(monkeypatch):
 #    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)

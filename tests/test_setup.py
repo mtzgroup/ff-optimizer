@@ -93,4 +93,4 @@ def test_setup():
     setup.setup("wat.xyz")
     rmtree("1_opt")
     rmtree("2_sampling")
-    os.remove("new_input.yaml")
+    os.remove("input.yaml")

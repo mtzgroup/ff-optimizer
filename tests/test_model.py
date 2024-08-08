@@ -206,8 +206,8 @@ def test_doParameterOptimization(monkeypatch):
     os.chdir(home / "model" / "test3")
     clean()
     args = getDefaults()
-    args.optdir = Path("1_optimization")
-    args.sampledir = Path("2_mm_sampling")
+    args.optdir = Path("1_optimization").absolute()
+    args.sampledir = Path("2_mm_sampling").absolute()
     args.nvalids = 2
     args.validinitial = True
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)

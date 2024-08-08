@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from shutil import copyfile, rmtree
 
-from ff_optimizer import mmengine
+from ff_optimizer import mmengine, utils
 
 from . import checkUtils
 from .test_inputs import getDefaults
@@ -323,33 +323,36 @@ def test_restart3(monkeypatch):
     mmEngine = mmengine.MMEngine(options)
 
     for f in os.listdir():
-        rmtree(f)
-    os.mkdir("train")
-    with open(os.path.join("train", "7.rst7"), "w") as f:
+        utils.rmrf(f)
+    train = Path("train")
+    train.mkdir()
+    with open(train / "7.rst7", "w") as f:
         f.write("hi!")
     mmEngine.restart()
 
     passTest = True
-    if os.path.isdir("train"):
-        if not os.path.isfile(os.path.join("train", "frames.txt")):
+    if train.is_dir():
+        if not (train / "frames.txt").is_file():
             passTest = False
             print("didn't sample")
-        if os.path.isfile(os.path.join("train", "7.rst7")):
+        if (train / "7.rst7").is_file():
             print("didn't delete")
             passTest = False
-        rmtree("train")
+        rmtree(train)
     else:
         passTest = False
-    if os.path.isdir("valid_1"):
-        if not os.path.isfile(os.path.join("valid_1", "frames.txt")):
+    valid1 = Path("valid_1")
+    if valid1.is_dir():
+        if not (valid1 / "frames.txt").is_file():
             passTest = False
-        rmtree("valid_1")
+        rmtree(valid1)
     else:
         passTest = False
-    if os.path.isdir("valid_2"):
-        if not os.path.isfile(os.path.join("valid_2", "frames.txt")):
+    valid2 = Path("valid_2")
+    if valid2.is_dir():
+        if not (valid2 / "frames.txt").is_file():
             passTest = False
-        rmtree("valid_2")
+        rmtree(valid2)
     else:
         passTest = False
     assert passTest

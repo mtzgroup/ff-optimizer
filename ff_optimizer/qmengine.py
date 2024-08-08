@@ -387,7 +387,7 @@ class ChemcloudEngine(QMEngine):
             jobID = utils.getName(xyz)
             mol = self.loadStructureFromXYZ(xyz)
             programInput = ProgramInput(
-                molecule=mol,
+                structure=mol,
                 model=mod,
                 calctype="gradient",
                 keywords=keywords,

@@ -4,6 +4,21 @@ from pathlib import Path
 import numpy as np
 import yaml
 from scipy.io import netcdf_file
+from shutil import rmtree
+from time import sleep
+
+def rmrf(f):
+    maxTries = 100
+    f = Path(f)
+    i = 0
+    while f.exists() and i < maxTries:
+        try:
+            rmtree(f)
+        except:
+            sleep(0.1)
+            i += 1
+    if f.exists():
+        raise OSError(f"Could not remove directory {f}")
 
 
 def checkForAmber(raiseException=True):
