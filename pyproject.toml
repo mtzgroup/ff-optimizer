@@ -29,6 +29,9 @@ authors = ["Ethan Curtis"]
 license = "MIT"
 readme = "README.md"
 
+[tool.poetry.scripts]
+ff-opt = "ff_optimizer.ff-opt:main"
+
 [tool.poetry.dependencies]
 python = "^3.8"
 forcebalance = "^1.9.5"
