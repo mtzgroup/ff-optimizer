@@ -1,0 +1,484 @@
+| Startfile from command line: md.in
+
+
+|       ***********************************************************
+|       *                    TeraChem v1.9-2022.08-dev            *
+|       *  Git Version: d777aa49a17b52d098a8ded87efb4e2595e1a1ed  *
+|       *                   Development Version                   *
+|       *           Chemistry at the Speed of Graphics!           *
+|       ***********************************************************
+|       * This program may only be used in connection with        *
+|       * a valid license from PetaChem, LLC. Use of this program *
+|       * or results thereof indicates acceptance of all terms    *
+|       * and conditions stated in the license and that a valid   *
+|       * license agreement between the user and PetaChem, LLC    *
+|       * exists. PetaChem, LLC does not warrant the correctness  *
+|       * of results or their suitability for any purpose.        *
+|       * Please email bugs, suggestions, and comments to         *
+|       *                  help@petachem.com                      *
+|       *                                                         *
+|       ***********************************************************
+
+
+|       ***********************************************************
+|       *  Compiled by admin        Wed Aug 31 13:02:24 PDT 2022  *
+|       *  Supported architectures: sm_35 sm_52 sm_61 sm_70 sm_80 *
+|       *  Build cuda_11.4.r11.4/compiler.30188945_0              *
+|       ***********************************************************
+
+
+| Job started   Fri Mar 24 23:26:01 2023
+| On fire-09-06 (available memory: 132907 MB)
+
+| ######################################### RUNTIME INFO ##########################################
+| terachem  md.in 
+
+|  NVRM version: NVIDIA UNIX x86_64 Kernel Module  525.89.02  Wed Feb  1 23:23:25 UTC 2023
+|  GCC version:  gcc version 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC) 
+
+|  	linux-vdso.so.1 =>  (0x00007ffd42368000)
+|  	libcurl.so.4 => /usr/lib64/libcurl.so.4 (0x00007fd733988000)
+|  	libmpi.so.12 => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/mpi/intel64/lib/libmpi.so.12 (0x00007fd732c52000)
+|  	libdftbplus.so => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libdftbplus.so (0x00007fd73276b000)
+|  	libfsockets.so => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libfsockets.so (0x00007fd732567000)
+|  	libxmlf90.so => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libxmlf90.so (0x00007fd732344000)
+|  	libthcbox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libthcbox.so.1 (0x00007fd7305f6000)
+|  	libOpenMM.so => /global/software/OpenMM/7.4.2-intel-2017.8.262-CUDA-11.0.2/lib/libOpenMM.so (0x00007fd72ff92000)
+|  	libgpubox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libgpubox.so.1 (0x00007fd72fd7f000)
+|  	libtensorbox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libtensorbox.so.1 (0x00007fd72fb62000)
+|  	libiobox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libiobox.so.1 (0x00007fd72f952000)
+|  	libintbox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libintbox.so.1 (0x00007fd6f3b75000)
+|  	libsqmbox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libsqmbox.so.1 (0x00007fd6f361c000)
+|  	libgridbox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libgridbox.so.1 (0x00007fd6f30a3000)
+|  	libdftbox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libdftbox.so.1 (0x00007fd6f2dc1000)
+|  	libcibox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libcibox.so.1 (0x00007fd6f25ef000)
+|  	libccbox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libccbox.so.1 (0x00007fd6f2024000)
+|  	libsimbox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libsimbox.so.1 (0x00007fd6f1e07000)
+|  	liboptbox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/liboptbox.so.1 (0x00007fd6f1bd2000)
+|  	libnvToolsExt.so.1 => /global/software/CUDA/11.4.1/lib64/libnvToolsExt.so.1 (0x00007fd6f19c8000)
+|  	libprotobuf.so.25 => /global/software/protobuf/3.14.0/lib/libprotobuf.so.25 (0x00007fd6f1515000)
+|  	libcommbox.so.1 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libcommbox.so.1 (0x00007fd6f12af000)
+|  	libssl.so.10 => /usr/lib64/libssl.so.10 (0x00007fd6f103d000)
+|  	libcrypto.so.10 => /usr/lib64/libcrypto.so.10 (0x00007fd6f0bdc000)
+|  	libcuda.so.1 => /usr/lib64/libcuda.so.1 (0x00007fd6eeefb000)
+|  	libcudart.so.11.0 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libcudart.so.11.0 (0x00007fd6eec59000)
+|  	libcublas.so.11 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libcublas.so.11 (0x00007fd6e5d20000)
+|  	libcufft.so.10 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libcufft.so.10 (0x00007fd6d009f000)
+|  	libcusparse.so.11 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libcusparse.so.11 (0x00007fd6c1cb4000)
+|  	libcusolver.so.11 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libcusolver.so.11 (0x00007fd6b49eb000)
+|  	libstdc++.so.6 => /usr/lib64/libstdc++.so.6 (0x00007fd6b46e2000)
+|  	libm.so.6 => /usr/lib64/libm.so.6 (0x00007fd6b43e0000)
+|  	libcilkrts.so.5 => /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1/lib/libcilkrts.so.5 (0x00007fd6b41a5000)
+|  	libgcc_s.so.1 => /usr/lib64/libgcc_s.so.1 (0x00007fd6b3f8e000)
+|  	libpthread.so.0 => /usr/lib64/libpthread.so.0 (0x00007fd6b3d72000)
+|  	libc.so.6 => /usr/lib64/libc.so.6 (0x00007fd6b39a5000)
+|  	/lib64/ld-linux-x86-64.so.2 (0x00007fd733c0f000)
+|  	libdl.so.2 => /usr/lib64/libdl.so.2 (0x00007fd6b37a0000)
+|  	libidn.so.11 => /usr/lib64/libidn.so.11 (0x00007fd6b356d000)
+|  	libssh2.so.1 => /usr/lib64/libssh2.so.1 (0x00007fd6b3343000)
+|  	libssl3.so => /usr/lib64/libssl3.so (0x00007fd6b30e5000)
+|  	libsmime3.so => /usr/lib64/libsmime3.so (0x00007fd6b2ebd000)
+|  	libnss3.so => /usr/lib64/libnss3.so (0x00007fd6b2b88000)
+|  	libnssutil3.so => /usr/lib64/libnssutil3.so (0x00007fd6b2957000)
+|  	libplds4.so => /usr/lib64/libplds4.so (0x00007fd6b2753000)
+|  	libplc4.so => /usr/lib64/libplc4.so (0x00007fd6b254e000)
+|  	libnspr4.so => /usr/lib64/libnspr4.so (0x00007fd6b230f000)
+|  	libgssapi_krb5.so.2 => /usr/lib64/libgssapi_krb5.so.2 (0x00007fd6b20c2000)
+|  	libkrb5.so.3 => /usr/lib64/libkrb5.so.3 (0x00007fd6b1dd9000)
+|  	libk5crypto.so.3 => /usr/lib64/libk5crypto.so.3 (0x00007fd6b1bbd000)
+|  	libcom_err.so.2 => /usr/lib64/libcom_err.so.2 (0x00007fd6b19b9000)
+|  	liblber-2.4.so.2 => /usr/lib64/liblber-2.4.so.2 (0x00007fd6b17aa000)
+|  	libldap-2.4.so.2 => /usr/lib64/libldap-2.4.so.2 (0x00007fd6b1554000)
+|  	libz.so.1 => /usr/lib64/libz.so.1 (0x00007fd6b133e000)
+|  	librt.so.1 => /usr/lib64/librt.so.1 (0x00007fd6b1136000)
+|  	libifport.so.5 => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libifport.so.5 (0x00007fd6b0f06000)
+|  	libifcoremt.so.5 => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libifcoremt.so.5 (0x00007fd6b0b76000)
+|  	libimf.so => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libimf.so (0x00007fd6b0688000)
+|  	libsvml.so => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libsvml.so (0x00007fd6af76a000)
+|  	libiomp5.so => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libiomp5.so (0x00007fd6af3c6000)
+|  	libintlc.so.5 => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libintlc.so.5 (0x00007fd6af159000)
+|  	libirng.so => /global/software/intel/2017.8.262/compilers_and_libraries_2017.8.262/linux/compiler/lib/intel64/libirng.so (0x00007fd6aede6000)
+|  	libcublasLt.so.11 => /global/software/CUDA/11.4.1/lib64/libcublasLt.so.11 (0x00007fd69ccd5000)
+|  	libkrb5support.so.0 => /usr/lib64/libkrb5support.so.0 (0x00007fd69cac5000)
+|  	libkeyutils.so.1 => /usr/lib64/libkeyutils.so.1 (0x00007fd69c8c1000)
+|  	libresolv.so.2 => /usr/lib64/libresolv.so.2 (0x00007fd69c6a8000)
+|  	libsasl2.so.3 => /usr/lib64/libsasl2.so.3 (0x00007fd69c48a000)
+|  	libselinux.so.1 => /usr/lib64/libselinux.so.1 (0x00007fd69c263000)
+|  	libcrypt.so.1 => /usr/lib64/libcrypt.so.1 (0x00007fd69c02b000)
+|  	libpcre.so.1 => /usr/lib64/libpcre.so.1 (0x00007fd69bdc9000)
+|  	libfreebl3.so => /usr/lib64/libfreebl3.so (0x00007fd69bbc6000)
+| #################################################################################################
+
+| Cannot find license.dat file in the TeraChem installation directory /global/software/TeraChem/2022.08-intel-2017.8.262-CUDA-11.4.1
+
+
+| TRYING THE NETWORK LICENSE...
+| Connecting to license server '54.208.252.40' port '8877'...
+| Connected!
+| Checking your license...
+
+| **************************************************************
+|  Greetings, Martinez Group! You have 1000 licenses in total
+|  IN USE: 31
+|  AVAILABLE: 969
+| **************************************************************
+
+-----------------------------------
+Processed Input file:
+              coordinates opt_bicarb.xyz
+                    basis aug-cc-pvdz
+                   charge -1
+                 spinmult 1
+                   method wb97x
+                     dftd d3
+                 convthre 1e-6
+                      run md
+               thermostat langevin
+                    nstep 30000
+                 timestep 0.5
+            restartmdfreq 200
+                    tinit 100
+                       t0 300
+-----------------------------------
+Jobname: opt_bicarb
+Scratch directory: ./scr.opt_bicarb
+Scratch data will be generated
+| Random number seed: 1083234623
+
+XYZ coordinates opt_bicarb.xyz
+Molden File Output: ./scr.opt_bicarb/opt_bicarb.molden
+Using basis set: aug-cc-pvdz
+dmrgstart not found
+Spin multiplicity: 1
+DIIS will use up to 10 vectors.
+Condition number limit for the DIIS overlap matrix is            0
+WF convergence threshold: 1.00e-06
+Using DIIS algorithm to converge WF
+Maximum number of SCF iterations: 100
+Incremental fock with rebuild every 8 iterations
+Will switch to conventional Fock if diffuse functions are detected
+X-matrix tolerance: 1.00e-04
+PRECISION: DYNAMIC
+TeraChem will select linear algebra engine
+DFT Functional requested: wb97x
+Method: wB97X
+  wB97X exchange/correlation functional:  1.0
+  Full range Hartree-Fock exchange:       0.157706
+  LR Hartree-Fock exchange:               0.842294
+  Range Correction Scaling:               0.300 a.u. 
+
+*********************************************************
+*                     WARNING                           *
+* Dispersion correction is not supported for wb97x      *
+*          Using non-standard parameters                *
+*********************************************************
+
+Wavefunction: RESTRICTED
+
+ DFT-D code reimplemented following the
+ code by S.Grimme, University Bonn 
+ based on DFTD3 V3.2 Rev 0         
+ 
+Please cite DFT-D3 work done with this code as:
+S. Grimme, J. Antony, S. Ehrlich and H. Krieg,
+J. Chem. Phys. 132 (2010), 154104
+If used with BJ-damping cite also
+S. Grimme, S. Ehrlich and L. Goerigk,
+J. Comput. Chem. 32 (2011), 1456-1465
+For DFT-D2 the reference is
+S. Grimme, J. Comput. Chem., 27 (2006), 1787-1799
+DFT grid type: 1
+Using dynamic DFT grids.
+Initial guess generated by maximum overlap
+
+********************************************
+*** RUNNING AB INITIO MOLECULAR DYNAMICS ***
+********************************************
+
+MD simulation parameters:
+Random velocities (T = 100.00 K)
+Velocity Verlet integration time step: 0.50 fs
+Total MD steps: 30000
+Target temperature: 300.00 K
+Langevin dynamics (Tdamp = 1000 fs)
+Binary output: no
+Output freq:   1
+SCF:   Time-reversible integrator with dissipation
+Starting TensorBox...
+| TeraChem will select linear algebra engine
+| Using cuSolver for matrix diagonalization
+
+| using 1 out of 1 CUDA devices
+|   Device 0: NVIDIA GeForce RTX 3080, 10009MB, CC 8.6 -- CPU THREAD 0
+| -------------------------------------------------------------------
+| CPU Memory Available: 18111.38 MegaWords 
+| GPU Memory Available: 995.18 MegaWords 
+| Maximum recommended basis set size: 11200 basis functions
+|  (limited by GPU memory)
+| -------------------------------------------------------------------
+| Initialize GPUBox with 128 MW of memory
+
+****** QM coordinates ******
+C        -4.8007538432         1.3042099597         0.0188366257  
+O        -3.3899080165         1.0712727808         0.0609846872  
+H        -3.0331630574         1.9650296492         0.0854138701  
+O        -5.1121560387         2.5175007366         0.0335406508  
+O        -5.4849990434         0.2750368735        -0.0291658339  
+
+Basis set:       aug-cc-pvdz
+Total atoms:     5
+Total charge:    -1
+Total electrons: 32 (16-alpha, 16-beta)
+Number electrons modeled by ECPs: 0
+Total orbitals:  109
+Total AO shells: 41 (19 S-shells; 14 P-shells; 8 D-shells; 0 F-shells; 0 G-shells)
+Spin multiplicity: 1
+Nuclear repulsion energy (QM atoms): 113.085624686353 a.u.
+
+
+Using time-reversible integrator with dissipation to generate WF guess during MD.
+A.M.N. Niklasson et al, J. Chem. Phys. 130, 214109 (2009)
+REMOVING COMM VELOCITY of {2.30e-06, 1.87e-05, 2.67e-05}
+REMOVING COMM ANGULAR MOMENTUM of {8.73e-03, 8.08e-03, -2.11e-02}
+COMM VELOCITY: {5.33e-20, 8.00e-20, 8.71e-20}
+COMM ANGULAR MOMENTUM: {3.10e-17, 2.02e-17, 6.07e-18}
+DFTD Energy:    -0.0018820 hartree
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 5580 (1116 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 15812 (3162 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying guess...Density matrix is not well-conditioned, rescale and purify
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 17 matrix multiplies
+| THRESPDP set to 1.00e+00
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.4115533913    -262.5023511917    32.1228263536   -21.9331947842    -262.5023511917     0.14  
+|                 >>> SWITCHING TO GRID 0 <<<
+|    2     0.2901373056      -1.3790991330    31.9996751367   -23.1008240786    -263.8814503248     0.08  
+|    3     0.0761835518      -0.4971627085    31.9996201634   -22.7250929115    -264.3786130333     0.08  
+|    4     0.0372055050      -0.0569346048    31.9997001065   -22.5650150978    -264.4355476381     0.07  
+|    5     0.0041270890      -0.0118656330    31.9996648371   -22.6450413249    -264.4474132711     0.08  
+|                 >>> SWITCHING TO GRID 1 <<<
+|    6     0.0034504663      +0.0017666747    32.0000433306   -22.6450927438    -264.4456465965     0.10  
+| THRESPDP set to 9.43e-05
+|    7     0.0008315585      -0.0001153548    32.0000436532   -22.6426237646    -264.4457619513     0.16  
+|    8     0.0004286411      -0.0000242258    32.0000429110   -22.6433411024    -264.4457861771     0.13  
+|    9     0.0001647476      -0.0000041813    32.0000428127   -22.6434862459    -264.4457903584     0.12  
+|   10     0.0000724716      -0.0000002901    32.0000428331   -22.6430970231    -264.4457906485     0.12  
+|   11     0.0000198710      -0.0000001532    32.0000428283   -22.6431685932    -264.4457908017     0.12  
+|   12     0.0000072462      -0.0000000343    32.0000428210   -22.6431603669    -264.4457908359     0.16  
+|   13     0.0000010126      -0.0000000006    32.0000428251   -22.6431609206    -264.4457908365     0.16  
+|   14     0.0000002966      -0.0000000025    32.0000428246   -22.6431625383    -264.4457908390     0.16  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -264.4457908390 a.u.
+| WARNING: Final energy is higher than the lowest energy by    0.0016224.
+DISPERSION CONTRIBUTION TO ENERGY: -0.0018819658 a.u.
+HOMO-LUMO GAP: 8.543 eV
+CENTER OF MASS: {-4.662663, 1.302327, 0.022257} ANGS
+DIPOLE MOMENT: {2.549130, 0.860418, 0.098746} (|D| = 2.692236) DEBYE
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+   -0.0000559515    -0.0000212259     0.0001081673
+   -0.0000933476    -0.0002078018    -0.0000606371
+    0.0002019158     0.0000846524    -0.0001472612
+    0.0001268506     0.0000215104    -0.0001298578
+   -0.0001794672     0.0001228650     0.0002295888
+
+=MD= ***** MD STEP 1 *****
+
+DFTD Energy:    -0.0018813 hartree
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 5581 (1116 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 15815 (3163 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying guess...Density matrix is not well-conditioned, rescale and purify
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 18 matrix multiplies
+| THRESPDP set to 1.00e+00
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.4138670775    -262.6628062261    32.0217877048   -21.8998532734    -262.6628062261     0.10  
+|                 >>> SWITCHING TO GRID 0 <<<
+|    2     0.2967389176      -1.1956220910    31.9996401295   -23.1231446679    -263.8584283171     0.08  
+|    3     0.0771506849      -0.5195736424    31.9995790507   -22.7302369064    -264.3780019594     0.08  
+|    4     0.0384258163      -0.0571011422    31.9996597787   -22.5620728691    -264.4351031016     0.07  
+|    5     0.0039546727      -0.0122487615    31.9996250058   -22.6436063622    -264.4473518631     0.07  
+|                 >>> SWITCHING TO GRID 1 <<<
+|    6     0.0033611522      +0.0017253749    32.0000389817   -22.6435368446    -264.4456264883     0.10  
+| THRESPDP set to 9.43e-05
+|    7     0.0009740550      -0.0000989240    32.0000392690   -22.6416267770    -264.4457254123     0.16  
+|    8     0.0004270179      -0.0000248285    32.0000385102   -22.6424018776    -264.4457502408     0.13  
+|    9     0.0001446628      -0.0000042648    32.0000384175   -22.6424495191    -264.4457545056     0.12  
+|   10     0.0000712795      -0.0000002645    32.0000384354   -22.6420857231    -264.4457547701     0.12  
+|   11     0.0000202823      -0.0000001412    32.0000384271   -22.6421783549    -264.4457549113     0.12  
+|   12     0.0000073490      -0.0000000139    32.0000384193   -22.6421664769    -264.4457549252     0.16  
+|   13     0.0000010227      +0.0000000036    32.0000384245   -22.6421675269    -264.4457549215     0.16  
+|   14     0.0000002784      -0.0000000020    32.0000384254   -22.6421691024    -264.4457549235     0.16  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -264.4457549235 a.u.
+| WARNING: Final energy is higher than the lowest energy by    0.0015969.
+DISPERSION CONTRIBUTION TO ENERGY: -0.0018813366 a.u.
+HOMO-LUMO GAP: 8.524 eV
+CENTER OF MASS: {-4.662663, 1.302327, 0.022257} ANGS
+DIPOLE MOMENT: {2.587745, 0.864901, 0.088031} (|D| = 2.729877) DEBYE
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+    0.0019827043     0.0004118796     0.0003890066
+    0.0010565922     0.0032219116     0.0001461954
+    0.0001868882    -0.0027913155    -0.0003419071
+   -0.0008917427     0.0008397945    -0.0001487374
+   -0.0023344423    -0.0016822701    -0.0000445575
+
+Running Mulliken population analysis...
+
+Calculating Mulliken bond orders.
+=MD= t =    0.000000 au   ESCF = -264.445755 au   EKIN =    0.003159 au   TEMP =  132.991103 K   ETOT = -264.442596 au
+| =MD= Time per MD step: 2.18 sec
+
+=MD= ***** MD STEP 2 *****
+
+DFTD Energy:    -0.0018807 hartree
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 5581 (1116 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 15817 (3163 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying guess...Density matrix is not well-conditioned, rescale and purify
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 18 matrix multiplies
+| THRESPDP set to 1.00e+00
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.4117633459    -262.6639471532    32.0218770914   -21.8969988324    -262.6639471532     0.10  
+|                 >>> SWITCHING TO GRID 0 <<<
+|    2     0.2974576784      -1.1902626914    31.9996146376   -23.1233306365    -263.8542098446     0.08  
+|    3     0.0779561086      -0.5231453707    31.9995440734   -22.7299785123    -264.3773552153     0.08  
+|    4     0.0386671239      -0.0576319510    31.9996227557   -22.5601906111    -264.4349871663     0.08  
+|    5     0.0038595407      -0.0122338010    31.9995878352   -22.6427563515    -264.4472209673     0.08  
+|                 >>> SWITCHING TO GRID 1 <<<
+|    6     0.0032599792      +0.0016964922    32.0000346122   -22.6420729426    -264.4455244750     0.10  
+| THRESPDP set to 9.43e-05
+|    7     0.0011118589      -0.0001096453    32.0000356019   -22.6405101241    -264.4456341203     0.16  
+|    8     0.0004342106      -0.0000248206    32.0000348583   -22.6413169303    -264.4456589409     0.13  
+|    9     0.0001306590      -0.0000043211    32.0000347848   -22.6412896406    -264.4456632620     0.12  
+|   10     0.0000690339      -0.0000002323    32.0000348046   -22.6409483156    -264.4456634942     0.12  
+|   11     0.0000205597      -0.0000001316    32.0000347900   -22.6410600285    -264.4456636259     0.12  
+|   12     0.0000074231      -0.0000000290    32.0000347872   -22.6410437804    -264.4456636549     0.16  
+|   13     0.0000010223      -0.0000000006    32.0000347907   -22.6410451817    -264.4456636555     0.16  
+|   14     0.0000002810      -0.0000000008    32.0000347894   -22.6410468053    -264.4456636563     0.16  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -264.4456636563 a.u.
+| WARNING: Final energy is higher than the lowest energy by    0.0015573.
+DISPERSION CONTRIBUTION TO ENERGY: -0.0018806953 a.u.
+HOMO-LUMO GAP: 8.506 eV
+CENTER OF MASS: {-4.662682, 1.302256, 0.022270} ANGS
+DIPOLE MOMENT: {2.625258, 0.870712, 0.077624} (|D| = 2.766974) DEBYE
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+    0.0039714997     0.0010104487     0.0006485491
+    0.0020773556     0.0062789750     0.0002931268
+    0.0002526422    -0.0052988485    -0.0004792099
+   -0.0018323846     0.0015539650    -0.0001578601
+   -0.0044691127    -0.0035445403    -0.0003046059
+
+Running Mulliken population analysis...
+
+Calculating Mulliken bond orders.
+=MD= t =   20.670687 au   ESCF = -264.445664 au   EKIN =    0.003171 au   TEMP =  133.490735 K   ETOT = -264.442493 au
+| =MD= Time per MD step: 2.19 sec
+
+=MD= ***** MD STEP 3 *****
+
+DFTD Energy:    -0.0018800 hartree
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 5581 (1116 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 15816 (3163 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying guess...Density matrix is not well-conditioned, rescale and purify
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 18 matrix multiplies
+| THRESPDP set to 1.00e+00
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.4095706449    -262.6644127200    32.0219050646   -21.8939792427    -262.6644127200     0.10  
+|                 >>> SWITCHING TO GRID 0 <<<
+|    2     0.2980724300      -1.1855971578    31.9995956316   -23.1233565807    -263.8500098778     0.08  
+|    3     0.0786666896      -0.5266951250    31.9995151437   -22.7294652923    -264.3767050028     0.08  
+|    4     0.0388924745      -0.0581544624    31.9995913991   -22.5581532199    -264.4348594651     0.07  
+|    5     0.0037885492      -0.0122251554    31.9995562134   -22.6416814903    -264.4470846205     0.07  
+|                 >>> SWITCHING TO GRID 1 <<<
+|    6     0.0031611013      +0.0016706121    32.0000322187   -22.6404242546    -264.4454140084     0.10  
+| THRESPDP set to 9.43e-05
+|    7     0.0011545138      -0.0000830972    32.0000328515   -22.6392060761    -264.4454971056     0.16  
+|    8     0.0004505541      -0.0000246913    32.0000320960   -22.6400112998    -264.4455217969     0.13  
+|    9     0.0001302677      -0.0000044113    32.0000320345   -22.6399149927    -264.4455262082     0.12  
+|   10     0.0000653241      -0.0000002551    32.0000320559   -22.6395931519    -264.4455264633     0.12  
+|   11     0.0000203846      -0.0000001353    32.0000320424   -22.6397241732    -264.4455265986     0.12  
+|   12     0.0000074172      +0.0000000096    32.0000320334   -22.6397060356    -264.4455265890     0.16  
+|   13     0.0000010325      -0.0000000043    32.0000320429   -22.6397076400    -264.4455265934     0.16  
+|   14     0.0000002753      +0.0000000017    32.0000320381   -22.6397092678    -264.4455265917     0.16  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -264.4455265917 a.u.
+| WARNING: Final energy is higher than the lowest energy by     0.001558.
+DISPERSION CONTRIBUTION TO ENERGY: -0.0018800320 a.u.
+HOMO-LUMO GAP: 8.487 eV
+CENTER OF MASS: {-4.662741, 1.302221, 0.022243} ANGS
+DIPOLE MOMENT: {2.661530, 0.876072, 0.067671} (|D| = 2.802825) DEBYE
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+    0.0058918096     0.0015080447     0.0009518001
+    0.0029501108     0.0087583676     0.0003842520
+    0.0004886941    -0.0072673955    -0.0005794038
+   -0.0028052127     0.0022766624    -0.0001850859
+   -0.0065254018    -0.0052756792    -0.0005715624
+
+Running Mulliken population analysis...
+
+Calculating Mulliken bond orders.
+=MD= t =   41.341373 au   ESCF = -264.445527 au   EKIN =    0.003031 au   TEMP =  127.601394 K   ETOT = -264.442496 au
+| =MD= Time per MD step: 2.18 sec
+

@@ -170,7 +170,7 @@ class SlurmEngine(QMEngine):
 
     def replaceVars(self, line, index):
         tcin = f"tc_{index}.in"
-        tcbackup = f"tc_backup_{index}.in"
+        tcbackup = f"tc_{index}_backup.in"
         line = line.replace("JOBID", index)
         line = line.replace("TCTEMPLATEBACKUP", tcbackup)
         line = line.replace("TCTEMPLATE", tcin)
