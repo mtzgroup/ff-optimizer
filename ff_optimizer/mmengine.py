@@ -230,7 +230,7 @@ class MMEngine:
             # get conformer names
             conformers = self.getConformerNames(f)
             if len(conformers) < self.inp.conformersperset:
-                rmtree(f)
+                utils.rmrf(f)
                 continue
             # record which initial conditions haven't had MD run yet
             redoFrames = self.getRedoFrames(f, conformers)

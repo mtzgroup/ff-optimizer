@@ -6,6 +6,7 @@ from ff_optimizer import mmengine, utils
 
 from . import checkUtils
 from .test_inputs import getDefaults
+import pytest
 
 
 def monkeyGetIndices(self):

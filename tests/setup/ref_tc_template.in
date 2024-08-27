@@ -1,5 +1,5 @@
 basis         def2-svp  
-method        wb97x-d3
+method        wb97xd3
 charge        0        
 run           gradient 
 dftd          d3       

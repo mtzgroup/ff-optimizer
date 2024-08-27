@@ -35,7 +35,7 @@ class OptEngine:
         self.validInitialTargetLines = []
 
     def readFileNames(self):
-        with open(self.optdir / "opt_0.in", "r") as f:
+        with open(self.optdir / self.inp.opt0, "r") as f:
             for line in f.readlines():
                 splitLine = line.split()
                 if len(splitLine) > 1:
@@ -50,16 +50,16 @@ class OptEngine:
 
     def checkFileNames(self):
         if self.mol2 == None:
-            raise RuntimeError("No mol2 file specified for optimization in opt_0.in")
+            raise RuntimeError(f"No mol2 file specified for optimization in {self.inp.opt0}")
         if self.frcmod == None:
-            raise RuntimeError("No frcmod file specified for optimization in opt_0.in")
+            raise RuntimeError(f"No frcmod file specified for optimization in {self.inp.opt0}")
         if not (self.optdir / self.mol2).is_file():
             raise RuntimeError(
-                f"Mol2 {self.mol2} specified in opt_0.in is not in {self.optdir}"
+                f"Mol2 {self.mol2} specified in {self.inp.opt0} is not in {self.optdir}"
             )
         if not (self.optdir / self.frcmod).is_file():
             raise RuntimeError(
-                f"Frcmod {self.frcmod} specified in opt_0.in is not in {self.optdir}"
+                f"Frcmod {self.frcmod} specified in {self.inp.opt0} is not in {self.optdir}"
             )
 
     def testTleap(self):
@@ -149,6 +149,31 @@ class OptEngine:
             for f in [self.frcmod, self.mol2]:
                 self.copyToFF(f)
 
+    # if we're not running initial training, we need to change the target in
+    # self.inp.opt0 to train_1
+    # if we're running initial training, we need to make sure the target name
+    # isn't train_1
+    def editOpt0(self):
+        inTarget = False
+        with open(self.optdir / self.inp.opt0, "r") as f:
+            with open("temp.txt", "w") as temp:
+                for line in f.readlines():
+                    if len(line.split()) > 0:
+                        if line.split()[0] == "$target":
+                            inTarget = True
+                        if inTarget and line.split()[0] == "$end":
+                            inTarget = False
+                        if inTarget and line.split()[0] == "name":
+                            name = line.split()[1]
+                            if self.inp.initialtraining and name == "train_1":
+                                self.initialTarget = "dynamics"
+                                line = line.replace("train_1", self.initialTarget)
+                            if not self.inp.initialtraining:
+                                self.initialTarget = "train_1"
+                                line = line.replace(name, "train_1")
+                    temp.write(line)
+        os.rename("temp.txt", self.optdir / self.inp.opt0)
+
     def makeValidIn(self):
         with open(self.optdir / "valid_0.in", "r") as srcValid:
             with open(self.optdir / "temp.txt", "w") as destValid:
@@ -202,6 +227,8 @@ class OptEngine:
         self.writeValidInitialLeap()
         # copy forcefield files to forcefield dir for forcebalance
         self.copyFiles()
+        # adjust opt0 target name if necessary
+        self.editOpt0()
         # make validation set inputs for forcebalance
         self.makeValidIn()
         self.makeInitialValidIn()
@@ -463,21 +490,13 @@ class OptEngine:
             self.validPrevious.append(self.readValid(f"valid_{i}_previous.out"))
 
     def runTraining(self, i):
-        if len(self.train) <= i:
+        if len(self.train) <= i + self.inp.initialtraining - 1:
             if self.respPriors is not None:
                 self.respPriors.updateRespPriors(
                     i, os.path.join("forcefield", self.mol2)
                 )
             os.system(f"ForceBalance.py opt_{i}.in > opt_{i}.out")
-            status, results = self.readOpt(f"opt_{i}.out")
-            if status == -1:
-                raise RuntimeError(
-                    f"ForceBalance optimization of {os.path.join(self.optdir, f'opt_{i}.in')} failed"
-                )
-            if status == 1:
-                print("WARNING: large change in one of the parameters")
-            self.train.append(results["obj"])
-            self.sortParams(results, i)
+            self.checkOpt(i)
 
     def runValid(self, i):
         if len(self.valid) < i:
@@ -502,7 +521,7 @@ class OptEngine:
         return self.readValid(out)
 
     def runInitialTraining(self):
-        os.system("ForceBalance.py opt_0.in > opt_0.out")
+        os.system(f"ForceBalance.py {self.inp.opt0} > opt_0.out")
         self.copyResults(0)
         self.checkOpt(0)
 
@@ -549,6 +568,8 @@ class OptEngine:
         inPatience = False
         cutoff = self.inp.cutoff  # Cutoff is 1% change in performance
         lastCycle = -1
+        # Remember, validDiff[0] maps to results from iteration 1
+        # indexing is fun
         validDiff = self.computeValidDiff()
         for j in range(len(validDiff)):
             if not inPatience and validDiff[j] > cutoff:
@@ -556,12 +577,12 @@ class OptEngine:
                 patienceCycle = j
             if inPatience and validDiff[j] < cutoff:
                 inPatience = False
-            if inPatience and j - patienceCycle >= self.inp.patience:
-                lastCycle = j
+            if inPatience and j - patienceCycle >= self.inp.patience - 1:
+                lastCycle = j + 1 # switch from 0-indexing to 1-indexing here
                 self.converged = True
-                print(f"Optimization has converged at cycle {j}")
+                print(f"Optimization has converged at cycle {lastCycle}")
                 print("Running final validations to determine optimal parameters")
-                best = self.getFinalValidations(j)
+                best = self.getFinalValidations(lastCycle)
                 print(f"Optimal parameters are from iteration {best}")
                 break
         return lastCycle

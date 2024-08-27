@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def checkFloats(f1, f2, thresh=0.00001):
     f1 = float(f1)
     f2 = float(f2)

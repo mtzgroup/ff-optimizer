@@ -4,6 +4,21 @@ from pathlib import Path
 import numpy as np
 import yaml
 from scipy.io import netcdf_file
+from shutil import rmtree
+from time import sleep
+
+def rmrf(f):
+    maxTries = 100
+    f = Path(f)
+    i = 0
+    while f.exists() and i < maxTries:
+        try:
+            rmtree(f)
+        except:
+            sleep(0.1)
+            i += 1
+    if f.exists():
+        raise OSError(f"Could not remove directory {f}")
 
 
 def checkForAmber(raiseException=True):
@@ -14,6 +29,7 @@ def checkForAmber(raiseException=True):
         print("No Amber available!")
         return False
     return True
+
 
 def convertTCtoFB(
     tcout, coors, stride, start=None, end=None, qdata="qdata.txt", mdcrd="all.mdcrd"
@@ -176,16 +192,19 @@ def readPDB(pdb: str):
 
 
 def readXYZ(xyz, readSymbols=False):
-    if readSymbols:
-        symbols = np.loadtxt(xyz, skiprows=2, usecols=(0), dtype=str)
-        geometry = np.loadtxt(
-            xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
-        ).flatten()
-        return geometry, symbols
-    else:
-        return np.loadtxt(
-            xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
-        ).flatten()
+    try:
+        if readSymbols:
+            symbols = np.loadtxt(xyz, skiprows=2, usecols=(0), dtype=str)
+            geometry = np.loadtxt(
+                xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
+            ).flatten()
+            return geometry, symbols
+        else:
+            return np.loadtxt(
+                xyz, skiprows=2, usecols=(1, 2, 3), dtype=np.float32
+            ).flatten()
+    except:
+        raise RuntimeError(f"XYZ file {xyz} is formatted incorrectly!")
 
 
 def writeXYZ(geometry: np.array, symbols: list, dest: str):

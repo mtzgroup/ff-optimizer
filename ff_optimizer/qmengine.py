@@ -5,8 +5,9 @@ from shutil import copyfile, rmtree
 from time import sleep
 
 from chemcloud import CCClient
-from qcio import Structure, ProgramInput, SinglePointResults
+from qcio import ProgramInput, SinglePointResults, Structure
 from qcparse import parse
+from pathlib import Path
 
 from . import utils
 
@@ -72,12 +73,12 @@ class QMEngine:
                 f.write(f"JOB {i+1}\n")
                 coordLine = "COORDS "
                 for coord in coords[i]:
-                    coordLine = coordLine + str(round(float(coord), 3)) + " "
+                    coordLine = coordLine + str(round(float(coord), 5)) + " "
                 gradLine = "FORCES "
                 for grad in grads[i]:
-                    gradLine = gradLine + str(round(float(grad), 5)) + " "
+                    gradLine = gradLine + str(round(float(grad), 8)) + " "
                 f.write(coordLine + "\n")
-                f.write(f"ENERGY {str(round(float(energies[i]),6))}\n")
+                f.write(f"ENERGY {str(round(float(energies[i]),7))}\n")
                 f.write(gradLine + "\n")
                 if espXYZs is not None:
                     espXYZLine = "ESPXYZ "
@@ -216,7 +217,7 @@ class SlurmEngine(QMEngine):
             name = xyz.name.split(".")[0]
             super().writeInputFile(self.inputSettings, xyz, f"tc_{name}.in")
             super().writeInputFile(
-                self.backupInputSettings, xyz, f"tc_{name}_backup.in"
+                self.backupInputSettings, xyz, f"tc_backup_{name}.in"
             )
             self.writeSbatchFile(name, f"sbatch_{name}.sh")
             job = self.slurmCommand(["sbatch", f"sbatch_{name}.sh"])
@@ -227,7 +228,9 @@ class SlurmEngine(QMEngine):
             name = xyz.name.split(".")[0]
             if self.doResp:
                 copyfile(f"scr.{name}/esp.xyz", f"esp_{name}.xyz")
-            rmtree(f"scr.{name}")
+            scr = Path(f"scr.{name}")
+            if scr.is_dir():
+                rmtree(scr)
 
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
@@ -242,7 +245,7 @@ class DebugEngine(QMEngine):
         grads = []
         coords = []
         for xyz in xyzs:
-            name = xyz.split(".")[0]
+            name = xyz.name.split(".")[0]
             super().writeInputFile(self.inputSettings, xyz, f"tc_{name}.in")
             os.system(f"terachem tc_{name}.in > tc_{name}.out")
             energy, grad = utils.readGradFromTCout(f"tc_{name}.out")
@@ -384,7 +387,7 @@ class ChemcloudEngine(QMEngine):
             jobID = utils.getName(xyz)
             mol = self.loadStructureFromXYZ(xyz)
             programInput = ProgramInput(
-                molecule=mol,
+                structure=mol,
                 model=mod,
                 calctype="gradient",
                 keywords=keywords,

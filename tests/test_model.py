@@ -10,9 +10,10 @@ from .test_optengine import cleanOptDir, monkeyForceBalance
 
 home = Path(__file__).parent.absolute()
 
+
 def rmdir(path):
     rmtree(path, ignore_errors=True)
-    
+
 
 class FakeModel:
     def __init__(self, args):
@@ -205,8 +206,8 @@ def test_doParameterOptimization(monkeypatch):
     os.chdir(home / "model" / "test3")
     clean()
     args = getDefaults()
-    args.optdir = Path("1_optimization")
-    args.sampledir = Path("2_mm_sampling")
+    args.optdir = Path("1_optimization").absolute()
+    args.sampledir = Path("2_mm_sampling").absolute()
     args.nvalids = 2
     args.validinitial = True
     monkeypatch.setattr(model.Model, "initializeQMEngine", monkeyInit)
@@ -513,8 +514,10 @@ def monkeyInitOptEngine(self, inp):
     self.writeValidInitialLeap()
     self.copyFiles()
 
+
 def monkeyMDFiles(self, inp):
     inp.heatCounter = 2
+
 
 def test_initialCycle1(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInitOptEngine)

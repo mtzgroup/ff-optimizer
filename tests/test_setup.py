@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from shutil import copyfile, rmtree
 
-from ff_optimizer import inputs, model, setup
+from ff_optimizer import setup
 
 from . import checkUtils
 from .test_inputs import getDefaults
@@ -45,7 +45,7 @@ def test_setupFF():
     os.chdir(os.path.dirname(__file__))
     optdir = Path("setup").absolute()
     os.chdir(optdir / "setupFF")
-    setup.setupFF("water.xyz", optdir)
+    setup.setupFF(Path("water.xyz"), optdir)
     for f in os.listdir():
         if not f.endswith(".xyz"):
             os.remove(f)
@@ -88,11 +88,9 @@ def test_setup():
     os.chdir(os.path.dirname(__file__))
     os.chdir("setup")
     os.chdir("test")
-    inp = inputs.Input.fromYaml("input.yaml")
     # if the new input file and model get initialized and pass all their
     # internal checks, then we pass this test as well
-    newInp = setup.setup(inp)
-    model.Model(newInp)
+    setup.setup("wat.xyz")
     rmtree("1_opt")
     rmtree("2_sampling")
-    os.remove("new_input.yaml")
+    os.remove("input.yaml")

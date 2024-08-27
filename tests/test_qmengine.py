@@ -1,4 +1,5 @@
 import os
+import pytest
 from pathlib import Path
 
 import numpy as np
@@ -220,9 +221,10 @@ class TestQMEngine:
 
     def test_writeFBdataResp(self):
         os.chdir(os.path.dirname(__file__))
+        testdir = Path("qmengine")
         inp = getDefaults()
-        inp.tctemplate = "qmengine/tc.in"
-        inp.tctemplate_backup = "qmengine/tc_backup.in"
+        inp.tctemplate = testdir / "tc.in"
+        inp.tctemplate_backup = testdir / "tc_backup.in"
         inp.sampledir = Path("")
         inp.resp = 1.0
         qmEngine = qmengine.QMEngine(inp)
@@ -233,36 +235,19 @@ class TestQMEngine:
         espXYZs = []
         esps = []
         for i in range(1, 26):
-            coords.append(utils.readXYZ(f"qmengine/test/{str(i)}.xyz"))
-            energy, grad = utils.readGradFromTCout(f"qmengine/test/tc_{str(i)}.out")
+            coords.append(utils.readXYZ(testdir / "test" / f"{str(i)}.xyz"))
+            energy, grad = utils.readGradFromTCout(testdir / "test" / f"tc_{str(i)}.out")
             energies.append(energy)
             grads.append(grad)
-            espXYZ, esp = utils.readEsp(f"qmengine/test/esp_{str(i)}.xyz")
+            espXYZ, esp = utils.readEsp(testdir / "test" / f"esp_{str(i)}.xyz")
             espXYZs.append(espXYZ)
             esps.append(esp)
         qmEngine.writeFBdata(energies, grads, coords, espXYZs, esps)
-        refLines = []
-        with open("qmengine/qdataResp.txt", "r") as refF:
-            for line in refF.readlines():
-                if len(line.split()) > 0:
-                    refLines.append(line)
-        testLines = []
-        with open("qdata.txt", "r") as testF:
-            for line in testF.readlines():
-                if len(line.split()) > 0:
-                    testLines.append(line)
-        assert len(refLines) == len(testLines)
-        for i in range(len(refLines)):
-            refLine = refLines[i].split()
-            testLine = testLines[i].split()
-            assert len(refLine) == len(testLine)
-            for j in range(len(refLine)):
-                try:
-                    assert checkUtils.checkFloat(refLine[j], testLine[j], 0.0001)
-                except:
-                    assert refLine[j] == testLine[j]
-        os.remove("qdata.txt")
+
+        check = checkUtils.checkFiles("qdata.txt", testdir / "qdataResp.txt")
+        #os.remove("qdata.txt")
         os.remove("all.mdcrd")
+        assert check
 
     """
     def test_writeResult(self):
