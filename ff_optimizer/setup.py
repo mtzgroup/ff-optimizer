@@ -96,7 +96,7 @@ def writeTCFiles(inp, charge):
             dedent(
                 f"""\
             basis         def2-svp  
-            method        wb97x-d3
+            method        wb97xd3
             charge        {charge}        
             run           gradient 
             dftd          d3       
@@ -109,7 +109,7 @@ def writeTCFiles(inp, charge):
             dedent(
                 f"""\
             basis         def2-svp  
-            method        wb97x-d3
+            method        wb97xd3
             charge        {charge}        
             run           gradient 
             dftd          d3       

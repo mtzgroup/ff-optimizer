@@ -568,6 +568,8 @@ class OptEngine:
         inPatience = False
         cutoff = self.inp.cutoff  # Cutoff is 1% change in performance
         lastCycle = -1
+        # Remember, validDiff[0] maps to results from iteration 1
+        # indexing is fun
         validDiff = self.computeValidDiff()
         for j in range(len(validDiff)):
             if not inPatience and validDiff[j] > cutoff:
@@ -575,12 +577,12 @@ class OptEngine:
                 patienceCycle = j
             if inPatience and validDiff[j] < cutoff:
                 inPatience = False
-            if inPatience and j - patienceCycle >= self.inp.patience:
-                lastCycle = j
+            if inPatience and j - patienceCycle >= self.inp.patience - 1:
+                lastCycle = j + 1 # switch from 0-indexing to 1-indexing here
                 self.converged = True
-                print(f"Optimization has converged at cycle {j}")
+                print(f"Optimization has converged at cycle {lastCycle}")
                 print("Running final validations to determine optimal parameters")
-                best = self.getFinalValidations(j)
+                best = self.getFinalValidations(lastCycle)
                 print(f"Optimal parameters are from iteration {best}")
                 break
         return lastCycle

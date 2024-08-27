@@ -245,7 +245,7 @@ class DebugEngine(QMEngine):
         grads = []
         coords = []
         for xyz in xyzs:
-            name = xyz.split(".")[0]
+            name = xyz.name.split(".")[0]
             super().writeInputFile(self.inputSettings, xyz, f"tc_{name}.in")
             os.system(f"terachem tc_{name}.in > tc_{name}.out")
             energy, grad = utils.readGradFromTCout(f"tc_{name}.out")
