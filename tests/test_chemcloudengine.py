@@ -111,7 +111,7 @@ def test_getQMRefData(monkeypatch):
     for i in range(1, 11):
         xyzs.append(f"{i}.xyz")
         mol = Structure.open(calcDir / f"{i}.xyz")
-        sp = ProgramInput(model=mod, molecule=mol, calctype="energy", extras={"id": i})
+        sp = ProgramInput(model=mod, structure=mol, calctype="energy", extras={"id": i})
         try:
             res = parse(calcDir / f"tc_{i}.out", "terachem")
             out = ProgramOutput(
@@ -129,7 +129,7 @@ def test_getQMRefData(monkeypatch):
     retryOutputs = []
     for i in refIds:
         mol = Structure.open(calcDir / f"{i}.xyz")
-        sp = ProgramInput(model=mod, molecule=mol, calctype="energy", extras={"id": i})
+        sp = ProgramInput(model=mod, structure=mol, calctype="energy", extras={"id": i})
         res = parse(calcDir / f"tc_{i}_success.out", "terachem")
         out = ProgramOutput(input_data=sp, results=res, provenance=prov, success=True)
         retryOutputs.append(out)
@@ -292,7 +292,7 @@ def test_writeResultResp(monkeypatch):
     prov = Provenance(program="terachem")
     mod = {"method": "hf", "basis": "sto-3g"}
     mol = Structure.open("qmengine/test/1.xyz")
-    sp = ProgramInput(model=mod, molecule=mol, calctype="energy", extras={"id": 999})
+    sp = ProgramInput(model=mod, structure=mol, calctype="energy", extras={"id": 999})
     res = parse("qmengine/test/tc_1.out", "terachem")
     with open("qmengine/test/esp_1.xyz", "r") as f:
         espLines = f.readlines()

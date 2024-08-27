@@ -60,7 +60,6 @@ def monkeyInitialCycle(self):
 def monkeyGetFinalValidations(self, j):
     return 1
 
-@pytest.mark.debug
 def test_optimize_converge(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     os.chdir("model")
