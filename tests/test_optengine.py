@@ -6,11 +6,12 @@ from shutil import copyfile, rmtree
 
 import numpy as np
 
-from ff_optimizer import optengine, resp_prior
+from ff_optimizer import optengine, resp_prior, utils
 
 from . import checkUtils
 from .test_inputs import getDefaults
 
+home = Path(os.path.dirname(__file__))
 
 def monkeyGraph():
     pass
@@ -416,10 +417,7 @@ def test_setupInputFiles():
     checkUtils.checkLists(testLinesValidInitial, refLinesValidInitial)
 
 
-def monkeyForceBalance(command):
-    split = command.split()
-    inp = split[1]
-    out = split[3]
+def monkeyForceBalance(inp, out, err=None):
     name = inp.split("_")[1].replace(".in", "")
     with open(inp, "r") as f:
         for line in f.readlines():
@@ -452,7 +450,7 @@ def test_optimizeForcefield0(monkeypatch):
     options.pathify()
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
-    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    monkeypatch.setattr(optengine, "runForceBalance", monkeyForceBalance)
     os.chdir("opt1")
     makeFFfolder("dasa.frcmod", "dasa.mol2")
     optEngine.optimizeForcefield(0)
@@ -486,7 +484,7 @@ def test_optimizeForcefield1(monkeypatch):
     options.optdir = Path("restart1").absolute()
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
-    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    monkeypatch.setattr(optengine, "runForceBalance", monkeyForceBalance)
     monkeypatch.setattr(optEngine, "graphResults", monkeyGraph)
     os.chdir("restart1")
     makeFFfolder("dasa.frcmod", "dasa.mol2")
@@ -634,7 +632,7 @@ def test_respPriors(monkeypatch):
     options.resppriors = 1
     options.restart = True
     optEngine = optengine.OptEngine(options)
-    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    monkeypatch.setattr(optengine, "runForceBalance", monkeyForceBalance)
     monkeypatch.setattr(optEngine, "graphResults", monkeyGraph)
     os.chdir("restart1")
     for f in os.listdir():
@@ -726,10 +724,7 @@ def test_setupInputFiles_multipleValids(monkeypatch):
     # checkUtils.checkLists(testLinesValidInitial2, refLinesValidInitial2)
 
 def test_optimizeForcefield_multipleValids(monkeypatch):
-    def monkeyForceBalance(command):
-        split = command.split()
-        inp = split[1]
-        out = split[3]
+    def monkeyForceBalance(inp, out, err=None):
         if not os.path.isfile(inp):
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), inp)
         if not os.path.isfile(os.path.join("ref", out)):
@@ -749,7 +744,7 @@ def test_optimizeForcefield_multipleValids(monkeypatch):
     options.pathify()
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
-    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    monkeypatch.setattr(optengine, "runForceBalance", monkeyForceBalance)
     monkeypatch.setattr(optEngine, "graphResults", monkeyGraph)
     monkeypatch.setattr(optEngine, "sortParams", monkeySort)
     os.chdir("opt3")
@@ -794,11 +789,10 @@ def test_determineRestart_multipleValids(monkeypatch):
     assert optEngine.restartCycle == 2
 
 
-def monkeyForcebalance(command):
+def monkeyFB2(inFile, out, err=None):
     with open("fb.log", "a") as f:
-        f.write(command + "\n")
-    inFile = command.split()[1]
-    outFileSplit = command.split()[3].replace(".out", "").split("_")
+        f.write(inFile + "\n")
+    outFileSplit = out.replace(".out", "").split("_")
     if outFileSplit[0] == "opt":
         fbType = "opt"
     else:
@@ -818,7 +812,7 @@ def monkeyForcebalance(command):
         commentLine = f.readline()
     if fbType not in commentLine:
         print(commentLine)
-        print(command)
+        print(inFile, out)
         raise RuntimeError("Ran FB on wrong parameters")
 
 
@@ -868,7 +862,7 @@ def test_restart1Params(monkeypatch):
     options.restart = True
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
-    monkeypatch.setattr(os, "system", monkeyForcebalance)
+    monkeypatch.setattr(optengine, "runForceBalance", monkeyFB2)
     monkeypatch.setattr(optengine.OptEngine, "readValid", monkeyReadValid)
     monkeypatch.setattr(optengine.OptEngine, "readOpt", monkeyReadOpt)
     setupFFdir("params1")
@@ -899,7 +893,7 @@ def test_restart2Params(monkeypatch):
     options.restart = True
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
-    monkeypatch.setattr(os, "system", monkeyForcebalance)
+    monkeypatch.setattr(optengine, "runForceBalance", monkeyFB2)
     monkeypatch.setattr(optengine.OptEngine, "readValid", monkeyReadValid)
     monkeypatch.setattr(optengine.OptEngine, "readOpt", monkeyReadOpt)
     setupFFdir(testDir)
@@ -929,7 +923,7 @@ def test_restart3Params(monkeypatch):
     options.restart = True
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
-    monkeypatch.setattr(os, "system", monkeyForcebalance)
+    monkeypatch.setattr(optengine, "runForceBalance", monkeyFB2)
     monkeypatch.setattr(optengine.OptEngine, "readValid", monkeyReadValid)
     monkeypatch.setattr(optengine.OptEngine, "readOpt", monkeyReadOpt)
     setupFFdir(testDir)
@@ -960,7 +954,7 @@ def test_restart4Params(monkeypatch):
     options.validinitial = True
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
-    monkeypatch.setattr(os, "system", monkeyForcebalance)
+    monkeypatch.setattr(optengine, "runForceBalance", monkeyFB2)
     monkeypatch.setattr(optengine.OptEngine, "readValid", monkeyReadValid)
     monkeypatch.setattr(optengine.OptEngine, "readOpt", monkeyReadOpt)
     setupFFdir(testDir)
@@ -1172,3 +1166,22 @@ def test_editOpt0_2(monkeypatch):
 #    os.chdir(testDir)
 #    results = optEngine.readOpt("opt_1.out")
 #    optEngine.sortParams(1, results)
+
+def test_runfb():
+    os.chdir(home / "optengine" / "runfb")
+    optengine.runForceBalance("valid_3.in", "test.out", "test.err")
+    # Some lines in the output include dates, timings, software that could change
+    # So we have to omit those lines when we're comparing to reference
+    with open("ref.out", "r") as f:
+        refOut = f.readlines()[182:225]
+    print(refOut)
+    with open("test.out", "r") as f:
+        testOut = f.readlines()[182:225]
+    out = checkUtils.checkLists(refOut, testOut)
+    err = checkUtils.checkFiles("ref.err", "test.err")
+    os.remove("test.out")
+    os.remove("test.err")
+    utils.rmrf("valid_3.tmp")
+    assert out
+    assert err
+

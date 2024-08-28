@@ -55,153 +55,185 @@
                           [44m      [0m      [43m  [0m                                
                              [44m  [0m                                         
 
-Reading options from file: valid_2.in
+Reading options from file: valid_1_initial.in
 
 #========================================================#
 #| [95m  Options at their default values are not printed   [0m |#
 #| [95m        Use 'verbose_options True' to Enable        [0m |#
 #========================================================#
-Reading force field from file: dasa.frcmod
-Reading force field from file: dasa.mol2
+Reading force field from file: initial_dasa.frcmod
+Reading force field from file: initial_dasa.mol2
 
 #=========================================================#
 #| [92m Starting parameter indices, physical values and IDs [0m |#
 #=========================================================#
-   0 [  1.0937e+02 ] : BONDSK/cy-c3
-   1 [  1.5141e+00 ] : BONDSB/cy-c3
-   2 [  1.0720e+02 ] : BONDSK/cy-os
-   3 [  1.4235e+00 ] : BONDSB/cy-os
-   4 [  9.7479e+02 ] : BONDSK/cv-cv
-   5 [  1.4530e+00 ] : BONDSB/cv-cv
-   6 [  3.2160e+02 ] : BONDSK/cv-o
-   7 [  1.2291e+00 ] : BONDSB/cv-o
-   8 [  1.7095e+02 ] : BONDSK/cv-os
-   9 [  1.3600e+00 ] : BONDSB/cv-os
-  10 [  3.6374e+02 ] : BONDSK/cv-ce
-  11 [  1.3453e+00 ] : BONDSB/cv-ce
-  12 [  2.1839e+02 ] : BONDSK/c3-hc
-  13 [  1.0942e+00 ] : BONDSB/c3-hc
-  14 [  2.1866e+02 ] : BONDSK/ce-ha
-  15 [  1.0843e+00 ] : BONDSB/ce-ha
-  16 [  1.9182e+02 ] : BONDSK/c2-ha
-  17 [  1.0768e+00 ] : BONDSB/c2-ha
+   0 [  2.6650e+02 ] : BONDSK/cy-c3
+   1 [  1.5317e+00 ] : BONDSB/cy-c3
+   2 [  2.5181e+02 ] : BONDSK/cy-os
+   3 [  1.4228e+00 ] : BONDSB/cy-os
+   4 [  2.7175e+02 ] : BONDSK/cv-cv
+   5 [  1.5327e+00 ] : BONDSB/cv-cv
+   6 [  7.4938e+02 ] : BONDSK/cv-o
+   7 [  1.2311e+00 ] : BONDSB/cv-o
+   8 [  2.8783e+02 ] : BONDSK/cv-os
+   9 [  1.3773e+00 ] : BONDSB/cv-os
+  10 [  4.1070e+02 ] : BONDSK/cv-ce
+  11 [  1.4066e+00 ] : BONDSB/cv-ce
+  12 [  3.6507e+02 ] : BONDSK/c3-hc
+  13 [  1.0969e+00 ] : BONDSB/c3-hc
+  14 [  3.5881e+02 ] : BONDSK/ce-ha
+  15 [  1.0898e+00 ] : BONDSB/ce-ha
+  16 [  4.0601e+02 ] : BONDSK/c2-ha
+  17 [  1.0891e+00 ] : BONDSB/c2-ha
   18 [  3.8744e+02 ] : BONDSK/c2-c2
   19 [  1.3902e+00 ] : BONDSB/c2-c2
-  20 [  2.6228e+02 ] : BONDSK/c2-ce
-  21 [  1.3662e+00 ] : BONDSB/c2-ce
-  22 [  2.1893e+02 ] : BONDSK/c2-oh
-  23 [  1.3689e+00 ] : BONDSB/c2-oh
-  24 [  1.2000e+02 ] : BONDSK/ce-h4
-  25 [  1.0985e+00 ] : BONDSB/ce-h4
-  26 [  2.2065e+02 ] : BONDSK/ce-n3
-  27 [  1.3090e+00 ] : BONDSB/ce-n3
-  28 [  1.8167e+02 ] : BONDSK/c3-h1
-  29 [  1.0981e+00 ] : BONDSB/c3-h1
-  30 [  1.9487e+02 ] : BONDSK/c3-c3
-  31 [  1.5178e+00 ] : BONDSB/c3-c3
-  32 [  1.4991e+02 ] : BONDSK/c3-n3
-  33 [  1.4234e+00 ] : BONDSB/c3-n3
-  34 [  2.5319e+02 ] : BONDSK/oh-ho
-  35 [  9.6434e-01 ] : BONDSB/oh-ho
-  36 [  2.1223e+01 ] : ANGLESK/cy-c3-hc
-  37 [  9.7736e+01 ] : ANGLESB/cy-c3-hc
-  38 [  2.7507e+01 ] : ANGLESK/cy-os-cv
-  39 [  1.0469e+02 ] : ANGLESB/cy-os-cv
-  40 [  5.5115e+01 ] : ANGLESK/cv-cv-cv
-  41 [  1.5976e+02 ] : ANGLESB/cv-cv-cv
-  42 [  3.0362e+01 ] : ANGLESK/cv-cv-ce
-  43 [  1.5619e+02 ] : ANGLESB/cv-cv-ce
-  44 [  1.4094e+01 ] : ANGLESK/cv-cv-o
-  45 [  1.5520e+02 ] : ANGLESB/cv-cv-o
-  46 [  1.6645e+01 ] : ANGLESK/cv-cv-os
-  47 [  1.5687e+02 ] : ANGLESB/cv-cv-os
-  48 [ -1.1039e+00 ] : ANGLESK/cv-ce-ha
-  49 [  1.5277e+02 ] : ANGLESB/cv-ce-ha
-  50 [  2.2573e+01 ] : ANGLESK/cv-ce-c2
-  51 [  9.1376e+01 ] : ANGLESB/cv-ce-c2
-  52 [  2.1526e+01 ] : ANGLESK/c3-cy-c3
-  53 [  1.1316e+02 ] : ANGLESB/c3-cy-c3
-  54 [  5.8457e+01 ] : ANGLESK/c3-cy-os
-  55 [  1.0296e+02 ] : ANGLESB/c3-cy-os
-  56 [  3.3114e+01 ] : ANGLESK/hc-c3-hc
-  57 [  1.0482e+02 ] : ANGLESB/hc-c3-hc
-  58 [  4.1814e+01 ] : ANGLESK/ce-c2-ce
-  59 [  1.2209e+02 ] : ANGLESB/ce-c2-ce
-  60 [  3.4633e+01 ] : ANGLESK/ce-c2-oh
-  61 [  1.2027e+02 ] : ANGLESB/ce-c2-oh
-  62 [  1.7499e+01 ] : ANGLESK/ha-ce-c2
-  63 [  1.3266e+02 ] : ANGLESB/ha-ce-c2
-  64 [ -4.0860e+00 ] : ANGLESK/c2-ce-c2
-  65 [  1.5358e+02 ] : ANGLESB/c2-ce-c2
-  66 [  1.4257e+01 ] : ANGLESK/c2-oh-ho
-  67 [  1.1861e+02 ] : ANGLESB/c2-oh-ho
-  68 [  3.2883e+00 ] : ANGLESK/ha-c2-ce
-  69 [  1.2467e+02 ] : ANGLESB/ha-c2-ce
-  70 [  4.1377e+01 ] : ANGLESK/c2-ce-h4
-  71 [  1.4538e+02 ] : ANGLESB/c2-ce-h4
-  72 [  2.4023e+01 ] : ANGLESK/c2-ce-n3
-  73 [  1.5735e+02 ] : ANGLESB/c2-ce-n3
-  74 [  5.2047e+01 ] : ANGLESK/ce-n3-c3
-  75 [  1.1619e+02 ] : ANGLESB/ce-n3-c3
-  76 [  2.7499e+01 ] : ANGLESK/h4-ce-n3
-  77 [  1.5571e+02 ] : ANGLESB/h4-ce-n3
-  78 [  3.6288e+01 ] : ANGLESK/c3-c3-hc
-  79 [  1.0622e+02 ] : ANGLESB/c3-c3-hc
-  80 [  5.7471e+01 ] : ANGLESK/c3-n3-c3
-  81 [  1.1419e+02 ] : ANGLESB/c3-n3-c3
-  82 [  1.4485e+01 ] : ANGLESK/h1-c3-h1
-  83 [  1.1395e+02 ] : ANGLESB/h1-c3-h1
-  84 [  3.0686e+01 ] : ANGLESK/h1-c3-c3
-  85 [  1.1067e+02 ] : ANGLESB/h1-c3-c3
-  86 [  4.5491e+01 ] : ANGLESK/h1-c3-n3
-  87 [  1.0588e+02 ] : ANGLESB/h1-c3-n3
-  88 [  5.0637e+01 ] : ANGLESK/c3-c3-n3
-  89 [  1.0808e+02 ] : ANGLESB/c3-c3-n3
-  90 [  2.7460e+01 ] : ANGLESK/o-cv-os
-  91 [  1.5241e+02 ] : ANGLESB/o-cv-os
-  92 [  2.9128e+01 ] : ANGLESK/os-cy-os
-  93 [  9.9750e+01 ] : ANGLESB/os-cy-os
-  94 [ -1.9737e+00 ] : PDIHS2K/cv-cv-cv-o
-  95 [  1.4619e+00 ] : PDIHS2K/cv-cv-cv-os
-  96 [  3.3709e+00 ] : PDIHS2K/cv-cv-ce-ha
-  97 [  8.0799e+00 ] : PDIHS2K/cv-cv-ce-c2
-  98 [  5.9099e-01 ] : PDIHS2K/cy-os-cv-cv
-  99 [  1.7691e+00 ] : PDIHS2K/cy-os-cv-o
- 100 [  1.1413e+00 ] : PDIHS3K/cv-os-cy-c3
- 101 [ -5.1437e-01 ] : PDIHS3K/cv-os-cy-os
- 102 [  2.9991e+00 ] : PDIHS2K/cv-ce-c2-ce
- 103 [  2.8875e+00 ] : PDIHS2K/cv-ce-c2-oh
- 104 [  6.2043e-01 ] : PDIHS3K/c3-cy-c3-hc
- 105 [ -4.3524e-02 ] : PDIHS3K/hc-c3-cy-os
- 106 [ -2.1134e+00 ] : PDIHS1K/hc-c3-cy-os
- 107 [  2.9725e+00 ] : PDIHS2K/ce-cv-cv-o
- 108 [ -3.1611e+00 ] : PDIHS2K/ce-cv-cv-os
- 109 [  1.7809e+00 ] : PDIHS2K/ce-c2-ce-ha
- 110 [  5.2251e+00 ] : PDIHS2K/ce-c2-ce-c2
- 111 [  6.0733e-01 ] : PDIHS2K/ce-c2-oh-ho
- 112 [  8.1787e+00 ] : PDIHS2K/ha-ce-c2-oh
- 113 [  7.8880e+00 ] : PDIHS2K/ce-c2-ce-h4
- 114 [  5.6210e+00 ] : PDIHS2K/ce-c2-ce-n3
- 115 [  1.0472e+01 ] : PDIHS2K/ha-c2-ce-ha
- 116 [  4.2786e+00 ] : PDIHS2K/c2-ce-c2-oh
- 117 [ -3.9635e-01 ] : PDIHS2K/c2-ce-n3-c3
- 118 [ -1.1803e+00 ] : PDIHS2K/ha-c2-ce-h4
- 119 [  6.4291e-01 ] : PDIHS2K/ha-c2-ce-n3
- 120 [  7.1714e-01 ] : PDIHS3K/ce-n3-c3-h1
- 121 [ -2.0176e+00 ] : PDIHS3K/ce-n3-c3-c3
- 122 [  2.8978e+00 ] : PDIHS2K/h4-ce-n3-c3
- 123 [  3.9731e+00 ] : PDIHS2K/ha-c2-ce-c2
- 124 [  7.2437e-01 ] : PDIHS3K/c3-n3-c3-h1
- 125 [ -1.0304e+00 ] : PDIHS3K/c3-n3-c3-c3
- 126 [  9.5034e-01 ] : PDIHS2K/c3-n3-c3-c3
- 127 [  7.2395e-02 ] : PDIHS3K/h1-c3-c3-hc
- 128 [  9.9004e-02 ] : PDIHS3K/hc-c3-c3-n3
- 129 [  4.1991e+00 ] : IDIHSK/cv-o-cv-os
- 130 [ -1.4321e+01 ] : IDIHSK/ce-cv-cv-cv
- 131 [ -1.0213e+01 ] : IDIHSK/c2-cv-ce-ha
- 132 [  3.3712e-02 ] : IDIHSK/ce-ce-c2-oh
- 133 [ -6.1003e+00 ] : IDIHSK/c2-c2-ce-ha
- 134 [ -8.7449e-01 ] : IDIHSK/c2-h4-ce-n3
+  20 [  4.6409e+02 ] : BONDSK/c2-ce
+  21 [  1.3981e+00 ] : BONDSB/c2-ce
+  22 [  3.8722e+02 ] : BONDSK/c2-oh
+  23 [  1.3470e+00 ] : BONDSB/c2-oh
+  24 [  3.7349e+02 ] : BONDSK/ce-h4
+  25 [  1.0932e+00 ] : BONDSB/ce-h4
+  26 [  4.9307e+02 ] : BONDSK/ce-n3
+  27 [  1.3466e+00 ] : BONDSB/ce-n3
+  28 [  3.6678e+02 ] : BONDSK/c3-h1
+  29 [  1.0966e+00 ] : BONDSB/c3-h1
+  30 [  2.5808e+02 ] : BONDSK/c3-c3
+  31 [  1.5412e+00 ] : BONDSB/c3-c3
+  32 [  2.7266e+02 ] : BONDSK/c3-n3
+  33 [  1.4702e+00 ] : BONDSB/c3-n3
+  34 [  4.0916e+02 ] : BONDSK/oh-ho
+  35 [  9.7389e-01 ] : BONDSB/oh-ho
+  36 [  4.5383e+01 ] : ANGLESK/cy-c3-hc
+  37 [  1.0853e+02 ] : ANGLESB/cy-c3-hc
+  38 [  4.6232e+01 ] : ANGLESK/cy-os-cv
+  39 [  1.0693e+02 ] : ANGLESB/cy-os-cv
+  40 [  7.4995e+01 ] : ANGLESK/cv-cv-cv
+  41 [  1.5654e+02 ] : ANGLESB/cv-cv-cv
+  42 [  5.4969e+01 ] : ANGLESK/cv-cv-ce
+  43 [  1.5834e+02 ] : ANGLESB/cv-cv-ce
+  44 [  5.7006e+01 ] : ANGLESK/cv-cv-o
+  45 [  1.5979e+02 ] : ANGLESB/cv-cv-o
+  46 [  6.1532e+01 ] : ANGLESK/cv-cv-os
+  47 [  1.4281e+02 ] : ANGLESB/cv-cv-os
+  48 [  3.0705e+01 ] : ANGLESK/cv-ce-ha
+  49 [  1.5262e+02 ] : ANGLESB/cv-ce-ha
+  50 [  4.3094e+01 ] : ANGLESK/cv-ce-c2
+  51 [  1.4596e+02 ] : ANGLESB/cv-ce-c2
+  52 [  5.0468e+01 ] : ANGLESK/c3-cy-c3
+  53 [  1.2726e+02 ] : ANGLESB/c3-cy-c3
+  54 [  8.2908e+01 ] : ANGLESK/c3-cy-os
+  55 [  1.1550e+02 ] : ANGLESB/c3-cy-os
+  56 [  3.9201e+01 ] : ANGLESK/hc-c3-hc
+  57 [  1.0677e+02 ] : ANGLESB/hc-c3-hc
+  58 [  7.1860e+01 ] : ANGLESK/ce-c2-ce
+  59 [  1.2574e+02 ] : ANGLESB/ce-c2-ce
+  60 [  6.3175e+01 ] : ANGLESK/ce-c2-oh
+  61 [  1.2572e+02 ] : ANGLESB/ce-c2-oh
+  62 [  3.9826e+01 ] : ANGLESK/ha-ce-c2
+  63 [  1.4619e+02 ] : ANGLESB/ha-ce-c2
+  64 [  5.2998e+01 ] : ANGLESK/c2-ce-c2
+  65 [  1.4667e+02 ] : ANGLESB/c2-ce-c2
+  66 [  4.7307e+01 ] : ANGLESK/c2-oh-ho
+  67 [  1.0647e+02 ] : ANGLESB/c2-oh-ho
+  68 [  3.9757e+01 ] : ANGLESK/ha-c2-ce
+  69 [  1.3161e+02 ] : ANGLESB/ha-c2-ce
+  70 [  3.8290e+01 ] : ANGLESK/c2-ce-h4
+  71 [  1.4501e+02 ] : ANGLESB/c2-ce-h4
+  72 [  4.8510e+01 ] : ANGLESK/c2-ce-n3
+  73 [  1.4725e+02 ] : ANGLESB/c2-ce-n3
+  74 [  6.3746e+01 ] : ANGLESK/ce-n3-c3
+  75 [  1.2057e+02 ] : ANGLESB/ce-n3-c3
+  76 [  4.5843e+01 ] : ANGLESK/h4-ce-n3
+  77 [  1.3485e+02 ] : ANGLESB/h4-ce-n3
+  78 [  4.4414e+01 ] : ANGLESK/c3-c3-hc
+  79 [  1.0988e+02 ] : ANGLESB/c3-c3-hc
+  80 [  5.7345e+01 ] : ANGLESK/c3-n3-c3
+  81 [  1.1680e+02 ] : ANGLESB/c3-n3-c3
+  82 [  3.4632e+01 ] : ANGLESK/h1-c3-h1
+  83 [  1.1457e+02 ] : ANGLESB/h1-c3-h1
+  84 [  4.2397e+01 ] : ANGLESK/h1-c3-c3
+  85 [  1.1717e+02 ] : ANGLESB/h1-c3-c3
+  86 [  5.2991e+01 ] : ANGLESK/h1-c3-n3
+  87 [  1.1332e+02 ] : ANGLESB/h1-c3-n3
+  88 [  6.8668e+01 ] : ANGLESK/c3-c3-n3
+  89 [  1.1706e+02 ] : ANGLESB/c3-c3-n3
+  90 [  7.9501e+01 ] : ANGLESK/o-cv-os
+  91 [  1.3860e+02 ] : ANGLESB/o-cv-os
+  92 [  1.0212e+02 ] : ANGLESK/os-cy-os
+  93 [  1.1235e+02 ] : ANGLESB/os-cy-os
+  94 [  1.0548e+00 ] : PDIHS2K/cv-cv-cv-o
+  95 [  8.9142e-01 ] : PDIHS2K/cv-cv-cv-os
+  96 [  2.2892e+00 ] : PDIHS2K/cv-cv-ce-ha
+  97 [  2.7124e+00 ] : PDIHS2K/cv-cv-ce-c2
+  98 [  4.4769e-01 ] : PDIHS2K/cy-os-cv-cv
+  99 [  3.9532e+00 ] : PDIHS2K/cy-os-cv-o
+ 100 [ -1.3895e-01 ] : PDIHS3K/cv-os-cy-c3
+ 101 [  2.0709e-01 ] : PDIHS3K/cv-os-cy-os
+ 102 [  3.6355e+00 ] : PDIHS2K/cv-ce-c2-ce
+ 103 [  2.2141e+00 ] : PDIHS2K/cv-ce-c2-oh
+ 104 [  1.8111e-01 ] : PDIHS3K/c3-cy-c3-hc
+ 105 [  2.0296e-01 ] : PDIHS3K/hc-c3-cy-os
+ 106 [ -8.8367e-01 ] : PDIHS1K/hc-c3-cy-os
+ 107 [  3.9739e-01 ] : PDIHS2K/ce-cv-cv-o
+ 108 [  3.4419e+00 ] : PDIHS2K/ce-cv-cv-os
+ 109 [  1.5320e+00 ] : PDIHS2K/ce-c2-ce-ha
+ 110 [  3.3124e+00 ] : PDIHS2K/ce-c2-ce-c2
+ 111 [  9.7490e-01 ] : PDIHS2K/ce-c2-oh-ho
+ 112 [  3.9525e+00 ] : PDIHS2K/ha-ce-c2-oh
+ 113 [  3.0091e+00 ] : PDIHS2K/ce-c2-ce-h4
+ 114 [  3.3690e+00 ] : PDIHS2K/ce-c2-ce-n3
+ 115 [  4.2661e+00 ] : PDIHS2K/ha-c2-ce-ha
+ 116 [  2.6381e+00 ] : PDIHS2K/c2-ce-c2-oh
+ 117 [  2.9289e+00 ] : PDIHS2K/c2-ce-n3-c3
+ 118 [  2.4753e+00 ] : PDIHS2K/ha-c2-ce-h4
+ 119 [  2.5343e+00 ] : PDIHS2K/ha-c2-ce-n3
+ 120 [  1.2979e-01 ] : PDIHS3K/ce-n3-c3-h1
+ 121 [  5.1608e-01 ] : PDIHS3K/ce-n3-c3-c3
+ 122 [  2.7190e+00 ] : PDIHS2K/h4-ce-n3-c3
+ 123 [  8.2673e-01 ] : PDIHS2K/ha-c2-ce-c2
+ 124 [  5.5879e-02 ] : PDIHS3K/c3-n3-c3-h1
+ 125 [  6.7559e-01 ] : PDIHS3K/c3-n3-c3-c3
+ 126 [ -6.0430e-01 ] : PDIHS2K/c3-n3-c3-c3
+ 127 [  1.1321e-01 ] : PDIHS3K/h1-c3-c3-hc
+ 128 [  3.6008e-01 ] : PDIHS3K/hc-c3-c3-n3
+ 129 [  5.0910e-01 ] : IDIHSK/cv-o-cv-os
+ 130 [ -1.4710e+01 ] : IDIHSK/ce-cv-cv-cv
+ 131 [ -4.7473e+00 ] : IDIHSK/c2-cv-ce-ha
+ 132 [  4.8706e-01 ] : IDIHSK/ce-ce-c2-oh
+ 133 [ -3.7684e+00 ] : IDIHSK/c2-c2-ce-ha
+ 134 [ -6.0860e+00 ] : IDIHSK/c2-h4-ce-n3
+ 135 [  4.4874e-02 ] : COUL:DAS-1
+ 136 [  1.7601e+00 ] : COUL:DAS-2
+ 137 [ -1.1183e+00 ] : COUL:DAS-3
+ 138 [  6.0281e-01 ] : COUL:DAS-4
+ 139 [  8.1694e-02 ] : COUL:DAS-5
+ 140 [  9.8904e-03 ] : COUL:DAS-6
+ 141 [ -3.2949e-02 ] : COUL:DAS-9
+ 142 [  4.0448e-02 ] : COUL:DAS-10
+ 143 [  3.5492e-01 ] : COUL:DAS-13
+ 144 [  1.0922e-01 ] : COUL:DAS-14
+ 145 [ -2.8764e-01 ] : COUL:DAS-15
+ 146 [  1.1295e-01 ] : COUL:DAS-16
+ 147 [  1.0654e-01 ] : COUL:DAS-17
+ 148 [ -5.4860e-01 ] : COUL:DAS-18
+ 149 [  2.5008e-01 ] : COUL:DAS-19
+ 150 [  4.7860e-01 ] : COUL:DAS-20
+ 151 [  2.6706e-02 ] : COUL:DAS-21
+ 152 [  2.2455e-01 ] : COUL:DAS-22
+ 153 [  6.1463e-02 ] : COUL:DAS-23
+ 154 [ -6.0803e-01 ] : COUL:DAS-25
+ 155 [  1.7921e-01 ] : COUL:DAS-26
+ 156 [  1.4499e-01 ] : COUL:DAS-29
+ 157 [  3.8822e-02 ] : COUL:DAS-30
+ 158 [ -2.5032e-01 ] : COUL:DAS-32
+ 159 [  8.8028e-02 ] : COUL:DAS-33
+ 160 [ -3.8080e-01 ] : COUL:DAS-36
+ 161 [ -8.8230e-01 ] : COUL:DAS-37
+ 162 [ -5.7262e-01 ] : COUL:DAS-38
+ 163 [ -2.1339e-01 ] : COUL:DAS-39
+ 164 [ -5.7110e-01 ] : COUL:DAS-40
+ 165 [ -4.1748e-01 ] : COUL:DAS-41
+ 166 [  4.3215e-01 ] : COUL:DAS-42
 -----------------------------------------------------------
 
 #=========================================================#
@@ -214,7 +246,8 @@ Reading force field from file: dasa.mol2
    PDIHS1K                              : 9.64853e+01
    PDIHS2K                              : 9.64853e+01
    PDIHS3K                              : 9.64853e+01
-   IDIHSK                               : 1.43213e+01
+   IDIHSK                               : 1.47096e+01
+   COUL                                 : 1.00000e+00
 -----------------------------------------------------------
 
 #========================================================#
@@ -349,17 +382,81 @@ Reading force field from file: dasa.mol2
  126 [    PDIHS2K                       : 9.64853e+01 ] : PDIHS2K/c3-n3-c3-c3
  127 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/h1-c3-c3-hc
  128 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/hc-c3-c3-n3
- 129 [    IDIHSK                        : 1.43213e+01 ] : IDIHSK/cv-o-cv-os
- 130 [    IDIHSK                        : 1.43213e+01 ] : IDIHSK/ce-cv-cv-cv
- 131 [    IDIHSK                        : 1.43213e+01 ] : IDIHSK/c2-cv-ce-ha
- 132 [    IDIHSK                        : 1.43213e+01 ] : IDIHSK/ce-ce-c2-oh
- 133 [    IDIHSK                        : 1.43213e+01 ] : IDIHSK/c2-c2-ce-ha
- 134 [    IDIHSK                        : 1.43213e+01 ] : IDIHSK/c2-h4-ce-n3
+ 129 [    IDIHSK                        : 1.47096e+01 ] : IDIHSK/cv-o-cv-os
+ 130 [    IDIHSK                        : 1.47096e+01 ] : IDIHSK/ce-cv-cv-cv
+ 131 [    IDIHSK                        : 1.47096e+01 ] : IDIHSK/c2-cv-ce-ha
+ 132 [    IDIHSK                        : 1.47096e+01 ] : IDIHSK/ce-ce-c2-oh
+ 133 [    IDIHSK                        : 1.47096e+01 ] : IDIHSK/c2-c2-ce-ha
+ 134 [    IDIHSK                        : 1.47096e+01 ] : IDIHSK/c2-h4-ce-n3
+ 135 [    COUL                          : 1.00000e+00 ] : COUL:DAS-1
+ 136 [    COUL                          : 1.00000e+00 ] : COUL:DAS-2
+ 137 [    COUL                          : 1.00000e+00 ] : COUL:DAS-3
+ 138 [    COUL                          : 1.00000e+00 ] : COUL:DAS-4
+ 139 [    COUL                          : 1.00000e+00 ] : COUL:DAS-5
+ 140 [    COUL                          : 1.00000e+00 ] : COUL:DAS-6
+ 141 [    COUL                          : 1.00000e+00 ] : COUL:DAS-9
+ 142 [    COUL                          : 1.00000e+00 ] : COUL:DAS-10
+ 143 [    COUL                          : 1.00000e+00 ] : COUL:DAS-13
+ 144 [    COUL                          : 1.00000e+00 ] : COUL:DAS-14
+ 145 [    COUL                          : 1.00000e+00 ] : COUL:DAS-15
+ 146 [    COUL                          : 1.00000e+00 ] : COUL:DAS-16
+ 147 [    COUL                          : 1.00000e+00 ] : COUL:DAS-17
+ 148 [    COUL                          : 1.00000e+00 ] : COUL:DAS-18
+ 149 [    COUL                          : 1.00000e+00 ] : COUL:DAS-19
+ 150 [    COUL                          : 1.00000e+00 ] : COUL:DAS-20
+ 151 [    COUL                          : 1.00000e+00 ] : COUL:DAS-21
+ 152 [    COUL                          : 1.00000e+00 ] : COUL:DAS-22
+ 153 [    COUL                          : 1.00000e+00 ] : COUL:DAS-23
+ 154 [    COUL                          : 1.00000e+00 ] : COUL:DAS-25
+ 155 [    COUL                          : 1.00000e+00 ] : COUL:DAS-26
+ 156 [    COUL                          : 1.00000e+00 ] : COUL:DAS-29
+ 157 [    COUL                          : 1.00000e+00 ] : COUL:DAS-30
+ 158 [    COUL                          : 1.00000e+00 ] : COUL:DAS-32
+ 159 [    COUL                          : 1.00000e+00 ] : COUL:DAS-33
+ 160 [    COUL                          : 1.00000e+00 ] : COUL:DAS-36
+ 161 [    COUL                          : 1.00000e+00 ] : COUL:DAS-37
+ 162 [    COUL                          : 1.00000e+00 ] : COUL:DAS-38
+ 163 [    COUL                          : 1.00000e+00 ] : COUL:DAS-39
+ 164 [    COUL                          : 1.00000e+00 ] : COUL:DAS-40
+ 165 [    COUL                          : 1.00000e+00 ] : COUL:DAS-41
+ 166 [    COUL                          : 1.00000e+00 ] : COUL:DAS-42
 ----------------------------------------------------------
 Building charge constraints...
+Parameter 135 occurs 1 times in molecule DAS in locations [0] (COUL:DAS-1)
+Parameter 136 occurs 1 times in molecule DAS in locations [1] (COUL:DAS-2)
+Parameter 137 occurs 1 times in molecule DAS in locations [2] (COUL:DAS-3)
+Parameter 138 occurs 1 times in molecule DAS in locations [3] (COUL:DAS-4)
+Parameter 139 occurs 1 times in molecule DAS in locations [4] (COUL:DAS-5)
+Parameter 140 occurs 3 times in molecule DAS in locations [5, 6, 7] (COUL:DAS-6 COUL:DAS-7 COUL:DAS-8)
+Parameter 141 occurs 1 times in molecule DAS in locations [8] (COUL:DAS-9)
+Parameter 142 occurs 3 times in molecule DAS in locations [9, 10, 11] (COUL:DAS-10 COUL:DAS-11 COUL:DAS-12)
+Parameter 143 occurs 1 times in molecule DAS in locations [12] (COUL:DAS-13)
+Parameter 144 occurs 1 times in molecule DAS in locations [13] (COUL:DAS-14)
+Parameter 145 occurs 1 times in molecule DAS in locations [14] (COUL:DAS-15)
+Parameter 146 occurs 1 times in molecule DAS in locations [15] (COUL:DAS-16)
+Parameter 147 occurs 1 times in molecule DAS in locations [16] (COUL:DAS-17)
+Parameter 148 occurs 1 times in molecule DAS in locations [17] (COUL:DAS-18)
+Parameter 149 occurs 1 times in molecule DAS in locations [18] (COUL:DAS-19)
+Parameter 150 occurs 1 times in molecule DAS in locations [19] (COUL:DAS-20)
+Parameter 151 occurs 1 times in molecule DAS in locations [20] (COUL:DAS-21)
+Parameter 152 occurs 1 times in molecule DAS in locations [21] (COUL:DAS-22)
+Parameter 153 occurs 2 times in molecule DAS in locations [22, 23] (COUL:DAS-23 COUL:DAS-24)
+Parameter 154 occurs 1 times in molecule DAS in locations [24] (COUL:DAS-25)
+Parameter 155 occurs 3 times in molecule DAS in locations [25, 26, 27] (COUL:DAS-26 COUL:DAS-27 COUL:DAS-28)
+Parameter 156 occurs 1 times in molecule DAS in locations [28] (COUL:DAS-29)
+Parameter 157 occurs 2 times in molecule DAS in locations [29, 30] (COUL:DAS-30 COUL:DAS-31)
+Parameter 158 occurs 1 times in molecule DAS in locations [31] (COUL:DAS-32)
+Parameter 159 occurs 3 times in molecule DAS in locations [32, 33, 34] (COUL:DAS-33 COUL:DAS-34 COUL:DAS-35)
+Parameter 160 occurs 1 times in molecule DAS in locations [35] (COUL:DAS-36)
+Parameter 161 occurs 1 times in molecule DAS in locations [36] (COUL:DAS-37)
+Parameter 162 occurs 1 times in molecule DAS in locations [37] (COUL:DAS-38)
+Parameter 163 occurs 1 times in molecule DAS in locations [38] (COUL:DAS-39)
+Parameter 164 occurs 1 times in molecule DAS in locations [39] (COUL:DAS-40)
+Parameter 165 occurs 1 times in molecule DAS in locations [40] (COUL:DAS-41)
+Parameter 166 occurs 1 times in molecule DAS in locations [41] (COUL:DAS-42)
 
 #========================================================#
 #| [92m               Setup for force field                [0m |#
 #========================================================#
-fnms                      ['dasa.frcmod', 'dasa.mol2'] 
+fnms                      ['initial_dasa.frcmod', 'initial_dasa.mol2'] 
 ----------------------------------------------------------

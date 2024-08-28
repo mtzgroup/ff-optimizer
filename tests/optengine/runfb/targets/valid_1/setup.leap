@@ -1,0 +1,6 @@
+source leaprc.gaff
+loadamberparams butadiene.frcmod
+BUT = loadmol2 butadiene.mol2
+x = loadpdb conf.pdb
+saveamberparm x ff.prmtop coord.inpcrd
+quit                                  

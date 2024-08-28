@@ -1,0 +1,231 @@
+
+#======================================================================#
+#| [1m            Welcome to ForceBalance version 1.9.5! =D             [0m |#
+#| [1m                 Force Field Optimization System                  [0m |#
+#| [1m                                                                  [0m |#
+#| [1m                             Authors:                             [0m |#
+#| [1m                          Lee-Ping Wang                           [0m |#
+#| [1m                  Yudong Qiu, Keri A. McKiernan                   [0m |#
+#| [1m          Jeffrey R. Wagner, Hyesu Jang, Simon Boothroyd          [0m |#
+#| [1m          Arthur Vigil, Erik G. Brandt, John Stoppelman           [0m |#
+#| [1m                  Johnny Israeli, Matt Thompson                   [0m |#
+#======================================================================#
+
+                          [44m     [0m                                        
+                       [44m        [0m      [43m     [0m                              
+                    [44m        [0m   [44m  [0m    [43m         [0m                          
+                 [44m       [0m    [44m      [0m      [43m         [0m                       
+             [44m        [0m    [44m        [0m          [43m         [0m                    
+          [44m        [0m    [44m        [0m                 [43m        [0m                 
+       [44m        [0m    [44m       [0m                        [43m        [0m              
+    [44m        [0m   [44m        [0m                              [43m         [0m          
+   [44m      [0m   [44m        [0m               `.:+@@###@'          [43m         [0m       
+    [44m [0m    [44m        [0m          ,;'+###############.             [43m     [0m       
+      [44m        [0m         +################':`                    [43m [0m        
+      [44m     [0m              `.,,...####+.                                  
+                                ,#####      +##.               [44m   [0m   [44m   [0m
+ [43m    [0m                            #####      ######             [44m   [0m   [44m   [0m
+ [43m    [0m                ###'        ####'     :#####'             [44m   [0m   [44m   [0m
+ [43m    [0m                :####@      ####.    ,####'               [44m   [0m   [44m   [0m
+ [43m    [0m                 ######     ####    +###+                 [44m   [0m   [44m   [0m
+ [43m    [0m                  #####     ####   ###;                   [44m   [0m   [44m   [0m
+ [43m    [0m                   :##      ####  ++`                     [44m   [0m   [44m   [0m
+ [43m    [0m                            ####``..:;+##############+`   [44m   [0m   [44m   [0m
+ [43m    [0m             .,:;;'++##################################`  [44m   [0m   [44m   [0m
+ [43m    [0m    `############################++++''';;;;;;;;;;;'';    [44m   [0m   [44m   [0m
+ [43m    [0m      ,########':,.``       ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+ [43m    [0m                            ####                          [44m   [0m   [44m   [0m
+      [44m    [0m                       ####                                   
+     [44m        [0m                    ####                                   
+    [44m [0m    [44m       [0m                 ####                       [43m     [0m       
+   [44m     [0m    [44m        [0m             ####                    [43m        [0m       
+   [44m        [0m    [44m        [0m          ###                  [43m         [0m         
+      [44m        [0m    [44m        [0m        +`               [43m        [0m             
+          [44m        [0m   [44m        [0m                   [43m        [0m                
+             [44m        [0m   [44m         [0m           [43m         [0m                   
+                [44m        [0m    [44m       [0m      [43m         [0m                      
+                   [44m        [0m    [44m   [0m    [43m        [0m                          
+                      [44m        [0m       [43m      [0m                             
+                          [44m      [0m      [43m  [0m                                
+                             [44m  [0m                                         
+
+Reading options from file: valid_3.in
+
+#========================================================#
+#| [95m  Options at their default values are not printed   [0m |#
+#| [95m        Use 'verbose_options True' to Enable        [0m |#
+#========================================================#
+Reading force field from file: butadiene.frcmod
+Reading force field from file: butadiene.mol2
+
+#=========================================================#
+#| [92m Starting parameter indices, physical values and IDs [0m |#
+#=========================================================#
+   0 [  4.2430e+02 ] : BONDSK/c2-ce
+   1 [  2.8833e+02 ] : BONDSK/ce-ce
+   2 [  6.2400e+01 ] : ANGLESK/c2-ce-ce
+   3 [  1.2323e+02 ] : ANGLESB/c2-ce-ce
+   4 [  7.4000e-01 ] : PDIHS3K/c2-ce-ce-c2
+-----------------------------------------------------------
+
+#=========================================================#
+#| [91m Rescaling Factors by Type (Lower Takes Precedence): [0m |#
+#=========================================================#
+   BONDSK                               : 9.37583e+05
+   ANGLESK                              : 6.05928e+02
+   ANGLESB                              : 5.72958e+01
+   PDIHS3K                              : 9.64853e+01
+-----------------------------------------------------------
+
+#========================================================#
+#| [91m   Rescaling Types / Factors by Parameter Number:   [0m |#
+#========================================================#
+   0 [    BONDSK                        : 9.37583e+05 ] : BONDSK/c2-ce
+   1 [    BONDSK                        : 9.37583e+05 ] : BONDSK/ce-ce
+   2 [    ANGLESK                       : 6.05928e+02 ] : ANGLESK/c2-ce-ce
+   3 [    ANGLESB                       : 5.72958e+01 ] : ANGLESB/c2-ce-ce
+   4 [    PDIHS3K                       : 9.64853e+01 ] : PDIHS3K/c2-ce-ce-c2
+----------------------------------------------------------
+Building charge constraints...
+
+#========================================================#
+#| [92m               Setup for force field                [0m |#
+#========================================================#
+fnms                      ['butadiene.frcmod', 'butadiene.mol2'] 
+----------------------------------------------------------
+Relative energy fitting: Subtracting (MM - QM) energy gap from all relative energy calculations - this is the default.
+The 'amberhome' option was not specified; using default.
+Received an error message:
+
+[====] [91mError Message[0m [====]
+STOP PMEMD Terminated Abnormally!
+[====] [91mEnd o'Message[0m [====]
+/global/software/Amber/23-CUDA-11.8.0/bin/pmemd.cuda -h gave a return code of 1 (it may have crashed) -- carrying on
+pmemd.cuda gave a nonzero returncode; CUDA environment variables likely missing
+Cannot find a unique file with extension .mdin in /home/curtie/7_FF_fitting/0_ff-optimizer/1_feature_branch/ff-optimizer/tests/optengine/runfb/targets/valid_1 (0 found; )
+Fitting the forces on all atoms
+
+#========================================================#
+#| [92m             Setup for target valid_1 :             [0m |#
+#========================================================#
+leapcmd                   setup.leap 
+name                      valid_1 
+type                      ABINITIO_AMBER 
+backup                    False 
+tgtdir                    targets/valid_1 
+shots                     20 
+----------------------------------------------------------
+Relative energy fitting: Subtracting (MM - QM) energy gap from all relative energy calculations - this is the default.
+Received an error message:
+
+[====] [91mError Message[0m [====]
+STOP PMEMD Terminated Abnormally!
+[====] [91mEnd o'Message[0m [====]
+/global/software/Amber/23-CUDA-11.8.0/bin/pmemd.cuda -h gave a return code of 1 (it may have crashed) -- carrying on
+pmemd.cuda gave a nonzero returncode; CUDA environment variables likely missing
+Fitting the forces on all atoms
+
+#========================================================#
+#| [92m             Setup for target valid_2 :             [0m |#
+#========================================================#
+leapcmd                   setup.leap 
+name                      valid_2 
+type                      ABINITIO_AMBER 
+backup                    False 
+tgtdir                    targets/valid_2 
+shots                     20 
+----------------------------------------------------------
+Relative energy fitting: Subtracting (MM - QM) energy gap from all relative energy calculations - this is the default.
+Received an error message:
+
+[====] [91mError Message[0m [====]
+STOP PMEMD Terminated Abnormally!
+[====] [91mEnd o'Message[0m [====]
+/global/software/Amber/23-CUDA-11.8.0/bin/pmemd.cuda -h gave a return code of 1 (it may have crashed) -- carrying on
+pmemd.cuda gave a nonzero returncode; CUDA environment variables likely missing
+Fitting the forces on all atoms
+
+#========================================================#
+#| [92m             Setup for target valid_3 :             [0m |#
+#========================================================#
+leapcmd                   setup.leap 
+name                      valid_3 
+type                      ABINITIO_AMBER 
+backup                    False 
+tgtdir                    targets/valid_3 
+shots                     20 
+----------------------------------------------------------
+Using parabolic regularization (Gaussian prior) with strength 0.0e+00 (+), 0.0e+00 (x)
+
+#========================================================#
+#| [92m           Setup for objective function :           [0m |#
+#========================================================#
+
+----------------------------------------------------------
+
+#========================================================#
+#| [92m                Setup for optimizer                 [0m |#
+#========================================================#
+jobtype                   SINGLE 
+backup                    False 
+input_file                valid_3.in 
+----------------------------------------------------------
+Calculation started at 2024-08-28 12:08 PM
+
+#================================================================================================#
+#|                Target: valid_1  Type: AbInitio_AMBER  Objective = 2.41054e-01                |#
+#|                        Difference   Denominator     Percent                                  |#
+#|  Observable            (Calc-Ref)     RMS (Ref)   Difference       Term   x Wt =   Contrib.  |#
+#================================================================================================#
+    Energy (kJ/mol)           3.7233       12.4861     29.8197%     0.0889    1.000     0.0889 
+    Gradient (kJ/mol/A)      76.1105      195.1344     39.0041%     0.1521    1.000     0.1521 
+--------------------------------------------------------------------------------------------------
+Maximum force difference on atom 4 (C), frame 19, 173.5936 kJ/mol/A
+
+#================================================================================================#
+#|                Target: valid_2  Type: AbInitio_AMBER  Objective = 2.52972e-01                |#
+#|                        Difference   Denominator     Percent                                  |#
+#|  Observable            (Calc-Ref)     RMS (Ref)   Difference       Term   x Wt =   Contrib.  |#
+#================================================================================================#
+    Energy (kJ/mol)           4.4450       16.1041     27.6017%     0.0762    1.000     0.0762 
+    Gradient (kJ/mol/A)      79.6244      189.3742     42.0461%     0.1768    1.000     0.1768 
+--------------------------------------------------------------------------------------------------
+Maximum force difference on atom 4 (C), frame 19, 133.1337 kJ/mol/A
+
+#================================================================================================#
+#|                Target: valid_3  Type: AbInitio_AMBER  Objective = 2.95881e-01                |#
+#|                        Difference   Denominator     Percent                                  |#
+#|  Observable            (Calc-Ref)     RMS (Ref)   Difference       Term   x Wt =   Contrib.  |#
+#================================================================================================#
+    Energy (kJ/mol)           4.1818       12.2881     34.0314%     0.1158    1.000     0.1158 
+    Gradient (kJ/mol/A)      79.2701      186.8063     42.4344%     0.1801    1.000     0.1801 
+--------------------------------------------------------------------------------------------------
+Maximum force difference on atom 0 (C), frame 19,  84.5829 kJ/mol/A
+
+#====================================================================#
+#| [94m                  Objective Function Breakdown                  [0m |#
+#| [94m  Target Name              Residual  x  Weight  =  Contribution [0m |#
+#====================================================================#
+valid_1                        0.24105      0.333 [94m     8.03512e-02[0m 
+valid_2                        0.25297      0.333 [94m     8.43241e-02[0m 
+valid_3                        0.29588      0.333 [94m     9.86270e-02[0m 
+Regularization                 0.00000      1.000 [94m     0.00000e+00[0m 
+Total                                             [94m     2.63302e-01[0m 
+----------------------------------------------------------------------
+
+#========================================================#
+#| [92m    Objective Function Single Point: 0.26330234     [0m |#
+#========================================================#
+Parameter file same as original; will not be printed to results folder.
+Wall time since calculation start: 0.2 seconds
+
+#========================================================#
+#| [1;44;93m               Calculation Finished.                [0m |#
+#| [1;44;93m     ---==(  May the Force be with you!  )==---     [0m |#
+#========================================================#
