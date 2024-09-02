@@ -14,7 +14,7 @@ mpl.use("Agg")
 class OptEngine:
     def setVariables(self, inp):
         self.converged = False
-        self.home = os.getcwd()
+        self.home = Path(os.getcwd())
         self.inp = inp
         self.optdir = Path(inp.optdir)
         self.resp = inp.resp
@@ -588,8 +588,15 @@ class OptEngine:
                 print("Running final validations to determine optimal parameters")
                 best = self.getFinalValidations(lastCycle)
                 print(f"Optimal parameters are from iteration {best}")
+                self.copyFinalResults(best)
                 break
         return lastCycle
+
+    def copyFinalResults(self, best):
+        resultFolder = self.home / "3_result"
+        resultFolder.mkdir(exist_ok=True)
+        copyfile(self.optdir / Path("result") / f"opt_{best}" / self.mol2, resultFolder / self.mol2)
+        copyfile(self.optdir / Path("result") / f"opt_{best}" / self.frcmod, resultFolder / self.frcmod)
 
     def getFinalValidations(self, lastCycle):
         vs = []

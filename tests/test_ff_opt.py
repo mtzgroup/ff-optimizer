@@ -77,6 +77,10 @@ def monkeyGetFinalValidations(self, j):
     return 1
 
 
+def monkeyCopyFinalResults(self, best):
+    pass
+
+
 def test_optimize_converge(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     os.chdir("model")
@@ -105,6 +109,7 @@ def test_optimize_converge(monkeypatch):
     monkeypatch.setattr(
         optengine.OptEngine, "getFinalValidations", monkeyGetFinalValidations
     )
+    monkeypatch.setattr(optengine.OptEngine, "copyFinalResults", monkeyCopyFinalResults)
     ff_opt.optimize("temp.yaml")
     with open("cycle.txt", "r") as f:
         cycle = int(f.readline().split()[0])
