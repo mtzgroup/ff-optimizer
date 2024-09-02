@@ -1,5 +1,4 @@
 import os
-import pytest
 from pathlib import Path
 from shutil import copyfile, copytree, rmtree
 
@@ -121,17 +120,22 @@ class TestSbatchEngine:
         assert checkAllMdcrd
         assert checkQdata
 
+
 def monkeySlurmCommand(self, command):
     return b"this is a test"
+
 
 def monkeyWaitForJobs(self, jobIDs):
     pass
 
+
 def monkeyReadQMRefData(self):
     return [], [], [], [], []
 
+
 def monkeyWriteFBdata(self, energies, grads, coords, espXYZs, esps):
     pass
+
 
 def test_writeFiles(monkeypatch):
     os.chdir(os.path.dirname(__file__))
@@ -160,4 +164,3 @@ def test_writeFiles(monkeypatch):
     os.remove(backup)
     os.remove("tc_11.in")
     assert backup == backupInScript
-            

@@ -1,5 +1,4 @@
 import errno
-import pytest
 import os
 from pathlib import Path
 from shutil import copyfile, rmtree
@@ -725,6 +724,7 @@ def test_setupInputFiles_multipleValids(monkeypatch):
     checkUtils.checkLists(testLinesValid2, refLinesValid2)
     # checkUtils.checkLists(testLinesValidInitial2, refLinesValidInitial2)
 
+
 def test_optimizeForcefield_multipleValids(monkeypatch):
     def monkeyForceBalance(command):
         split = command.split()
@@ -1135,6 +1135,7 @@ def test_getFinalValidations(monkeypatch):
     best = optEngine.getFinalValidations(13)
     assert best == 12
 
+
 def test_editOpt0_1(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
@@ -1147,6 +1148,7 @@ def test_editOpt0_1(monkeypatch):
     os.remove("opt_0.in")
     assert test
     assert optEngine.initialTarget == "dynamics"
+
 
 def test_editOpt0_2(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
@@ -1161,6 +1163,7 @@ def test_editOpt0_2(monkeypatch):
     os.remove("opt_0.in")
     assert test
     assert optEngine.initialTarget == "train_1"
+
 
 # def test_sortParams(monkeypatch):
 #    monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit2)

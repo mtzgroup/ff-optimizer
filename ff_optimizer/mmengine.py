@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from random import randint
-from shutil import copyfile, rmtree
+from shutil import copyfile
 
 import GPUtil
 

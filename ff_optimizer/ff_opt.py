@@ -168,8 +168,10 @@ def optimize(input_file: str):
         if ffModel.converged:
             break
 
+
 def main():
     app()
+
 
 if __name__ == "__main__":
     app()

@@ -1,5 +1,4 @@
 import os
-import pytest
 from pathlib import Path
 
 import numpy as np
@@ -236,7 +235,9 @@ class TestQMEngine:
         esps = []
         for i in range(1, 26):
             coords.append(utils.readXYZ(testdir / "test" / f"{str(i)}.xyz"))
-            energy, grad = utils.readGradFromTCout(testdir / "test" / f"tc_{str(i)}.out")
+            energy, grad = utils.readGradFromTCout(
+                testdir / "test" / f"tc_{str(i)}.out"
+            )
             energies.append(energy)
             grads.append(grad)
             espXYZ, esp = utils.readEsp(testdir / "test" / f"esp_{str(i)}.xyz")
@@ -245,7 +246,7 @@ class TestQMEngine:
         qmEngine.writeFBdata(energies, grads, coords, espXYZs, esps)
 
         check = checkUtils.checkFiles("qdata.txt", testdir / "qdataResp.txt")
-        #os.remove("qdata.txt")
+        # os.remove("qdata.txt")
         os.remove("all.mdcrd")
         assert check
 
