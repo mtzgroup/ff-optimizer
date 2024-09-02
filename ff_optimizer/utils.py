@@ -1,11 +1,12 @@
 import os
 from pathlib import Path
+from shutil import rmtree
+from time import sleep
 
 import numpy as np
 import yaml
 from scipy.io import netcdf_file
-from shutil import rmtree
-from time import sleep
+
 
 def rmrf(f):
     maxTries = 100

@@ -1,5 +1,4 @@
 import os
-import pytest
 from pathlib import Path
 from shutil import copyfile, copytree, rmtree
 
@@ -120,3 +119,48 @@ class TestSbatchEngine:
         assert copied
         assert checkAllMdcrd
         assert checkQdata
+
+
+def monkeySlurmCommand(self, command):
+    return b"this is a test"
+
+
+def monkeyWaitForJobs(self, jobIDs):
+    pass
+
+
+def monkeyReadQMRefData(self):
+    return [], [], [], [], []
+
+
+def monkeyWriteFBdata(self, energies, grads, coords, espXYZs, esps):
+    pass
+
+
+def test_writeFiles(monkeypatch):
+    os.chdir(os.path.dirname(__file__))
+    os.chdir("qmengine")
+    inp = getDefaults()
+    inp.sampledir = Path("")
+    inp.tctemplate = "tc.in"
+    inp.tctemplate_backup = "tc_backup.in"
+    monkeypatch.setattr(qmengine.SlurmEngine, "slurmCommand", monkeySlurmCommand)
+    monkeypatch.setattr(qmengine.SlurmEngine, "waitForJobs", monkeyWaitForJobs)
+    monkeypatch.setattr(qmengine.QMEngine, "readQMRefData", monkeyReadQMRefData)
+    monkeypatch.setattr(qmengine.QMEngine, "writeFBdata", monkeyWriteFBdata)
+    xyzs = [Path("11.xyz")]
+    slurmEngine = qmengine.SlurmEngine(inp)
+    slurmEngine.getQMRefData(xyzs)
+    with open("sbatch_11.sh", "r") as f:
+        for line in f.readlines():
+            if "backup" in line:
+                for token in line.split():
+                    if "backup" in token:
+                        backupInScript = token
+    for f in os.listdir():
+        if "11" in f and "backup" in f and f.endswith(".in"):
+            backup = f
+    os.remove("sbatch_11.sh")
+    os.remove(backup)
+    os.remove("tc_11.in")
+    assert backup == backupInScript
