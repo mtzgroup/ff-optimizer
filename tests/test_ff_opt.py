@@ -1,46 +1,59 @@
-from ff_optimizer import ff_opt, model, optengine
-import pytest
-from . import checkUtils
 import os
+
+from ff_optimizer import ff_opt, model, optengine
+
 from .test_inputs import getDefaults
+
 
 def monkeyDoMMSampling(self, i):
     pass
 
+
 def monkeyDoQMCalculations(self, i):
     pass
+
 
 def monkeyMakeFBTargets(self, i):
     return []
 
+
 def monkeyCopyLeapFiles(self, f):
     pass
+
 
 def monkeyGetSampleFolders(self, i):
     pass
 
+
 def monkeyCopyQMResults(self, f1, f2):
     pass
+
 
 def monkeyCopyResults(self, i):
     pass
 
+
 def monkeySetupInputFiles(self, i):
     pass
 
+
 def monkeyRunValidPrevious(self, i):
     self.validPrevious.append(1.0)
+
 
 def monkeyRunTraining(self, i):
     self.train.append(0.5)
     with open("cycle.txt", "w") as f:
         f.write(str(i))
-    
+
+
 def monkeyCopyResults(self, i):
     pass
 
+
 def monkeyRunValid(self, i):
     self.valid.append(1.0)
+
 
 def monkeyInitModel(self, inp):
     self.converged = False
@@ -49,16 +62,24 @@ def monkeyInitModel(self, inp):
     self.optdir = inp.optdir
     self.home = self.optdir
 
-def monkeyInitOpt(self, inp):   
+
+def monkeyInitOpt(self, inp):
     self.converged = False
     self.inp = inp
     self.determineRestart()
 
+
 def monkeyInitialCycle(self):
     pass
 
+
 def monkeyGetFinalValidations(self, j):
     return 1
+
+
+def monkeyCopyFinalResults(self, best):
+    pass
+
 
 def test_optimize_converge(monkeypatch):
     os.chdir(os.path.dirname(__file__))
@@ -85,11 +106,13 @@ def test_optimize_converge(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "runTraining", monkeyRunTraining)
     monkeypatch.setattr(optengine.OptEngine, "copyResults", monkeyCopyResults)
     monkeypatch.setattr(optengine.OptEngine, "runValid", monkeyRunValid)
-    monkeypatch.setattr(optengine.OptEngine, "getFinalValidations", monkeyGetFinalValidations)
+    monkeypatch.setattr(
+        optengine.OptEngine, "getFinalValidations", monkeyGetFinalValidations
+    )
+    monkeypatch.setattr(optengine.OptEngine, "copyFinalResults", monkeyCopyFinalResults)
     ff_opt.optimize("temp.yaml")
     with open("cycle.txt", "r") as f:
         cycle = int(f.readline().split()[0])
     os.remove("temp.yaml")
     os.remove("cycle.txt")
     assert cycle == 5
-

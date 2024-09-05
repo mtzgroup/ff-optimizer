@@ -147,7 +147,7 @@ class Model(AbstractModel):
         elif self.restartCycle == -1:
             rmtree(samplePath, ignore_errors=True)
             rmtree(samplePath, ignore_errors=True)
-            samplePath.mkdir()
+            samplePath.mkdir(exist_ok=True)
         return samplePath
 
     def copyFFFiles(self, i, dest):

@@ -1,13 +1,13 @@
 import os
 import subprocess
 import traceback
+from pathlib import Path
 from shutil import copyfile, rmtree
 from time import sleep
 
 from chemcloud import CCClient
 from qcio import ProgramInput, SinglePointResults, Structure
 from qcparse import parse
-from pathlib import Path
 
 from . import utils
 
@@ -170,7 +170,7 @@ class SlurmEngine(QMEngine):
 
     def replaceVars(self, line, index):
         tcin = f"tc_{index}.in"
-        tcbackup = f"tc_{index}_backup.in"
+        tcbackup = f"tc_backup_{index}.in"
         line = line.replace("JOBID", index)
         line = line.replace("TCTEMPLATEBACKUP", tcbackup)
         line = line.replace("TCTEMPLATE", tcin)

@@ -79,7 +79,6 @@ def getCharge(optdir):
                     inAtoms = False
             if "@<TRIPOS>ATOM" in line:
                 inAtoms = True
-    print(charge)
     diff = charge - round(charge)
     if abs(diff) > 1e-6:
         print(f"WARNING: residual charge of %13.9f in mol2 file" % diff)

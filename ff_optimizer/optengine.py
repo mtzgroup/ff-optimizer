@@ -14,7 +14,7 @@ mpl.use("Agg")
 class OptEngine:
     def setVariables(self, inp):
         self.converged = False
-        self.home = os.getcwd()
+        self.home = Path(os.getcwd())
         self.inp = inp
         self.optdir = Path(inp.optdir)
         self.resp = inp.resp
@@ -50,9 +50,13 @@ class OptEngine:
 
     def checkFileNames(self):
         if self.mol2 == None:
-            raise RuntimeError(f"No mol2 file specified for optimization in {self.inp.opt0}")
+            raise RuntimeError(
+                f"No mol2 file specified for optimization in {self.inp.opt0}"
+            )
         if self.frcmod == None:
-            raise RuntimeError(f"No frcmod file specified for optimization in {self.inp.opt0}")
+            raise RuntimeError(
+                f"No frcmod file specified for optimization in {self.inp.opt0}"
+            )
         if not (self.optdir / self.mol2).is_file():
             raise RuntimeError(
                 f"Mol2 {self.mol2} specified in {self.inp.opt0} is not in {self.optdir}"
@@ -578,14 +582,21 @@ class OptEngine:
             if inPatience and validDiff[j] < cutoff:
                 inPatience = False
             if inPatience and j - patienceCycle >= self.inp.patience - 1:
-                lastCycle = j + 1 # switch from 0-indexing to 1-indexing here
+                lastCycle = j + 1  # switch from 0-indexing to 1-indexing here
                 self.converged = True
                 print(f"Optimization has converged at cycle {lastCycle}")
                 print("Running final validations to determine optimal parameters")
                 best = self.getFinalValidations(lastCycle)
                 print(f"Optimal parameters are from iteration {best}")
+                self.copyFinalResults(best)
                 break
         return lastCycle
+
+    def copyFinalResults(self, best):
+        resultFolder = self.home / "3_result"
+        resultFolder.mkdir(exist_ok=True)
+        copyfile(self.optdir / Path("result") / f"opt_{best}" / self.mol2, resultFolder / self.mol2)
+        copyfile(self.optdir / Path("result") / f"opt_{best}" / self.frcmod, resultFolder / self.frcmod)
 
     def getFinalValidations(self, lastCycle):
         vs = []
