@@ -182,8 +182,7 @@ def monkeyOptInit(self, args):
     self.restartCycle = 0
 
 
-def monkeyForceBalanceSimple(command):
-    out = command.split()[3]
+def monkeyForceBalanceSimple(inp, out, err):
     out.split("_")[1].split(".")[0]
     copyfile(os.path.join("reference", out), out)
 
@@ -214,7 +213,7 @@ def test_doParameterOptimization(monkeypatch):
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInit)
     monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupFiles)
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyOptInit)
-    monkeypatch.setattr(os, "system", monkeyForceBalanceSimple)
+    monkeypatch.setattr(optengine, "runForceBalance", monkeyForceBalanceSimple)
     monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
     monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
 
@@ -529,7 +528,7 @@ def test_initialCycle1(monkeypatch):
     inp = getDefaults()
     inp.validinitial = True
     m = model.Model(inp)
-    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    monkeypatch.setattr(optengine, "runForceBalance", monkeyForceBalance)
     m.initialCycle()
     copied = True
     if not (m.optdir / "result" / "opt_0" / "dasa.mol2").is_file():

@@ -479,8 +479,7 @@ def monkeyOptInit(self, args):
     self.restartCycle = 0
 
 
-def monkeyForceBalance(command):
-    out = command.split()[3]
+def monkeyForceBalance(inp, out, err):
     out.split("_")[1].split(".")[0]
     copyfile(os.path.join("reference", out), out)
 
@@ -536,7 +535,7 @@ def test_doParameterOptimization(monkeypatch):
     monkeypatch.setattr(model.Model, "initializeMMEngine", monkeyInitialize)
     monkeypatch.setattr(optengine.OptEngine, "setupInputFiles", monkeySetupFiles)
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyOptInit)
-    monkeypatch.setattr(os, "system", monkeyForceBalance)
+    monkeypatch.setattr(optengine, "runForceBalance", monkeyForceBalance)
     monkeypatch.setattr(optengine.OptEngine, "sortParams", monkeySortParams)
     monkeypatch.setattr(optengine.OptEngine, "graphResults", monkeyGraphResults)
     monkeypatch.setattr(active_learning.ActiveLearningModel, "__init__", monkeyALInit)

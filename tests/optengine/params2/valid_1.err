@@ -1,0 +1,15 @@
+[91m[91mThe targets directory is missing![0m[0m
+[91mDid you finish setting up the target data?[0m
+[91mPlace the data in a directory called "targets" or "simulations"[0m
+Traceback (most recent call last):
+  File "/home/curtie/.conda/envs/forcebalance/bin/ForceBalance.py", line 41, in Run_ForceBalance
+    objective   = Objective(options, tgt_opts, forcefield)
+  File "/home/curtie/.conda/envs/forcebalance/lib/python3.8/site-packages/forcebalance/objective.py", line 182, in __init__
+    else: Tgt = Implemented_Targets[opts['type']](options,opts,forcefield)
+  File "/home/curtie/.conda/envs/forcebalance/lib/python3.8/site-packages/forcebalance/amberio.py", line 1842, in __init__
+    super(AbInitio_AMBER,self).__init__(options,tgt_opts,forcefield)
+  File "/home/curtie/.conda/envs/forcebalance/lib/python3.8/site-packages/forcebalance/abinitio.py", line 93, in __init__
+    super(AbInitio,self).__init__(options,tgt_opts,forcefield)
+  File "/home/curtie/.conda/envs/forcebalance/lib/python3.8/site-packages/forcebalance/target.py", line 152, in __init__
+    raise RuntimeError
+RuntimeError
