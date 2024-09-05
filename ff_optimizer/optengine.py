@@ -1,4 +1,5 @@
 import os
+import subprocess
 from pathlib import Path
 from shutil import copyfile
 
@@ -10,6 +11,14 @@ from . import resp_prior, utils
 
 mpl.use("Agg")
 
+def runForceBalance(inp, out, err=None):
+    with subprocess.Popen(["ForceBalance.py", inp] , stdin=subprocess.PIPE, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as process:
+        stdout, stderr = process.communicate("\n"*100)
+    with open(out, "w") as f:
+        f.write(stdout)
+    if err is not None:
+        with open(err, "w") as f:
+            f.write(stderr)
 
 class OptEngine:
     def setVariables(self, inp):
@@ -479,14 +488,13 @@ class OptEngine:
             os.path.join("forcefield", self.mol2),
         )
 
+
     def runValidPrevious(self, i):
         # If we're just restarting, skip if this calculation finished
         if len(self.validPrevious) < i:
-            os.system(f"ForceBalance.py valid_{i}.in > valid_{i}_previous.out")
+            runForceBalance(f"valid_{i}.in", f"valid_{i}_previous.out", f"valid_{i}_previous.err")
             for j in range(1, self.nvalids):
-                os.system(
-                    f"ForceBalance.py valid_{i}_{j}.in > valid_{i}_{j}_previous.out"
-                )
+                runForceBalance(f"valid_{i}_{j}.in", f"valid_{i}_{j}_previous.out", f"valid_{i}_{j}_previous.err")
             self.validPrevious.append(self.readValid(f"valid_{i}_previous.out"))
 
     def runTraining(self, i):
@@ -495,33 +503,31 @@ class OptEngine:
                 self.respPriors.updateRespPriors(
                     i, os.path.join("forcefield", self.mol2)
                 )
-            os.system(f"ForceBalance.py opt_{i}.in > opt_{i}.out")
+            runForceBalance(f"opt_{i}.in", f"opt_{i}.out", f"opt_{i}.err")
             self.checkOpt(i)
 
     def runValid(self, i):
         if len(self.valid) < i:
-            os.system(f"ForceBalance.py valid_{i}.in > valid_{i}.out")
+            runForceBalance(f"valid_{i}.in", f"valid_{i}.out", f"valid_{i}.err")
             for j in range(1, self.nvalids):
-                os.system(f"ForceBalance.py valid_{i}_{j}.in > valid_{i}_{j}.out")
+                runForceBalance(f"valid_{i}_{j}.in", f"valid_{i}_{j}.out", f"valid_{i}_{j}.err")
             self.valid.append(self.readValid(f"valid_{i}.out"))
 
     def runValidInitial(self, i):
         if len(self.validInitial) < i:
-            os.system(f"ForceBalance.py valid_{i}_initial.in > valid_{i}_initial.out")
+            runForceBalance(f"valid_{i}_initial.in", f"valid_{i}_initial.out", f"valid_{i}_initial.err")
             for j in range(1, self.nvalids):
-                os.system(
-                    f"ForceBalance.py valid_{i}_{j}_initial.in > valid_{i}_{j}_initial.out"
-                )
+                runForceBalance(f"valid_{i}_{j}_initial.in", f"valid_{i}_{j}_initial.out", f"valid_{i}_{j}_initial.err")
             self.validInitial.append(self.readValid(f"valid_{i}_initial.out"))
 
     def runValidFinal(self, i, lastCycle):
         self.copyResults(i)
         out = f"valid_{i}_final.out"
-        os.system(f"ForceBalance.py valid_{lastCycle}.in > {out}")
+        runForceBalance(f"valid_{lastCycle}.in", out)
         return self.readValid(out)
 
     def runInitialTraining(self):
-        os.system(f"ForceBalance.py {self.inp.opt0} > opt_0.out")
+        runForceBalance(self.inp.opt0, "opt_0.out", "opt_0.err")
         self.copyResults(0)
         self.checkOpt(0)
 
