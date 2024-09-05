@@ -67,6 +67,7 @@ def test_runSander(monkeypatch):
     os.remove("md.rst7")
     os.remove("mdinfo")
     os.remove("md.out")
+    os.remove("md.err")
     refRst = loadtxt(os.path.join("ref", "md.rst7"), skiprows=2)
     checkUtils.checkArrays(testRst, refRst)
 
@@ -88,6 +89,7 @@ def test_runSanderCUDA(monkeypatch):
     os.remove("md.rst7")
     os.remove("mdinfo")
     os.remove("md.out")
+    os.remove("md.err")
     refRst = loadtxt(os.path.join("ref", "md.rst7"), skiprows=2)
     checkUtils.checkArrays(testRst, refRst)
 
