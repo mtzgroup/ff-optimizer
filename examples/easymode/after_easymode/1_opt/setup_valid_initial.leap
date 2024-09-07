@@ -1,6 +1,0 @@
-source leaprc.gaff
-loadamberparams initial_wat.frcmod
-WAT = loadmol2 initial_wat.mol2
-x = loadpdb conf.pdb
-saveamberparm x ff.prmtop coord.inpcrd
-quit                                  

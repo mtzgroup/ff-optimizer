@@ -12,14 +12,14 @@ maxcycles: 30
 mmengine: amber
 nvalids: 1
 opt0: opt_0.in
-optdir: /home/curtie/7_FF_fitting/0_ff-optimizer/0_main_branch/ff-optimizer/examples/setup/after/1_opt
+optdir: 1_opt
 patience: 5
-qmengine: chemcloud
+qmengine: slurm
 resp: 0
 resppriors: 0
 restart: false
 retries: 3
-sampledir: /home/curtie/7_FF_fitting/0_ff-optimizer/0_main_branch/ff-optimizer/examples/setup/after/2_sampling
+sampledir: 2_sampling
 sbatchtemplate: sbatch_template.sh
 skipchecks: true
 split: null

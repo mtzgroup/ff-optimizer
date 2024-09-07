@@ -6,24 +6,52 @@
 
 ====================================================================================
 -------------------------------ring property (III)-----------------------------------
-atom[ 1] (O01 ) is not in any ring (nr[1]=1)
-atom[ 2] (H01 ) is not in any ring (nr[2]=1)
-atom[ 3] (H02 ) is not in any ring (nr[3]=1)
+atom[ 1] (C01 ) is not in any ring (nr[1]=1)
+atom[ 2] (C02 ) is not in any ring (nr[2]=1)
+atom[ 3] (H01 ) is not in any ring (nr[3]=1)
+atom[ 4] (H02 ) is not in any ring (nr[4]=1)
+atom[ 5] (C03 ) is not in any ring (nr[5]=1)
+atom[ 6] (H03 ) is not in any ring (nr[6]=1)
+atom[ 7] (C04 ) is not in any ring (nr[7]=1)
+atom[ 8] (H04 ) is not in any ring (nr[8]=1)
+atom[ 9] (H05 ) is not in any ring (nr[9]=1)
+atom[10] (H06 ) is not in any ring (nr[10]=1)
 
 ====================================================================================
 -------------------------------aromatic property------------------------------------
 
 ====================================================================================
 -------------------------------electronic property----------------------------------
-atom [ 1] (O01 ) is an electron-withdrew atom
-atom [ 2] (H01 ) is not an electron-withdrew atom
-atom [ 3] (H02 ) is not an electron-withdrew atom
+atom [ 1] (C01 ) is not an electron-withdrew atom
+atom [ 2] (C02 ) is not an electron-withdrew atom
+atom [ 3] (H01 ) is not an electron-withdrew atom
+atom [ 4] (H02 ) is not an electron-withdrew atom
+atom [ 5] (C03 ) is not an electron-withdrew atom
+atom [ 6] (H03 ) is not an electron-withdrew atom
+atom [ 7] (C04 ) is not an electron-withdrew atom
+atom [ 8] (H04 ) is not an electron-withdrew atom
+atom [ 9] (H05 ) is not an electron-withdrew atom
+atom [10] (H06 ) is not an electron-withdrew atom
 
 ====================================================================================
 --------------------------------connectivity property-------------------------------
-atom[ 1] (O01 )     2   H01
-atom[ 1] (O01 )     3   H02
-atom[ 2] (H01 )     1   O01
-atom[ 3] (H02 )     1   O01
+atom[ 1] (C01 )     2   C02
+atom[ 1] (C01 )     3   H01
+atom[ 1] (C01 )     4   H02
+atom[ 2] (C02 )     1   C01
+atom[ 2] (C02 )     5   C03
+atom[ 2] (C02 )     6   H03
+atom[ 3] (H01 )     1   C01
+atom[ 4] (H02 )     1   C01
+atom[ 5] (C03 )     2   C02
+atom[ 5] (C03 )     7   C04
+atom[ 5] (C03 )     8   H04
+atom[ 6] (H03 )     2   C02
+atom[ 7] (C04 )     5   C03
+atom[ 7] (C04 )     9   H05
+atom[ 7] (C04 )    10   H06
+atom[ 8] (H04 )     5   C03
+atom[ 9] (H05 )     7   C04
+atom[10] (H06 )     7   C04
 ----------------------------------------END-----------------------------------------
 
