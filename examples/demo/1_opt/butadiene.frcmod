@@ -1,0 +1,37 @@
+Remark line goes here
+MASS
+c2 12.010        0.360
+ce 12.010        0.360
+ha 1.008         0.135
+
+BOND
+c2-ce  424.30   1.346 # PRM 1 2
+c2-ha  357.29   1.088 
+ce-ce  288.33   1.462 # PRM 1 2
+ce-ha  357.59   1.088 
+
+ANGLE
+c2-ce-ce   62.400     123.230 # PRM 1 2
+c2-ce-ha   46.240     120.000 
+ce-c2-ha   46.150     120.490 
+ce-ce-ha   43.870     116.620 
+ha-c2-ha   34.660     116.660 
+
+DIHE
+c2-ce-ce-c2   1    0.740         0.000           3.000 # PRM 2
+c2-ce-ce-ha   4    4.000       180.000           2.000 
+ha-c2-ce-ce   4   26.600       180.000           2.000 
+ha-c2-ce-ha   4   26.600       180.000           2.000 
+ha-ce-ce-ha   4    4.000       180.000           2.000 
+
+IMPROPER
+ce-ha-c2-ha         1.1          180.0         2.0          Same as X -X -ca-ha, penalty score= 47.1 (use general term)) 
+c2-ce-ce-ha         1.1          180.0         2.0          Same as X -X -ca-ha, penalty score= 46.8 (use general term)) 
+
+NONBON
+  c2          1.8606  0.0988
+  ce          1.8606  0.0988
+  ha          1.4735  0.0161
+
+
+

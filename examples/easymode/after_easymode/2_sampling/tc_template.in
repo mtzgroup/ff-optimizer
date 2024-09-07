@@ -1,6 +1,0 @@
-basis         def2-svp  
-method        wb97x-d3
-charge        0        
-run           gradient 
-dftd          d3       
-spinmult      1        
