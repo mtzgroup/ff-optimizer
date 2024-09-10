@@ -11,14 +11,22 @@ from . import resp_prior, utils
 
 mpl.use("Agg")
 
+
 def runForceBalance(inp, out, err=None):
-    with subprocess.Popen(["ForceBalance.py", inp] , stdin=subprocess.PIPE, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as process:
-        stdout, stderr = process.communicate("\n"*100)
+    with subprocess.Popen(
+        ["ForceBalance.py", inp],
+        stdin=subprocess.PIPE,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ) as process:
+        stdout, stderr = process.communicate("\n" * 100)
     with open(out, "w") as f:
         f.write(stdout)
     if err is not None:
         with open(err, "w") as f:
             f.write(stderr)
+
 
 class OptEngine:
     def setVariables(self, inp):
@@ -492,13 +500,18 @@ class OptEngine:
             os.path.join("forcefield", self.mol2),
         )
 
-
     def runValidPrevious(self, i):
         # If we're just restarting, skip if this calculation finished
         if len(self.validPrevious) < i:
-            runForceBalance(f"valid_{i}.in", f"valid_{i}_previous.out", f"valid_{i}_previous.err")
+            runForceBalance(
+                f"valid_{i}.in", f"valid_{i}_previous.out", f"valid_{i}_previous.err"
+            )
             for j in range(1, self.nvalids):
-                runForceBalance(f"valid_{i}_{j}.in", f"valid_{i}_{j}_previous.out", f"valid_{i}_{j}_previous.err")
+                runForceBalance(
+                    f"valid_{i}_{j}.in",
+                    f"valid_{i}_{j}_previous.out",
+                    f"valid_{i}_{j}_previous.err",
+                )
             self.validPrevious.append(self.readValid(f"valid_{i}_previous.out"))
 
     def runTraining(self, i):
@@ -514,14 +527,24 @@ class OptEngine:
         if len(self.valid) < i:
             runForceBalance(f"valid_{i}.in", f"valid_{i}.out", f"valid_{i}.err")
             for j in range(1, self.nvalids):
-                runForceBalance(f"valid_{i}_{j}.in", f"valid_{i}_{j}.out", f"valid_{i}_{j}.err")
+                runForceBalance(
+                    f"valid_{i}_{j}.in", f"valid_{i}_{j}.out", f"valid_{i}_{j}.err"
+                )
             self.valid.append(self.readValid(f"valid_{i}.out"))
 
     def runValidInitial(self, i):
         if len(self.validInitial) < i:
-            runForceBalance(f"valid_{i}_initial.in", f"valid_{i}_initial.out", f"valid_{i}_initial.err")
+            runForceBalance(
+                f"valid_{i}_initial.in",
+                f"valid_{i}_initial.out",
+                f"valid_{i}_initial.err",
+            )
             for j in range(1, self.nvalids):
-                runForceBalance(f"valid_{i}_{j}_initial.in", f"valid_{i}_{j}_initial.out", f"valid_{i}_{j}_initial.err")
+                runForceBalance(
+                    f"valid_{i}_{j}_initial.in",
+                    f"valid_{i}_{j}_initial.out",
+                    f"valid_{i}_{j}_initial.err",
+                )
             self.validInitial.append(self.readValid(f"valid_{i}_initial.out"))
 
     def runValidFinal(self, i, lastCycle):
@@ -601,8 +624,14 @@ class OptEngine:
     def copyFinalResults(self, best):
         resultFolder = self.home / "3_result"
         resultFolder.mkdir(exist_ok=True)
-        copyfile(self.optdir / Path("result") / f"opt_{best}" / self.mol2, resultFolder / self.mol2)
-        copyfile(self.optdir / Path("result") / f"opt_{best}" / self.frcmod, resultFolder / self.frcmod)
+        copyfile(
+            self.optdir / Path("result") / f"opt_{best}" / self.mol2,
+            resultFolder / self.mol2,
+        )
+        copyfile(
+            self.optdir / Path("result") / f"opt_{best}" / self.frcmod,
+            resultFolder / self.frcmod,
+        )
 
     def getFinalValidations(self, lastCycle):
         vs = []

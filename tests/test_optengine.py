@@ -1,5 +1,4 @@
 import errno
-import pytest
 import os
 from pathlib import Path
 from shutil import copyfile, rmtree
@@ -12,6 +11,7 @@ from . import checkUtils
 from .test_inputs import getDefaults
 
 home = Path(os.path.dirname(__file__))
+
 
 def monkeyGraph():
     pass
@@ -1077,6 +1077,7 @@ def test_computeValidDiff(monkeypatch):
 def monkeyGetFinalValidations(self, a):
     return 0
 
+
 def monkeyCopyFinalResults(self, best):
     pass
 
@@ -1194,6 +1195,7 @@ def test_copyFinalResults(monkeypatch):
 #    results = optEngine.readOpt("opt_1.out")
 #    optEngine.sortParams(1, results)
 
+
 def test_runfb():
     os.chdir(home / "optengine" / "runfb")
     optengine.runForceBalance("valid_3.in", "test.out", "test.err")
@@ -1211,4 +1213,3 @@ def test_runfb():
     utils.rmrf("valid_3.tmp")
     assert out
     assert err
-
