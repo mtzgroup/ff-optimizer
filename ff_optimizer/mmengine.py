@@ -1,8 +1,8 @@
 import os
+import subprocess
 from pathlib import Path
 from random import randint
 from shutil import copyfile
-import subprocess
 
 import GPUtil
 
@@ -284,15 +284,32 @@ class ExternalAmberEngine(MMEngine):
             raise RuntimeError(f"Cannot find mdin {mdin} in {os.getcwd()}")
         if not os.path.isfile(mdcrd):
             raise RuntimeError(f"Cannot find input crd {mdcrd} in {os.getcwd()}")
-        command = [self.amberExe, "-O", "-p", prmtop, "-i", mdin, "-o", mdout, "-c", mdcrd, "-x", mdtraj, "-r", restart]
+        command = [
+            self.amberExe,
+            "-O",
+            "-p",
+            prmtop,
+            "-i",
+            mdin,
+            "-o",
+            mdout,
+            "-c",
+            mdcrd,
+            "-x",
+            mdtraj,
+            "-r",
+            restart,
+        ]
         if mdvels is not None:
             command += ["-v", mdvels]
-        result = subprocess.run(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(
+            command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
         with open("md.out", "a") as f:
             f.write(result.stdout)
         with open("md.err", "a") as f:
             f.write(result.stderr)
-            
+
         if not os.path.isfile(restart):
             if self.amberExe == "pmemd.cuda":
                 print("pmemd.cuda failed; trying MM sampling with pmemd")
