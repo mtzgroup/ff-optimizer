@@ -120,7 +120,7 @@ def test_getQMRefData(monkeypatch):
             # out = SinglePointOutput(input_data=sp, results=res, provenance=prov)
         except Exception:
             out = ProgramOutput(
-                input_data=sp, provenance=prov, success=False, traceback="Oops"
+                input_data=sp, results=res, provenance=prov, success=False, traceback="Oops"
             )
             # out = ProgramFailure(input_data=sp, results={}, provenance=prov)
         outputs.append(out)

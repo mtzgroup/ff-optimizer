@@ -105,7 +105,7 @@ def optimize(input_file: str):
 
     # Begin sampling/optimization cycling
     print(
-        "%7s%15s%15s%22s%25s%8s%8s%8s"
+        "%7s%15s%15s%22s%25s%9s%9s%9s"
         % (
             "Epoch",
             "Training",
@@ -138,7 +138,7 @@ def optimize(input_file: str):
 
         if inp.validinitial:
             print(
-                "%7d%15.8f%15.8f%22.8f%25.8f%8.1f%8.1f%8.1f"
+                "%7d%15.8f%15.8f%22.8f%25.8f%9.1f%9.1f%9.1f"
                 % (
                     i,
                     optResults[0],
@@ -152,7 +152,7 @@ def optimize(input_file: str):
             )
         else:
             print(
-                "%7d%15.8f%15.8f%22.8f%25.8s%8.1f%8.1f%8.1f"
+                "%7d%15.8f%15.8f%22.8f%25.8s%9.1f%9.1f%9.1f"
                 % (
                     i,
                     optResults[0],

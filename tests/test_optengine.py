@@ -1195,17 +1195,25 @@ def test_copyFinalResults(monkeypatch):
 #    results = optEngine.readOpt("opt_1.out")
 #    optEngine.sortParams(1, results)
 
-
 def test_runfb():
     os.chdir(home / "optengine" / "runfb")
     optengine.runForceBalance("valid_3.in", "test.out", "test.err")
     # Some lines in the output include dates, timings, software that could change
     # So we have to omit those lines when we're comparing to reference
     with open("ref.out", "r") as f:
-        refOut = f.readlines()[182:225]
-    print(refOut)
+        refLines = f.readlines()
+    for i, line in enumerate(refLines):
+        if "Target: valid_1" in line:
+            start = i
+            break
+    refOut = refLines[i:i+43]
     with open("test.out", "r") as f:
-        testOut = f.readlines()[182:225]
+        testLines = f.readlines()
+    for i, line in enumerate(testLines):
+        if "Target: valid_1" in line:
+            start = i
+            break
+    testOut = testLines[i:i+43]
     out = checkUtils.checkLists(refOut, testOut)
     err = checkUtils.checkFiles("ref.err", "test.err")
     os.remove("test.out")
