@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
-from shutil import copyfile, rmtree
+from shutil import copyfile
 
-from ff_optimizer import setup
+from ff_optimizer import setup, utils
 
 from . import checkUtils
 from .test_inputs import getDefaults
@@ -91,6 +91,26 @@ def test_setup():
     # if the new input file and model get initialized and pass all their
     # internal checks, then we pass this test as well
     setup.setup("wat.xyz")
-    rmtree("1_opt")
-    rmtree("2_sampling")
+    utils.rmrf("1_opt")
+    utils.rmrf("2_sampling")
     os.remove("input.yaml")
+
+def test_charges():
+    os.chdir(Path(os.path.dirname(__file__)) / "setup" / "charges")
+    os.system("ff-opt setup --charge -1 bicarb.xyz")
+    mol2charge = setup.getCharge("1_opt")
+    os.chdir(Path(os.path.dirname(__file__)) / "setup" / "charges")
+    with open(Path("2_sampling") / "tc_template.in") as f:
+        for line in f.readlines():
+            if "charge" in line:
+                tcCharge = int(line.split()[1])
+    with open(Path("2_sampling") / "tc_template_backup.in") as f:
+        for line in f.readlines():
+            if "charge" in line:
+                tcChargeBackup = int(line.split()[1])
+    utils.rmrf("1_opt")
+    utils.rmrf("2_sampling")
+    os.remove("input.yaml")
+    assert mol2charge == -1
+    assert tcCharge == -1
+    assert tcChargeBackup == -1

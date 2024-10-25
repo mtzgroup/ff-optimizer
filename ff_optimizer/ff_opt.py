@@ -89,8 +89,8 @@ def getRestartCycle(inp, ffModel):
 
 
 @app.command()
-def setup(xyz: str):
-    st.setup(xyz)
+def setup(xyz: str, charge: int = 0):
+    st.setup(xyz, charge)
 
 
 @app.command()

@@ -7,7 +7,7 @@ from .inputs import Input
 from .utils import checkForAmber, readXYZ, writePDB
 
 
-def setup(xyz, opt=True, mm=True, qm=True):
+def setup(xyz, charge=0, opt=True, mm=True, qm=True):
     xyz = Path(xyz)
     readXYZ(xyz)  # easy way to check that xyz is formatted correctly and exists
     checkForAmber()
@@ -23,11 +23,11 @@ def setup(xyz, opt=True, mm=True, qm=True):
     inp.coors = xyz
     inp.conformers = inp.coors
     if opt:
-        setupOpt(inp)
+        setupOpt(inp, charge)
     if mm:
         setupMM(inp)
     if qm:
-        setupQM(inp)
+        setupQM(inp, charge)
     # when we initialize the new input, it'll check for files and folder
     os.chdir(home)
     inp.toYaml("input.yaml")
@@ -35,14 +35,14 @@ def setup(xyz, opt=True, mm=True, qm=True):
     return newInp
 
 
-def setupOpt(inp):
+def setupOpt(inp, charge):
     xyz = inp.coors
     setupDir = inp.optdir / "setup"
     print(f"Making FF setup directory {str(setupDir)}")
     setupDir.mkdir(exist_ok=True)
     copyfile(xyz, setupDir / xyz)
     os.chdir(inp.optdir / "setup")
-    frcmod, mol2, resname = setupFF(xyz, inp.optdir)
+    frcmod, mol2, resname = setupFF(xyz, inp.optdir, charge)
     os.chdir(inp.optdir)
     setupForceBalance(inp, frcmod, mol2, resname)
     editFrcmod(frcmod)
@@ -55,7 +55,7 @@ def setupMM(inp):
     writeMDFiles()
 
 
-def setupQM(inp):
+def setupQM(inp, charge):
     charge = getCharge(inp.optdir)
     os.chdir(inp.sampledir)
     writeTCFiles(inp, charge)
@@ -169,7 +169,7 @@ def writeMDFiles():
         )
 
 
-def setupFF(xyz, optdir):
+def setupFF(xyz, optdir, charge):
     name = xyz.name.replace(".xyz", "")
     resname = name[:3].upper()
     coords, atoms = readXYZ(xyz, True)
@@ -182,7 +182,7 @@ def setupFF(xyz, optdir):
     print(f"Creating Amber forcefield files")
     print("Making mol2 file with antechamber")
     print("Using AM1-BCC to create charges; this should be done with HF/6-31g* RESP")
-    os.system(f"antechamber -i {pdb} -fi pdb -o {mol2} -fo mol2 -c bcc")
+    os.system(f"antechamber -i {pdb} -fi pdb -o {mol2} -fo mol2 -c bcc -nc {charge}")
     print("Making frcmod file with parmchk2")
     os.system(f"parmchk2 -i {mol2} -o {frcmod} -f mol2 -s 2 -a Y")
     copyfile(mol2, optdir / mol2)
