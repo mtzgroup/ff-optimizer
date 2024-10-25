@@ -2,7 +2,7 @@ import os
 import subprocess
 from pathlib import Path
 from random import randint
-from shutil import copyfile
+from shutil import copyfile, which
 
 import GPUtil
 
@@ -267,9 +267,14 @@ class ExternalAmberEngine(MMEngine):
         try:
             deviceIDs = GPUtil.getAvailable(maxLoad=0.1)
             if len(deviceIDs) > 0:
-                print("Nvidia GPUs detected; defaulting to pmemd.cuda")
-                self.amberExe = "pmemd.cuda"
-                os.environ["CUDA_VISIBLE_DEVICES"] = str(deviceIDs[0])
+                print("Nvidia GPUs detected")
+                if which("pmemd.cuda"):
+                    self.amberExe = "pmemd.cuda"
+                    os.environ["CUDA_VISIBLE_DEVICES"] = str(deviceIDs[0])
+                    print("Defaulting to pmemd.cuda")
+                else:
+                    print("No pmemd.cuda on path; defaulting to pmemd")
+                    self.amberExe = "pmemd"
             else:
                 print("No Nvidia GPUs available; defaulting to sander")
                 self.amberExe = "pmemd"
