@@ -33,7 +33,7 @@ readme = "README.md"
 ff-opt = "ff_optimizer.ff_opt:main"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.11"
 forcebalance = "^1.9.5"
 openmm = "^8.1.1"
 scipy = "<=1.14.0"
@@ -45,7 +45,7 @@ typer = "^0.12.3"
 networkx = "<3.3"
 future = "^1.0.0"
 pymbar = "<3.1"
-chemcloud = ">=0.10"
+chemcloud = "^0.12.1"
 
 
 [tool.poetry.group.dev.dependencies]

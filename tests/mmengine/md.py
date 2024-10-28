@@ -4,6 +4,7 @@ import simtk.openmm as mm
 from parmed.openmm import NetCDFReporter
 from simtk import unit
 from simtk.openmm import app
+from numpy.random import seed
 
 prmtopFile = sys.argv[1]
 rst = sys.argv[2]
@@ -30,6 +31,7 @@ system.setParticleMass(0, 0)
 
 platform = mm.Platform.getPlatformByName("CPU")
 simulation = app.Simulation(prmtop.topology, system, integrator, platform)
+seed(26536)
 simulation.context.setPositions(coordinates.positions)
 simulation.minimizeEnergy(maxIterations=10)
 

@@ -5,25 +5,22 @@ Uses ForceBalance, Amber, and TeraChem to optimize forcefield parameters.
 ### Summary of necessary directories and files ###
 
 Dynamics directory ("dynamicsdir", 0_dynamics) contains:
-
-        QM dynamics coordinates ("coors", coors.xyz)
-        TeraChem output file ("tcout", tc.out)
-        Conformers file ("conformers", coors.xyz)
+    -- QM dynamics coordinates ("coors", coors.xyz)
+    -- TeraChem output file ("tcout", tc.out)
+    -- Conformers file ("conformers", coors.xyz)
 FB Optimization directory ("optdir", 1_opt) contains:
-
-        FB optimization input file (opt_0.in)
-        FB validation input file (valid_0.in)
-        PDB conformation file (conf.pdb)
-        Tleap setup file (setup.leap)
-        Parameter frcmod file (*.frcmod)
-        Parameter mol2 file (*.mol2)
+    -- FB optimization input file (opt_0.in)
+    -- FB validation input file (valid_0.in)
+    -- PDB conformation file (conf.pdb)
+    -- Tleap setup file (setup.leap)
+    -- Parameter frcmod file (*.frcmod)
+    -- Parameter mol2 file (*.mol2)
 MM sampling directory ("sampledir", 2_sampling) contains:
-
-        Equilibration inputs (heat*in)
-        MM sampling input(s) ("trainmdin", "validmdin", md.in)
-        TeraChem input file for fire (tc_template.in)
-        Backup TeraChem input file if job fails (tc_template_long.in)
-        sbatch template file for queue (sbatch_template.sh)
+    -- Equilibration inputs (heat*in)
+    -- MM sampling input(s) ("trainmdin", "validmdin", md.in)
+    -- TeraChem input file for fire (tc_template.in)
+    -- Backup TeraChem input file if job fails (tc_template_long.in)
+    -- sbatch template file for queue (sbatch_template.sh)
 
 ### Input files ###
 
