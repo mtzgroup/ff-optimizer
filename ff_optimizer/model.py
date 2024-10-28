@@ -4,6 +4,7 @@ from shutil import copyfile, rmtree
 
 from . import mmengine, optengine, qmengine
 from .utils import convertTCtoFB, getXYZs
+from .inputs import Input
 
 
 # Template class for ff models used by ff_optimizer
@@ -12,28 +13,62 @@ from .utils import convertTCtoFB, getXYZs
 # use the inherited class
 class AbstractModel:
     def __init__(self):
+        """
+        Initialize the AbstractModel.
+        """
         # self.restartCycle = -1
         # raise NotImplementedError
         # commented in case using super becomes necessary
         pass
 
     def initialCycle(self):
+        """
+        Perform the initial cycle of the model.
+        This method should be implemented by subclasses.
+        """
         raise NotImplementedError()
 
-    def doMMSampling(self, i):
+    def doMMSampling(self, i: int):
+        """
+        Perform MM sampling for a given iteration.
+        This method should be implemented by subclasses.
+
+        Args:
+            i (int): The iteration number.
+        """
         raise NotImplementedError()
 
-    def doQMCalculations(self, i):
+    def doQMCalculations(self, i: int):
+        """
+        Perform QM calculations for a given iteration.
+        This method should be implemented by subclasses.
+
+        Args:
+            i (int): The iteration number.
+        """
         raise NotImplementedError()
 
-    def doParameterOptimization(self, i):
+    def doParameterOptimization(self, i: int):
+        """
+        Perform parameter optimization for a given iteration.
+        This method should be implemented by subclasses.
+
+        Args:
+            i (int): The iteration number.
+        """
         raise NotImplementedError()
 
 
 # Functions in this class assume that they are operating in the home directory
 # where the job was started.
 class Model(AbstractModel):
-    def __init__(self, inp):
+    def __init__(self, inp: Input):
+        """
+        Initialize the Model.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+        """
         self.setParams(inp)
         self.getMDFiles(inp)
         # Set up each engine
@@ -42,7 +77,13 @@ class Model(AbstractModel):
         self.mmEngine = self.initializeMMEngine(inp)
         self.restartCycle = self.optEngine.restartCycle
 
-    def getMDFiles(self, inp):
+    def getMDFiles(self, inp: Input):
+        """
+        Get MD files and count heat files.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+        """
         self.mdFiles = []
         self.heatCounter = 0
         for f in os.listdir(self.sampledir):
@@ -53,7 +94,13 @@ class Model(AbstractModel):
         # Easiest way to pass this to MMEngine is through the Inputs class
         inp.heatCounter = self.heatCounter
 
-    def setParams(self, inp):
+    def setParams(self, inp: Input):
+        """
+        Set parameters for the model.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+        """
         # Set some miscellaneous variables
         self.home = Path(".").cwd().absolute()
         self.optdir = inp.optdir
@@ -62,11 +109,29 @@ class Model(AbstractModel):
         self.inp = inp
         self.converged = False
 
-    def initializeOptEngine(self, inp):
+    def initializeOptEngine(self, inp: Input) -> optengine.OptEngine:
+        """
+        Initialize the optimization engine.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+
+        Returns:
+            OptEngine: The initialized optimization engine.
+        """
         optEngine = optengine.OptEngine(inp)
         return optEngine
 
-    def initializeQMEngine(self, inp):
+    def initializeQMEngine(self, inp: Input) -> qmengine.QMEngine:
+        """
+        Initialize the QM engine.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+
+        Returns:
+            QMEngine: The initialized QM engine.
+        """
         if inp.qmengine == "debug":
             qmEngine = qmengine.DebugEngine(inp)
         elif inp.qmengine == "slurm":
@@ -75,7 +140,16 @@ class Model(AbstractModel):
             qmEngine = qmengine.ChemcloudEngine(inp)
         return qmEngine
 
-    def initializeMMEngine(self, inp):
+    def initializeMMEngine(self, inp: Input) -> mmengine.MMEngine:
+        """
+        Initialize the MM engine.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+
+        Returns:
+            MMEngine: The initialized MM engine.
+        """
         if inp.mmengine == "amber":
             mmEngine = mmengine.ExternalAmberEngine(inp)
         if inp.mmengine == "openmm":
@@ -83,6 +157,9 @@ class Model(AbstractModel):
         return mmEngine
 
     def initialCycle(self):
+        """
+        Perform the initial cycle of the model.
+        """
         if self.inp.initialtraining:
             # Prepare initial target data
             path = self.createTCData()
@@ -99,7 +176,12 @@ class Model(AbstractModel):
             copyfile(self.optdir / self.optEngine.frcmod, path / self.optEngine.frcmod)
 
     def createTCData(self):
-        # Create initial target data from dynamics
+        """
+        Create initial target data from dynamics.
+
+        Returns:
+            Path: Path to the created target data.
+        """
         with open(self.optdir / "opt_0.in", "r") as f:
             for line in f.readlines():
                 splitLine = line.split()
@@ -120,6 +202,13 @@ class Model(AbstractModel):
         return path
 
     def copyLeapFiles(self, dest, validInitial=True):
+        """
+        Copy leap files to the destination.
+
+        Args:
+            dest (Path): Destination path for the leap files.
+            validInitial (bool): Whether to copy the valid initial leap file.
+        """
         files = ["setup.leap", "conf.pdb"]
         # default is to copy the valid initial leap if the input wants to
         if validInitial and self.inp.validinitial:
@@ -128,6 +217,12 @@ class Model(AbstractModel):
             copyfile(self.optdir / f, dest / f)
 
     def doMMSampling(self, i):
+        """
+        Perform MM sampling for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+        """
         # Make sampling directory and copy files into it
         samplePath = self.makeSampleDir(i)
         self.copySamplingFiles(i, samplePath)
@@ -140,6 +235,15 @@ class Model(AbstractModel):
         os.chdir(self.home)
 
     def makeSampleDir(self, i):
+        """
+        Create a sampling directory for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+
+        Returns:
+            Path: Path to the created sampling directory.
+        """
         sampleName = f"{str(i)}_cycle_{str(i)}"
         samplePath = self.sampledir / sampleName
         if not samplePath.exists():
@@ -150,18 +254,39 @@ class Model(AbstractModel):
             samplePath.mkdir(exist_ok=True)
         return samplePath
 
-    def copyFFFiles(self, i, dest):
+    def copyFFFile(self, i: int, dest: Path, filename: str):
+        """
+        Copy a specific force field file to the sampling directory.
+
+        Args:
+            i (int): The iteration number.
+            samplePath (Path): Path to the sampling directory.
+            filename (str): Name of the file to copy.
+        """
         resultPath = self.optdir / "result" / f"opt_{i}"
         for f in resultPath.iterdir():
             copyfile(f, dest / f.name)
 
-    def copySamplingFiles(self, i, samplePath):
+    def copySamplingFiles(self, i: int, samplePath: Path):
+        """
+        Copy sampling files for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+            samplePath (Path): Path to the sampling directory.
+        """
         self.copyFFFiles(i - 1, samplePath)
         self.copyLeapFiles(samplePath, validInitial=False)
         for f in self.mdFiles:
             copyfile(self.sampledir / f, samplePath / f)
 
-    def doQMCalculations(self, i):
+    def doQMCalculations(self, i: int):
+        """
+        Perform QM calculations for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+        """
         # Run QM calculations for each sampling trajectory
         for f in (self.sampledir / f"{str(i)}_cycle_{str(i)}").iterdir():
             if (
@@ -176,7 +301,16 @@ class Model(AbstractModel):
                 os.chdir("..")
             os.chdir(self.home)
 
-    def makeFBTargets(self, i):
+    def makeFBTargets(self, i: int) -> list:
+        """
+        Create ForceBalance target folders for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+
+        Returns:
+            list: List of created target folder paths.
+        """
         targets = self.optdir / "targets"
         if not targets.exists():
             targets.mkdir()
@@ -188,7 +322,13 @@ class Model(AbstractModel):
                 f.mkdir()
         return folders
 
-    def doParameterOptimization(self, i):
+    def doParameterOptimization(self, i: int):
+        """
+        Perform parameter optimization for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+        """
         # Copy new QM data into appropriate folders
         targetFolders = self.makeFBTargets(i)
         for f in targetFolders:
@@ -204,12 +344,31 @@ class Model(AbstractModel):
 
     # sampleFolders and targetFolders should be ordered such that the train
     # folder is index 0, with the valid folders in order behind it
-    def copyQMResults(self, sampleFolders, targetFolders):
+    def copyQMResults(self, sampleFolders: list, targetFolders: list):
+        """
+        Copy QM results from sample folders to target folders.
+
+        Args:
+            sampleFolders (list): List of sample folder paths.
+            targetFolders (list): List of target folder paths.
+        """
         for f in ["all.mdcrd", "qdata.txt"]:
             for i in range(len(sampleFolders)):
                 copyfile(sampleFolders[i] / f, targetFolders[i] / f)
 
-    def getSampleFolders(self, i):
+    def getSampleFolders(self, i: int) -> list:
+        """
+        Get sample folders for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+
+        Returns:
+            list: List of sample folder paths.
+
+        Raises:
+            RuntimeError: If a QM results folder cannot be found.
+        """
         sampleFolders = [self.sampledir / f"{str(i)}_cycle_{str(i)}" / "train"]
         for j in range(1, self.inp.nvalids + 1):
             sampleFolders.append(
@@ -221,6 +380,9 @@ class Model(AbstractModel):
         return sampleFolders
 
     def getOptResults(self):
+        """
+        Get optimization results and update the model's state.
+        """
         self.converged = self.optEngine.converged
         self.optResults = []
         self.optResults.append(self.optEngine.train[-1])

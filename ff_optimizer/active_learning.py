@@ -14,38 +14,96 @@ except:
 
 from . import utils
 from .model import AbstractModel, Model
+from .inputs import Input
 
 # from time import perf_counter
 
 
 def mmSampleStar(inp):
+    """
+    Helper function for multiprocessing MM sampling.
+
+    Args:
+        inp (Input): Input object containing configuration parameters.
+    """
     mmSampleParallel(*inp)
 
 
 def mmSampleParallel(model, folder, i):
+    """
+    Perform parallel MM sampling for a given model.
+
+    Args:
+        model (Model): The model to perform sampling on.
+        folder (Path): The folder to change to before sampling.
+        i (int): The iteration number.
+    """
     os.chdir(folder)
     model.doMMSampling(i)
 
 
 def paramOptStar(inp):
+    """
+    Helper function for multiprocessing parameter optimization.
+
+    Args:
+        inp (Input): Input object containing configuration parameters.
+
+    Returns:
+        Model: The optimized model.
+    """
     model = paramOptParallel(*inp)
     return model
 
 
 def paramOptParallel(model, folder, i):
+    """
+    Perform parallel parameter optimization for a given model.
+
+    Args:
+        model (Model): The model to optimize.
+        folder (Path): The folder to change to before optimization.
+        i (int): The iteration number.
+
+    Returns:
+        Model: The optimized model.
+    """
     os.chdir(folder)
     model.doParameterOptimization(i)
     return model
 
 
 def sanderEnergyForce(geometry):
+    """
+    Compute the energy and forces of a geometry using sander.
+
+    Args:
+        geometry (np.ndarray): The geometry to compute the energy and forces for.
+
+    Returns:
+        list: A list containing the total energy and the forces.
+    """
     sander.set_positions(geometry)
     energy, force = sander.energy_forces()
     return [energy.tot, force]
 
 
 class ActiveLearningModel(AbstractModel):
-    def setupFolders(self, inp, i):
+    """
+    Main class for active learning model, inheriting from AbstractModel.
+    """
+
+    def setupFolders(self, inp: Input, i: int) -> Input:
+        """
+        Set up folders for each model.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+            i (int): Model number.
+
+        Returns:
+            Input: Modified input object.
+        """
         folder = Path(f"model_{str(i)}")
         if folder.is_dir():
             if not inp.restart:
@@ -64,7 +122,13 @@ class ActiveLearningModel(AbstractModel):
         tempInp.optdir = optdir
         return tempInp
 
-    def setupModels(self, inp):
+    def setupModels(self, inp: Input):
+        """
+        Initialize multiple models.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+        """
         for i in range(1, self.nmodels + 1):
             tempInp = self.setupFolders(inp, i)
             # Want to sample multiple validation sets, but don't need to evaluate them all
@@ -77,7 +141,13 @@ class ActiveLearningModel(AbstractModel):
                 self.models[-1].restartCycle = self.models[-1].optEngine.restartCycle
             os.chdir(self.home)
 
-    def setupLeap(self, inp):
+    def setupLeap(self, inp: Input):
+        """
+        Set up LEAP for AMBER.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+        """
         os.chdir(inp.optdir)
         os.system(f"tleap -f setup.leap > leap.out")
         self.prmtop = None
@@ -88,7 +158,13 @@ class ActiveLearningModel(AbstractModel):
             raise RuntimeError("setup.leap file did not produce a .prmtop file")
         os.chdir(self.home)
 
-    def __init__(self, inp):
+    def __init__(self, inp: Input):
+        """
+        Initialize the ActiveLearningModel.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+        """
         self.setParams(inp)
         self.setupLeap(inp)
         self.setupModels(inp)
@@ -98,7 +174,13 @@ class ActiveLearningModel(AbstractModel):
             self.restartCycle = -1
         self.symbols = None
 
-    def setParams(self, inp):
+    def setParams(self, inp: Input):
+        """
+        Set parameters for the model.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+        """
         inp.nvalids = inp.activelearning - 1
         self.home = os.getcwd()
         self.nmodels = inp.activelearning
@@ -111,12 +193,21 @@ class ActiveLearningModel(AbstractModel):
         self.converged = False
 
     def initialCycle(self):
+        """
+        Perform initial cycle for all models.
+        """
         for i in range(1, self.nmodels + 1):
             os.chdir(f"model_{str(i)}")
             self.models[i - 1].initialCycle()
             os.chdir(self.home)
 
-    def doMMSampling(self, i):
+    def doMMSampling(self, i: int):
+        """
+        Perform MM sampling for all models.
+
+        Args:
+            i (int): Iteration number.
+        """
         ## serial code
         # for j in range(1, self.nmodels + 1):
         #    os.chdir(f"model_{str(j)}")
@@ -127,13 +218,25 @@ class ActiveLearningModel(AbstractModel):
             p.map(mmSampleStar, tasks)
         self.doActiveLearning(i)
 
-    def doQMCalculations(self, i):
+    def doQMCalculations(self, i: int):
+        """
+        Perform QM calculations for all models.
+
+        Args:
+            i (int): Iteration number.
+        """
         for j in range(1, self.nmodels + 1):
             os.chdir(f"model_{str(j)}")
             self.models[j - 1].doQMCalculations(i)
             os.chdir(self.home)
 
-    def doParameterOptimization(self, i):
+    def doParameterOptimization(self, i: int):
+        """
+        Perform parameter optimization for all models.
+
+        Args:
+            i (int): Iteration number.
+        """
         # serial code
         # optResults = []
         # for i in range(1, self.nmodels + 1):
@@ -153,7 +256,19 @@ class ActiveLearningModel(AbstractModel):
         for model in self.models:
             self.converged = self.converged and model.converged
 
-    def doActiveLearning(self, i):
+    def doActiveLearning(self, i: int):
+        """
+        Perform active learning step for the current iteration.
+
+        This method implements the active learning strategy, which involves:
+        1. Collecting geometries from all models
+        2. Computing energies and forces for these geometries
+        3. Selecting new geometries based on force spread
+        4. Distributing these geometries among the models for training and validation
+
+        Args:
+            i (int): Current iteration number.
+        """
         sampleDirs = [
             os.path.join(
                 f"model_{str(k+1)}",
@@ -201,7 +316,16 @@ class ActiveLearningModel(AbstractModel):
                         )
 
     def computeEnergyForce(self, geometries, prmtop):
+        """
+        Compute energy and forces for all geometries.
 
+        Args:
+            geometries (list): List of geometries.
+            prmtop (Path): Path to the parameter topology file.
+
+        Returns:
+            list: List of energy and force results.
+        """
         with sander.setup(prmtop, geometries[0], None, sander.gas_input()):
             # parallel code
             # paraStart = perf_counter()
@@ -221,6 +345,16 @@ class ActiveLearningModel(AbstractModel):
         return results
 
     def collectAll(self, i, j):
+        """
+        Collect all geometries from different models.
+
+        Args:
+            i (int): Iteration number.
+            j (int): Model number.
+
+        Returns:
+            list: List of collected geometries.
+        """
         geometries = []
         dirs = ["train"]
         for k in range(1, self.nmodels):
@@ -260,6 +394,15 @@ class ActiveLearningModel(AbstractModel):
         return geometries
 
     def collectGeometries(self, sampleDir):
+        """
+        Collect geometries from a specific sample directory.
+
+        Args:
+            sampleDir (Path): Path to the sample directory.
+
+        Returns:
+            list: List of collected geometries.
+        """
         geometries = []
         for f in os.listdir(sampleDir):
             if ".xyz" in f:
@@ -273,6 +416,16 @@ class ActiveLearningModel(AbstractModel):
         return geometries
 
     def computeAll(self, geometries, prmtops):
+        """
+        Compute energies and forces for all models.
+
+        Args:
+            geometries (list): List of geometries.
+            prmtops (list): List of paths to parameter topology files.
+
+        Returns:
+            tuple: Tuple containing arrays of energies and forces.
+        """
         energies = []
         forces = []
         allEnergies = []
@@ -293,6 +446,17 @@ class ActiveLearningModel(AbstractModel):
         return allEnergies, allForces
 
     def chooseGeometries(self, energies, forces, geomsNeeded):
+        """
+        Choose geometries based on force spread.
+
+        Args:
+            energies (np.ndarray): Array of energies.
+            forces (np.ndarray): Array of forces.
+            geomsNeeded (int): Number of geometries needed.
+
+        Returns:
+            list: Indices of chosen geometries.
+        """
         if self.nmodels == 2:
             # energySpread = np.abs(energies[0,:] - energies[1,:])
             forceSpread = np.linalg.norm(forces[0, :, :] - forces[1, :, :], axis=1)
@@ -309,6 +473,13 @@ class ActiveLearningModel(AbstractModel):
         return newGeoms
 
     def writeGeoms(self, geometries, dest):
+        """
+        Write geometries to destination folder.
+
+        Args:
+            geometries (list): List of geometries to write.
+            dest (Path): Destination folder path.
+        """
         for i in range(1, len(geometries) + 1):
             utils.writeXYZ(
                 geometries[i - 1], self.symbols, os.path.join(dest, f"{str(i)}.xyz")

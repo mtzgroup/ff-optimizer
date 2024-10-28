@@ -6,7 +6,17 @@ from pathlib import Path
 import yaml
 
 
-def checkForFile(f, isFile=True):
+def checkForFile(f: Path, isFile: bool = True):
+    """
+    Check if a file or directory exists.
+
+    Args:
+        f (Path): Path to the file or directory to check.
+        isFile (bool): If True, check for a file; if False, check for a directory.
+
+    Raises:
+        FileNotFoundError: If the file or directory does not exist.
+    """
     if isFile:
         if not f.is_file():
             raise FileNotFoundError(errno.ENOENT, strerror(errno.ENOENT), f.absolute())
@@ -15,20 +25,33 @@ def checkForFile(f, isFile=True):
             raise FileNotFoundError(errno.ENOENT, strerror(errno.ENOENT), f.absolute())
 
 
-def checkDirectory(directory, fs):
-    if type(directory) is str:
+def checkDirectory(directory: Path, fs: list):
+    """
+    Check if a directory exists and contains specified files.
+
+    Args:
+        directory (Path): Path to the directory to check.
+        fs (list): List of filenames to check for in the directory.
+
+    Raises:
+        FileNotFoundError: If the directory or any of the specified files do not exist.
+    """
+    if isinstance(directory, str):
         directory = Path(directory)
     checkForFile(directory, False)
     for f in fs:
         checkForFile(directory / f, True)
 
 
-# Flat list of options for now
 @dataclass
 class Input:
+    """
+    Input class containing configuration parameters for the force field optimization process.
+    """
+
     # General parameters
-    dynamicsdir: str = field(
-        default="0_dynamics",
+    dynamicsdir: Path = field(
+        default=Path("0_dynamics"),
         metadata={
             "comment": """
         Specifies the directory containing QM energies,
@@ -36,8 +59,8 @@ class Input:
         """
         },
     )
-    optdir: str = field(
-        default="1_opt",
+    optdir: Path = field(
+        default=Path("1_opt"),
         metadata={
             "comment": """
         Specifies the directory where ForceBalance optimization will
@@ -45,8 +68,8 @@ class Input:
         """
         },
     )
-    sampledir: str = field(
-        default="2_sampling",
+    sampledir: Path = field(
+        default=Path("2_sampling"),
         metadata={
             "comment": """
         Specifies the directory where MM sampling and QM 
@@ -394,8 +417,17 @@ class Input:
     )
 
     @classmethod
-    def fromYaml(cls, inputs):
-        if Path(inputs).is_file():
+    def fromYaml(cls, inputs: Path):
+        """
+        Create an Input object from a YAML file.
+
+        Args:
+            inputs (Path): Path to the YAML file.
+
+        Returns:
+            Input: An Input object with parameters from the YAML file.
+        """
+        if inputs.is_file():
             with open(inputs, "r") as f:
                 di = yaml.safe_load(f)
         else:
@@ -405,16 +437,25 @@ class Input:
             di = {}
         return cls(**di)
 
-    def toYaml(self, dest):
+    def toYaml(self, dest: Path):
+        """
+        Write the Input object parameters to a YAML file.
+
+        Args:
+            dest (Path): Path to the destination YAML file.
+        """
         data = vars(self)
-        # convert pathlib Paths back to strs
-        for key in data.keys():
-            if isinstance(data[key], Path):
-                data[key] = str(data[key])
+        # convert pathlib Paths to strs for YAML serialization
+        for key, value in data.items():
+            if isinstance(value, Path):
+                data[key] = str(value)
         with open(dest, "w") as f:
-            yaml.dump(vars(self), f)
+            yaml.dump(data, f)
 
     def __post_init__(self):
+        """
+        Perform post-initialization checks and setup.
+        """
         self.checkParams()
         self.pathify()
         if not self.skipchecks:
@@ -423,11 +464,20 @@ class Input:
             self.maxcycles = -1
 
     def pathify(self):
+        """
+        Convert directory strings to absolute Path objects.
+        """
         self.dynamicsdir = Path(self.dynamicsdir).absolute()
         self.optdir = Path(self.optdir).absolute()
         self.sampledir = Path(self.sampledir).absolute()
 
     def checkFiles(self):
+        """
+        Check for the existence of required files and directories.
+
+        Raises:
+            FileNotFoundError: If required files or directories are missing.
+        """
         dynamicsFiles = [self.coors]
         if self.conformers is not None:
             dynamicsFiles.append(self.conformers)
@@ -442,6 +492,12 @@ class Input:
         checkDirectory(self.sampledir, sampleFiles)
 
     def checkParams(self):
+        """
+        Validate input parameters.
+
+        Raises:
+            ValueError: If any input parameters are invalid.
+        """
         if self.resppriors != 1 and self.resppriors != 2 and self.resppriors != 0:
             raise ValueError("RESP prior mode must be either 0, 1, or 2")
         if self.stride < 1:
