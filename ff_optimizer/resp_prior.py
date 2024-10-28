@@ -1,7 +1,9 @@
 import os
-
+from pathlib import Path
+from typing import List, Tuple
 import numpy as np
 from scipy.stats import norm
+from .inputs import Input
 
 # import matplotlib as mpl
 # import matplotlib.pyplot as plt
@@ -9,7 +11,7 @@ from scipy.stats import norm
 
 
 class RespPriors:
-    def __init__(self, inp, mol2, prmtop):
+    def __init__(self, inp: Input, mol2: str | Path, prmtop: str | Path):
         """
         Initialize the RespPriors class.
 
@@ -65,7 +67,7 @@ class RespPriors:
                     loc = j
         return loc
 
-    def readCharges(self, lines: list) -> tuple:
+    def readCharges(self, lines: List[str]) -> Tuple[List[float], List[float]]:
         """
         Read ESP and RESP charges from TeraChem output lines.
 
@@ -194,7 +196,7 @@ class RespPriors:
         # fig.set_dpi(200)
         # plt.savefig("RESP_charge_dist.png",bbox_inches="tight")
 
-    def computePriors(self, cdf=0.95):
+    def computePriors(self, cdf: float = 0.95) -> np.ndarray:
         """
         Compute priors based on the specified mode.
 
@@ -213,7 +215,7 @@ class RespPriors:
             ppf = norm.ppf(cdf)
             return np.abs(self.espMeans - self.respMeans) / ppf + self.espStdevs
 
-    def setMol2Charges(self, charges: list, mol2: str):
+    def setMol2Charges(self, charges: List[float], mol2: str | Path):
         """
         Set charges in the mol2 file.
 
@@ -241,7 +243,7 @@ class RespPriors:
                         inCharges = True
         os.rename("temp.txt", mol2)
 
-    def setPriors(self, priors: list, inputFile: str):
+    def setPriors(self, priors: List[float], inputFile: str | Path):
         """
         Set priors in the input file.
 
@@ -287,7 +289,7 @@ class RespPriors:
                         outF.write(line)
         os.rename("temp.txt", inputFile)
 
-    def getRepeats(self, mol2: str):
+    def getRepeats(self, mol2: str | Path):
         """
         Get repeats from the mol2 file.
 
@@ -319,7 +321,7 @@ class RespPriors:
                 if "@<TRIPOS>ATOM" in line:
                     inCharges = True
 
-    def updateRespPriors(self, i: int, mol2: str):
+    def updateRespPriors(self, i: int, mol2: str | Path):
         """
         Update RESP priors for a given iteration.
 

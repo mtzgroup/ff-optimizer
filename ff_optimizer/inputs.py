@@ -417,16 +417,17 @@ class Input:
     )
 
     @classmethod
-    def fromYaml(cls, inputs: Path):
+    def fromYaml(cls, inputs: str | Path) -> "Input":
         """
         Create an Input object from a YAML file.
 
         Args:
-            inputs (Path): Path to the YAML file.
+            inputs (str | Path): Path to the YAML file.
 
         Returns:
             Input: An Input object with parameters from the YAML file.
         """
+        inputs = Path(inputs)  # Convert to Path if string
         if inputs.is_file():
             with open(inputs, "r") as f:
                 di = yaml.safe_load(f)
@@ -437,12 +438,12 @@ class Input:
             di = {}
         return cls(**di)
 
-    def toYaml(self, dest: Path):
+    def toYaml(self, dest: str | Path):
         """
         Write the Input object parameters to a YAML file.
 
         Args:
-            dest (Path): Path to the destination YAML file.
+            dest (str | Path): Path to the destination YAML file.
         """
         data = vars(self)
         # convert pathlib Paths to strs for YAML serialization

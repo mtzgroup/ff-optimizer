@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from shutil import copyfile, rmtree
+from shutil import copyfile, rmtree, which
 
 import GPUtil
 import pytest
@@ -48,7 +48,10 @@ def test_AmberInit(monkeypatch):
     assert mmEngine.amberExe == "pmemd"
     monkeypatch.setattr(GPUtil, "getAvailable", monkeyID)
     mmEngine = mmengine.ExternalAmberEngine(options)
-    assert mmEngine.amberExe == "pmemd.cuda"
+    if which("pmemd.cuda"):
+        assert mmEngine.amberExe == "pmemd.cuda"
+    else:
+        assert mmEngine.amberExe == "pmemd"
 
 
 @pytest.mark.amber

@@ -254,14 +254,13 @@ class Model(AbstractModel):
             samplePath.mkdir(exist_ok=True)
         return samplePath
 
-    def copyFFFile(self, i: int, dest: Path, filename: str):
+    def copyFFFiles(self, i: int, dest: Path):
         """
-        Copy a specific force field file to the sampling directory.
+        Copy force field files to the sampling directory.
 
         Args:
             i (int): The iteration number.
-            samplePath (Path): Path to the sampling directory.
-            filename (str): Name of the file to copy.
+            dest (Path): Path to the destination directory.
         """
         resultPath = self.optdir / "result" / f"opt_{i}"
         for f in resultPath.iterdir():
