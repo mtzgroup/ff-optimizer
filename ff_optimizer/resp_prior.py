@@ -1,7 +1,9 @@
 import os
-
+from pathlib import Path
+from typing import List, Tuple
 import numpy as np
 from scipy.stats import norm
+from .inputs import Input
 
 # import matplotlib as mpl
 # import matplotlib.pyplot as plt
@@ -9,7 +11,15 @@ from scipy.stats import norm
 
 
 class RespPriors:
-    def __init__(self, inp, mol2, prmtop):
+    def __init__(self, inp: Input, mol2: str | Path, prmtop: str | Path):
+        """
+        Initialize the RespPriors class.
+
+        Args:
+            inp: Input object containing configuration parameters.
+            mol2 (str): Path to the mol2 file.
+            prmtop (str): Path to the prmtop file.
+        """
         # We run RespPriors from within optdir but initialize in the main directory
         # getCharges will determine automatically where we are
         self.sampledir = inp.sampledir
@@ -21,6 +31,9 @@ class RespPriors:
         self.getUnits()
 
     def getUnits(self):
+        """
+        Get the number of units from the prmtop file.
+        """
         self.units = 0
         inResidues = False
         almostInResidues = False
@@ -37,7 +50,16 @@ class RespPriors:
                 if "%FLAG RESIDUE_LABEL" in line:
                     almostInResidues = True
 
-    def findRepeatIndex(self, idx: int):
+    def findRepeatIndex(self, idx: int) -> int:
+        """
+        Find the repeat index for a given atom index.
+
+        Args:
+            idx (int): Atom index.
+
+        Returns:
+            int: Repeat index, or -1 if not found.
+        """
         loc = -1
         for j, idxs in enumerate(self.repeats):
             for i in idxs:
@@ -45,7 +67,19 @@ class RespPriors:
                     loc = j
         return loc
 
-    def readCharges(self, lines: list):
+    def readCharges(self, lines: List[str]) -> Tuple[List[float], List[float]]:
+        """
+        Read ESP and RESP charges from TeraChem output lines.
+
+        Args:
+            lines (list): List of lines from TeraChem output.
+
+        Returns:
+            tuple: ESP charges and RESP charges.
+
+        Raises:
+            RuntimeError: If no charges are found in the lines.
+        """
         esp = []
         resp = []
         inEsp = False
@@ -79,6 +113,15 @@ class RespPriors:
         return esp, resp
 
     def getCharges(self, i: int):
+        """
+        Get charges from TeraChem output files for a given iteration.
+
+        Args:
+            i (int): Iteration number.
+
+        Raises:
+            RuntimeError: If no training directory is found.
+        """
         cycleDir = f"{i}_cycle_{i}"
         path = self.sampledir.absolute() / cycleDir
         trainDir = ""
@@ -103,6 +146,12 @@ class RespPriors:
             self.allResp.append(resp)
 
     def computeChargeDistributions(self):
+        """
+        Compute charge distributions for ESP and RESP charges.
+
+        Raises:
+            ValueError: If the number of atoms is not divisible by the number of units.
+        """
         espArray = np.array(self.allEsp, dtype=np.float32, copy=True)
         respArray = np.array(self.allResp, dtype=np.float32, copy=True)
         espArray.shape[1]
@@ -147,7 +196,16 @@ class RespPriors:
         # fig.set_dpi(200)
         # plt.savefig("RESP_charge_dist.png",bbox_inches="tight")
 
-    def computePriors(self, cdf=0.95):
+    def computePriors(self, cdf: float = 0.95) -> np.ndarray:
+        """
+        Compute priors based on the specified mode.
+
+        Args:
+            cdf (float, optional): Cumulative distribution function value. Defaults to 0.95.
+
+        Returns:
+            numpy.ndarray: Computed priors.
+        """
         # Priors determined by distribution of RESP charges
         if self.mode == 1:
             return self.respStdevs
@@ -157,7 +215,14 @@ class RespPriors:
             ppf = norm.ppf(cdf)
             return np.abs(self.espMeans - self.respMeans) / ppf + self.espStdevs
 
-    def setMol2Charges(self, charges: list, mol2: str):
+    def setMol2Charges(self, charges: List[float], mol2: str | Path):
+        """
+        Set charges in the mol2 file.
+
+        Args:
+            charges (list): List of charges to set.
+            mol2 (str): Path to the mol2 file.
+        """
         inCharges = False
         with open(mol2, "r") as inF:
             with open("temp.txt", "w") as outF:
@@ -178,7 +243,14 @@ class RespPriors:
                         inCharges = True
         os.rename("temp.txt", mol2)
 
-    def setPriors(self, priors: list, inputFile: str):
+    def setPriors(self, priors: List[float], inputFile: str | Path):
+        """
+        Set priors in the input file.
+
+        Args:
+            priors (list): List of priors to set.
+            inputFile (str): Path to the input file.
+        """
         inOptions = False
         inPriors = False
         added = False
@@ -217,7 +289,13 @@ class RespPriors:
                         outF.write(line)
         os.rename("temp.txt", inputFile)
 
-    def getRepeats(self, mol2: str):
+    def getRepeats(self, mol2: str | Path):
+        """
+        Get repeats from the mol2 file.
+
+        Args:
+            mol2 (str): Path to the mol2 file.
+        """
         inCharges = False
         self.repeats = []
         with open(mol2, "r") as f:
@@ -243,7 +321,14 @@ class RespPriors:
                 if "@<TRIPOS>ATOM" in line:
                     inCharges = True
 
-    def updateRespPriors(self, i: int, mol2: str):
+    def updateRespPriors(self, i: int, mol2: str | Path):
+        """
+        Update RESP priors for a given iteration.
+
+        Args:
+            i (int): Iteration number.
+            mol2 (str): Path to the mol2 file.
+        """
         self.getCharges(i)
         self.computeChargeDistributions()
         priors = self.computePriors()

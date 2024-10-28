@@ -15,7 +15,7 @@ def getDefaults():
     setattr(inputs.Input, "__post_init__", fakePostInit)
     with open("nothing.yaml", "w") as f:
         f.write(" ")
-    inp = inputs.Input.fromYaml("nothing.yaml")
+    inp = inputs.Input.fromYaml(Path("nothing.yaml"))
     setattr(inputs.Input, "__post_init__", postInit)
     os.remove("nothing.yaml")
     return inp

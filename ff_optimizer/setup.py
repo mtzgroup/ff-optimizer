@@ -7,7 +7,19 @@ from .inputs import Input
 from .utils import checkForAmber, readXYZ, writePDB
 
 
-def setup(xyz, opt=True, mm=True, qm=True):
+def setup(xyz: str | Path, opt: bool = True, mm: bool = True, qm: bool = True) -> Input:
+    """
+    Set up the optimization, MM, and QM calculations.
+
+    Args:
+        xyz (str or Path): Path to the XYZ file.
+        opt (bool, optional): Whether to set up optimization. Defaults to True.
+        mm (bool, optional): Whether to set up MM. Defaults to True.
+        qm (bool, optional): Whether to set up QM. Defaults to True.
+
+    Returns:
+        Input: A new Input object with the setup configuration.
+    """
     xyz = Path(xyz)
     readXYZ(xyz)  # easy way to check that xyz is formatted correctly and exists
     checkForAmber()
@@ -35,7 +47,13 @@ def setup(xyz, opt=True, mm=True, qm=True):
     return newInp
 
 
-def setupOpt(inp):
+def setupOpt(inp: Input):
+    """
+    Set up the optimization environment.
+
+    Args:
+        inp (Input): Input object containing configuration parameters.
+    """
     xyz = inp.coors
     setupDir = inp.optdir / "setup"
     print(f"Making FF setup directory {str(setupDir)}")
@@ -48,20 +66,41 @@ def setupOpt(inp):
     editFrcmod(frcmod)
 
 
-def setupMM(inp):
+def setupMM(inp: Input):
+    """
+    Set up the MM environment.
+
+    Args:
+        inp (Input): Input object containing configuration parameters.
+    """
     print("Creating Amber MD input files")
     print("Head to https://ambermd.org/index.php for documentation")
     os.chdir(inp.sampledir)
     writeMDFiles()
 
 
-def setupQM(inp):
+def setupQM(inp: Input):
+    """
+    Set up the QM environment.
+
+    Args:
+        inp (Input): Input object containing configuration parameters.
+    """
     charge = getCharge(inp.optdir)
     os.chdir(inp.sampledir)
     writeTCFiles(inp, charge)
 
 
-def getCharge(optdir):
+def getCharge(optdir: Path) -> int:
+    """
+    Get the total charge from the mol2 file.
+
+    Args:
+        optdir (Path): Path to the optimization directory.
+
+    Returns:
+        int: The rounded total charge.
+    """
     os.chdir(optdir)
     for f in os.listdir():
         if f.endswith("mol2"):
@@ -86,7 +125,14 @@ def getCharge(optdir):
     return round(charge)
 
 
-def writeTCFiles(inp, charge):
+def writeTCFiles(inp: Input, charge: int):
+    """
+    Write TeraChem input files.
+
+    Args:
+        inp (Input): Input object containing configuration parameters.
+        charge (int): The total charge of the system.
+    """
     print("Writing TeraChem input files")
     print("Head to http://www.petachem.com/doc/userguide.pdf for documentation")
     print("Defaulting to wB97X-D3/def2-svp and a spin multiplicity of 1")
@@ -122,6 +168,9 @@ def writeTCFiles(inp, charge):
 
 
 def writeMDFiles():
+    """
+    Write Amber MD input files for heating and sampling.
+    """
     print("Writing inputs to equilibrate to 400K")
     for i in range(8):
         with open(f"heat{i+1}.in", "w") as f:
@@ -169,7 +218,17 @@ def writeMDFiles():
         )
 
 
-def setupFF(xyz, optdir):
+def setupFF(xyz: Path, optdir: Path) -> tuple[str, str, str]:
+    """
+    Set up the force field files.
+
+    Args:
+        xyz (Path): Path to the XYZ file.
+        optdir (Path): Path to the optimization directory.
+
+    Returns:
+        tuple: frcmod, mol2, and resname.
+    """
     name = xyz.name.replace(".xyz", "")
     resname = name[:3].upper()
     coords, atoms = readXYZ(xyz, True)
@@ -191,7 +250,16 @@ def setupFF(xyz, optdir):
     return frcmod, mol2, resname
 
 
-def setupForceBalance(inp, frcmod, mol2, resname):
+def setupForceBalance(inp: Input, frcmod: str, mol2: str, resname: str):
+    """
+    Set up ForceBalance input files.
+
+    Args:
+        inp (Input): Input object containing configuration parameters.
+        frcmod (str): Name of the frcmod file.
+        mol2 (str): Name of the mol2 file.
+        resname (str): Residue name.
+    """
     print("Writing ForceBalance input files")
     print(
         "Head to https://leeping.github.io/forcebalance/doc/html/index.html for documentation"
@@ -257,7 +325,13 @@ def setupForceBalance(inp, frcmod, mol2, resname):
         )
 
 
-def editFrcmod(frcmod):
+def editFrcmod(frcmod: str):
+    """
+    Edit the frcmod file to optimize all bonds, angles, and torsions.
+
+    Args:
+        frcmod (str): Name of the frcmod file.
+    """
     print("Labeling frcmod file to optimize all bonds, angles, and torsions")
     inBond = False
     inAngle = False
