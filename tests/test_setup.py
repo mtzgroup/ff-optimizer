@@ -1,4 +1,5 @@
 import os
+import pytest
 from pathlib import Path
 from shutil import copyfile
 
@@ -8,18 +9,25 @@ from . import checkUtils
 from .test_inputs import getDefaults
 
 
+def getSetup():
+    xyz = Path("setup") / "test" / "wat.xyz"
+    st = setup.Setup(xyz)
+    return st
+
+
 def test_getCharge():
     os.chdir(os.path.dirname(__file__))
-    sampledir = Path("setup")
-    charge = setup.getCharge(sampledir)
+    st = getSetup()
+    os.chdir("setup")
+    charge = st.getCharge("ref_water.mol2")
     assert charge == 0
 
 
 def test_writeTCFiles():
     os.chdir(os.path.dirname(__file__))
+    st = getSetup()
     os.chdir("setup")
-    inp = getDefaults()
-    setup.writeTCFiles(inp, 0)
+    st.writeTCFiles()
     test1 = checkUtils.checkFiles("tc_template.in", "ref_tc_template.in")
     test2 = checkUtils.checkFiles("tc_template_backup.in", "ref_tc_template_backup.in")
     os.remove("tc_template.in")
@@ -29,9 +37,9 @@ def test_writeTCFiles():
 
 def test_writeMDFiles():
     os.chdir(os.path.dirname(__file__))
+    st = getSetup()
     os.chdir("setup")
-    getDefaults()
-    setup.writeMDFiles()
+    st.writeMDFiles()
     test = True
     for i in range(1, 9):
         test = test and checkUtils.checkFiles(f"heat{i}.in", f"ref_heat{i}.in")
@@ -43,9 +51,13 @@ def test_writeMDFiles():
 
 def test_setupFF():
     os.chdir(os.path.dirname(__file__))
+    st = getSetup()
     optdir = Path("setup").absolute()
+    st.inp.optdir = optdir
+    st.xyz = Path("water.xyz")
     os.chdir(optdir / "setupFF")
-    setup.setupFF(Path("water.xyz"), optdir)
+    print(st.inp.optdir)
+    st.setupFF()
     for f in os.listdir():
         if not f.endswith(".xyz"):
             os.remove(f)
@@ -59,12 +71,12 @@ def test_setupFF():
 
 def test_setupForceBalance():
     os.chdir(os.path.dirname(__file__))
+    st = getSetup()
     os.chdir("setup")
-    inp = getDefaults()
     frcmod = "ref_water.frcmod"
     mol2 = "ref_water.mol2"
     resname = "WAT"
-    setup.setupForceBalance(inp, frcmod, mol2, resname)
+    st.setupForceBalance(frcmod, mol2, resname)
     test = checkUtils.checkFiles("opt_0.in", "ref_opt_0.in")
     test = test and checkUtils.checkFiles("valid_0.in", "ref_valid_0.in")
     test = test and checkUtils.checkFiles("setup.leap", "ref_setup.leap")
@@ -76,29 +88,38 @@ def test_setupForceBalance():
 
 def test_editFrcmod():
     os.chdir(os.path.dirname(__file__))
+    st = getSetup()
     os.chdir("setup")
     copyfile("dasa.frcmod", "test.frcmod")
-    setup.editFrcmod("test.frcmod")
+    st.editFrcmod("test.frcmod")
     test = checkUtils.checkFiles("test.frcmod", "ref_dasa.frcmod")
     os.remove("test.frcmod")
     assert test
 
-
-def test_setup():
-    os.chdir(os.path.dirname(__file__))
-    os.chdir("setup")
-    os.chdir("test")
-    # if the new input file and model get initialized and pass all their
-    # internal checks, then we pass this test as well
-    setup.setup("wat.xyz")
-    utils.rmrf("1_opt")
-    utils.rmrf("2_sampling")
-    os.remove("input.yaml")
+# need to run all of setup because we get the electron count from antechamber
+#def test_spinmult():
+#    os.chdir(os.path.dirname(__file__))
+#    os.chdir("setup")
+#    os.chdir("test")
+#    st = setup.Setup("wat.xyz", charge=1)
+#    inp = st.setup()
+#    with open(inp.sampledir / inp.tctemplate, "r") as f:
+#        for line in f.readlines():
+#            if "spinmult" in line:
+#                spinmult = int(line.split()[1])
+#    utils.rmrf("1_opt")
+#    utils.rmrf("2_sampling")
+#    os.remove("input.yaml")
+#    assert spinmult == 2
 
 def test_charges():
-    os.chdir(Path(os.path.dirname(__file__)) / "setup" / "charges")
+    os.chdir(Path(os.path.dirname(__file__)))
+    st = getSetup()
+    os.chdir("setup")
+    os.chdir("charges")
     os.system("ff-opt setup --charge -1 bicarb.xyz")
-    mol2charge = setup.getCharge("1_opt")
+    print(os.listdir("1_opt"))
+    mol2charge = st.getCharge(Path("1_opt") / "bicarb.mol2")
     os.chdir(Path(os.path.dirname(__file__)) / "setup" / "charges")
     with open(Path("2_sampling") / "tc_template.in") as f:
         for line in f.readlines():
