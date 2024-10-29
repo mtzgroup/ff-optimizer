@@ -1,10 +1,10 @@
 import sys
 
 import simtk.openmm as mm
+from numpy.random import seed
 from parmed.openmm import NetCDFReporter
 from simtk import unit
 from simtk.openmm import app
-from numpy.random import seed
 
 prmtopFile = sys.argv[1]
 rst = sys.argv[2]

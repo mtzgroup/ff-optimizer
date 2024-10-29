@@ -60,7 +60,7 @@ def convertTCtoFB(
     start: int | None = None,
     end: int | None = None,
     qdata: str = "qdata.txt",
-    mdcrd: str = "all.mdcrd"
+    mdcrd: str = "all.mdcrd",
 ) -> int:
     """
     Convert TeraChem output to ForceBalance format.
@@ -243,7 +243,9 @@ def readPDB(pdb: str):
     return np.asarray(coords, dtype=np.float32)
 
 
-def readXYZ(xyz: str, readSymbols: bool = False) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
+def readXYZ(
+    xyz: str, readSymbols: bool = False
+) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
     """
     Read XYZ file and return geometry and optionally symbols.
 
@@ -474,7 +476,13 @@ def writeRst(frame: list, natoms: int, dest: str):
                 f.write("\n")
 
 
-def writePDB(geometry: np.ndarray, dest: str, atoms: list | None = None, resname: str | None = None, template: str | None = None):
+def writePDB(
+    geometry: np.ndarray,
+    dest: str,
+    atoms: list | None = None,
+    resname: str | None = None,
+    template: str | None = None,
+):
     """
     Write PDB file.
 

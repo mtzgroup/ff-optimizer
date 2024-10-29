@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 from dataclasses import fields
+from pathlib import Path
 from textwrap import dedent
 from time import perf_counter
 from typing import get_type_hints
-from pathlib import Path
+
 import typer
 
 from ff_optimizer import active_learning, inputs, model
@@ -89,8 +90,9 @@ def getRestartCycle(inp, ffModel):
 
 
 @app.command()
-def setup(xyz: str):
-    st.setup(xyz)
+def setup(xyz: str, charge: int = 0):
+    s = st.Setup(xyz, charge)
+    s.setup()
 
 
 @app.command()

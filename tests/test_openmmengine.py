@@ -17,6 +17,7 @@ def clean():
         if f.endswith(".xyz") or f.endswith(".nc") or f.endswith(".out"):
             os.remove(f)
 
+
 def test_sample(monkeypatch):
     options = getDefaults()
     monkeypatch.setattr(mmengine.MMEngine, "getIndices", monkeyGetIndices)

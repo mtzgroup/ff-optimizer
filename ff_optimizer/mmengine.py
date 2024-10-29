@@ -10,7 +10,7 @@ from . import utils
 
 
 class MMEngine:
-    def __init__(self, inp: 'Input'):
+    def __init__(self, inp: "Input"):
         """
         Initialize the MMEngine.
 
@@ -262,7 +262,6 @@ class MMEngine:
             frames (list): List of frame indices to sample.
             mdin (str): Input file for the sampling process.
         """
-        pass
 
     def setup(self):
         """
@@ -392,7 +391,16 @@ class ExternalAmberEngine(MMEngine):
             print("No Nvidia GPUs available; defaulting to sander")
             self.amberExe = "pmemd"
 
-    def runSander(self, prmtop: Path, mdin: Path, mdout: Path, mdcrd: Path, mdtraj: Path, restart: Path, mdvels: Path = None):
+    def runSander(
+        self,
+        prmtop: Path,
+        mdin: Path,
+        mdout: Path,
+        mdcrd: Path,
+        mdtraj: Path,
+        restart: Path,
+        mdvels: Path = None,
+    ):
         """
         Run Amber's sander or pmemd.
 

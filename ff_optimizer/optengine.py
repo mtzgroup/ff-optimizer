@@ -165,9 +165,9 @@ class OptEngine:
             ]
             self.validTargetLines = self.targetLines.copy()
             self.validInitialTargetLines = self.targetLines.copy()
-            self.validInitialTargetLines[
-                3
-            ] = "amber_leapcmd       setup_valid_initial.leap\n"
+            self.validInitialTargetLines[3] = (
+                "amber_leapcmd       setup_valid_initial.leap\n"
+            )
         if self.doResp:
             for lines in [
                 self.targetLines,

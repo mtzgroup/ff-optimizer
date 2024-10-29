@@ -1,8 +1,10 @@
 import os
 from pathlib import Path
 from typing import List, Tuple
+
 import numpy as np
 from scipy.stats import norm
+
 from .inputs import Input
 
 # import matplotlib as mpl
