@@ -29,6 +29,17 @@ class Setup():
         self.inp.conformers = self.inp.coors
 
     def setup(self, opt=True, mm=True, qm=True):
+        """
+        Set up the optimization, MM, and QM calculations.
+
+        Args:
+            opt (bool, optional): Whether to set up optimization. Defaults to True.
+            mm (bool, optional): Whether to set up MM. Defaults to True.
+            qm (bool, optional): Whether to set up QM. Defaults to True.
+
+        Returns:
+            Input: A new Input object with the setup configuration.
+        """
         self.inp.optdir.mkdir(parents=True, exist_ok=True)
         self.inp.sampledir.mkdir(parents=True, exist_ok=True)
         if opt:
@@ -278,6 +289,12 @@ class Setup():
     
     
     def editFrcmod(self, frcmod):
+        """
+        Edit the frcmod file to optimize all bonds, angles, and torsions.
+
+        Args:
+            frcmod (str): Name of the frcmod file.
+        """
         print("Labeling frcmod file to optimize all bonds, angles, and torsions")
         inBond = False
         inAngle = False

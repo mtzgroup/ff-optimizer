@@ -8,7 +8,16 @@ import yaml
 from scipy.io import netcdf_file
 
 
-def rmrf(f):
+def rmrf(f: str | Path):
+    """
+    Recursively remove a file or directory.
+
+    Args:
+        f (str or Path): Path to file or directory to remove.
+
+    Raises:
+        OSError: If the directory cannot be removed after multiple attempts.
+    """
     maxTries = 100
     f = Path(f)
     i = 0
@@ -22,7 +31,19 @@ def rmrf(f):
         raise OSError(f"Could not remove directory {f}")
 
 
-def checkForAmber(raiseException=True):
+def checkForAmber(raiseException: bool = True) -> bool:
+    """
+    Check if Amber is available in the environment path.
+
+    Args:
+        raiseException (bool, optional): Whether to raise an exception if Amber is not found. Defaults to True.
+
+    Returns:
+        bool: True if Amber is available, False otherwise.
+
+    Raises:
+        RuntimeError: If Amber is not available and raiseException is True.
+    """
     value = os.getenv("AMBERHOME")
     if value is None:
         if raiseException:
@@ -33,8 +54,29 @@ def checkForAmber(raiseException=True):
 
 
 def convertTCtoFB(
-    tcout, coors, stride, start=None, end=None, qdata="qdata.txt", mdcrd="all.mdcrd"
-):
+    tcout: str,
+    coors: str,
+    stride: int,
+    start: int | None = None,
+    end: int | None = None,
+    qdata: str = "qdata.txt",
+    mdcrd: str = "all.mdcrd"
+) -> int:
+    """
+    Convert TeraChem output to ForceBalance format.
+
+    Args:
+        tcout (str): Path to TeraChem output file.
+        coors (str): Path to coordinates file.
+        stride (int): Stride for frame selection.
+        start (int, optional): Start frame. Defaults to None.
+        end (int, optional): End frame. Defaults to None.
+        qdata (str, optional): Output qdata filename. Defaults to "qdata.txt".
+        mdcrd (str, optional): Output mdcrd filename. Defaults to "all.mdcrd".
+
+    Returns:
+        int: Number of jobs processed.
+    """
 
     molSize = 0
     coords = []
@@ -182,6 +224,15 @@ def convertTCtoFB(
 
 # unused
 def readPDB(pdb: str):
+    """
+    Read coordinates from PDB file.
+
+    Args:
+        pdb (str): Path to PDB file.
+
+    Returns:
+        numpy.ndarray: Array of coordinates.
+    """
     coords = []
     with open(pdb, "r") as f:
         for line in f.readlines():
@@ -192,7 +243,20 @@ def readPDB(pdb: str):
     return np.asarray(coords, dtype=np.float32)
 
 
-def readXYZ(xyz, readSymbols=False):
+def readXYZ(xyz: str, readSymbols: bool = False) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
+    """
+    Read XYZ file and return geometry and optionally symbols.
+
+    Args:
+        xyz (str): Path to XYZ file.
+        readSymbols (bool, optional): Whether to read atomic symbols. Defaults to False.
+
+    Returns:
+        tuple or np.ndarray: Geometry (and symbols if readSymbols is True).
+
+    Raises:
+        RuntimeError: If the XYZ file is not formatted correctly.
+    """
     try:
         if readSymbols:
             symbols = np.loadtxt(xyz, skiprows=2, usecols=(0), dtype=str)
@@ -226,7 +290,16 @@ def writeXYZ(geometry: np.array, symbols: list, dest: str):
 
 
 # unused
-def convertPDBtoXYZ(pdb: str):
+def convertPDBtoXYZ(pdb: str) -> str:
+    """
+    Convert PDB file to XYZ format.
+
+    Args:
+        pdb (str): Path to PDB file.
+
+    Returns:
+        str: Path to the created XYZ file.
+    """
     name = pdb.replace(".pdb", ".xyz")
     xyzLines = []
     with open(pdb, "r") as f:
@@ -246,7 +319,19 @@ def convertPDBtoXYZ(pdb: str):
     return name
 
 
-def readGradFromTCout(outFile: str):
+def readGradFromTCout(outFile: str) -> tuple[float, np.ndarray]:
+    """
+    Read gradient from TeraChem output file.
+
+    Args:
+        outFile (str): Path to TeraChem output file.
+
+    Returns:
+        tuple: Energy and gradients.
+
+    Raises:
+        RuntimeError: If reading TCCloud format gradient file fails.
+    """
     isTCCloud = False
     with open(outFile, "r") as f:
         line = f.readline()
@@ -287,7 +372,16 @@ def readGradFromTCout(outFile: str):
     return energy, grads
 
 
-def readOpt(filename):
+def readOpt(filename: str) -> tuple[int, dict]:
+    """
+    Read optimization results from ForceBalance output file.
+
+    Args:
+        filename (str): Path to ForceBalance output file.
+
+    Returns:
+        tuple: Status and results dictionary.
+    """
     inInitialParams = False
     inFinalParams = False
     inFinalObj = False
@@ -334,7 +428,16 @@ def readOpt(filename):
     return status, results
 
 
-def readEsp(filename):
+def readEsp(filename: str) -> tuple[list, list]:
+    """
+    Read ESP data from file.
+
+    Args:
+        filename (str): Path to ESP file.
+
+    Returns:
+        tuple: ESP XYZ coordinates and ESP values.
+    """
     lineCounter = 1
     espXYZ = []
     esp = []
@@ -350,7 +453,15 @@ def readEsp(filename):
 
 
 # frame is a 2D list
-def writeRst(frame, natoms, dest):
+def writeRst(frame: list, natoms: int, dest: str):
+    """
+    Write restart file.
+
+    Args:
+        frame (list): 2D list containing frame data.
+        natoms (int): Number of atoms.
+        dest (str): Destination file path.
+    """
     with open(dest, "w") as f:
         f.write(f"Written by ff_optimizer\n")
         f.write(f"{str(natoms)}\n")
@@ -363,7 +474,17 @@ def writeRst(frame, natoms, dest):
                 f.write("\n")
 
 
-def writePDB(geometry, dest, atoms=None, resname=None, template=None):
+def writePDB(geometry: np.ndarray, dest: str, atoms: list | None = None, resname: str | None = None, template: str | None = None):
+    """
+    Write PDB file.
+
+    Args:
+        geometry (np.ndarray): Geometry data.
+        dest (str): Destination file path.
+        atoms (list, optional): Atom names. Defaults to None.
+        resname (str, optional): Residue name. Defaults to None.
+        template (str, optional): Template PDB file. Defaults to None.
+    """
     if template is None:
         assert atoms is not None
         assert resname is not None
@@ -422,7 +543,18 @@ def writePDB(geometry, dest, atoms=None, resname=None, template=None):
                     f.write(line)
 
 
-def convertNCtoXYZs(nc, symbols, offset=0):
+def convertNCtoXYZs(nc: str, symbols: list, offset: int = 0) -> int:
+    """
+    Convert NetCDF file to XYZ files.
+
+    Args:
+        nc (str): Path to NetCDF file.
+        symbols (list): List of atomic symbols.
+        offset (int, optional): Frame offset. Defaults to 0.
+
+    Returns:
+        int: Number of frames converted.
+    """
     f = netcdf_file(nc, "r", mmap=False)
     try:
         coords = f.variables["coordinates"]
@@ -454,7 +586,16 @@ def convertNCtoXYZs(nc, symbols, offset=0):
     return coords.shape[0]
 
 
-def getSymbolsFromPrmtop(prmtop):
+def getSymbolsFromPrmtop(prmtop: str) -> list:
+    """
+    Get atomic symbols from AMBER prmtop file.
+
+    Args:
+        prmtop (str): Path to AMBER prmtop file.
+
+    Returns:
+        list: List of atomic symbols.
+    """
     with open(os.path.join(os.path.dirname(__file__), "elements.yaml"), "r") as f:
         elements = yaml.safe_load(f)
     elementsByNumber = {}
@@ -487,7 +628,16 @@ def getSymbolsFromPrmtop(prmtop):
     return symbols
 
 
-def getXYZs(folder="."):
+def getXYZs(folder: str | Path = ".") -> list:
+    """
+    Get list of XYZ files in a folder.
+
+    Args:
+        folder (str or Path, optional): Path to folder. Defaults to current directory.
+
+    Returns:
+        list: Sorted list of XYZ file paths.
+    """
     if type(folder) == str:
         folder = Path(folder)
     xyzs = []
@@ -498,7 +648,16 @@ def getXYZs(folder="."):
 
 
 # Separate file name from extension
-def getName(f):
+def getName(f: str | Path) -> str:
+    """
+    Separate file name from extension.
+
+    Args:
+        f (str or Path): File path.
+
+    Returns:
+        str: File name without extension.
+    """
     if type(f) == str:
         return f.split(".")[0]
     else:

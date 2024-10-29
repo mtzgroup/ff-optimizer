@@ -8,11 +8,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import resp_prior, utils
+from .inputs import Input
 
 mpl.use("Agg")
 
 
-def runForceBalance(inp, out, err=None):
+def runForceBalance(inp: str, out: str, err: str = None):
+    """
+    Run ForceBalance with the given input file and capture output.
+
+    Args:
+        inp (str): Input file for ForceBalance.
+        out (str): File to write stdout.
+        err (str, optional): File to write stderr. Defaults to None.
+    """
     with subprocess.Popen(
         ["ForceBalance.py", inp],
         stdin=subprocess.PIPE,
@@ -29,7 +38,13 @@ def runForceBalance(inp, out, err=None):
 
 
 class OptEngine:
-    def setVariables(self, inp):
+    def setVariables(self, inp: Input):
+        """
+        Set initial variables for the OptEngine.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+        """
         self.converged = False
         self.home = Path(os.getcwd())
         self.inp = inp
@@ -38,10 +53,7 @@ class OptEngine:
         self.nvalids = inp.nvalids
         self.respPriors = None
         self.leap = "setup.leap"
-        if inp.resp != 0:
-            self.doResp = True
-        else:
-            self.doResp = False
+        self.doResp = inp.resp != 0
         self.maxCycles = inp.maxcycles
         self.mol2 = None
         self.frcmod = None
@@ -52,6 +64,9 @@ class OptEngine:
         self.validInitialTargetLines = []
 
     def readFileNames(self):
+        """
+        Read .frcmod and .mol2 file names from ForceBalance input.
+        """
         with open(self.optdir / self.inp.opt0, "r") as f:
             for line in f.readlines():
                 splitLine = line.split()
@@ -66,11 +81,17 @@ class OptEngine:
                         self.initialTarget = splitLine[1]
 
     def checkFileNames(self):
-        if self.mol2 == None:
+        """
+        Check that the .frcmod and .mol2 files exist.
+
+        Raises:
+            RuntimeError: If the specified files are not found.
+        """
+        if self.mol2 is None:
             raise RuntimeError(
                 f"No mol2 file specified for optimization in {self.inp.opt0}"
             )
-        if self.frcmod == None:
+        if self.frcmod is None:
             raise RuntimeError(
                 f"No frcmod file specified for optimization in {self.inp.opt0}"
             )
@@ -84,6 +105,12 @@ class OptEngine:
             )
 
     def testTleap(self):
+        """
+        Check that tleap creates a prmtop file.
+
+        Raises:
+            RuntimeError: If tleap fails to create a prmtop file.
+        """
         utils.checkForAmber()
         os.chdir(self.optdir)
         os.system(f"tleap -f {self.leap} > leap.out")
@@ -96,11 +123,17 @@ class OptEngine:
         os.chdir(self.home)
 
     def initializeRespPriors(self):
+        """
+        Initialize RESP priors if specified in the input.
+        """
         if self.inp.resppriors != 0:
             mol2 = self.optdir / self.mol2
             self.respPriors = resp_prior.RespPriors(self.inp, mol2, self.prmtop)
 
     def readTargetLines(self):
+        """
+        Read target lines from the ForceBalance input file.
+        """
         inTarget = False
         with open(self.optdir / self.inp.opt0, "r") as f:
             for line in f.readlines():
@@ -145,6 +178,9 @@ class OptEngine:
                 lines.insert(1, "resp 1\n")
 
     def writeValidInitialLeap(self):
+        """
+        Write tleap file for evaluating initial parameters on validation set.
+        """
         with open(os.path.join(self.optdir, "setup.leap"), "r") as leapRead:
             with open(
                 os.path.join(self.optdir, "setup_valid_initial.leap"), "w"
@@ -160,11 +196,20 @@ class OptEngine:
                         line = line.replace(oldName, newName)
                     leapWrite.write(line)
 
-    def copyToFF(self, f):
+    def copyToFF(self, f: str):
+        """
+        Copy a file to the forcefield directory.
+
+        Args:
+            f (str): Name of the file to copy.
+        """
         copyfile(self.optdir / f, self.optdir / "forcefield" / f)
         copyfile(self.optdir / f, self.optdir / "forcefield" / f"initial_{f}")
 
     def copyFiles(self):
+        """
+        Copy forcefield files to forcefield dir for ForceBalance.
+        """
         (self.optdir / "forcefield").mkdir(exist_ok=True)
         if self.restartCycle == -1:
             for f in [self.frcmod, self.mol2]:
@@ -175,6 +220,9 @@ class OptEngine:
     # if we're running initial training, we need to make sure the target name
     # isn't train_1
     def editOpt0(self):
+        """
+        Adjust opt0 target name if necessary.
+        """
         inTarget = False
         with open(self.optdir / self.inp.opt0, "r") as f:
             with open("temp.txt", "w") as temp:
@@ -256,7 +304,16 @@ class OptEngine:
         # duplicate inputs if using multiple validation sets
         self.copyValids()
 
-    def readOpt(self, filename):
+    def readOpt(self, filename: str) -> tuple:
+        """
+        Read optimization results from a file.
+
+        Args:
+            filename (str): Name of the file to read.
+
+        Returns:
+            tuple: A tuple containing the optimization status and results.
+        """
         inInitialParams = False
         inFinalParams = False
         inFinalObj = False
@@ -299,7 +356,15 @@ class OptEngine:
         results["initialParams"] = initialParams
         return status, results
 
-    def addTargetLines(self, inputFile, targetLines, newTarget):
+    def addTargetLines(self, inputFile: str, targetLines: list, newTarget: str):
+        """
+        Add target lines to an input file.
+
+        Args:
+            inputFile (str): Name of the input file.
+            targetLines (list): List of target lines to add.
+            newTarget (str): Name of the new target.
+        """
         addedLines = False
         with open(inputFile, "r") as f:
             for line in f.readlines():
@@ -313,7 +378,19 @@ class OptEngine:
                 for line in targetLines:
                     f.write(line.replace(self.initialTarget, newTarget))
 
-    def readValid(self, filename):
+    def readValid(self, filename: str) -> float:
+        """
+        Read validation results from a file.
+
+        Args:
+            filename (str): Name of the file to read.
+
+        Returns:
+            float: The validation result.
+
+        Raises:
+            RuntimeError: If ForceBalance single-point evaluation did not converge.
+        """
         with open(filename, "r") as f:
             for line in f.readlines():
                 if "Objective Function Single Point" in line:
@@ -490,7 +567,13 @@ class OptEngine:
                         self.params[i + 1, k] = results["params"][j]
                         break
 
-    def copyResults(self, i):
+    def copyResults(self, i: int):
+        """
+        Copy optimization results to the forcefield directory.
+
+        Args:
+            i (int): The iteration number.
+        """
         copyfile(
             os.path.join("result", f"opt_{i}", self.frcmod),
             os.path.join("forcefield", self.frcmod),
@@ -514,7 +597,13 @@ class OptEngine:
                 )
             self.validPrevious.append(self.readValid(f"valid_{i}_previous.out"))
 
-    def runTraining(self, i):
+    def runTraining(self, i: int):
+        """
+        Run training for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+        """
         if len(self.train) <= i + self.inp.initialtraining - 1:
             if self.respPriors is not None:
                 self.respPriors.updateRespPriors(
@@ -523,7 +612,13 @@ class OptEngine:
             runForceBalance(f"opt_{i}.in", f"opt_{i}.out", f"opt_{i}.err")
             self.checkOpt(i)
 
-    def runValid(self, i):
+    def runValid(self, i: int):
+        """
+        Run validation for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+        """
         if len(self.valid) < i:
             runForceBalance(f"valid_{i}.in", f"valid_{i}.out", f"valid_{i}.err")
             for j in range(1, self.nvalids):
@@ -532,7 +627,7 @@ class OptEngine:
                 )
             self.valid.append(self.readValid(f"valid_{i}.out"))
 
-    def runValidInitial(self, i):
+    def runValidInitial(self, i: int):
         if len(self.validInitial) < i:
             runForceBalance(
                 f"valid_{i}_initial.in",
@@ -547,19 +642,46 @@ class OptEngine:
                 )
             self.validInitial.append(self.readValid(f"valid_{i}_initial.out"))
 
-    def runValidFinal(self, i, lastCycle):
+    def runValidFinal(self, i: int, lastCycle: int) -> float:
+        """
+        Run final validation for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+            lastCycle (int): The last cycle number.
+
+        Returns:
+            float: The final validation result.
+        """
         self.copyResults(i)
         out = f"valid_{i}_final.out"
         runForceBalance(f"valid_{lastCycle}.in", out)
         return self.readValid(out)
 
     def runInitialTraining(self):
+        """
+        Run initial training for the forcefield optimization.
+        """
         runForceBalance(self.inp.opt0, "opt_0.out", "opt_0.err")
         self.copyResults(0)
         self.checkOpt(0)
 
     # We assume that optimizeForcefield and all the functions it calls run in the inp.optdir directory
     def optimizeForcefield(self, i):
+        """
+        Perform forcefield optimization for a given iteration.
+
+        This function runs the main optimization cycle, which includes:
+        - Copying results from the previous cycle
+        - Setting up input files
+        - Running validation with previous parameters
+        - Optimizing forcefield parameters
+        - Running validation with new parameters
+        - Checking for convergence
+
+        Args:
+            i (int): The current iteration number.
+        """
         if i > 0:
             # copy ff files from previous cycle (important if restarting)
             self.copyResults(i - 1)
@@ -585,13 +707,29 @@ class OptEngine:
             # special setup for first-time training
             self.runInitialTraining()
 
-    def checkValids(self, i, suffix=""):
+    def checkValids(self, i: int, suffix: str = "") -> float:
+        """
+        Check validation results for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+            suffix (str, optional): The suffix for the validation file. Defaults to "".
+
+        Returns:
+            float: The validation result.
+        """
         v = self.readValid(self.optdir / f"valid_{i}{suffix}.out")
         for j in range(1, self.nvalids):
             self.readValid(self.optdir / f"valid_{i}_{j}{suffix}.out")
         return v
 
-    def computeValidDiff(self):
+    def computeValidDiff(self) -> list:
+        """
+        Compute the validation difference.
+
+        Returns:
+            list: The validation difference.
+        """
         vDiff = []
         for i in range(len(self.valid)):
             vDiff.append((self.valid[i] - self.validPrevious[i]) / self.valid[i] * 100)
@@ -621,7 +759,13 @@ class OptEngine:
                 break
         return lastCycle
 
-    def copyFinalResults(self, best):
+    def copyFinalResults(self, best: int):
+        """
+        Copy final results to the result directory.
+
+        Args:
+            best (int): The iteration number with the best results.
+        """
         resultFolder = self.home / "3_result"
         resultFolder.mkdir(exist_ok=True)
         copyfile(
@@ -633,7 +777,16 @@ class OptEngine:
             resultFolder / self.frcmod,
         )
 
-    def getFinalValidations(self, lastCycle):
+    def getFinalValidations(self, lastCycle: int) -> int:
+        """
+        Get final validation results for a given last cycle.
+
+        Args:
+            lastCycle (int): The last cycle number.
+
+        Returns:
+            int: The iteration number with the best results.
+        """
         vs = []
         for j in range(lastCycle - self.inp.patience, lastCycle + 1):
             try:
@@ -644,7 +797,16 @@ class OptEngine:
         vs = np.asarray(vs)
         return np.argmin(vs) + lastCycle - self.inp.patience
 
-    def checkOpt(self, i):
+    def checkOpt(self, i: int):
+        """
+        Check optimization results for a given iteration.
+
+        Args:
+            i (int): The iteration number.
+
+        Raises:
+            RuntimeError: If ForceBalance fails.
+        """
         status, results = self.readOpt(self.optdir / f"opt_{i}.out")
         if status == 0:
             # setup params and labels after first optimization
@@ -658,6 +820,9 @@ class OptEngine:
             raise RuntimeError("ForceBalance failed!")
 
     def determineRestart(self):
+        """
+        Determine the restart cycle and set restart variables.
+        """
         self.train = []
         self.valid = []
         self.validInitial = []
@@ -699,8 +864,10 @@ class OptEngine:
                     self.respPriors.getCharges(i)
         self.restartCycle = i
 
-    # Unused and untested
+    # Unused and untested methods are commented out
+    """
     def changeParameter(self, inputFile, prmName, prmValue):
+        
         changed = False
         lines = []
         with open(inputFile, "r") as f:
@@ -716,8 +883,10 @@ class OptEngine:
             for line in lines:
                 f.write(line)
         os.system(f"mv temp.txt {inputFile}")
+    """
 
     # Unused and untested
+    """
     def determineAdaptiveDamping(
         self, testFile, upperThreshold=0.3, lowerThreshold=0.01, adaptiveDamping=0.5
     ):
@@ -738,3 +907,4 @@ class OptEngine:
                 changeParameter(testFile, "adaptive_damping", str(adaptiveDamping))
             else:
                 return adaptiveDamping
+    """

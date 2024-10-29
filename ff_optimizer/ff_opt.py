@@ -4,7 +4,7 @@ from dataclasses import fields
 from textwrap import dedent
 from time import perf_counter
 from typing import get_type_hints
-
+from pathlib import Path
 import typer
 
 from ff_optimizer import active_learning, inputs, model
@@ -96,7 +96,7 @@ def setup(xyz: str, charge: int = 0):
 
 @app.command()
 def optimize(input_file: str):
-    inp = inputs.Input.fromYaml(input_file)
+    inp = inputs.Input.fromYaml(Path(input_file))
     ffModel = createModel(inp)
     restartCycle = getRestartCycle(inp, ffModel)
 

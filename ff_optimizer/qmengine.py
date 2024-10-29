@@ -14,6 +14,12 @@ from . import utils
 
 class QMEngine:
     def __init__(self, inp):
+        """
+        Initialize the QMEngine.
+
+        Args:
+            inp: Input object containing configuration parameters.
+        """
         if inp.resp == 0 and inp.resppriors == 0:
             self.doResp = False
         else:
@@ -24,6 +30,15 @@ class QMEngine:
         )
 
     def readInputFile(self, inputFile: str):
+        """
+        Read and process the input file.
+
+        Args:
+            inputFile (str): Path to the input file.
+
+        Returns:
+            list: Processed settings from the input file.
+        """
         settings = []
         with open(inputFile, "r") as f:
             for line in f.readlines():
@@ -52,6 +67,14 @@ class QMEngine:
         return settings
 
     def writeInputFile(self, settings: list, coordinates: str, fileName: str):
+        """
+        Write the input file for QM calculations.
+
+        Args:
+            settings (list): List of settings to write.
+            coordinates (str): Path to the coordinates file.
+            fileName (str): Name of the output file.
+        """
         with open(fileName, "w") as f:
             f.write(f"coordinates {coordinates}\n")
             f.write(f"run gradient\n")
@@ -68,6 +91,16 @@ class QMEngine:
     def writeFBdata(
         self, energies: list, grads: list, coords: list, espXYZs=None, esps=None
     ):
+        """
+        Write ForceBalance data files.
+
+        Args:
+            energies: List of energies.
+            grads: List of gradients.
+            coords: List of coordinates.
+            espXYZs: List of ESP XYZ coordinates.
+            esps: List of ESP values.
+        """
         with open("qdata.txt", "w") as f:
             for i in range(len(energies)):
                 f.write(f"JOB {i+1}\n")
@@ -111,6 +144,12 @@ class QMEngine:
         return result
 
     def readQMRefData(self):
+        """
+        Read QM reference data from output files.
+
+        Returns:
+            tuple: Energies, gradients, coordinates, ESP XYZs, and ESP values.
+        """
         coords = []
         energies = []
         grads = []
@@ -160,15 +199,37 @@ class SlurmEngine(QMEngine):
         self,
         inp,
     ):
+        """
+        Initialize the SlurmEngine.
+
+        Args:
+            inp: Input object containing configuration parameters.
+        """
         self.readSbatchFile(inp.sampledir / inp.sbatchtemplate)
         self.inp = inp
         super().__init__(inp)
 
     def readSbatchFile(self, sbatchFile: str):
+        """
+        Read the Slurm batch file.
+
+        Args:
+            sbatchFile (str): Path to the Slurm batch file.
+        """
         with open(sbatchFile, "r") as f:
             self.sbatchLines = f.readlines()
 
     def replaceVars(self, line, index):
+        """
+        Replace variables in a Slurm batch file line.
+
+        Args:
+            line (str): Line from the Slurm batch file.
+            index (str): Job index.
+
+        Returns:
+            str: Updated line with variables replaced.
+        """
         tcin = f"tc_{index}.in"
         tcbackup = f"tc_backup_{index}.in"
         line = line.replace("JOBID", index)
@@ -177,12 +238,31 @@ class SlurmEngine(QMEngine):
         return line
 
     def writeSbatchFile(self, index: str, fileName: str):
+        """
+        Write a Slurm batch file for a specific job.
+
+        Args:
+            index (str): Job index.
+            fileName (str): Name of the output Slurm batch file.
+        """
         index = str(index)
         with open(fileName, "w") as f:
             for line in self.sbatchLines:
                 f.write(self.replaceVars(line, index))
 
     def slurmCommand(self, command: list):
+        """
+        Execute a Slurm command with retries.
+
+        Args:
+            command (list): Slurm command to execute.
+
+        Returns:
+            bytes: Output of the Slurm command.
+
+        Raises:
+            RuntimeError: If the Slurm command fails after maximum retries.
+        """
         maxTries = 10
         i = 1
         done = False
@@ -198,6 +278,12 @@ class SlurmEngine(QMEngine):
         return output
 
     def waitForJobs(self, jobIDs):
+        """
+        Wait for Slurm jobs to complete.
+
+        Args:
+            jobIDs (list): List of Slurm job IDs to wait for.
+        """
         while len(jobIDs) > 0:
             runningIDs = []
             sleep(10)
@@ -212,6 +298,15 @@ class SlurmEngine(QMEngine):
             jobIDs = runningIDs
 
     def getQMRefData(self, xyzs: list):
+        """
+        Perform QM calculations and get reference data using Slurm.
+
+        Args:
+            xyzs (list): List of XYZ file paths.
+
+        Returns:
+            tuple: Energies, gradients, coordinates, ESP XYZs, and ESP values.
+        """
         jobIDs = []
         for xyz in xyzs:
             name = xyz.name.split(".")[0]
@@ -238,9 +333,24 @@ class SlurmEngine(QMEngine):
 
 class DebugEngine(QMEngine):
     def __init__(self, inp):
+        """
+        Initialize the DebugEngine.
+
+        Args:
+            inp: Input object containing configuration parameters.
+        """
         super().__init__(inp)
 
     def getQMRefData(self, xyzs: list):
+        """
+        Perform QM calculations and get reference data for debugging.
+
+        Args:
+            xyzs (list): List of XYZ file paths.
+
+        Returns:
+            tuple: Energies, gradients, coordinates, ESP XYZs, and ESP values.
+        """
         energies = []
         grads = []
         coords = []
@@ -263,6 +373,12 @@ class DebugEngine(QMEngine):
 
 class ChemcloudEngine(QMEngine):
     def __init__(self, inp):
+        """
+        Initialize the ChemcloudEngine.
+
+        Args:
+            inp: Input object containing configuration parameters.
+        """
         self.batchSize = inp.batchsize
         self.retries = inp.retries
         self.client = CCClient()
@@ -270,6 +386,12 @@ class ChemcloudEngine(QMEngine):
         self.setKeywords(self.doResp)
 
     def setKeywords(self, doResp):
+        """
+        Set keywords for ChemCloud calculations.
+
+        Args:
+            doResp (bool): Whether to perform RESP calculations.
+        """
         self.keywords = {}
         self.backupKeywords = {}
         self.specialKeywords = {}
@@ -285,6 +407,16 @@ class ChemcloudEngine(QMEngine):
             # self.backupKeywords["esp_restraint_b"] = "0"
 
     def sortSettings(self, settings, backup=False):
+        """
+        Sort and process settings for ChemCloud calculations.
+
+        Args:
+            settings (list): List of settings to process.
+            backup (bool): Whether these are backup settings.
+
+        Returns:
+            dict: Processed and sorted settings.
+        """
         keywords = {}
         specialSettings = ["method", "basis", "charge", "spinmult"]
         for setting in settings:
@@ -302,6 +434,15 @@ class ChemcloudEngine(QMEngine):
         return keywords
 
     def loadStructureFromXYZ(self, xyz):
+        """
+        Load a molecular structure from an XYZ file.
+
+        Args:
+            xyz: Path to the XYZ file.
+
+        Returns:
+            Structure: Loaded molecular structure.
+        """
         tempMol = Structure.open(xyz)
         kwargs = tempMol.model_dump()
         if "charge" in self.specialKeywords.keys():
@@ -312,6 +453,12 @@ class ChemcloudEngine(QMEngine):
         return mol
 
     def checkSpecialKeywords(self):
+        """
+        Check and validate special keywords for ChemCloud calculations.
+
+        Raises:
+            ValueError: If required special keywords are missing or invalid.
+        """
         if "method" not in self.specialKeywords.keys():
             raise ValueError("ES method not specified in tc template file")
         if "basis" not in self.specialKeywords.keys():
@@ -336,6 +483,15 @@ class ChemcloudEngine(QMEngine):
             )
 
     def computeBatch(self, programInputs: list):
+        """
+        Compute a batch of QM calculations using ChemCloud.
+
+        Args:
+            programInputs (list): List of program inputs for QM calculations.
+
+        Returns:
+            tuple: Status code and list of outputs from the calculations.
+        """
         status = 0
         # If there are no jobs to run after restart
         if len(programInputs) == 0:
@@ -374,7 +530,17 @@ class ChemcloudEngine(QMEngine):
                 status = -1
         return status, outputs
 
-    def createProgramInputs(self, xyzs: list, useBackup=False):
+    def createProgramInputs(self, xyzs: list, useBackup: bool = False) -> list:
+        """
+        Create program inputs for QM calculations.
+
+        Args:
+            xyzs (list): List of XYZ file paths.
+            useBackup (bool, optional): Whether to use backup keywords. Defaults to False.
+
+        Returns:
+            list: List of program inputs for QM calculations.
+        """
         mod = {}
         mod["method"] = self.specialKeywords["method"]
         mod["basis"] = self.specialKeywords["basis"]
@@ -397,6 +563,12 @@ class ChemcloudEngine(QMEngine):
         return programInputs
 
     def writeResult(self, output):
+        """
+        Write the result of a QM calculation to files.
+
+        Args:
+            output: Output object from the QM calculation.
+        """
         jobID = output.input_data.extras["id"]
         out = f"tc_{jobID}.out"
         with open(out, "w") as f:
@@ -405,7 +577,16 @@ class ChemcloudEngine(QMEngine):
             with open(f"esp_{jobID}.xyz", "w") as f:
                 f.write(output.files["esp.xyz"])
 
-    def getFailedJobs(self, outputs):
+    def getFailedJobs(self, outputs: list) -> list:
+        """
+        Get a list of failed jobs from the outputs.
+
+        Args:
+            outputs (list): List of output objects from QM calculations.
+
+        Returns:
+            list: List of XYZ file names for failed jobs.
+        """
         retryXyzs = []
         for output in outputs:
             self.writeResult(output)
@@ -414,7 +595,20 @@ class ChemcloudEngine(QMEngine):
                 retryXyzs.append(f"{jobID}.xyz")
         return retryXyzs
 
-    def runJobs(self, xyzs: list, useBackup=False):
+    def runJobs(self, xyzs: list, useBackup: bool = False) -> list:
+        """
+        Run QM jobs for a list of XYZ files.
+
+        Args:
+            xyzs (list): List of XYZ file paths.
+            useBackup (bool, optional): Whether to use backup settings. Defaults to False.
+
+        Returns:
+            list: List of XYZ file names for failed jobs.
+
+        Raises:
+            RuntimeError: If ChemCloud returns an unexpected number of outputs or if batch submission fails.
+        """
         programInputs = self.createProgramInputs(xyzs, useBackup=useBackup)
         status, outputs = self.computeBatch(programInputs)
         if len(outputs) != len(programInputs):
@@ -431,6 +625,15 @@ class ChemcloudEngine(QMEngine):
         return retryXyzs
 
     def getQMRefData(self, xyzs: list):
+        """
+        Get QM reference data for a list of XYZ files.
+
+        Args:
+            xyzs (list): List of XYZ file paths.
+
+        Raises:
+            RuntimeError: If QM calculations fail after multiple retries.
+        """
         cwd = os.getcwd()
         retryXyzs = self.runJobs(xyzs)
         for _ in range(self.retries):
@@ -451,7 +654,14 @@ class ChemcloudEngine(QMEngine):
         os.chdir(cwd)
 
 
-def dumpFailedJobs(programInputs, outputs):
+def dumpFailedJobs(programInputs: list, outputs: list):
+    """
+    Dump information about failed jobs for debugging.
+
+    Args:
+        programInputs (list): List of program inputs for the failed jobs.
+        outputs (list): List of outputs from the failed jobs.
+    """
     for inp in programInputs:
         name = inp.extras["id"] + "_input.yaml"
         inp.save(name)

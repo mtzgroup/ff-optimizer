@@ -10,7 +10,13 @@ from . import utils
 
 
 class MMEngine:
-    def __init__(self, inp):
+    def __init__(self, inp: 'Input'):
+        """
+        Initialize the MMEngine.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+        """
         self.inp = inp
         # Account for being in basedir/sampledir/x_cycle_x/
         if inp.conformers is None:
@@ -21,6 +27,15 @@ class MMEngine:
         self.symbols = None
 
     def checkForTCFormatting(self):
+        """
+        Check if the coordinates file has TeraChem formatting.
+
+        Returns:
+            bool: True if the file has TeraChem formatting, False otherwise.
+
+        Raises:
+            RuntimeError: If the XYZ coordinates file is not correctly formatted.
+        """
         with open(self.coordPath, "r") as f:
             try:
                 int(f.readline())
@@ -39,6 +54,15 @@ class MMEngine:
         return terachemFormat
 
     def readTCFormat(self):
+        """
+        Read TeraChem formatted coordinates file.
+
+        Returns:
+            tuple: A tuple containing startIndex, endIndex, and splitIndex.
+
+        Raises:
+            RuntimeError: If the XYZ coordinates file is not correctly formatted.
+        """
         start = self.inp.start
         end = self.inp.end
         split = self.inp.split
@@ -69,6 +93,15 @@ class MMEngine:
         return startIndex, endIndex, splitIndex
 
     def countFrames(self):
+        """
+        Count the number of frames in the coordinates file.
+
+        Returns:
+            int: The number of frames in the coordinates file.
+
+        Raises:
+            RuntimeError: If the XYZ coordinates file is not correctly formatted.
+        """
         with open(self.coordPath, "r") as f:
             try:
                 natoms = int(f.readline())
@@ -86,18 +119,20 @@ class MMEngine:
                 )
         return nframes
 
-    # 0-indexed
     def getIndices(self):
+        """
+        Get the start, end, and split indices for the coordinates.
+
+        Returns:
+            tuple: A tuple containing startIndex, endIndex, and splitIndex.
+
+        Raises:
+            ValueError: If the provided indices are invalid.
+        """
         start = self.inp.start
         end = self.inp.end
         split = self.inp.split
         nframes = self.countFrames()
-        # If we really need it, I can uncomment this. It's only useful if you
-        # have concatenated several output/coors.xyz files from a trajectory
-        # that you've restarted many times.
-        # terachemFormat = self.checkForTCFormatting()
-        # if terachemFormat:
-        #    start, end, split = self.readTCFormat()
         if end is not None:
             if end > nframes - 1:
                 end = nframes - 1
@@ -121,7 +156,16 @@ class MMEngine:
             start = 0
         return start, end, split
 
-    def getFrames(self, samplePath="."):
+    def getFrames(self, samplePath: Path = Path(".")):
+        """
+        Get random frames for sampling.
+
+        Args:
+            samplePath (Path): Path to the sample directory.
+
+        Returns:
+            list: List of randomly selected frame indices.
+        """
         frames = []
         if self.splitIndex == 0:
             for i in range((self.inp.nvalids + 1) * self.inp.conformersperset):
@@ -133,8 +177,17 @@ class MMEngine:
                 frames.append(randint(self.splitIndex, self.endIndex))
         return frames
 
-    # 0-indexed
-    def getFrame(self, index, dest):
+    def getFrame(self, index: int, dest: Path):
+        """
+        Extract a specific frame from the coordinates file.
+
+        Args:
+            index (int): Index of the frame to extract.
+            dest (Path): Destination path to write the extracted frame.
+
+        Raises:
+            RuntimeError: If there's an error finding the frame in the coordinates file.
+        """
         frame = []
         with open(self.coordPath, "r") as f:
             natoms = int(f.readline())
@@ -148,19 +201,37 @@ class MMEngine:
             raise RuntimeError("Error finding frame in coordinates XYZ file")
         utils.writeRst(frame, natoms, dest)
 
-    def writeMMFinished(self, f=Path("./")):
+    def writeMMFinished(self, f: Path = Path(".")):
+        """
+        Write a file indicating that MM sampling is finished.
+
+        Args:
+            f (Path): Path to write the file.
+        """
         with open(f / "MMFinished.txt", "w") as f:
             f.write("MM sampling finished\n")
             f.write("Remove this file\n")
             f.write("If you want to force a recalculation of the MM sampling")
 
     def getFolders(self):
+        """
+        Get a list of folder names for training and validation.
+
+        Returns:
+            list: List of folder names.
+        """
         folders = [Path("train")]
         for i in range(1, self.inp.nvalids + 1):
             folders.append(Path(f"valid_{i}"))
         return folders
 
     def getMMSamples(self):
+        """
+        Perform MM sampling.
+
+        This method sets up the sampling process, generates frames,
+        and runs the sampling for each folder.
+        """
         self.prmtop = self.setup()
         allFrames = self.getFrames()
         folders = self.getFolders()
@@ -183,12 +254,26 @@ class MMEngine:
             self.writeMMFinished()
             os.chdir("..")
 
-    # This is the function that has to be implemented for every MMEngine
     def sample(self, frames, mdin):
+        """
+        Perform sampling. This method should be implemented by subclasses.
+
+        Args:
+            frames (list): List of frame indices to sample.
+            mdin (str): Input file for the sampling process.
+        """
         pass
 
-    # This is hard-coded to use Amber
     def setup(self):
+        """
+        Set up the MM engine.
+
+        Returns:
+            str: Name of the parameter topology file.
+
+        Raises:
+            RuntimeError: If tleap fails to create a new .prmtop file.
+        """
         os.system(f"tleap -f setup.leap > leap.out")
         prmtop = None
         for f in os.listdir():
@@ -196,21 +281,39 @@ class MMEngine:
                 prmtop = f
         if prmtop == None:
             raise RuntimeError(
-                f"Tleap failed to create a new .prmtop file, check {os.path.join(os.getcwd(),'leap.out')} for more information"
+                f"Tleap failed to create a new .prmtop file, check {Path.cwd()/'leap.out'} for more information"
             )
         if self.symbols is None:
             self.symbols = utils.getSymbolsFromPrmtop(prmtop)
         return prmtop
 
-    def getConformerNames(self, f):
+    def getConformerNames(self, f: Path):
+        """
+        Get the names of conformer files in a directory.
+
+        Args:
+            f (Path): Path to the directory.
+
+        Returns:
+            list: List of conformer file names.
+        """
         conformers = []
         for g in os.listdir(f):
             if g.endswith("rst7") and "heat" not in g and "_" not in g:
                 conformers.append(g)
         return conformers
 
-    # This function is currently hard-coded to use .nc trajectory files
-    def getRedoFrames(self, f, conformers):
+    def getRedoFrames(self, f: Path, conformers: list):
+        """
+        Get frames that need to be redone.
+
+        Args:
+            f (Path): Path to the directory.
+            conformers (list): List of conformer file names.
+
+        Returns:
+            list: List of frame indices that need to be redone.
+        """
         redoFrames = []
         for conformer in conformers:
             name = conformer.split(".")[0]
@@ -218,8 +321,13 @@ class MMEngine:
                 redoFrames.append(int(name))
         return redoFrames
 
-    # This function is currently hard-coded to use .nc trajectory files
     def restart(self):
+        """
+        Restart the MM sampling process.
+
+        This method checks for existing folders and conformers,
+        and restarts the sampling process where needed.
+        """
         self.prmtop = self.setup()
         for f in self.getFolders():
             # getMMSamples will take care of any folders that haven't been created yet
@@ -249,21 +357,23 @@ class MMEngine:
         self.getMMSamples()
 
 
-# class AmberEngine(MMEngine):
-#    def __init__(self, options):
-#        super().__init__(options)
-#        inputs = sander.gas_input()
-#        sander.setup(prmtop, options["coordinates"], None, inputs)
-
-
 class ExternalAmberEngine(MMEngine):
     def __init__(self, inp):
+        """
+        Initialize the ExternalAmberEngine.
+
+        Args:
+            inp (Input): Input object containing configuration parameters.
+        """
         self.inp = inp
         self.heatCounter = inp.heatCounter
         self.checkForGPUs()
         super().__init__(inp)
 
     def checkForGPUs(self):
+        """
+        Check for available GPUs and set the appropriate Amber executable.
+        """
         try:
             deviceIDs = GPUtil.getAvailable(maxLoad=0.1)
             if len(deviceIDs) > 0:
@@ -282,31 +392,46 @@ class ExternalAmberEngine(MMEngine):
             print("No Nvidia GPUs available; defaulting to sander")
             self.amberExe = "pmemd"
 
-    def runSander(self, prmtop, mdin, mdout, mdcrd, mdtraj, restart, mdvels=None):
-        if not os.path.isfile(prmtop):
+    def runSander(self, prmtop: Path, mdin: Path, mdout: Path, mdcrd: Path, mdtraj: Path, restart: Path, mdvels: Path = None):
+        """
+        Run Amber's sander or pmemd.
+
+        Args:
+            prmtop (Path): Path to the parameter topology file.
+            mdin (Path): Path to the input file.
+            mdout (Path): Path to the output file.
+            mdcrd (Path): Path to the input coordinates file.
+            mdtraj (Path): Path to the trajectory output file.
+            restart (Path): Path to the restart file.
+            mdvels (Path, optional): Path to the velocities file.
+
+        Raises:
+            RuntimeError: If the Amber simulation fails.
+        """
+        if not prmtop.is_file():
             raise RuntimeError(f"Cannot find prmtop {prmtop} in {os.getcwd()}")
-        if not os.path.isfile(mdin):
+        if not mdin.is_file():
             raise RuntimeError(f"Cannot find mdin {mdin} in {os.getcwd()}")
-        if not os.path.isfile(mdcrd):
+        if not mdcrd.is_file():
             raise RuntimeError(f"Cannot find input crd {mdcrd} in {os.getcwd()}")
         command = [
             self.amberExe,
             "-O",
             "-p",
-            prmtop,
+            str(prmtop),
             "-i",
-            mdin,
+            str(mdin),
             "-o",
-            mdout,
+            str(mdout),
             "-c",
-            mdcrd,
+            str(mdcrd),
             "-x",
-            mdtraj,
+            str(mdtraj),
             "-r",
-            restart,
+            str(restart),
         ]
         if mdvels is not None:
-            command += ["-v", mdvels]
+            command += ["-v", str(mdvels)]
         result = subprocess.run(
             command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
@@ -315,7 +440,7 @@ class ExternalAmberEngine(MMEngine):
         with open("md.err", "a") as f:
             f.write(result.stderr)
 
-        if not os.path.isfile(restart):
+        if not restart.is_file():
             if self.amberExe == "pmemd.cuda":
                 print("pmemd.cuda failed; trying MM sampling with pmemd")
                 self.amberExe = "pmemd"
@@ -328,6 +453,13 @@ class ExternalAmberEngine(MMEngine):
                 )
 
     def sample(self, frames, mdin):
+        """
+        Perform sampling using Amber.
+
+        Args:
+            frames (list): List of frame indices to sample.
+            mdin (Path): Path to the input file for the sampling process.
+        """
         numXYZs = 0
         for frame in frames:
             name = str(frame)
@@ -335,27 +467,33 @@ class ExternalAmberEngine(MMEngine):
             copyfile(f"{name}.rst7", f"{name}_heat0.rst7")
             for j in range(1, self.heatCounter + 1):
                 self.runSander(
-                    os.path.join("..", self.prmtop),
-                    os.path.join("..", f"heat{str(j)}.in"),
-                    f"{name}_heat{str(j)}.out",
-                    f"{name}_heat{str(j-1)}.rst7",
-                    f"{name}_heat{str(j)}.nc",
-                    f"{name}_heat{str(j)}.rst7",
+                    Path("..") / self.prmtop,
+                    Path("..") / f"heat{str(j)}.in",
+                    Path(f"{name}_heat{str(j)}.out"),
+                    Path(f"{name}_heat{str(j-1)}.rst7"),
+                    Path(f"{name}_heat{str(j)}.nc"),
+                    Path(f"{name}_heat{str(j)}.rst7"),
                 )
             self.runSander(
-                os.path.join("..", self.prmtop),
-                os.path.join("..", mdin),
-                f"{name}_.out",
-                f"{name}_heat{str(self.heatCounter)}.rst7",
-                f"{name}.nc",
-                f"{name}_md.rst7",
-                mdvels=f"{name}_vel.nc",
+                Path("..") / self.prmtop,
+                Path("..") / mdin,
+                Path(f"{name}_.out"),
+                Path(f"{name}_heat{str(self.heatCounter)}.rst7"),
+                Path(f"{name}.nc"),
+                Path(f"{name}_md.rst7"),
+                mdvels=Path(f"{name}_vel.nc"),
             )
             numXYZs += utils.convertNCtoXYZs(f"{name}.nc", self.symbols, numXYZs)
 
 
 class ExternalOpenMMEngine(MMEngine):
     def __init__(self, options):
+        """
+        Initialize the ExternalOpenMMEngine.
+
+        Args:
+            options (Input): Input object containing configuration parameters.
+        """
         super().__init__(options)
 
     # The OpenMM python file must satisfy the following conditions:
@@ -363,10 +501,17 @@ class ExternalOpenMMEngine(MMEngine):
     # 2. It performs all necessary equilibrations internally
     # 3. It produces a {name}.nc file containing the sampled geometries
     def sample(self, frames, mdin):
+        """
+        Perform sampling using OpenMM.
+
+        Args:
+            frames (list): List of frame indices to sample.
+            mdin (Path): Path to the Python script for the OpenMM MD run.
+        """
         numXYZs = 0
         for frame in frames:
             name = str(frame)
             os.system(
-                f"python {os.path.join('..',mdin)} {self.prmtop} {name}.rst7 > {name}.out"
+                f"python {Path('..') / mdin} {self.prmtop} {name}.rst7 > {name}.out"
             )
             numXYZs += utils.convertNCtoXYZs(f"{name}.nc", self.symbols, numXYZs)
