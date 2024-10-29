@@ -3,8 +3,8 @@ from pathlib import Path
 from shutil import copyfile, rmtree
 
 from . import mmengine, optengine, qmengine
-from .utils import convertTCtoFB, getXYZs
 from .inputs import Input
+from .utils import convertTCtoFB, getXYZs
 
 
 # Template class for ff models used by ff_optimizer
@@ -19,7 +19,6 @@ class AbstractModel:
         # self.restartCycle = -1
         # raise NotImplementedError
         # commented in case using super becomes necessary
-        pass
 
     def initialCycle(self):
         """

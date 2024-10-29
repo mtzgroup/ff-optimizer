@@ -10,6 +10,7 @@ import numpy as np
 
 mpl.use("Agg")
 
+
 # Some helper functions
 def readOpt(filename):
     inInitialParams = False

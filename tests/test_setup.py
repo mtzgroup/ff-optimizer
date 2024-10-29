@@ -1,12 +1,10 @@
 import os
-import pytest
 from pathlib import Path
 from shutil import copyfile
 
 from ff_optimizer import setup, utils
 
 from . import checkUtils
-from .test_inputs import getDefaults
 
 
 def getSetup():
@@ -96,8 +94,9 @@ def test_editFrcmod():
     os.remove("test.frcmod")
     assert test
 
+
 # need to run all of setup because we get the electron count from antechamber
-#def test_spinmult():
+# def test_spinmult():
 #    os.chdir(os.path.dirname(__file__))
 #    os.chdir("setup")
 #    os.chdir("test")
@@ -111,6 +110,7 @@ def test_editFrcmod():
 #    utils.rmrf("2_sampling")
 #    os.remove("input.yaml")
 #    assert spinmult == 2
+
 
 def test_charges():
     os.chdir(Path(os.path.dirname(__file__)))

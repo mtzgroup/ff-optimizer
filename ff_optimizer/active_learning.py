@@ -13,8 +13,8 @@ except:
     pass
 
 from . import utils
-from .model import AbstractModel, Model
 from .inputs import Input
+from .model import AbstractModel, Model
 
 # from time import perf_counter
 

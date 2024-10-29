@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 from dataclasses import fields
+from pathlib import Path
 from textwrap import dedent
 from time import perf_counter
 from typing import get_type_hints
-from pathlib import Path
+
 import typer
 
 from ff_optimizer import active_learning, inputs, model
