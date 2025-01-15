@@ -42,6 +42,9 @@ def test_loadStructureFromXYZ1():
     assert mol.charge == 0
 
 
+# this test checks if spinmult is provided in the tc.in files
+# which is not necessary anymore
+"""
 def test_loadStructureFromXYZ2():
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
@@ -55,7 +58,7 @@ def test_loadStructureFromXYZ2():
     except:
         pass
     assert passTest
-
+"""
 
 def test_loadStructureFromXYZ3():
     os.chdir(os.path.dirname(__file__))
