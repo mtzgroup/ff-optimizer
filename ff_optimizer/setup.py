@@ -109,7 +109,7 @@ class Setup:
         os.chdir(self.inp.sampledir)
         self.writeTCFiles()
 
-    def getCharge(self, mol2) -> float:
+    def getCharge(self, mol2) -> int:
         """
         Determines total molecular charge from a mol2 file.
 
@@ -117,7 +117,7 @@ class Setup:
             mol2 (str | Path): mol2 file containing atomic partial charges
 
         Returns:
-            float: the (rounded) molecular charge from the mol2 file.
+            int: the (rounded) molecular charge from the mol2 file.
         """
         charge = 0.0
         inAtoms = False
