@@ -478,9 +478,11 @@ class ChemcloudEngine(QMEngine):
             except:
                 raise ValueError("Molecular spin multiplicity must be an integer")
         else:
-            raise ValueError(
-                "Spin multiplicity ('spinmult') must be specified in input file"
-            )
+            # TC defaults to lowest possible spin; this is good enough for us.
+            pass
+            #raise ValueError(
+            #    "Spin multiplicity ('spinmult') must be specified in input file"
+            #)
 
     def computeBatch(self, programInputs: list):
         """
