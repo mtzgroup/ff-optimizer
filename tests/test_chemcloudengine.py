@@ -287,7 +287,6 @@ def test_computeBatch(monkeypatch):
 
     os.chdir("..")
 
-
 def test_writeResultResp(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
@@ -301,22 +300,19 @@ def test_writeResultResp(monkeypatch):
     mol = Structure.open("qmengine/test/1.xyz")
     sp = ProgramInput(model=mod, structure=mol, calctype="energy", extras={"id": 999})
     res = parse("qmengine/test/tc_1.out", "terachem")
-    with open("qmengine/test/esp_1.xyz", "r") as f:
-        espLines = f.readlines()
     with open("qmengine/test/tc_1.out", "r") as f:
         stdoutLines = f.readlines()
     stdout = "".join(stdoutLines)
-    esp = "".join(espLines)
-    files = {"esp.xyz": esp}
+    res.add_file("qmengine/test/esp.xyz")
     out = ProgramOutput(
         input_data=sp,
         results=res,
         provenance=prov,
-        files=files,
+        #files=files,
         stdout=stdout,
         success=True,
     )
-    out.stdout
+    print(res.files.keys())
     chemcloudEngine.writeResult(out)
     wroteTcout = Path("tc_999.out").exists()
     wroteEsp = Path("esp_999.xyz").exists()

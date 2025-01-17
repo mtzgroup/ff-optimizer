@@ -507,8 +507,9 @@ class ChemcloudEngine(QMEngine):
         try:
             # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION?
             futureResults = [
+                # only need extra files if running resp
                 self.client.compute(
-                    "terachem", programInputs[i::stride], collect_files=True
+                    "terachem", programInputs[i::stride], collect_files=self.doResp
                 )
                 for i in range(stride)
             ]
@@ -577,7 +578,7 @@ class ChemcloudEngine(QMEngine):
             f.write(output.stdout)
         if self.doResp and output.success:
             with open(f"esp_{jobID}.xyz", "w") as f:
-                f.write(output.files["esp.xyz"])
+                f.write(output.results.files["esp.xyz"])
 
     def getFailedJobs(self, outputs: list) -> list:
         """
