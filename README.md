@@ -2,32 +2,79 @@
 
 Uses ForceBalance, Amber, and TeraChem to optimize forcefield parameters.
 
+### Installation ###
+
+1. Clone the ff-opt repo: `git clone git@github.com:mtzgroup/ff-optimizer.git`
+2. With your python environment manager of choice, create an environment with a python version compatible with ff-opt (currently ^3.11)
+3. Install poetry into this environment: `pip install poetry`
+4. Ensure that the poetry executable is on your PATH: `which poetry`
+5. Move into the ff-opt folder: `cd ff-optimizer`
+6. Run `poetry install`
+
+   ##### Installing Amber #####
+   ff-opt depends on ForceBalance, which uses Amber's pysander interface. For ff-opt to work, Amber's pysander interface
+   must be compiled with the same version of python used by ff-opt. As of right now, the python environment bundled with Amber
+   is python3.8, which is deprecated. Follow the instructions below to install Amber with an up-to-date version of python.
+
+   1. Create a python environment with the desired python version (currently ^3.11) and the following packages
+       - numpy
+       - scipy
+       - cython
+       - setuptools
+   2. Activate this environment before installing Amber.
+   3. In Amber's `run_cmake` file, set `DOWNLOAD_MINICONDA` to `FALSE`.
+   4. Compile Amber.
+
+   This will compile Amber's pysander interface with a newer version of python.
+
+### Running ff-opt ###
+
+1. Head to the directory where ff-opt was installed.
+2. Create a new shell with ff-opt on PATH: `poetry shell`
+3. Add Amber to the PATH with, e.g., `module load Amber`
+4. Move to the desired folder and run ff-opt!
+
+ff-opt currently has three commands:
+- `ff-opt optimize [input file]`:
+Optimizes force field parameters according to [input file]. [Here's](#summary-of-necessary-directories-and-files) a summary of the
+directory structure and files required by the parameter optimizer. The input file specification can be found [here](#input-files), and
+a full list of keywords can be found [here](#list-of-all-keywords). Examples are in `/ff-optimizer/examples`.
+- `ff-opt setup [xyz file]`:
+Sets up a force field optimization for [xyz file]. Creates all necessary files and folders required by `ff-opt optimize` and populates
+them with reasonable defaults. Currently, it obtains atom types and starting parameters from GAFF, charges from AM1-BCC, and sets up an
+optimization of all bonded parameters using wB97X-D3/def2-svp.
+- `ff-opt print-manual`:
+Prints this file, then quits.
+
+
 ### Summary of necessary directories and files ###
 
-Dynamics directory ("dynamicsdir", 0_dynamics) contains:
-    -- QM dynamics coordinates ("coors", coors.xyz)
-    -- TeraChem output file ("tcout", tc.out)
-    -- Conformers file ("conformers", coors.xyz)
-FB Optimization directory ("optdir", 1_opt) contains:
-    -- FB optimization input file (opt_0.in)
-    -- FB validation input file (valid_0.in)
-    -- PDB conformation file (conf.pdb)
-    -- Tleap setup file (setup.leap)
-    -- Parameter frcmod file (*.frcmod)
-    -- Parameter mol2 file (*.mol2)
-MM sampling directory ("sampledir", 2_sampling) contains:
-    -- Equilibration inputs (heat*in)
-    -- MM sampling input(s) ("trainmdin", "validmdin", md.in)
-    -- TeraChem input file for fire (tc_template.in)
-    -- Backup TeraChem input file if job fails (tc_template_long.in)
-    -- sbatch template file for queue (sbatch_template.sh)
+- Dynamics directory ("dynamicsdir", 0_dynamics) contains:
+    - QM dynamics coordinates ("coors", coors.xyz)
+    - TeraChem output file ("tcout", tc.out)
+    - Conformers file ("conformers", coors.xyz)
+- FB Optimization directory ("optdir", 1_opt) contains:
+    - FB optimization input file (opt_0.in)
+    - FB validation input file (valid_0.in)
+    - PDB conformation file (conf.pdb)
+    - Tleap setup file (setup.leap)
+    - Parameter frcmod file (*.frcmod)
+    - Parameter mol2 file (*.mol2)
+- MM sampling directory ("sampledir", 2_sampling) contains:
+    - Equilibration inputs (heat*in)
+    - MM sampling input(s) ("trainmdin", "validmdin", md.in)
+    - TeraChem input file for fire (tc_template.in)
+    - Backup TeraChem input file if job fails (tc_template_long.in)
+    - sbatch template file for queue (sbatch_template.sh)
 
 ### Input files ###
 
-Keywords are to be provided in a .yaml (or .json) file. Example:
+Keywords are to be provided in a .yaml (or .json) file. Example yaml format:
+```
 restart: False
 mmengine: amber
 maxcycles: 30
+```
 
 For all keywords, the syntax is simply keyword: value. If using a json, 
 take care that keywords have the the right type: strings should be in 
