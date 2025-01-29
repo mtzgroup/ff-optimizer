@@ -573,6 +573,7 @@ def convertNCtoXYZs(nc: str, symbols: list, offset: int = 0) -> int:
     # Count number of real atoms
     natoms = 0
     for symbol in symbols:
+        # ignore dummy atoms
         if symbol != "X":
             natoms += 1
     for i in range(coords.shape[0]):
