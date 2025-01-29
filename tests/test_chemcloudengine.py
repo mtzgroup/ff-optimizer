@@ -1,4 +1,6 @@
 import os
+from . import checkUtils
+import pytest
 from pathlib import Path
 
 from qcio import ProgramInput, ProgramOutput, Provenance, Structure
@@ -320,3 +322,45 @@ def test_writeResultResp(monkeypatch):
     os.remove("esp_999.xyz")
     assert wroteTcout
     assert wroteEsp
+
+def test_dumpFailedJobs(monkeypatch):
+    os.chdir(os.path.dirname(__file__))
+    inp = getDefaults()
+    inp.tctemplate = "qmengine/tc.in"
+    inp.tctemplate_backup = "qmengine/tc_backup.in"
+    inp.sampledir = Path("")
+    chemcloudEngine = qmengine.ChemcloudEngine(inp)
+
+    os.chdir("chemcloudengine")
+    xyzs = ["3.xyz", "6.xyz"]
+    inputs = chemcloudEngine.createProgramInputs(xyzs)
+    outputs = []
+    prov = Provenance(program="terachem")
+    mod = {"method": "hf", "basis": "sto-3g"}
+    mol = Structure.open("3.xyz")
+    res = parse("tc_1.out", "terachem")
+    #res.Files = {}
+    #res.OptimizationResults = {}
+    sp = ProgramInput(model=mod, structure=mol, calctype="energy", extras={"id": 3})
+    out = ProgramOutput(
+        input_data=sp,
+        results=res,
+        provenance=prov,
+        success=False,
+        traceback="Oops",
+    )
+    outputs.append(out)
+    outputs.append(('extras', {}))
+    qmengine.dumpFailedJobs(inputs, outputs)
+    pass3Input = checkUtils.checkFiles("3_input.yaml", "ref_3_input.yaml")
+    pass3Output = checkUtils.checkFiles("3_output.yaml", "ref_3_output.yaml")
+    pass6Input = checkUtils.checkFiles("6_input.yaml", "ref_6_input.yaml")
+    pass6Output = checkUtils.checkFiles("6_output.yaml", "ref_6_output.yaml")
+    os.remove("3_input.yaml")
+    os.remove("3_output.yaml")
+    os.remove("6_input.yaml")
+    os.remove("6_output.yaml")
+    assert pass3Input
+    assert pass3Output
+    assert pass6Input
+    assert pass6Output

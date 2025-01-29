@@ -4,6 +4,7 @@ import traceback
 from pathlib import Path
 from shutil import copyfile, rmtree
 from time import sleep
+import yaml
 
 from chemcloud import CCClient
 from qcio import ProgramInput, SinglePointResults, Structure
@@ -665,9 +666,14 @@ def dumpFailedJobs(programInputs: list, outputs: list):
         programInputs (list): List of program inputs for the failed jobs.
         outputs (list): List of outputs from the failed jobs.
     """
-    for inp in programInputs:
-        name = inp.extras["id"] + "_input.yaml"
-        inp.save(name)
-    for out in outputs:
-        name = out.input_data.extras["id"] + "_output.yaml"
-        out.save(name)
+    for inp, out in zip(programInputs, outputs):
+        jobID = inp.extras["id"]
+        inpName = jobID + "_input.yaml"
+        outName = jobID + "_output.yaml"
+        inp.save(inpName)
+        try:
+            out.save(outName)
+        # sometimes the output object isn't returned properly
+        except:
+            with open(outName, "w") as f:
+                yaml.dump(out, f, default_flow_style=False)
