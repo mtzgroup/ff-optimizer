@@ -185,8 +185,8 @@ class QMEngine:
             try:
                 parse(out, "terachem")
             except Exception as e:
-                print(f)
-                print(e)
+                #print(f)
+                #print(e)
                 xyzs.append(f)
         self.getQMRefData(xyzs)
 
