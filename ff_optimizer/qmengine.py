@@ -594,6 +594,12 @@ class ChemcloudEngine(QMEngine):
         retryXyzs = []
         for output in outputs:
             self.writeResult(output)
+            # start debug
+            jobID = output.input_data.extras["id"]
+            outfile = Path(f"tc_{jobID}.out")
+            if not outfile.is_file():
+                import pdb; pdb.set_trace()
+            # end debug
             if not output.success:
                 jobID = output.input_data.extras["id"]
                 retryXyzs.append(f"{jobID}.xyz")
@@ -617,6 +623,7 @@ class ChemcloudEngine(QMEngine):
         status, outputs = self.computeBatch(programInputs)
         if len(outputs) != len(programInputs):
             dumpFailedJobs(programInputs, outputs)
+            import pdb; pdb.set_trace()
             raise RuntimeError(
                 "ChemCloud did not return the same number of outputs as inputs"
             )

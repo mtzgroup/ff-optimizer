@@ -1,6 +1,8 @@
 import os
+import pytest
 from pathlib import Path
 from shutil import copyfile
+import numpy as np
 
 from ff_optimizer import setup, utils
 
@@ -135,3 +137,36 @@ def test_charges():
     assert mol2charge == -1
     assert tcCharge == -1
     assert tcChargeBackup == -1
+
+def test_getSpinMult():
+    os.chdir(Path(os.path.dirname(__file__)))
+    os.chdir("setup")
+    st = setup.Setup("bcla.xyz", 0)
+    mult1 = st.spinMult
+    st = setup.Setup("bcla.xyz", -7)
+    mult2 = st.spinMult
+    assert mult1 == 1
+    assert mult2 == 2
+
+def test_readCharges(): 
+    os.chdir(Path(os.path.dirname(__file__)))
+    os.chdir("setup")
+    st = setup.Setup("bcla.xyz", 0)
+    charges = list(np.loadtxt("charges.txt", dtype=str))
+    with open("tc.out", "r") as f:
+        lines = list(f.readlines())
+    testCharges = st.readCharges(lines)
+    assert checkUtils.checkListsFloats(charges, testCharges)
+
+def test_changeCharges():
+    os.chdir(Path(os.path.dirname(__file__)))
+    os.chdir("setup")
+    copyfile("bclg_wrong_charges.mol2", "bclg.mol2")
+    charges = list(np.loadtxt("charges.txt", dtype=str))
+    st = setup.Setup("bcla.xyz", 0)
+    st.changeCharges(charges, "bclg.mol2")
+    test = checkUtils.checkFiles("bclg.mol2", "ref_bclg.mol2")
+    os.remove("bclg.mol2")
+    assert test
+    
+

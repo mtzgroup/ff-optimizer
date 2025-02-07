@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from shutil import rmtree
+from shutil import rmtree, which
 from time import sleep
 
 import numpy as np
@@ -51,6 +51,30 @@ def checkForAmber(raiseException: bool = True) -> bool:
         print("No Amber available!")
         return False
     return True
+
+
+def checkForTerachem(raiseException: bool = True) -> bool:
+    """
+    Check if TeraChem is available in the environment path.
+
+    Args:
+        raiseException (bool, optional): Whether to raise an exception if TeraChem is not found. Defaults to True.
+
+    Returns:
+        bool: True if TeraChem is available, False otherwise.
+
+    Raises:
+        RuntimeError: If TeraChem is not available and raiseException is True.
+    """
+    path = which("terachem")
+    if path is None:
+        if raiseException:
+            raise RuntimeError("TeraChem is not available in the environment path!")
+        print("No TeraChem available!")
+        return False
+    return True
+
+
 
 
 def convertTCtoFB(
@@ -595,6 +619,19 @@ def convertNCtoXYZs(nc: str, symbols: list, offset: int = 0) -> int:
     return coords.shape[0]
 
 
+def loadElements():
+    """
+    Loads elements dict from file
+
+    Returns:
+        elements (dict): dictionary of elements with atomic information
+    """
+    with open(os.path.join(os.path.dirname(__file__), "elements.yaml"), "r") as f:
+        elements = yaml.safe_load(f)
+    return elements
+
+
+
 def getSymbolsFromPrmtop(prmtop: str) -> list:
     """
     Get atomic symbols from AMBER prmtop file.
@@ -605,8 +642,7 @@ def getSymbolsFromPrmtop(prmtop: str) -> list:
     Returns:
         list: List of atomic symbols.
     """
-    with open(os.path.join(os.path.dirname(__file__), "elements.yaml"), "r") as f:
-        elements = yaml.safe_load(f)
+    elements = loadElements()
     elementsByNumber = {}
     for element in elements.keys():
         elementsByNumber[elements[element]["atomic_number"]] = element
