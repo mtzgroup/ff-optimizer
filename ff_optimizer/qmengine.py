@@ -163,8 +163,12 @@ class QMEngine:
         for f in utils.getXYZs():
             coord = utils.readXYZ(f)
             name = utils.getName(f)
-            result = parse(f"tc_{name}.out", "terachem")
-            if result.energy is None or result.gradient is None:
+            try:
+                result = parse(f"tc_{name}.out", "terachem")
+                assert result.energy
+                assert result.gradient
+            except Exception as e:
+                print(e)
                 raise RuntimeError(
                     f"Terachem job tc_{name}.out in {os.getcwd()} did not succeed!"
                 )
