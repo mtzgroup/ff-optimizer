@@ -326,6 +326,9 @@ class Setup:
                 threall       1.0e-14
                 diismaxvecs   40
                 maxit         200
+                precision     double
+                purify        no
+                dftgrid       2
             """
                 )
             )
