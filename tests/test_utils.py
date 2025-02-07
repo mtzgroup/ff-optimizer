@@ -1,4 +1,5 @@
 import os
+import pytest
 from pathlib import Path
 
 import numpy as np
@@ -82,6 +83,14 @@ def test_convertPDBtoMolecule():
     for i in range(len(testMol.symbols)):
         assert testMol.symbols[i] == refMol.symbols[i]
 """
+
+@pytest.mark.debug
+def test_convertPDBtoXYZ():
+    os.chdir(home / "utils")
+    utils.convertPDBtoXYZ("with_chain.pdb")
+    test = checkUtils.checkFiles("with_chain.xyz", "ref_with_chain.xyz")
+    os.remove("with_chain.xyz")
+    assert test
 
 
 def test_writeRst():

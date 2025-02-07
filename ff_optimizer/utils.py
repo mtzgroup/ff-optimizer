@@ -315,7 +315,6 @@ def writeXYZ(geometry: np.array, symbols: list, dest: str):
             )
 
 
-# unused
 def convertPDBtoXYZ(pdb: str) -> str:
     """
     Convert PDB file to XYZ format.
@@ -335,7 +334,7 @@ def convertPDBtoXYZ(pdb: str) -> str:
                 continue
             if splitLine[0] == "ATOM" or splitLine[0] == "HETATM":
                 xyzLines.append(
-                    f"{splitLine[10]}\t{splitLine[5]}\t{splitLine[6]}\t{splitLine[7]}\n"
+                    "%5s %9s %9s %9s\n" % (line[77].upper() + line[78].lower(), line[30:38], line[38:46], line[46:54])  
                 )
     with open(name, "w") as f:
         f.write(f"{str(len(xyzLines))}\n")
