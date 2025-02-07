@@ -51,11 +51,13 @@ class Input:
 
     # General parameters
     dynamicsdir: Path = field(
-        default=Path("0_dynamics"),
+        default=None,
         metadata={
             "comment": """
         Specifies the directory containing QM energies,
-        gradients, and coordinates from an MD trajectory.
+        gradients, and coordinates from an MD trajectory. If not
+        provided, ff-opt will default to using conf.pdb in optdir
+        to provide starting coordinates for MM sampling.
         """
         },
     )
@@ -284,7 +286,7 @@ class Input:
         },
     )
     initialtraining: bool = field(
-        default=True,
+        default=False,
         metadata={
             "comment": """
         Specifies whether or not to sample initial training data from 
@@ -472,6 +474,20 @@ class Input:
         self.optdir = Path(self.optdir).absolute()
         self.sampledir = Path(self.sampledir).absolute()
 
+    def setupDynamicsFolder(self):
+        """
+        If dynamicsdir is not provided, set it to optdir and set up
+        coordinates within it.
+        """
+        if self.dynamicsdir:
+            return
+        self.dynamicsdir = self.optdir
+        home = os.getcwd()
+        os.chdir(self.dynamicsdir)
+        utils.convertPDBtoXYZ("conf.pdb")
+        os.chdir(home)
+        self.coors = "conf.xyz"
+
     def checkFiles(self):
         """
         Check for the existence of required files and directories.
@@ -479,11 +495,14 @@ class Input:
         Raises:
             FileNotFoundError: If required files or directories are missing.
         """
-        dynamicsFiles = [self.coors]
-        if self.conformers is not None:
+        dynamicsFiles = []
+        if self.conformers:
             dynamicsFiles.append(self.conformers)
         if self.initialtraining:
             dynamicsFiles.append(self.tcout)
+        else:
+            self.setupDynamicsFolder()
+        dynamicsFiles.append(self.coors)
         checkDirectory(self.dynamicsdir, dynamicsFiles)
         optFiles = ["conf.pdb", "setup.leap", "opt_0.in", "valid_0.in"]
         checkDirectory(self.optdir, optFiles)
@@ -499,6 +518,8 @@ class Input:
         Raises:
             ValueError: If any input parameters are invalid.
         """
+        if self.initialtraining and not self.dynamicsdir:
+            raise ValueError("Initial training requires a provided dynamics directory with a coordinates and terachem output file")
         if self.resppriors != 1 and self.resppriors != 2 and self.resppriors != 0:
             raise ValueError("RESP prior mode must be either 0, 1, or 2")
         if self.stride < 1:

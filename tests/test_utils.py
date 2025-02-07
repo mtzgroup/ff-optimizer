@@ -84,7 +84,6 @@ def test_convertPDBtoMolecule():
         assert testMol.symbols[i] == refMol.symbols[i]
 """
 
-@pytest.mark.debug
 def test_convertPDBtoXYZ():
     os.chdir(home / "utils")
     utils.convertPDBtoXYZ("with_chain.pdb")
