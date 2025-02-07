@@ -623,7 +623,6 @@ class ChemcloudEngine(QMEngine):
         status, outputs = self.computeBatch(programInputs)
         if len(outputs) != len(programInputs):
             dumpFailedJobs(programInputs, outputs)
-            import pdb; pdb.set_trace()
             raise RuntimeError(
                 "ChemCloud did not return the same number of outputs as inputs"
             )
@@ -673,14 +672,12 @@ def dumpFailedJobs(programInputs: list, outputs: list):
         programInputs (list): List of program inputs for the failed jobs.
         outputs (list): List of outputs from the failed jobs.
     """
-    for inp, out in zip(programInputs, outputs):
+    for inp in programInputs:
         jobID = inp.extras["id"]
         inpName = jobID + "_input.yaml"
-        outName = jobID + "_output.yaml"
         inp.save(inpName)
-        try:
-            out.save(outName)
-        # sometimes the output object isn't returned properly
-        except:
-            with open(outName, "w") as f:
-                yaml.dump(out, f, default_flow_style=False)
+    for out in outputs:
+        jobID = out.input.extras["id"]
+        outName = jobID + "_output.yaml"
+        out.save(outName)
+                
