@@ -1,0 +1,6 @@
+source leaprc.gaff
+loadamberparams wat.frcmod
+WAT = loadmol2 wat.mol2
+x = loadpdb conf.pdb
+saveamberparm x ff.prmtop coord.inpcrd
+quit                                  

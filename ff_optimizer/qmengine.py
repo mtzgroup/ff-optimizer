@@ -166,7 +166,7 @@ class QMEngine:
             try:
                 result = parse(f"tc_{name}.out", "terachem")
                 assert result.energy
-                assert result.gradient
+                assert result.gradient.any()
             except Exception as e:
                 print(e)
                 raise RuntimeError(

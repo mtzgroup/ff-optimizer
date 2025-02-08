@@ -1,4 +1,5 @@
 import os
+import pytest
 from pathlib import Path
 
 from ff_optimizer import inputs
@@ -47,11 +48,118 @@ def test_checkForFile2():
     assert found
 
 
-# @pytest.mark.debug
 def test_post_init():
     os.chdir(home / "inputs")
     inp = inputs.Input.fromYaml("input.yaml")
     assert inp.maxcycles == -1
 
 
-# Should be more tests here?
+def test_setupDynamicsFolder():
+    os.chdir(home / "inputs")
+    inp = getDefaults()
+    inp.setupDynamicsFolder()
+    xyz = Path(inp.optdir) / "conf.xyz"
+    madeXYZ = xyz.is_file()
+    os.remove(xyz)
+    assert inp.coors == "conf.xyz"
+    assert inp.optdir == inp.dynamicsdir
+
+
+def test_checkFiles1(monkeypatch):
+    os.chdir(home / "inputs" / "test1")
+    monkeypatch.setattr(inputs.Input, "__post_init__", fakePostInit)
+    inp = inputs.Input.fromYaml("input.yaml")
+    test1 = True
+    try:
+        inp.checkFiles()
+    except:
+        test1 = False
+    
+    os.rename("1_opt", "oops")
+    test2 = False
+    try:
+        inp.checkFiles()
+    except:
+        test2 = True
+    os.rename("oops", "1_opt")
+
+    os.rename("wat.xyz", "oops")
+    test3 = False
+    try:
+        inp.checkFiles()
+    except:
+        test3 = True
+    os.rename("oops", "wat.xyz")
+    assert test1
+    assert test2
+    assert test3
+
+
+def test_checkFiles2(monkeypatch):
+    os.chdir(home / "inputs" / "test2")
+    monkeypatch.setattr(inputs.Input, "__post_init__", fakePostInit)
+    inp = inputs.Input.fromYaml("input.yaml")
+    # base test should pass checkFiles
+    test1 = True
+    inp.checkFiles()
+    try:
+        inp.checkFiles()
+    except:
+        test1 = False
+    
+    os.chdir("1_opt")
+    os.remove("conf.xyz")
+
+    # renaming things should not pass checkFiles
+    test2 = []
+    for i, file in enumerate(["conf.pdb", "setup.leap", inp.opt0, inp.valid0]):
+        os.rename(file, "oops")
+        temp = False
+        try:
+            inp.checkFiles()
+        except Exception as e:
+            print(e)
+            temp = True
+        test2.append(temp)
+        os.rename("oops", file)
+    assert test1
+    for test in test2:
+        assert test
+
+def test_checkFiles3(monkeypatch):
+    os.chdir(home / "inputs" / "test3")
+    monkeypatch.setattr(inputs.Input, "__post_init__", fakePostInit)
+    inp = inputs.Input.fromYaml("input.yaml")
+    # base test should pass checkFiles
+    test1 = True
+    inp.checkFiles()
+    try:
+        inp.checkFiles()
+    except:
+        test1 = False
+
+    test2 = []
+    os.chdir("0_dynamics")
+    for i, file in enumerate([inp.coors, inp.tcout, inp.conformers]):
+        os.rename(file, "oops")
+        temp = False
+        try:
+            inp.checkFiles()
+        except Exception as e:
+            print(e)
+            temp = True
+        test2.append(temp)
+        os.rename("oops", file)
+
+    os.chdir(home / "inputs" / "test3" / "2_sampling")
+    test3 = False
+    os.rename(inp.sbatchtemplate, "oops")
+    try:
+        inp.checkFiles()
+    except:
+        test3 = True
+    os.rename("oops", inp.sbatchtemplate)
+    assert test1
+    for test in test2:
+        assert test
+    assert test3

@@ -1,0 +1,5 @@
+$options                                 
+jobtype             single               
+forcefield          wat.frcmod wat.mol2
+backup              false                
+$end                               

@@ -1,7 +1,9 @@
 import errno
+import os
 from dataclasses import dataclass, field
 from os import strerror
 from pathlib import Path
+from . import utils
 
 import yaml
 
@@ -470,7 +472,8 @@ class Input:
         """
         Convert directory strings to absolute Path objects.
         """
-        self.dynamicsdir = Path(self.dynamicsdir).absolute()
+        if self.dynamicsdir:
+            self.dynamicsdir = Path(self.dynamicsdir).absolute()
         self.optdir = Path(self.optdir).absolute()
         self.sampledir = Path(self.sampledir).absolute()
 
@@ -495,6 +498,8 @@ class Input:
         Raises:
             FileNotFoundError: If required files or directories are missing.
         """
+        optFiles = ["conf.pdb", "setup.leap", self.opt0, self.valid0]
+        checkDirectory(self.optdir, optFiles)
         dynamicsFiles = []
         if self.conformers:
             dynamicsFiles.append(self.conformers)
@@ -504,9 +509,7 @@ class Input:
             self.setupDynamicsFolder()
         dynamicsFiles.append(self.coors)
         checkDirectory(self.dynamicsdir, dynamicsFiles)
-        optFiles = ["conf.pdb", "setup.leap", "opt_0.in", "valid_0.in"]
-        checkDirectory(self.optdir, optFiles)
-        sampleFiles = [self.tctemplate, self.tctemplate_backup]
+        sampleFiles = [self.tctemplate, self.tctemplate_backup, self.trainmdin, self.validmdin]
         if self.qmengine == "slurm":
             sampleFiles.append(self.sbatchtemplate)
         checkDirectory(self.sampledir, sampleFiles)

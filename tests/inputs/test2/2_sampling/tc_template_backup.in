@@ -1,0 +1,12 @@
+basis         def2-svp  
+method        wb97xd3
+charge        0        
+run           gradient 
+dftd          d3       
+spinmult      1        
+threall       1.0e-14
+diismaxvecs   40
+maxit         200
+precision     double
+purify        no
+dftgrid       2
