@@ -230,7 +230,7 @@ def test_computeBatch(monkeypatch):
     assert len(results) == 10
 
     # Check small batch size
-    chemcloudEngine.batchsize = 3
+    chemcloudEngine.batchSize = 1
     status, results = chemcloudEngine.computeBatch(inputs)
     if os.path.isfile(os.path.join("chemcloudengine", "jobs.txt")):
         os.remove(os.path.join("chemcloudengine", "jobs.txt"))
@@ -238,7 +238,7 @@ def test_computeBatch(monkeypatch):
     assert len(results) == 10
 
     # Check large batch size
-    chemcloudEngine.batchsize = 77
+    chemcloudEngine.batchSize = 77
     status, results = chemcloudEngine.computeBatch(inputs)
     if os.path.isfile(os.path.join("chemcloudengine", "jobs.txt")):
         os.remove(os.path.join("chemcloudengine", "jobs.txt"))
@@ -350,7 +350,15 @@ def test_dumpFailedJobs(monkeypatch):
         traceback="Oops",
     )
     outputs.append(out)
-    outputs.append(('extras', {}))
+    sp = ProgramInput(model=mod, structure=mol, calctype="energy", extras={"id": 6})
+    out = ProgramOutput(
+        input_data=sp,
+        results=res,
+        provenance=prov,
+        success=False,
+        traceback="Oops",
+    )
+    outputs.append(out)
     qmengine.dumpFailedJobs(inputs, outputs)
     pass3Input = checkUtils.checkFiles("3_input.yaml", "ref_3_input.yaml")
     pass3Output = checkUtils.checkFiles("3_output.yaml", "ref_3_output.yaml")

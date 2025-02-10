@@ -522,7 +522,7 @@ class Input:
             ValueError: If any input parameters are invalid.
         """
         if self.initialtraining and not self.dynamicsdir:
-            raise ValueError("Initial training requires a provided dynamics directory with a coordinates and terachem output file")
+            raise ValueError("Initial training requires providing a dynamics directory (via keyword dynamicsdir) with a coordinates and terachem output file")
         if self.resppriors != 1 and self.resppriors != 2 and self.resppriors != 0:
             raise ValueError("RESP prior mode must be either 0, 1, or 2")
         if self.stride < 1:

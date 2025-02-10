@@ -8,12 +8,16 @@ home = Path(__file__).parent.absolute()
 
 
 def fakePostInit(self):
+    self.dynamicsdir = Path("0_dynamics")
+    self.pathify()
+
+def fakePostInit2(self):
     self.pathify()
 
 
-def getDefaults():
+def getDefaults(fake=fakePostInit):
     postInit = inputs.Input.__post_init__
-    setattr(inputs.Input, "__post_init__", fakePostInit)
+    setattr(inputs.Input, "__post_init__", fake)
     with open("nothing.yaml", "w") as f:
         f.write(" ")
     inp = inputs.Input.fromYaml(Path("nothing.yaml"))
@@ -26,6 +30,7 @@ def test_defaults():
     inp = getDefaults()
     assert isinstance(inp, inputs.Input)
     assert isinstance(inp.optdir, Path)
+    assert isinstance(inp.dynamicsdir, Path)
 
 
 def test_checkForFile1():
@@ -53,13 +58,13 @@ def test_post_init():
     inp = inputs.Input.fromYaml("input.yaml")
     assert inp.maxcycles == -1
 
-
 def test_setupDynamicsFolder():
     os.chdir(home / "inputs")
-    inp = getDefaults()
+    inp = getDefaults(fakePostInit2)
     inp.setupDynamicsFolder()
     xyz = Path(inp.optdir) / "conf.xyz"
     madeXYZ = xyz.is_file()
+    assert madeXYZ
     os.remove(xyz)
     assert inp.coors == "conf.xyz"
     assert inp.optdir == inp.dynamicsdir
@@ -67,7 +72,7 @@ def test_setupDynamicsFolder():
 
 def test_checkFiles1(monkeypatch):
     os.chdir(home / "inputs" / "test1")
-    monkeypatch.setattr(inputs.Input, "__post_init__", fakePostInit)
+    monkeypatch.setattr(inputs.Input, "__post_init__", fakePostInit2)
     inp = inputs.Input.fromYaml("input.yaml")
     test1 = True
     try:
@@ -97,7 +102,7 @@ def test_checkFiles1(monkeypatch):
 
 def test_checkFiles2(monkeypatch):
     os.chdir(home / "inputs" / "test2")
-    monkeypatch.setattr(inputs.Input, "__post_init__", fakePostInit)
+    monkeypatch.setattr(inputs.Input, "__post_init__", fakePostInit2)
     inp = inputs.Input.fromYaml("input.yaml")
     # base test should pass checkFiles
     test1 = True
@@ -163,3 +168,4 @@ def test_checkFiles3(monkeypatch):
     for test in test2:
         assert test
     assert test3
+

@@ -278,10 +278,17 @@ class MMEngine:
         for f in os.listdir():
             if f.endswith(".prmtop"):
                 prmtop = f
-        if prmtop == None:
+        if not prmtop:
             raise RuntimeError(
                 f"Tleap failed to create a new .prmtop file, check {Path.cwd()/'leap.out'} for more information"
             )
+        with open(prmtop, "r") as f:
+            n = len(list(f.readlines()))
+        if n < 2:
+            raise RuntimeError(
+                f"Tleap failed to create a new .prmtop file, check {Path.cwd()/'leap.out'} for more information"
+            )
+            
         if self.symbols is None:
             self.symbols = utils.getSymbolsFromPrmtop(prmtop)
         return prmtop

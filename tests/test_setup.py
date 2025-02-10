@@ -22,7 +22,6 @@ def test_getCharge():
     charge = st.getCharge("ref_water.mol2")
     assert charge == 0
 
-
 def test_writeTCFiles():
     os.chdir(os.path.dirname(__file__))
     st = getSetup()

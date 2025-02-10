@@ -1,4 +1,5 @@
 import errno
+import pytest
 import os
 from pathlib import Path
 from shutil import copyfile, rmtree
@@ -61,12 +62,16 @@ def makeFFfolder(frcmod, mol2):
     copyfile(frcmod, os.path.join("forcefield", frcmod))
     copyfile(mol2, os.path.join("forcefield", mol2))
 
+def monkeyEditOpt0(self):
+    pass
+
 
 def test_init1():
     os.chdir(os.path.dirname(__file__))
     options = getDefaults()
     options.optdir = os.path.join("optengine", "opt1")
     options.validinitial = True
+    options.initialtraining = True
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
 
@@ -124,10 +129,12 @@ def test_init1():
     cleanOptDir(options.optdir)
 
 
-def test_init2():
+def test_init2(monkeypatch):
+    monkeypatch.setattr(optengine.OptEngine, "editOpt0", monkeyEditOpt0)
     os.chdir(os.path.dirname(__file__))
     options = getDefaults()
     options.optdir = os.path.join("optengine", "opt2")
+    options.initialtraining = True
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
 
@@ -195,6 +202,7 @@ def test_init1_RESP():
     os.chdir(os.path.dirname(__file__))
     options = getDefaults()
     options.validinitial = True
+    options.initialtraining = True
     options.optdir = os.path.join("optengine", "opt1")
     cleanOptDir(options.optdir)
     options.resp = 1
@@ -447,6 +455,7 @@ def test_optimizeForcefield0(monkeypatch):
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     options = getDefaults()
     options.optdir = "opt1"
+    options.initialtraining = True
     options.pathify()
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
@@ -529,6 +538,7 @@ def test_determineRestart1(monkeypatch):
     options.optdir = "restart1"
     options.restart = True
     options.validinitial = True
+    options.initialtraining = True
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     assert checkUtils.checkFloats(optEngine.params[0, 0], 266.5)
@@ -549,6 +559,7 @@ def test_determineRestart2(monkeypatch):
     options = getDefaults()
     options.optdir = "restart2"
     options.restart = True
+    options.initialtraining = True
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     assert len(optEngine.validPrevious) == 3
@@ -566,6 +577,7 @@ def test_determineRestart3(monkeypatch):
     options.optdir = "restart3"
     options.restart = True
     options.validinitial = True
+    options.initialtraining = True
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     print(optEngine.params[:6, 0])
@@ -592,6 +604,7 @@ def test_sortParams1(monkeypatch):
     options = getDefaults()
     options.optdir = "restart1"
     options.restart = True
+    options.initialtraining = True
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     assert optEngine.labels[0] == "BONDSK/cy-c3"
@@ -608,6 +621,7 @@ def test_sortParams2(monkeypatch):
     options = getDefaults()
     options.optdir = "restart3"
     options.restart = True
+    options.initialtraining = True
     optEngine = optengine.OptEngine(options)
     cleanOptDir(options.optdir)
     refParams = [1.6289e-01, 1.6289e-01, 1.4744e-01, 1.4744e-01, 1.4744e-01]
@@ -892,6 +906,7 @@ def test_restart2Params(monkeypatch):
     options.validinitial = True
     options.optdir = testDir
     options.restart = True
+    options.initialtraining = True
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
     monkeypatch.setattr(optengine, "runForceBalance", monkeyFB2)
@@ -982,6 +997,7 @@ def test_computeSortedParams(monkeypatch):
     options = getDefaults()
     options.optdir = testDir
     options.restart = True
+    options.initialtraining = True
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
     setupFFdir(testDir)
@@ -1017,6 +1033,7 @@ def test_graphResults(monkeypatch):
     options = getDefaults()
     options.optdir = testDir
     options.restart = True
+    options.initialtraining = True
     options.pathify()
     cleanOptDir(options.optdir)
     optEngine = optengine.OptEngine(options)
@@ -1135,13 +1152,13 @@ def test_getFinalValidations(monkeypatch):
     best = optEngine.getFinalValidations(13)
     assert best == 12
 
-
 def test_editOpt0_1(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     copyfile("opt_0_test1.in", "opt_0.in")
     options = getDefaults()
     options.optdir = "."
+    options.initialtraining = True
     optEngine = optengine.OptEngine(options)
     optEngine.editOpt0()
     test = checkUtils.checkFiles("opt_0.in", "opt_0_ref1.in")
@@ -1149,14 +1166,12 @@ def test_editOpt0_1(monkeypatch):
     assert test
     assert optEngine.initialTarget == "dynamics"
 
-
 def test_editOpt0_2(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
     copyfile("opt_0_test2.in", "opt_0.in")
     options = getDefaults()
     options.optdir = "."
-    options.initialtraining = False
     optEngine = optengine.OptEngine(options)
     optEngine.editOpt0()
     test = checkUtils.checkFiles("opt_0.in", "opt_0_ref2.in")

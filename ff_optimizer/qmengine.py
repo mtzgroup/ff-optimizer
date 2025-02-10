@@ -511,8 +511,8 @@ class ChemcloudEngine(QMEngine):
         #    pickle.dump(programInputs, f)
         try:
             # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION?
+            # only need extra files if running resp
             futureResults = [
-                # only need extra files if running resp
                 self.client.compute(
                     "terachem", programInputs[i::stride], collect_files=self.doResp
                 )
@@ -520,8 +520,13 @@ class ChemcloudEngine(QMEngine):
             ]
             outputBatches = [futureResults[i].get() for i in range(stride)]
             for batch in outputBatches:
-                for output in batch:
-                    outputs.append(output)
+                # avoid accidentally unpacking Output object if batch is a 
+                # single Output object
+                if batchSize > 1:
+                    for output in batch:
+                        outputs.append(output)
+                else:
+                    outputs.append(batch)
         except Exception as e:
             traceback.print_exc()
             print(e)
@@ -530,7 +535,7 @@ class ChemcloudEngine(QMEngine):
                 f"Submission failed; resubmitting with batch size {str(self.batchSize)}"
             )
             # sleep(30)
-            if self.batchSize < 2:
+            if self.batchSize < 1:
                 status = -1
                 return status, outputs
             tempStatus, outputs = self.computeBatch(programInputs)
@@ -677,11 +682,11 @@ def dumpFailedJobs(programInputs: list, outputs: list):
         outputs (list): List of outputs from the failed jobs.
     """
     for inp in programInputs:
-        jobID = inp.extras["id"]
+        jobID = str(inp.extras["id"])
         inpName = jobID + "_input.yaml"
         inp.save(inpName)
     for out in outputs:
-        jobID = out.input.extras["id"]
+        jobID = str(out.input_data.extras["id"])
         outName = jobID + "_output.yaml"
         out.save(outName)
                 

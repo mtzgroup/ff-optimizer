@@ -21,6 +21,6 @@ $end
 
 $target
 type                abinitio_amber
-name                dynamics
+name                train_1
 amber_leapcmd       setup.leap
 $end
