@@ -1,12 +1,12 @@
 import os
-import pytest
 from pathlib import Path
 from shutil import copyfile
-import numpy as np
+
 import chemcloud
+import numpy as np
 import yaml
+from qcio import ProgramInput, ProgramOutput, Provenance
 from qcparse import parse
-from qcio import ProgramOutput, ProgramInput, Provenance
 
 from ff_optimizer import setup, utils
 
@@ -25,6 +25,7 @@ def test_getCharge():
     os.chdir("setup")
     charge = st.getCharge("ref_water.mol2")
     assert charge == 0
+
 
 def test_writeTCFiles():
     os.chdir(os.path.dirname(__file__))
@@ -141,6 +142,7 @@ def test_charges():
     assert tcCharge == -1
     assert tcChargeBackup == -1
 
+
 def test_getSpinMult():
     os.chdir(Path(os.path.dirname(__file__)))
     os.chdir("setup")
@@ -151,7 +153,8 @@ def test_getSpinMult():
     assert mult1 == 1
     assert mult2 == 2
 
-def test_readCharges(): 
+
+def test_readCharges():
     os.chdir(Path(os.path.dirname(__file__)))
     os.chdir("setup")
     st = setup.Setup("bcla.xyz", 0)
@@ -160,6 +163,7 @@ def test_readCharges():
         lines = list(f.readlines())
     testCharges = st.readCharges(lines)
     assert checkUtils.checkListsFloats(charges, testCharges)
+
 
 def test_changeCharges():
     os.chdir(Path(os.path.dirname(__file__)))
@@ -171,13 +175,14 @@ def test_changeCharges():
     test = checkUtils.checkFiles("bclg.mol2", "ref_bclg.mol2")
     os.remove("bclg.mol2")
     assert test
-    
+
+
 def test_runResp(monkeypatch):
     os.chdir(Path(os.path.dirname(__file__)))
     os.chdir("setup")
     st = setup.Setup("bcla.xyz", 0)
     st.mol2 = "nah"
-    
+
     def monkeyChemcloudResp(self):
         self.test = 1
 
@@ -209,14 +214,14 @@ def test_runResp(monkeypatch):
         error = True
     assert error
 
+
 def test_chemcloudResp(monkeypatch):
     os.chdir(Path(os.path.dirname(__file__)))
     os.chdir("setup")
     st = setup.Setup("bcla.xyz", 0)
     switch = 1
 
-
-    class MonkeyClient():
+    class MonkeyClient:
         def __init__(self):
             pass
 
@@ -224,7 +229,7 @@ def test_chemcloudResp(monkeypatch):
             inp.save("test.yaml")
             return MonkeyFutureOutput()
 
-    class MonkeyFutureOutput():
+    class MonkeyFutureOutput:
         def __init__(self):
             pass
 
@@ -244,7 +249,13 @@ def test_chemcloudResp(monkeypatch):
             with open(outfile, "r") as f:
                 lines = list(f.readlines())
             stdout = " ".join(lines)
-            kwargs = {"results" : result, "success" : success, "input_data" : inp, "provenance" : prov, "stdout" : stdout}
+            kwargs = {
+                "results": result,
+                "success": success,
+                "input_data": inp,
+                "provenance": prov,
+                "stdout": stdout,
+            }
             output = ProgramOutput(**kwargs)
             return output
 
@@ -262,6 +273,7 @@ def test_chemcloudResp(monkeypatch):
         error = True
     assert testInput
     assert error
+
 
 def test_localResp(monkeypatch):
     os.chdir(Path(os.path.dirname(__file__)))
@@ -286,7 +298,7 @@ def test_localResp(monkeypatch):
     monkeypatch.setattr(setup, "checkForTerachem", monkeyCheckForTerachem)
     st.localResp()
     testInput = checkUtils.checkFiles("resp.in", "ref_resp.in")
-    
+
     switch = 0
     error = False
     try:

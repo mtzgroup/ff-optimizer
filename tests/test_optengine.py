@@ -1,5 +1,4 @@
 import errno
-import pytest
 import os
 from pathlib import Path
 from shutil import copyfile, rmtree
@@ -61,6 +60,7 @@ def makeFFfolder(frcmod, mol2):
         os.mkdir("forcefield")
     copyfile(frcmod, os.path.join("forcefield", frcmod))
     copyfile(mol2, os.path.join("forcefield", mol2))
+
 
 def monkeyEditOpt0(self):
     pass
@@ -1152,6 +1152,7 @@ def test_getFinalValidations(monkeypatch):
     best = optEngine.getFinalValidations(13)
     assert best == 12
 
+
 def test_editOpt0_1(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)
     os.chdir(os.path.join(os.path.dirname(__file__), "optengine"))
@@ -1165,6 +1166,7 @@ def test_editOpt0_1(monkeypatch):
     os.remove("opt_0.in")
     assert test
     assert optEngine.initialTarget == "dynamics"
+
 
 def test_editOpt0_2(monkeypatch):
     monkeypatch.setattr(optengine.OptEngine, "__init__", monkeyInit)

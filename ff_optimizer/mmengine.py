@@ -288,7 +288,7 @@ class MMEngine:
             raise RuntimeError(
                 f"Tleap failed to create a new .prmtop file, check {Path.cwd()/'leap.out'} for more information"
             )
-            
+
         if self.symbols is None:
             self.symbols = utils.getSymbolsFromPrmtop(prmtop)
         return prmtop

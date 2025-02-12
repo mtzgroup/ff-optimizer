@@ -1,5 +1,4 @@
 import os
-import pytest
 from pathlib import Path
 
 import numpy as np
@@ -83,6 +82,7 @@ def test_convertPDBtoMolecule():
     for i in range(len(testMol.symbols)):
         assert testMol.symbols[i] == refMol.symbols[i]
 """
+
 
 def test_convertPDBtoXYZ():
     os.chdir(home / "utils")

@@ -3,9 +3,10 @@ import os
 from dataclasses import dataclass, field
 from os import strerror
 from pathlib import Path
-from . import utils
 
 import yaml
+
+from . import utils
 
 
 def checkForFile(f: Path, isFile: bool = True):
@@ -509,7 +510,12 @@ class Input:
             self.setupDynamicsFolder()
         dynamicsFiles.append(self.coors)
         checkDirectory(self.dynamicsdir, dynamicsFiles)
-        sampleFiles = [self.tctemplate, self.tctemplate_backup, self.trainmdin, self.validmdin]
+        sampleFiles = [
+            self.tctemplate,
+            self.tctemplate_backup,
+            self.trainmdin,
+            self.validmdin,
+        ]
         if self.qmengine == "slurm":
             sampleFiles.append(self.sbatchtemplate)
         checkDirectory(self.sampledir, sampleFiles)
@@ -522,7 +528,9 @@ class Input:
             ValueError: If any input parameters are invalid.
         """
         if self.initialtraining and not self.dynamicsdir:
-            raise ValueError("Initial training requires providing a dynamics directory (via keyword dynamicsdir) with a coordinates and terachem output file")
+            raise ValueError(
+                "Initial training requires providing a dynamics directory (via keyword dynamicsdir) with a coordinates and terachem output file"
+            )
         if self.resppriors != 1 and self.resppriors != 2 and self.resppriors != 0:
             raise ValueError("RESP prior mode must be either 0, 1, or 2")
         if self.stride < 1:

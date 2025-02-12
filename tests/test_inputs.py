@@ -1,5 +1,4 @@
 import os
-import pytest
 from pathlib import Path
 
 from ff_optimizer import inputs
@@ -10,6 +9,7 @@ home = Path(__file__).parent.absolute()
 def fakePostInit(self):
     self.dynamicsdir = Path("0_dynamics")
     self.pathify()
+
 
 def fakePostInit2(self):
     self.pathify()
@@ -58,6 +58,7 @@ def test_post_init():
     inp = inputs.Input.fromYaml("input.yaml")
     assert inp.maxcycles == -1
 
+
 def test_setupDynamicsFolder():
     os.chdir(home / "inputs")
     inp = getDefaults(fakePostInit2)
@@ -79,7 +80,7 @@ def test_checkFiles1(monkeypatch):
         inp.checkFiles()
     except:
         test1 = False
-    
+
     os.rename("1_opt", "oops")
     test2 = False
     try:
@@ -111,7 +112,7 @@ def test_checkFiles2(monkeypatch):
         inp.checkFiles()
     except:
         test1 = False
-    
+
     os.chdir("1_opt")
     os.remove("conf.xyz")
 
@@ -130,6 +131,7 @@ def test_checkFiles2(monkeypatch):
     assert test1
     for test in test2:
         assert test
+
 
 def test_checkFiles3(monkeypatch):
     os.chdir(home / "inputs" / "test3")
@@ -168,4 +170,3 @@ def test_checkFiles3(monkeypatch):
     for test in test2:
         assert test
     assert test3
-

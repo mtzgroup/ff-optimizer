@@ -4,7 +4,6 @@ import traceback
 from pathlib import Path
 from shutil import copyfile, rmtree
 from time import sleep
-import yaml
 
 from chemcloud import CCClient
 from qcio import ProgramInput, Structure
@@ -184,9 +183,9 @@ class QMEngine:
             out = f"tc_{name}.out"
             try:
                 parse(out, "terachem")
-            except Exception as e:
-                #print(f)
-                #print(e)
+            except Exception:
+                # print(f)
+                # print(e)
                 xyzs.append(f)
         self.getQMRefData(xyzs)
 
@@ -481,9 +480,9 @@ class ChemcloudEngine(QMEngine):
         else:
             # TC defaults to lowest possible spin; this is good enough for us.
             pass
-            #raise ValueError(
+            # raise ValueError(
             #    "Spin multiplicity ('spinmult') must be specified in input file"
-            #)
+            # )
 
     def computeBatch(self, programInputs: list):
         """
@@ -516,7 +515,7 @@ class ChemcloudEngine(QMEngine):
             ]
             outputBatches = [futureResults[i].get() for i in range(stride)]
             for batch in outputBatches:
-                # avoid accidentally unpacking Output object if batch is a 
+                # avoid accidentally unpacking Output object if batch is a
                 # single Output object
                 if batchSize > 1:
                     for output in batch:
@@ -603,7 +602,9 @@ class ChemcloudEngine(QMEngine):
             jobID = output.input_data.extras["id"]
             outfile = Path(f"tc_{jobID}.out")
             if not outfile.is_file():
-                import pdb; pdb.set_trace()
+                import pdb
+
+                pdb.set_trace()
             # end debug
             if not output.success:
                 jobID = output.input_data.extras["id"]
@@ -680,4 +681,3 @@ def dumpFailedJobs(programInputs: list, outputs: list):
         jobID = str(out.input_data.extras["id"])
         outName = jobID + "_output.yaml"
         out.save(outName)
-                

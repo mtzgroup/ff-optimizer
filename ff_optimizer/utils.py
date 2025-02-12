@@ -75,8 +75,6 @@ def checkForTerachem(raiseException: bool = True) -> bool:
     return True
 
 
-
-
 def convertTCtoFB(
     tcout: str,
     coors: str,
@@ -334,7 +332,13 @@ def convertPDBtoXYZ(pdb: str) -> str:
                 continue
             if splitLine[0] == "ATOM" or splitLine[0] == "HETATM":
                 xyzLines.append(
-                    "%5s %9s %9s %9s\n" % (line[77].upper() + line[78].lower(), line[30:38], line[38:46], line[46:54])  
+                    "%5s %9s %9s %9s\n"
+                    % (
+                        line[77].upper() + line[78].lower(),
+                        line[30:38],
+                        line[38:46],
+                        line[46:54],
+                    )
                 )
     with open(name, "w") as f:
         f.write(f"{str(len(xyzLines))}\n")
@@ -628,7 +632,6 @@ def loadElements():
     with open(os.path.join(os.path.dirname(__file__), "elements.yaml"), "r") as f:
         elements = yaml.safe_load(f)
     return elements
-
 
 
 def getSymbolsFromPrmtop(prmtop: str) -> list:

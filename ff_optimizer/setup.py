@@ -4,10 +4,11 @@ from pathlib import Path
 from shutil import copyfile
 from textwrap import dedent
 
-from .inputs import Input
-from .utils import *
 from chemcloud import CCClient
 from qcio import ProgramInput, Structure
+
+from .inputs import Input
+from .utils import *
 
 
 class Setup:
@@ -33,7 +34,7 @@ class Setup:
 
     def getSpinMult(self):
         """
-        Obtains a guess for the spin multiplicity of the molecule based on 
+        Obtains a guess for the spin multiplicity of the molecule based on
         elements and charges. Defaults to the lowest reasonable option
         (singlet or doublet)
 
@@ -70,7 +71,6 @@ class Setup:
             raise ValueError("Invalid RESP method")
         self.changeCharges(charges, self.mol2)
 
-
     def chemcloudResp(self):
         """
         Run a ChemCloud job to obtain RESP results.
@@ -86,11 +86,13 @@ class Setup:
         keywords["resp"] = "yes"
         keywords["esp_grid_dens"] = 20.0
         mol = Structure.open(self.xyz, charge=self.charge, multiplicity=self.spinMult)
-        inp = ProgramInput(structure=mol, model=mod, calctype="energy", keywords=keywords)
+        inp = ProgramInput(
+            structure=mol, model=mod, calctype="energy", keywords=keywords
+        )
         inp.save("test.yaml")
         client = CCClient()
         futureResult = client.compute("terachem", inp)
-        #import sys; sys.exit()
+        # import sys; sys.exit()
         result = futureResult.get()
         if not result.success:
             raise RuntimeError("Chemcloud RESP calculation failed")
@@ -133,7 +135,7 @@ class Setup:
             raise RuntimeError("Local RESP calculation failed")
         charges = self.readCharges(lines)
         return charges
-    
+
     def readCharges(self, lines):
         """
         Reads charges from lines of a TeraChem RESP output file.
@@ -146,17 +148,16 @@ class Setup:
 
         charges = []
         i = 0
-        for line in lines:                                                           
-            if "ESP restrained charges:" in line:                                     
-                break                                                                
-            i = i + 1                                                                
-        for line in lines[i+3:]:                                                     
+        for line in lines:
+            if "ESP restrained charges:" in line:
+                break
+            i = i + 1
+        for line in lines[i + 3 :]:
             if "-----------------------------------------------------------" in line:
-                break                                                                
-            splitLine = line.split()                                                 
+                break
+            splitLine = line.split()
             charges.append(splitLine[4])
         return charges
-
 
     def changeCharges(self, charges, mol2):
         """
@@ -166,33 +167,34 @@ class Setup:
             charges (list[str]): list of atomic partial charges
             mol2 (str | Path): mol2 file to have charges replaced
         """
-        with open(mol2, 'r') as f:                                                                         
-            lines = f.readlines()                                                                              
-            i = 0                                                                                              
-            start = 0                                                                                          
-            end = 0                                                                                            
-            for line in lines:                                                                                 
-                if "@<TRIPOS>ATOM" in line:                                                                    
-                    start = i + 1                                                                              
-                if "@<TRIPOS>BOND" in line:                                                                    
-                    end = i                                                                                    
-                    break                                                                                      
-                i = i + 1                                                                                      
-            if end - start != len(charges):                                                                    
-                raise RuntimeError("Size of molecule in mol2 file differs from number of supplied charges")
-        with open(mol2, 'w') as w:                                                                         
-            for line in lines[:start]:                                                                         
-                w.write(line)                                                                                  
-            for line, charge in zip(lines[start:end],charges):                                                 
-                oldCharge = line.split()[8]                                                                    
-                w.write(line.replace(oldCharge,charge))                                                        
-            for line in lines[end:]:                                                                           
-                w.write(line)                                                                                  
-
+        with open(mol2, "r") as f:
+            lines = f.readlines()
+            i = 0
+            start = 0
+            end = 0
+            for line in lines:
+                if "@<TRIPOS>ATOM" in line:
+                    start = i + 1
+                if "@<TRIPOS>BOND" in line:
+                    end = i
+                    break
+                i = i + 1
+            if end - start != len(charges):
+                raise RuntimeError(
+                    "Size of molecule in mol2 file differs from number of supplied charges"
+                )
+        with open(mol2, "w") as w:
+            for line in lines[:start]:
+                w.write(line)
+            for line, charge in zip(lines[start:end], charges):
+                oldCharge = line.split()[8]
+                w.write(line.replace(oldCharge, charge))
+            for line in lines[end:]:
+                w.write(line)
 
     def makeInput(self):
-        """ 
-        Create Input object with defaults for setup. This object will be 
+        """
+        Create Input object with defaults for setup. This object will be
         returned later if the user wants to run an optimization with it.
         """
         self.inp = Input(**{"skipchecks": True})
@@ -233,7 +235,7 @@ class Setup:
     def setupOpt(self):
         """
         Sets up the optimization directory for ff-opt. This includes running
-        antechamber to make the mol2 and frcmod files and writing the 
+        antechamber to make the mol2 and frcmod files and writing the
         ForceBalance input files.
         """
         print("\n\n**** Setting up force field and ForceBalance files ****")
@@ -451,7 +453,7 @@ class Setup:
         Args:
             frcmod (str | Path): frcmod file for molecule to be optimized
             mol2 (str | Path): mol2 file for molecule to be optimized
-            resname (str): residue ID used for molecule in pdb files. 
+            resname (str): residue ID used for molecule in pdb files.
         """
         print("Writing ForceBalance input files")
         print(
