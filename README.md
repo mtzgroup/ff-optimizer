@@ -2,6 +2,7 @@
 
 Uses ForceBalance, Amber, and TeraChem to optimize forcefield parameters.
 
+
 ### Installation ###
 
 1. Clone the ff-opt repo: `git clone git@github.com:mtzgroup/ff-optimizer.git`
@@ -27,6 +28,7 @@ Uses ForceBalance, Amber, and TeraChem to optimize forcefield parameters.
 
    This will compile Amber's pysander interface with a newer version of python.
 
+
 ### Running ff-opt ###
 
 1. Head to the directory where ff-opt was installed.
@@ -41,13 +43,18 @@ directory structure and files required by the parameter optimizer. The input fil
 a full list of keywords can be found [here](#list-of-all-keywords). Examples are in `/ff-optimizer/examples`.
 - `ff-opt setup [xyz file]`:
 Sets up a force field optimization for [xyz file]. Creates all necessary files and folders required by `ff-opt optimize` and populates
-them with reasonable defaults. Currently, it obtains atom types and starting parameters from GAFF, charges from AM1-BCC, and sets up an
-optimization of all bonded parameters using wB97X-D3/def2-svp.
+them with reasonable defaults. Currently, it obtains atom types and starting parameters from GAFF, charges from AM1-BCC or HF/6-31G* RESP,
+and sets up an optimization of all bonded parameters using wB97X-D3/def2-svp.
 - `ff-opt print-manual`:
 Prints this file, then quits.
 
 
-### Summary of necessary directories and files ###
+### Keywords for `ff-opt setup` ###
+- `--charge`: (int), molecular charge. Default = 0
+- `--resp`: (str) method for computing atomic charges. Options are "am1" for Amber's AM1-BCC charges, "chemcloud" to run a HF/6-31G* RESP calculation on chemcloud, and "local" to run a HF/6-31G* RESP calculation with Terachem locally. Default = "am1"
+
+
+### Summary of necessary directories and files for `ff-opt optimize` ###
 
 - Dynamics directory ("dynamicsdir", 0_dynamics) contains:
     - QM dynamics coordinates ("coors", coors.xyz)
@@ -67,7 +74,7 @@ Prints this file, then quits.
     - Backup TeraChem input file if job fails (tc_template_long.in)
     - sbatch template file for queue (sbatch_template.sh)
 
-### Input files ###
+### Input files for `ff-opt optimize` ###
 
 Keywords are to be provided in a .yaml (or .json) file. Example yaml format:
 ```
@@ -80,7 +87,7 @@ For all keywords, the syntax is simply keyword: value. If using a json,
 take care that keywords have the the right type: strings should be in 
 quotes, ints should not. If using a yaml file, this doesn't matter.
 
- ### List of all keywords ###
+ ### List of all keywords for input files ###
 
 dynamicsdir: str, Default = 0_dynamics
         Specifies the directory containing QM energies,
