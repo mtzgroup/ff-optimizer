@@ -1,0 +1,8 @@
+basis         6-31gs  
+method        hf
+charge        0        
+run           energy 
+spinmult      1        
+resp          yes
+esp_grid_dens 20.0
+coordinates   /home/curtie/7_FF_fitting/0_ff-optimizer/0_main_branch/ff-optimizer/tests/setup/bcla.xyz

@@ -58,6 +58,7 @@ class Setup:
         Run RESP to obtain partial charges for the molecule. Then, change
         the charges in the mol2 file.
         """
+        print(self.resp)
 
         if self.resp == "am1":
             return
@@ -73,6 +74,9 @@ class Setup:
     def chemcloudResp(self):
         """
         Run a ChemCloud job to obtain RESP results.
+
+        Raises:
+            RuntimeError: If Chemcloud RESP calculation fails
         """
 
         mod = {}
@@ -81,18 +85,16 @@ class Setup:
         keywords = {}
         keywords["resp"] = "yes"
         keywords["esp_grid_dens"] = 20.0
-        tempMol = Structure.open(self.xyz)
-        kwargs = tempMol.model_dump()
-        kwargs["charge"] = self.charge
-        #kwargs["spinmult"] = self.spinMult
-        mol = Structure(**kwargs)
+        mol = Structure.open(self.xyz, charge=self.charge, multiplicity=self.spinMult)
         inp = ProgramInput(structure=mol, model=mod, calctype="energy", keywords=keywords)
+        inp.save("test.yaml")
         client = CCClient()
         futureResult = client.compute("terachem", inp)
+        #import sys; sys.exit()
         result = futureResult.get()
-        try:
-            assert isinstance(result.stdout, str)
-        except:
+        if not result.success:
+            raise RuntimeError("Chemcloud RESP calculation failed")
+        if not isinstance(result.stdout, str):
             raise RuntimeError("Chemcloud RESP calculation failed")
         charges = self.readCharges(result.stdout.split("\n"))
         return charges
@@ -100,6 +102,9 @@ class Setup:
     def localResp(self):
         """
         Run TeraChem locally to obtain RESP results.
+
+        Raises:
+            RuntimeError: if local terachem RESP calculation fails.
         """
 
         with open("resp.in", "w") as f:
@@ -123,7 +128,9 @@ class Setup:
             with open("resp.out", "r") as f:
                 lines = list(f.readlines())
         except:
-            raise RuntimeError("Debug RESP calculation failed")
+            raise RuntimeError("Local RESP calculation failed")
+        if not "Job finished" in lines[-2]:
+            raise RuntimeError("Local RESP calculation failed")
         charges = self.readCharges(lines)
         return charges
     
@@ -172,7 +179,7 @@ class Setup:
                     break                                                                                      
                 i = i + 1                                                                                      
             if end - start != len(charges):                                                                    
-                raise RuntimeError("Size of molecule in mol2 file differs from size of molecule in tcout file")
+                raise RuntimeError("Size of molecule in mol2 file differs from number of supplied charges")
         with open(mol2, 'w') as w:                                                                         
             for line in lines[:start]:                                                                         
                 w.write(line)                                                                                  

@@ -7,7 +7,7 @@ from time import sleep
 import yaml
 
 from chemcloud import CCClient
-from qcio import ProgramInput, SinglePointResults, Structure
+from qcio import ProgramInput, Structure
 from qcparse import parse
 
 from . import utils
@@ -139,10 +139,6 @@ class QMEngine:
                         tokenCounter += 1
                 if tokenCounter != 1:
                     f.write("\n")
-
-    def readResult(self, js):
-        result = SinglePointResults.open(js)
-        return result
 
     def readQMRefData(self):
         """
@@ -660,11 +656,6 @@ class ChemcloudEngine(QMEngine):
                 break
             retryXyzs = self.runJobs(retryXyzs, useBackup=True)
         if len(retryXyzs) > 0:
-            # for result in [self.readResult(f"tc_{xyz.split('.')[0]}.json") for xyz in retryXyzs]:
-            #    print(
-            #        f"Job id {result.input_data['id']} suffered a {result.error.error_type}"
-            #    )
-            #    print(result.error.error_message)
             raise RuntimeError(
                 f"Job ids {sorted([xyz.split('.')[0] for xyz in retryXyzs])} in {os.getcwd()} failed {str(self.retries)} times!"
             )
