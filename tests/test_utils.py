@@ -84,6 +84,14 @@ def test_convertPDBtoMolecule():
 """
 
 
+def test_convertPDBtoXYZ():
+    os.chdir(home / "utils")
+    utils.convertPDBtoXYZ("with_chain.pdb")
+    test = checkUtils.checkFiles("with_chain.xyz", "ref_with_chain.xyz")
+    os.remove("with_chain.xyz")
+    assert test
+
+
 def test_writeRst():
     os.chdir(home)
     coords = np.loadtxt(

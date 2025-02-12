@@ -443,6 +443,7 @@ def test_restart(monkeypatch):
     args = getDefaults()
     args.activelearning = 3
     args.restart = True
+    args.initialtraining = True
     mod = active_learning.ActiveLearningModel(args)
     leap = os.path.join("1_opt", "leap.out")
     if os.path.isfile(leap):

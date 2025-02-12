@@ -1,6 +1,4 @@
 import os
-from . import checkUtils
-import pytest
 from pathlib import Path
 
 from qcio import ProgramInput, ProgramOutput, Provenance, Structure
@@ -8,6 +6,7 @@ from qcparse import parse
 
 from ff_optimizer import qmengine
 
+from . import checkUtils
 from .test_inputs import getDefaults
 
 
@@ -61,6 +60,7 @@ def test_loadStructureFromXYZ2():
         pass
     assert passTest
 """
+
 
 def test_loadStructureFromXYZ3():
     os.chdir(os.path.dirname(__file__))
@@ -230,7 +230,7 @@ def test_computeBatch(monkeypatch):
     assert len(results) == 10
 
     # Check small batch size
-    chemcloudEngine.batchsize = 3
+    chemcloudEngine.batchSize = 1
     status, results = chemcloudEngine.computeBatch(inputs)
     if os.path.isfile(os.path.join("chemcloudengine", "jobs.txt")):
         os.remove(os.path.join("chemcloudengine", "jobs.txt"))
@@ -238,7 +238,7 @@ def test_computeBatch(monkeypatch):
     assert len(results) == 10
 
     # Check large batch size
-    chemcloudEngine.batchsize = 77
+    chemcloudEngine.batchSize = 77
     status, results = chemcloudEngine.computeBatch(inputs)
     if os.path.isfile(os.path.join("chemcloudengine", "jobs.txt")):
         os.remove(os.path.join("chemcloudengine", "jobs.txt"))
@@ -289,6 +289,7 @@ def test_computeBatch(monkeypatch):
 
     os.chdir("..")
 
+
 def test_writeResultResp(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
@@ -310,7 +311,7 @@ def test_writeResultResp(monkeypatch):
         input_data=sp,
         results=res,
         provenance=prov,
-        #files=files,
+        # files=files,
         stdout=stdout,
         success=True,
     )
@@ -322,6 +323,7 @@ def test_writeResultResp(monkeypatch):
     os.remove("esp_999.xyz")
     assert wroteTcout
     assert wroteEsp
+
 
 def test_dumpFailedJobs(monkeypatch):
     os.chdir(os.path.dirname(__file__))
@@ -339,8 +341,8 @@ def test_dumpFailedJobs(monkeypatch):
     mod = {"method": "hf", "basis": "sto-3g"}
     mol = Structure.open("3.xyz")
     res = parse("tc_1.out", "terachem")
-    #res.Files = {}
-    #res.OptimizationResults = {}
+    # res.Files = {}
+    # res.OptimizationResults = {}
     sp = ProgramInput(model=mod, structure=mol, calctype="energy", extras={"id": 3})
     out = ProgramOutput(
         input_data=sp,
@@ -350,7 +352,15 @@ def test_dumpFailedJobs(monkeypatch):
         traceback="Oops",
     )
     outputs.append(out)
-    outputs.append(('extras', {}))
+    sp = ProgramInput(model=mod, structure=mol, calctype="energy", extras={"id": 6})
+    out = ProgramOutput(
+        input_data=sp,
+        results=res,
+        provenance=prov,
+        success=False,
+        traceback="Oops",
+    )
+    outputs.append(out)
     qmengine.dumpFailedJobs(inputs, outputs)
     pass3Input = checkUtils.checkFiles("3_input.yaml", "ref_3_input.yaml")
     pass3Output = checkUtils.checkFiles("3_output.yaml", "ref_3_output.yaml")

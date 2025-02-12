@@ -1,0 +1,461 @@
+| Startfile from command line: tc.in
+
+
+|       ***********************************************************
+|       *                 TeraChem v1.9-2023.11-dev               *
+|       *                   Development Version                   *
+|       *           Chemistry at the Speed of Graphics!           *
+|       ***********************************************************
+|       * This program may only be used in connection with        *
+|       * a valid license from PetaChem, LLC. Use of this program *
+|       * or results thereof indicates acceptance of all terms    *
+|       * and conditions stated in the license and that a valid   *
+|       * license agreement between the user and PetaChem, LLC    *
+|       * exists. PetaChem, LLC does not warrant the correctness  *
+|       * of results or their suitability for any purpose.        *
+|       * Please email bugs, suggestions, and comments to         *
+|       *                  help@petachem.com                      *
+|       *                                                         *
+|       ***********************************************************
+
+
+|       ***********************************************************
+|       *  Compiled by root         Fri Jan 17 03:24:20 PM PST 2025  *
+|       *  Supported architecture SMs: 52 61 70 80 90             *
+|       *  Build cuda_12.2.r12.2/compiler.33053471_0              *
+|       *  Git Version:                               *
+|       ***********************************************************
+
+
+| Job started   Sat Jan 18 14:23:59 2025
+| On fire-12-01 (available memory: 80549 MB)
+
+| ######################################### RUNTIME INFO ##########################################
+| terachem  tc.in 
+
+|  NVRM version: NVIDIA UNIX x86_64 Kernel Module  525.89.02  Wed Feb  1 23:23:25 UTC 2023
+|  GCC version:  gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04) 
+
+|  	linux-vdso.so.1 (0x00007ffcbe5f3000)
+|  	libcurl.so.4 => /lib/x86_64-linux-gnu/libcurl.so.4 (0x00007fc9951a1000)
+|  	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007fc995185000)
+|  	libimf.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libimf.so (0x00007fc994d9b000)
+|  	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fc994cb2000)
+|  	libmpi.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libmpi.so.12 (0x00007fc993000000)
+|  	libdftbplus.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libdftbplus.so (0x00007fc992ca8000)
+|  	libfsockets.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libfsockets.so (0x00007fc994cac000)
+|  	libxmlf90.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libxmlf90.so (0x00007fc994c81000)
+|  	libthcbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libthcbox.so.1 (0x00007fc990e8b000)
+|  	libOpenMM.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libOpenMM.so (0x00007fc990a31000)
+|  	libFlexiBLE.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libFlexiBLE.so (0x00007fc994c6c000)
+|  	libnvToolsExt.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libnvToolsExt.so.1 (0x00007fc990800000)
+|  	libgpubox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libgpubox.so.1 (0x00007fc994c61000)
+|  	libcpubox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcpubox.so.1 (0x00007fc994c5b000)
+|  	libtensorbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libtensorbox.so.1 (0x00007fc994c3d000)
+|  	libiobox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libiobox.so.1 (0x00007fc994c37000)
+|  	libintbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libintbox.so.1 (0x00007fc92aca1000)
+|  	libatmx2cbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libatmx2cbox.so.1 (0x00007fc994b76000)
+|  	libperiodicbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libperiodicbox.so.1 (0x00007fc90fe1a000)
+|  	libsqmbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libsqmbox.so.1 (0x00007fc90fa6e000)
+|  	libgridbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libgridbox.so.1 (0x00007fc90d6a4000)
+|  	libdftbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libdftbox.so.1 (0x00007fc90d5a4000)
+|  	libcibox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcibox.so.1 (0x00007fc90cf55000)
+|  	libccbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libccbox.so.1 (0x00007fc90cac4000)
+|  	libsimbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libsimbox.so.1 (0x00007fc994b4c000)
+|  	liboptbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/liboptbox.so.1 (0x00007fc994b15000)
+|  	libprotobuf.so.25 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libprotobuf.so.25 (0x00007fc90c7f1000)
+|  	libcommbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcommbox.so.1 (0x00007fc90c790000)
+|  	libssl.so.3 => /lib/x86_64-linux-gnu/libssl.so.3 (0x00007fc90c6ec000)
+|  	libcrypto.so.3 => /lib/x86_64-linux-gnu/libcrypto.so.3 (0x00007fc90c2a9000)
+|  	libcuda.so.1 => /lib/x86_64-linux-gnu/libcuda.so.1 (0x00007fc90a5c9000)
+|  	libcudart.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcudart.so.12 (0x00007fc90a200000)
+|  	libcublas.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcublas.so.12 (0x00007fc903a00000)
+|  	libcufft.so.11 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcufft.so.11 (0x00007fc8f8c00000)
+|  	libcusparse.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcusparse.so.12 (0x00007fc8e8e00000)
+|  	libcusolver.so.11 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcusolver.so.11 (0x00007fc8e1c00000)
+|  	libcublasLt.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcublasLt.so.12 (0x00007fc8bf400000)
+|  	libsvml.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libsvml.so (0x00007fc8bddd1000)
+|  	libirng.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libirng.so (0x00007fc8bda00000)
+|  	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007fc8bd7d4000)
+|  	libiomp5.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libiomp5.so (0x00007fc8bd200000)
+|  	libcilkrts.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcilkrts.so.5 (0x00007fc8bce00000)
+|  	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007fc994aef000)
+|  	libintlc.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libintlc.so.5 (0x00007fc90a551000)
+|  	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fc8bcbd7000)
+|  	/lib64/ld-linux-x86-64.so.2 (0x00007fc995257000)
+|  	libnghttp2.so.14 => /lib/x86_64-linux-gnu/libnghttp2.so.14 (0x00007fc90a527000)
+|  	libidn2.so.0 => /lib/x86_64-linux-gnu/libidn2.so.0 (0x00007fc990a10000)
+|  	librtmp.so.1 => /lib/x86_64-linux-gnu/librtmp.so.1 (0x00007fc90a508000)
+|  	libssh.so.4 => /lib/x86_64-linux-gnu/libssh.so.4 (0x00007fc903993000)
+|  	libpsl.so.5 => /lib/x86_64-linux-gnu/libpsl.so.5 (0x00007fc994ad9000)
+|  	libgssapi_krb5.so.2 => /lib/x86_64-linux-gnu/libgssapi_krb5.so.2 (0x00007fc90a4b4000)
+|  	libldap-2.5.so.0 => /lib/x86_64-linux-gnu/libldap-2.5.so.0 (0x00007fc903934000)
+|  	liblber-2.5.so.0 => /lib/x86_64-linux-gnu/liblber-2.5.so.0 (0x00007fc90a1ef000)
+|  	libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1 (0x00007fc8e8d31000)
+|  	libbrotlidec.so.1 => /lib/x86_64-linux-gnu/libbrotlidec.so.1 (0x00007fc90a1e1000)
+|  	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007fc994ad2000)
+|  	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fc990a0b000)
+|  	libifport.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libifport.so.5 (0x00007fc8f8bd6000)
+|  	libifcoremt.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libifcoremt.so.5 (0x00007fc8bd65a000)
+|  	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fc90a4ad000)
+|  	libnvJitLink.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libnvJitLink.so.12 (0x00007fc8b9a00000)
+|  	libunistring.so.2 => /lib/x86_64-linux-gnu/libunistring.so.2 (0x00007fc8bd056000)
+|  	libgnutls.so.30 => /lib/x86_64-linux-gnu/libgnutls.so.30 (0x00007fc8b9815000)
+|  	libhogweed.so.6 => /lib/x86_64-linux-gnu/libhogweed.so.6 (0x00007fc8e8ce9000)
+|  	libnettle.so.8 => /lib/x86_64-linux-gnu/libnettle.so.8 (0x00007fc8e8ca3000)
+|  	libgmp.so.10 => /lib/x86_64-linux-gnu/libgmp.so.10 (0x00007fc8e1b7e000)
+|  	libkrb5.so.3 => /lib/x86_64-linux-gnu/libkrb5.so.3 (0x00007fc8b974a000)
+|  	libk5crypto.so.3 => /lib/x86_64-linux-gnu/libk5crypto.so.3 (0x00007fc8f8ba7000)
+|  	libcom_err.so.2 => /lib/x86_64-linux-gnu/libcom_err.so.2 (0x00007fc90a1db000)
+|  	libkrb5support.so.0 => /lib/x86_64-linux-gnu/libkrb5support.so.0 (0x00007fc90a1cd000)
+|  	libsasl2.so.2 => /lib/x86_64-linux-gnu/libsasl2.so.2 (0x00007fc8e8c88000)
+|  	libbrotlicommon.so.1 => /lib/x86_64-linux-gnu/libbrotlicommon.so.1 (0x00007fc8e8c65000)
+|  	libp11-kit.so.0 => /lib/x86_64-linux-gnu/libp11-kit.so.0 (0x00007fc8b960f000)
+|  	libtasn1.so.6 => /lib/x86_64-linux-gnu/libtasn1.so.6 (0x00007fc8e8c4d000)
+|  	libkeyutils.so.1 => /lib/x86_64-linux-gnu/libkeyutils.so.1 (0x00007fc90a1c4000)
+|  	libresolv.so.2 => /lib/x86_64-linux-gnu/libresolv.so.2 (0x00007fc8e1b6a000)
+|  	libffi.so.8 => /lib/x86_64-linux-gnu/libffi.so.8 (0x00007fc8e1b5d000)
+| #################################################################################################
+
+| Checking Amazon Cloud instance ID...   Not found
+| Cannot find license.dat file /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/license.dat
+
+
+| TRYING THE NETWORK LICENSE...
+| Connecting to license server '54.208.252.40' port '8877'...
+| Connected!
+| Checking your license...
+
+| **************************************************************
+|  Greetings, Martinez Group! You have 1000 licenses in total
+|  IN USE: 10
+|  AVAILABLE: 990
+| **************************************************************
+
+-----------------------------------
+Processed Input file:
+                   method hf
+                    basis 6-31gs
+                      run energy
+                   charge 0
+              coordinates ../pdbs/bclg.pdb
+                     resp yes
+            esp_grid_dens 20.0
+-----------------------------------
+Jobname: bclg
+Scratch data will be generated
+Scratch directory: ./scr.bclg
+| Random number seed: 393161179
+
+XYZ coordinates ../pdbs/bclg.pdb
+Molden File Output: ./scr.bclg/bclg.molden
+Using basis set: 6-31gs
+dmrgstart not found
+Spin multiplicity: 1
+DIIS will use up to 10 vectors.
+Condition number limit for the DIIS overlap matrix is            0
+WF convergence threshold: 3.00e-05
+Using DIIS algorithm to converge WF
+Maximum number of SCF iterations: 100
+Incremental fock with rebuild every 8 iterations
+Will switch to conventional Fock if diffuse functions are detected
+X-matrix tolerance: 1.00e-04
+PRECISION: DYNAMIC
+TeraChem will select linear algebra engine
+DFT Functional requested: hf
+Method: Hartree-Fock 
+Wavefunction: RESTRICTED
+Initial guess generated by maximum overlap
+
+********************************************
+***** SINGLE POINT ENERGY CALCULATIONS *****
+********************************************
+Starting TensorBox...
+| TeraChem will select linear algebra engine
+| Using cuSolver for matrix diagonalization
+
+| using 2 out of 2 CUDA devices
+|   Device 0: NVIDIA GeForce GTX 970,  4036MB, CC 5.2 -- CPU THREAD 0
+|   Device 1: NVIDIA GeForce GTX 970,  4036MB, CC 5.2 -- CPU THREAD 1
+| -------------------------------------------------------------------
+| CPU Memory Available: 48365.88 MegaWords 
+| GPU Memory Available: 248.61 MegaWords 
+| Maximum recommended basis set size: 5100 basis functions
+|  (limited by GPU memory)
+| -------------------------------------------------------------------
+| Initialize GPUBox with 128 MW of memory
+
+
+Basis set:       6-31gs
+Total atoms:     118
+Total charge:    0
+Total electrons: 438 (219-alpha, 219-beta)
+Number electrons modeled by ECPs: 0
+Total orbitals:  1020
+Total AO shells: 478 (297 S-shells; 121 P-shells; 60 D-shells; 0 F-shells; 0 G-shells)
+Spin multiplicity: 1
+Nuclear repulsion energy (QM atoms): 8225.351702106558 a.u.
+
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change         Energy        Time(s)
+------------------------------------------------------------------------
+| Purifying guess...
+| Trace of guess 438.00000000, trace of guess*guess 438.00000000,  electron number 438.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on GPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| THRESPDP set to 1.00e+00
+|    1     0.2646133468   -2703.6935556832   -2703.6935556832     3.94  
+|    2     0.1023411855     -13.3129750196   -2717.0065307027     4.03  
+|    3     0.0505331995      -1.7117305744   -2718.7182612771     3.69  
+|    4     0.0197409376      -0.1994346085   -2718.9176958856     3.52  
+|    5     0.0073547291      -0.0378221054   -2718.9555179910     3.34  
+|    6     0.0023899596      -0.0041320086   -2718.9596499995     3.22  
+|    7     0.0026341930      -0.0010119507   -2718.9606619503     2.96  
+| THRESPDP set to 4.59e-04
+|    8     0.0012801644      +0.0002259268   -2718.9604360234     5.50  
+|    9     0.0005928182      -0.0000914430   -2718.9605274664     2.84  
+|   10     0.0002369346      -0.0000206345   -2718.9605481009     2.62  
+|   11     0.0000996446      -0.0000030521   -2718.9605511530     2.51  
+|   12     0.0000306729      -0.0000011907   -2718.9605523437     5.71  
+|   13     0.0000132542      -0.0000001911   -2718.9605525348     5.48  
+------------------------------------------------------------------------
+FINAL ENERGY: -2718.9605525348 a.u.
+| WARNING: Final energy is higher than the lowest energy by   0.00010942.
+HOMO-LUMO GAP: 6.153 eV
+CENTER OF MASS: {32.687372, 67.299797, 46.140470} ANGS
+DIPOLE MOMENT: {-0.035911, -10.026573, 6.747720} (|D| = 12.085743) DEBYE
+
+Computing ESP on molecular grid...
+Using layered Connolly surfaces for molecular grid...Total number of ESP grid points from 4 layers: 67373
+Electrostatic potential written to file ./scr.bclg/esp.xyz (unit: Ansgtrom)
+Fitting RESP charges to the computed ESP...
+ESP unrestrained charges:
+Atom          X          Y          Z     Charge   Exposure
+-----------------------------------------------------------
+  Mg  59.524479 128.253813  95.674937   1.281174     0.0786
+   C  60.645086 130.937224  89.843243   0.080833     0.0404
+   C  59.258028 122.439126  92.832789  -0.713636     0.1009
+   C  58.400092 125.511821 101.406476  -0.731795     0.0874
+   C  59.220233 134.210229  98.475511  -0.412890     0.1054
+   N  60.002580 126.896990  91.869029  -0.501963     0.0991
+   C  60.529813 128.391763  89.720410  -0.108173     0.0282
+   C  60.886971 126.738253  87.407386   0.019631     0.0000
+   C  59.978013 124.128541  88.348469   0.244311     0.0000
+   C  59.747467 124.508376  91.186838   0.456077     0.0386
+   C  57.455229 123.325408  87.167391  -0.396294     0.0932
+   C  63.634633 126.755260  86.477641   0.040287     0.0236
+   C  64.044703 125.196236  84.064461  -0.343877     0.0437
+   C  62.593394 126.280939  81.855371   0.843490     0.0335
+   O  60.488239 125.627094  81.224202  -0.598750     0.2048
+   O  63.889746 128.112084  80.702638  -0.478610     0.0654
+   N  59.044488 124.657665  96.905149  -0.849168     0.1067
+   C  58.957561 122.537392  95.419824   0.487143     0.0724
+   C  58.483240 120.292397  97.022312   0.101464     0.0691
+   C  58.343400 121.123877  99.450610  -0.121002     0.0683
+   C  58.638197 123.920671  99.367462   0.582365     0.0686
+   C  58.273480 117.650561  96.037764  -0.383337     0.1087
+   C  57.935219 119.547845 101.708832  -0.090940     0.1067
+   C  59.046378 119.857760 103.961385  -0.396604     0.2243
+   N  59.021812 129.648431  99.420374  -0.648378     0.1044
+   C  58.558829 128.210349 101.393248   0.501410     0.0457
+   C  58.112854 129.722130 103.789420   0.402923     0.0028
+   C  58.692999 132.396092 102.910698  -0.513613     0.0495
+   C  59.016143 132.243025 100.129021   0.467860     0.0653
+   C  55.404876 129.398987 104.781527  -0.388617     0.0996
+   C  58.897090 134.374636 104.490509   0.063791     0.1186
+   C  59.520699 137.071275 103.832884  -0.346722     0.1092
+   N  59.909983 131.825395  94.516535  -0.662617     0.1070
+   C  59.592509 134.111964  95.775093   0.134168     0.0704
+   C  59.722900 136.166096  94.072449   0.144787     0.0706
+   C  60.166986 135.037929  91.670608  -0.353987     0.0826
+   C  60.259582 132.426328  92.088237   0.243181     0.0673
+   C  59.475346 138.928875  94.680941  -0.336307     0.1110
+   C  60.435327 135.497133  88.968300   0.749821     0.0658
+   O  60.219898 137.418984  87.728639  -0.577636     0.4295
+   C  61.102400 132.859075  87.747537  -0.773688     0.0028
+   C  59.658649 132.399872  85.324908   1.039193     0.0112
+   O  60.578946 132.424438  83.234871  -0.671119     0.1819
+   O  57.213344 131.933110  85.759545  -0.409348     0.1251
+   C  55.711012 131.362412  83.588250  -0.088096     0.1184
+   C  62.746462 129.232691  78.491659   0.292007     0.0320
+   C  62.929765 127.484695  76.246664  -0.549046     0.0843
+   C  65.119958 126.702348  75.228102   0.334297     0.0399
+   C  67.674867 127.535717  76.184303  -0.483558     0.0864
+   C  65.165311 124.808843  73.087042  -0.337160     0.0279
+   C  66.127181 125.878427  70.551030   0.221192     0.0328
+   C  66.478671 123.824295  68.600833  -0.442560     0.0960
+   C  68.591384 122.465582  68.247454   0.134750     0.0394
+   C  70.997005 122.885102  69.736558  -0.226623     0.0833
+   C  68.702878 120.379325  66.295367  -0.303756     0.0287
+   C  70.696539 120.823410  64.218558   0.374252     0.0272
+   C  70.779687 118.691800  62.326943  -0.649059     0.0991
+   C  72.302806 116.666013  62.398752   0.405529     0.0592
+   C  74.264342 116.212479  64.422649  -0.452791     0.0963
+   C  72.157297 114.621330  60.412650  -0.448279     0.1189
+   H  61.111849 139.624294  95.769423   0.088546     0.3227
+   H  59.363852 140.040034  92.927275   0.127221     0.2561
+   H  57.768923 139.320048  95.809108   0.079651     0.2925
+   H  54.027266 129.973464 103.330217   0.112708     0.3033
+   H  55.021262 127.422334 105.310650   0.082817     0.2583
+   H  55.117638 130.593294 106.459603   0.095894     0.2706
+   H  56.737133 117.501272  94.637477   0.118896     0.2988
+   H  60.034705 117.076084  95.087232   0.121585     0.3053
+   H  57.899315 116.299406  97.568442   0.126173     0.2321
+   H  55.986912 124.746482  87.573682   0.113306     0.2518
+   H  57.668768 123.185568  85.101920   0.092464     0.1837
+   H  56.812722 121.490484  87.906273   0.094241     0.2643
+   H  56.438556 129.655990  82.643387   0.087105     0.1313
+   H  53.789161 131.033600  84.293117   0.105943     0.3546
+   H  55.729909 132.951672  82.248434   0.109104     0.3065
+   H  66.066710 125.177339  83.584470   0.113556     0.2791
+   H  63.405976 123.236591  84.330912   0.078516     0.1988
+   H  64.233676 128.716796  86.118593   0.010828     0.1176
+   H  64.868624 126.014488  87.985642   0.032588     0.2694
+   H  70.694649 115.023841  58.989686   0.108598     0.2894
+   H  73.988442 114.417239  59.431882   0.118437     0.3176
+   H  76.167296 116.072639  63.577941   0.115023     0.3213
+   H  74.304026 117.701583  65.868289   0.136517     0.1564
+   H  73.903404 114.396452  65.378850   0.115955     0.3139
+   H  70.252453 122.611091  63.241570  -0.023253     0.3039
+   H  72.565478 121.086082  65.095391  -0.028634     0.1145
+   H  69.158302 118.576526  67.249679   0.096751     0.2167
+   H  66.832049 120.133660  65.412865   0.091332     0.2392
+   H  59.078504 136.105625  99.265416   0.235467     0.0305
+   H  57.991911 124.646326 103.230062   0.210110     0.0701
+   H  59.110629 120.585305  91.935169   0.208501     0.1159
+   H  63.113069 132.959231  87.218413   0.266030     0.2125
+   H  71.849272 121.055847  70.261902   0.071723     0.2541
+   H  72.414300 123.905554  68.598943   0.066445     0.2771
+   H  70.685201 123.971694  71.478885   0.082283     0.1265
+   H  64.755240 127.288163  69.857501   0.001960     0.3113
+   H  67.912973 126.900769  70.847717   0.002514     0.1344
+   H  66.414420 123.227142  73.635063   0.106021     0.1937
+   H  63.266136 124.000040  72.809253   0.107059     0.2501
+   H  68.874843 128.200901  74.617720   0.129958     0.2102
+   H  67.561484 129.041829  77.609157   0.146581     0.1829
+   H  68.661304 125.914332  77.051687   0.132672     0.2823
+   H  61.397197 122.646996  87.983752   0.002072     0.1623
+   H  59.456449 129.098521 105.255848  -0.022131     0.2780
+   H  59.651091 127.397767  85.871039   0.098684     0.0057
+   H  61.153423 126.736363  75.492663   0.198415     0.2552
+   H  60.779257 129.712682  78.933855   0.071791     0.1324
+   H  63.806598 130.993916  78.210089   0.080351     0.2469
+   H  61.191217 137.194107 102.593224   0.104126     0.2467
+   H  59.911873 138.174874 105.550645   0.104726     0.3495
+   H  57.948447 138.010468 102.833219   0.102606     0.2777
+   H  58.590954 133.970234 106.503067   0.090850     0.2501
+   H  56.642647 117.945358 101.453719   0.145137     0.2623
+   H  60.414540 121.367652 104.312875   0.191203     0.2432
+   H  58.640087 118.561408 105.522299   0.174824     0.3606
+   H  64.819491 123.351864  67.446210   0.176639     0.2768
+   H  69.388849 118.793845  60.786816   0.216514     0.2729
+   H  71.737778 112.773178  61.285704   0.119061     0.3184
+-----------------------------------------------------------
+Quality of fit (RRMS):0.0978
+
+Solving Resp charge with restraints iteratively...
+Restraint parameters a:0.0005 , b:0.001 
+ESP restrained charges:
+Atom          X          Y          Z     Charge   Exposure
+-----------------------------------------------------------
+  Mg  59.524479 128.253813  95.674937   1.264772     0.0786
+   C  60.645086 130.937224  89.843243   0.063520     0.0404
+   C  59.258028 122.439126  92.832789  -0.696490     0.1009
+   C  58.400092 125.511821 101.406476  -0.713848     0.0874
+   C  59.220233 134.210229  98.475511  -0.387466     0.1054
+   N  60.002580 126.896990  91.869029  -0.490624     0.0991
+   C  60.529813 128.391763  89.720410  -0.096838     0.0282
+   C  60.886971 126.738253  87.407386   0.013415     0.0000
+   C  59.978013 124.128541  88.348469   0.245819     0.0000
+   C  59.747467 124.508376  91.186838   0.436686     0.0386
+   C  57.455229 123.325408  87.167391  -0.386189     0.0932
+   C  63.634633 126.755260  86.477641   0.026459     0.0236
+   C  64.044703 125.196236  84.064461  -0.323612     0.0437
+   C  62.593394 126.280939  81.855371   0.831731     0.0335
+   O  60.488239 125.627094  81.224202  -0.594828     0.2048
+   O  63.889746 128.112084  80.702638  -0.472496     0.0654
+   N  59.044488 124.657665  96.905149  -0.829601     0.1067
+   C  58.957561 122.537392  95.419824   0.474155     0.0724
+   C  58.483240 120.292397  97.022312   0.095659     0.0691
+   C  58.343400 121.123877  99.450610  -0.104967     0.0683
+   C  58.638197 123.920671  99.367462   0.557423     0.0686
+   C  58.273480 117.650561  96.037764  -0.376923     0.1087
+   C  57.935219 119.547845 101.708832  -0.099630     0.1067
+   C  59.046378 119.857760 103.961385  -0.391530     0.2243
+   N  59.021812 129.648431  99.420374  -0.627626     0.1044
+   C  58.558829 128.210349 101.393248   0.487619     0.0457
+   C  58.112854 129.722130 103.789420   0.390192     0.0028
+   C  58.692999 132.396092 102.910698  -0.486353     0.0495
+   C  59.016143 132.243025 100.129021   0.435355     0.0653
+   C  55.404876 129.398987 104.781527  -0.378876     0.0996
+   C  58.897090 134.374636 104.490509   0.044628     0.1186
+   C  59.520699 137.071275 103.832884  -0.327876     0.1092
+   N  59.909983 131.825395  94.516535  -0.643444     0.1070
+   C  59.592509 134.111964  95.775093   0.114882     0.0704
+   C  59.722900 136.166096  94.072449   0.141031     0.0706
+   C  60.166986 135.037929  91.670608  -0.337633     0.0826
+   C  60.259582 132.426328  92.088237   0.230217     0.0673
+   C  59.475346 138.928875  94.680941  -0.328538     0.1110
+   C  60.435327 135.497133  88.968300   0.729583     0.0658
+   O  60.219898 137.418984  87.728639  -0.573883     0.4295
+   C  61.102400 132.859075  87.747537  -0.733129     0.0028
+   C  59.658649 132.399872  85.324908   1.023018     0.0112
+   O  60.578946 132.424438  83.234871  -0.668172     0.1819
+   O  57.213344 131.933110  85.759545  -0.407502     0.1251
+   C  55.711012 131.362412  83.588250  -0.081986     0.1184
+   C  62.746462 129.232691  78.491659   0.274794     0.0320
+   C  62.929765 127.484695  76.246664  -0.535451     0.0843
+   C  65.119958 126.702348  75.228102   0.316944     0.0399
+   C  67.674867 127.535717  76.184303  -0.462765     0.0864
+   C  65.165311 124.808843  73.087042  -0.319833     0.0279
+   C  66.127181 125.878427  70.551030   0.208104     0.0328
+   C  66.478671 123.824295  68.600833  -0.433981     0.0960
+   C  68.591384 122.465582  68.247454   0.118351     0.0394
+   C  70.997005 122.885102  69.736558  -0.206639     0.0833
+   C  68.702878 120.379325  66.295367  -0.285721     0.0287
+   C  70.696539 120.823410  64.218558   0.359718     0.0272
+   C  70.779687 118.691800  62.326943  -0.641622     0.0991
+   C  72.302806 116.666013  62.398752   0.395130     0.0592
+   C  74.264342 116.212479  64.422649  -0.437240     0.0963
+   C  72.157297 114.621330  60.412650  -0.440402     0.1189
+   H  61.111849 139.624294  95.769423   0.086799     0.3227
+   H  59.363852 140.040034  92.927275   0.124924     0.2561
+   H  57.768923 139.320048  95.809108   0.078241     0.2925
+   H  54.027266 129.973464 103.330217   0.110727     0.3033
+   H  55.021262 127.422334 105.310650   0.080797     0.2583
+   H  55.117638 130.593294 106.459603   0.093495     0.2706
+   H  56.737133 117.501272  94.637477   0.117719     0.2988
+   H  60.034705 117.076084  95.087232   0.120354     0.3053
+   H  57.899315 116.299406  97.568442   0.124255     0.2321
+   H  55.986912 124.746482  87.573682   0.111000     0.2518
+   H  57.668768 123.185568  85.101920   0.089747     0.1837
+   H  56.812722 121.490484  87.906273   0.091567     0.2643
+   H  56.438556 129.655990  82.643387   0.085611     0.1313
+   H  53.789161 131.033600  84.293117   0.103915     0.3546
+   H  55.729909 132.951672  82.248434   0.108101     0.3065
+   H  66.066710 125.177339  83.584470   0.109037     0.2791
+   H  63.405976 123.236591  84.330912   0.074258     0.1988
+   H  64.233676 128.716796  86.118593   0.013935     0.1176
+   H  64.868624 126.014488  87.985642   0.035642     0.2694
+   H  70.694649 115.023841  58.989686   0.106878     0.2894
+   H  73.988442 114.417239  59.431882   0.116770     0.3176
+   H  76.167296 116.072639  63.577941   0.111519     0.3213
+   H  74.304026 117.701583  65.868289   0.131853     0.1564
+   H  73.903404 114.396452  65.378850   0.112765     0.3139
+   H  70.252453 122.611091  63.241570  -0.020358     0.3039
+   H  72.565478 121.086082  65.095391  -0.025004     0.1145
+   H  69.158302 118.576526  67.249679   0.093229     0.2167
+   H  66.832049 120.133660  65.412865   0.087444     0.2392
+   H  59.078504 136.105625  99.265416   0.230618     0.0305
+   H  57.991911 124.646326 103.230062   0.208111     0.0701
+   H  59.110629 120.585305  91.935169   0.205594     0.1159
+   H  63.113069 132.959231  87.218413   0.257405     0.2125
+   H  71.849272 121.055847  70.261902   0.067816     0.2541
+   H  72.414300 123.905554  68.598943   0.061917     0.2771
+   H  70.685201 123.971694  71.478885   0.076477     0.1265
+   H  64.755240 127.288163  69.857501   0.003803     0.3113
+
+   DIE CALLED AAHHHHHHH

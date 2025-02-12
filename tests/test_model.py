@@ -527,6 +527,7 @@ def test_initialCycle1(monkeypatch):
     os.chdir(home / "model" / "initial1")
     inp = getDefaults()
     inp.validinitial = True
+    inp.initialtraining = True
     m = model.Model(inp)
     monkeypatch.setattr(optengine, "runForceBalance", monkeyForceBalance)
     m.initialCycle()

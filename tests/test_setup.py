@@ -2,6 +2,12 @@ import os
 from pathlib import Path
 from shutil import copyfile
 
+import chemcloud
+import numpy as np
+import yaml
+from qcio import ProgramInput, ProgramOutput, Provenance
+from qcparse import parse
+
 from ff_optimizer import setup, utils
 
 from . import checkUtils
@@ -135,3 +141,170 @@ def test_charges():
     assert mol2charge == -1
     assert tcCharge == -1
     assert tcChargeBackup == -1
+
+
+def test_getSpinMult():
+    os.chdir(Path(os.path.dirname(__file__)))
+    os.chdir("setup")
+    st = setup.Setup("bcla.xyz", 0)
+    mult1 = st.spinMult
+    st = setup.Setup("bcla.xyz", -7)
+    mult2 = st.spinMult
+    assert mult1 == 1
+    assert mult2 == 2
+
+
+def test_readCharges():
+    os.chdir(Path(os.path.dirname(__file__)))
+    os.chdir("setup")
+    st = setup.Setup("bcla.xyz", 0)
+    charges = list(np.loadtxt("charges.txt", dtype=str))
+    with open("tc.out", "r") as f:
+        lines = list(f.readlines())
+    testCharges = st.readCharges(lines)
+    assert checkUtils.checkListsFloats(charges, testCharges)
+
+
+def test_changeCharges():
+    os.chdir(Path(os.path.dirname(__file__)))
+    os.chdir("setup")
+    copyfile("bclg_wrong_charges.mol2", "bclg.mol2")
+    charges = list(np.loadtxt("charges.txt", dtype=str))
+    st = setup.Setup("bcla.xyz", 0)
+    st.changeCharges(charges, "bclg.mol2")
+    test = checkUtils.checkFiles("bclg.mol2", "ref_bclg.mol2")
+    os.remove("bclg.mol2")
+    assert test
+
+
+def test_runResp(monkeypatch):
+    os.chdir(Path(os.path.dirname(__file__)))
+    os.chdir("setup")
+    st = setup.Setup("bcla.xyz", 0)
+    st.mol2 = "nah"
+
+    def monkeyChemcloudResp(self):
+        self.test = 1
+
+    def monkeyLocalResp(self):
+        self.test = 2
+
+    def monkeyChangeCharges(self, charges, mol2):
+        return
+
+    monkeypatch.setattr(setup.Setup, "chemcloudResp", monkeyChemcloudResp)
+    monkeypatch.setattr(setup.Setup, "localResp", monkeyLocalResp)
+    monkeypatch.setattr(setup.Setup, "changeCharges", monkeyChangeCharges)
+
+    st.test = 0
+    st.resp = "am1"
+    st.runResp()
+    assert st.test == 0
+    st.resp = "chemcloud"
+    st.runResp()
+    assert st.test == 1
+    st.resp = "local"
+    st.runResp()
+    assert st.test == 2
+    st.resp = "hi mom"
+    error = False
+    try:
+        st.runResp()
+    except:
+        error = True
+    assert error
+
+
+def test_chemcloudResp(monkeypatch):
+    os.chdir(Path(os.path.dirname(__file__)))
+    os.chdir("setup")
+    st = setup.Setup("bcla.xyz", 0)
+    switch = 1
+
+    class MonkeyClient:
+        def __init__(self):
+            pass
+
+        def compute(self, mode, inp):
+            inp.save("test.yaml")
+            return MonkeyFutureOutput()
+
+    class MonkeyFutureOutput:
+        def __init__(self):
+            pass
+
+        def get(self):
+            with open("ref.yaml", "r") as f:
+                inputDict = yaml.safe_load(f)
+            inp = ProgramInput(**inputDict)
+            prov = Provenance(program="terachem")
+            print(switch)
+            if switch == 1:
+                outfile = "tc.out"
+                success = True
+            else:
+                outfile = "failure.out"
+                success = False
+            result = parse(outfile, "terachem")
+            with open(outfile, "r") as f:
+                lines = list(f.readlines())
+            stdout = " ".join(lines)
+            kwargs = {
+                "results": result,
+                "success": success,
+                "input_data": inp,
+                "provenance": prov,
+                "stdout": stdout,
+            }
+            output = ProgramOutput(**kwargs)
+            return output
+
+    monkeypatch.setattr(setup, "CCClient", MonkeyClient)
+    monkeypatch.setattr(chemcloud.models, "FutureOutput", MonkeyFutureOutput)
+
+    st.chemcloudResp()
+    testInput = checkUtils.checkFiles("test.yaml", "ref.yaml")
+    os.remove("test.yaml")
+    switch = 0
+    error = False
+    try:
+        st.chemcloudResp()
+    except:
+        error = True
+    assert testInput
+    assert error
+
+
+def test_localResp(monkeypatch):
+    os.chdir(Path(os.path.dirname(__file__)))
+    os.chdir("setup")
+    st = setup.Setup("bcla.xyz", 0)
+    switch = 1
+
+    def monkeySystem(cmd):
+        if switch == 1:
+            copyfile("tc.out", "resp.out")
+        else:
+            copyfile("failure.out", "resp.out")
+
+    def monkeyReadCharges(self, lines):
+        return 0
+
+    def monkeyCheckForTerachem(crash):
+        pass
+
+    monkeypatch.setattr(os, "system", monkeySystem)
+    monkeypatch.setattr(setup.Setup, "readCharges", monkeyReadCharges)
+    monkeypatch.setattr(setup, "checkForTerachem", monkeyCheckForTerachem)
+    st.localResp()
+    testInput = checkUtils.checkFiles("resp.in", "ref_resp.in")
+
+    switch = 0
+    error = False
+    try:
+        st.localResp()
+    except:
+        error = True
+    os.remove("resp.in")
+    assert testInput
+    assert error

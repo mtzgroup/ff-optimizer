@@ -4,10 +4,9 @@ import traceback
 from pathlib import Path
 from shutil import copyfile, rmtree
 from time import sleep
-import yaml
 
 from chemcloud import CCClient
-from qcio import ProgramInput, SinglePointResults, Structure
+from qcio import ProgramInput, Structure
 from qcparse import parse
 
 from . import utils
@@ -140,10 +139,6 @@ class QMEngine:
                 if tokenCounter != 1:
                     f.write("\n")
 
-    def readResult(self, js):
-        result = SinglePointResults.open(js)
-        return result
-
     def readQMRefData(self):
         """
         Read QM reference data from output files.
@@ -163,8 +158,12 @@ class QMEngine:
         for f in utils.getXYZs():
             coord = utils.readXYZ(f)
             name = utils.getName(f)
-            result = parse(f"tc_{name}.out", "terachem")
-            if result.energy is None or result.gradient is None:
+            try:
+                result = parse(f"tc_{name}.out", "terachem")
+                assert result.energy
+                assert result.gradient.any()
+            except Exception as e:
+                print(e)
                 raise RuntimeError(
                     f"Terachem job tc_{name}.out in {os.getcwd()} did not succeed!"
                 )
@@ -184,9 +183,9 @@ class QMEngine:
             out = f"tc_{name}.out"
             try:
                 parse(out, "terachem")
-            except Exception as e:
-                #print(f)
-                #print(e)
+            except Exception:
+                # print(f)
+                # print(e)
                 xyzs.append(f)
         self.getQMRefData(xyzs)
 
@@ -481,9 +480,9 @@ class ChemcloudEngine(QMEngine):
         else:
             # TC defaults to lowest possible spin; this is good enough for us.
             pass
-            #raise ValueError(
+            # raise ValueError(
             #    "Spin multiplicity ('spinmult') must be specified in input file"
-            #)
+            # )
 
     def computeBatch(self, programInputs: list):
         """
@@ -507,8 +506,8 @@ class ChemcloudEngine(QMEngine):
         #    pickle.dump(programInputs, f)
         try:
             # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION?
+            # only need extra files if running resp
             futureResults = [
-                # only need extra files if running resp
                 self.client.compute(
                     "terachem", programInputs[i::stride], collect_files=self.doResp
                 )
@@ -516,8 +515,13 @@ class ChemcloudEngine(QMEngine):
             ]
             outputBatches = [futureResults[i].get() for i in range(stride)]
             for batch in outputBatches:
-                for output in batch:
-                    outputs.append(output)
+                # avoid accidentally unpacking Output object if batch is a
+                # single Output object
+                if batchSize > 1:
+                    for output in batch:
+                        outputs.append(output)
+                else:
+                    outputs.append(batch)
         except Exception as e:
             traceback.print_exc()
             print(e)
@@ -526,7 +530,7 @@ class ChemcloudEngine(QMEngine):
                 f"Submission failed; resubmitting with batch size {str(self.batchSize)}"
             )
             # sleep(30)
-            if self.batchSize < 2:
+            if self.batchSize < 1:
                 status = -1
                 return status, outputs
             tempStatus, outputs = self.computeBatch(programInputs)
@@ -594,6 +598,14 @@ class ChemcloudEngine(QMEngine):
         retryXyzs = []
         for output in outputs:
             self.writeResult(output)
+            # start debug
+            jobID = output.input_data.extras["id"]
+            outfile = Path(f"tc_{jobID}.out")
+            if not outfile.is_file():
+                import pdb
+
+                pdb.set_trace()
+            # end debug
             if not output.success:
                 jobID = output.input_data.extras["id"]
                 retryXyzs.append(f"{jobID}.xyz")
@@ -645,11 +657,6 @@ class ChemcloudEngine(QMEngine):
                 break
             retryXyzs = self.runJobs(retryXyzs, useBackup=True)
         if len(retryXyzs) > 0:
-            # for result in [self.readResult(f"tc_{xyz.split('.')[0]}.json") for xyz in retryXyzs]:
-            #    print(
-            #        f"Job id {result.input_data['id']} suffered a {result.error.error_type}"
-            #    )
-            #    print(result.error.error_message)
             raise RuntimeError(
                 f"Job ids {sorted([xyz.split('.')[0] for xyz in retryXyzs])} in {os.getcwd()} failed {str(self.retries)} times!"
             )
@@ -666,14 +673,11 @@ def dumpFailedJobs(programInputs: list, outputs: list):
         programInputs (list): List of program inputs for the failed jobs.
         outputs (list): List of outputs from the failed jobs.
     """
-    for inp, out in zip(programInputs, outputs):
-        jobID = inp.extras["id"]
+    for inp in programInputs:
+        jobID = str(inp.extras["id"])
         inpName = jobID + "_input.yaml"
-        outName = jobID + "_output.yaml"
         inp.save(inpName)
-        try:
-            out.save(outName)
-        # sometimes the output object isn't returned properly
-        except:
-            with open(outName, "w") as f:
-                yaml.dump(out, f, default_flow_style=False)
+    for out in outputs:
+        jobID = str(out.input_data.extras["id"])
+        outName = jobID + "_output.yaml"
+        out.save(outName)

@@ -4,18 +4,22 @@ from pathlib import Path
 from shutil import copyfile
 from textwrap import dedent
 
+from chemcloud import CCClient
+from qcio import ProgramInput, Structure
+
 from .inputs import Input
-from .utils import checkForAmber, readXYZ, writePDB
+from .utils import *
 
 
 class Setup:
-    def __init__(self, xyz: str | Path, charge: int = 0):
+    def __init__(self, xyz: str | Path, charge: int = 0, resp: str = "am1"):
         """
         Initialize Setup class and set some internal variables.
 
         Args:
             xyz (str | Path): xyz file for molecule to set up
             charge (int): molecular charge for that molecule
+            resp (str): how to obtain charges
         """
         self.xyz = Path(xyz).absolute()
         readXYZ(
@@ -24,14 +28,173 @@ class Setup:
         checkForAmber()
         self.home = Path(".").absolute()
         self.charge = charge
-        self.spinMult = (
-            1  # currently hard-coded, would be a minor pain to determine automatically
-        )
+        self.spinMult = self.getSpinMult()
+        self.resp = resp
         self.makeInput()
 
+    def getSpinMult(self):
+        """
+        Obtains a guess for the spin multiplicity of the molecule based on
+        elements and charges. Defaults to the lowest reasonable option
+        (singlet or doublet)
+
+        Returns:
+            spinmult (int): guess spin multiplicity for molecule
+        """
+        elements = loadElements()
+        _, symbols = readXYZ(self.xyz, True)
+        electrons = 0
+        for symbol in symbols:
+            atomicNumber = elements[symbol]["atomic_number"]
+            electrons += atomicNumber
+        electrons -= self.charge
+        if electrons % 2 == 0:
+            spinmult = 1
+        else:
+            spinmult = 2
+        return spinmult
+
+    def runResp(self):
+        """
+        Run RESP to obtain partial charges for the molecule. Then, change
+        the charges in the mol2 file.
+        """
+        print(self.resp)
+
+        if self.resp == "am1":
+            return
+        elif self.resp == "chemcloud":
+            charges = self.chemcloudResp()
+        elif self.resp == "local":
+            charges = self.localResp()
+        else:
+            raise ValueError("Invalid RESP method")
+        self.changeCharges(charges, self.mol2)
+
+    def chemcloudResp(self):
+        """
+        Run a ChemCloud job to obtain RESP results.
+
+        Raises:
+            RuntimeError: If Chemcloud RESP calculation fails
+        """
+
+        mod = {}
+        mod["method"] = "hf"
+        mod["basis"] = "6-31gs"
+        keywords = {}
+        keywords["resp"] = "yes"
+        keywords["esp_grid_dens"] = 20.0
+        mol = Structure.open(self.xyz, charge=self.charge, multiplicity=self.spinMult)
+        inp = ProgramInput(
+            structure=mol, model=mod, calctype="energy", keywords=keywords
+        )
+        inp.save("test.yaml")
+        client = CCClient()
+        futureResult = client.compute("terachem", inp)
+        # import sys; sys.exit()
+        result = futureResult.get()
+        if not result.success:
+            raise RuntimeError("Chemcloud RESP calculation failed")
+        if not isinstance(result.stdout, str):
+            raise RuntimeError("Chemcloud RESP calculation failed")
+        charges = self.readCharges(result.stdout.split("\n"))
+        return charges
+
+    def localResp(self):
+        """
+        Run TeraChem locally to obtain RESP results.
+
+        Raises:
+            RuntimeError: if local terachem RESP calculation fails.
+        """
+
+        with open("resp.in", "w") as f:
+            f.write(
+                dedent(
+                    f"""\
+                basis         6-31gs  
+                method        hf
+                charge        {self.charge}        
+                run           energy 
+                spinmult      {self.spinMult}        
+                resp          yes
+                esp_grid_dens 20.0
+                coordinates   {self.xyz}
+            """
+                )
+            )
+        checkForTerachem(True)
+        os.system("terachem resp.in > resp.out")
+        try:
+            with open("resp.out", "r") as f:
+                lines = list(f.readlines())
+        except:
+            raise RuntimeError("Local RESP calculation failed")
+        if not "Job finished" in lines[-2]:
+            raise RuntimeError("Local RESP calculation failed")
+        charges = self.readCharges(lines)
+        return charges
+
+    def readCharges(self, lines):
+        """
+        Reads charges from lines of a TeraChem RESP output file.
+
+        Args:
+            lines (list[str]): lines of a TC RESP file
+        Returns:
+            charges (list[str]): RESP charges from TC output
+        """
+
+        charges = []
+        i = 0
+        for line in lines:
+            if "ESP restrained charges:" in line:
+                break
+            i = i + 1
+        for line in lines[i + 3 :]:
+            if "-----------------------------------------------------------" in line:
+                break
+            splitLine = line.split()
+            charges.append(splitLine[4])
+        return charges
+
+    def changeCharges(self, charges, mol2):
+        """
+        Replaces charges in a mol2 file.
+
+        Args:
+            charges (list[str]): list of atomic partial charges
+            mol2 (str | Path): mol2 file to have charges replaced
+        """
+        with open(mol2, "r") as f:
+            lines = f.readlines()
+            i = 0
+            start = 0
+            end = 0
+            for line in lines:
+                if "@<TRIPOS>ATOM" in line:
+                    start = i + 1
+                if "@<TRIPOS>BOND" in line:
+                    end = i
+                    break
+                i = i + 1
+            if end - start != len(charges):
+                raise RuntimeError(
+                    "Size of molecule in mol2 file differs from number of supplied charges"
+                )
+        with open(mol2, "w") as w:
+            for line in lines[:start]:
+                w.write(line)
+            for line, charge in zip(lines[start:end], charges):
+                oldCharge = line.split()[8]
+                w.write(line.replace(oldCharge, charge))
+            for line in lines[end:]:
+                w.write(line)
+
     def makeInput(self):
-        """ 
-        Create Input object with defaults for setup. This object will be 
+        """
+        Create Input object with defaults for setup. This object will be
         returned later if the user wants to run an optimization with it.
         """
         self.inp = Input(**{"skipchecks": True})
@@ -72,7 +235,7 @@ class Setup:
     def setupOpt(self):
         """
         Sets up the optimization directory for ff-opt. This includes running
-        antechamber to make the mol2 and frcmod files and writing the 
+        antechamber to make the mol2 and frcmod files and writing the
         ForceBalance input files.
         """
         print("\n\n**** Setting up force field and ForceBalance files ****")
@@ -172,6 +335,9 @@ class Setup:
                 threall       1.0e-14
                 diismaxvecs   40
                 maxit         200
+                precision     double
+                purify        no
+                dftgrid       2
             """
                 )
             )
@@ -241,15 +407,20 @@ class Setup:
         coords, atoms = readXYZ(self.xyz, True)
         pdb = name + ".pdb"
         mol2 = name + ".mol2"
+        self.mol2 = mol2
         frcmod = name + ".frcmod"
         print(f"Converting xyz {self.xyz} to a pdb with residue name {resname}")
         writePDB(coords, pdb, atoms=atoms, resname=resname, template=None)
 
         print(f"Creating Amber forcefield files")
         print("Making mol2 file with antechamber")
-        print(
-            "Using AM1-BCC to create charges; this should be done with HF/6-31g* RESP"
-        )
+        if self.resp == "am1":
+            method = "bcc"
+            print(
+                "Using AM1-BCC to create charges; this should be done with HF/6-31g* RESP"
+            )
+        else:
+            method = "dc"
         subprocess.check_output(
             [
                 "antechamber",
@@ -262,28 +433,18 @@ class Setup:
                 "-fo",
                 "mol2",
                 "-c",
-                "bcc",
+                method,
                 "-nc",
                 str(self.charge),
             ]
         )
-        # self.setSpinMult(output.decode("utf-8"))
+        self.runResp()
         print("Making frcmod file with parmchk2")
         os.system(f"parmchk2 -i {mol2} -o {frcmod} -f mol2 -s 2 -a Y")
         copyfile(mol2, self.inp.optdir / mol2)
         copyfile(frcmod, self.inp.optdir / frcmod)
         copyfile(pdb, self.inp.optdir / "conf.pdb")
         return frcmod, mol2, resname
-
-    # Not used.
-    def setSpinMult(self, output):
-        output = output.split()
-        for i, token in enumerate(output):
-            if token == "electrons:":
-                electrons = output[i + 1]
-                break
-        electrons = int(electrons[:-1])
-        self.spinMult = (electrons % 2) + 1
 
     def setupForceBalance(self, frcmod: str | Path, mol2: str | Path, resname: str):
         """
@@ -292,7 +453,7 @@ class Setup:
         Args:
             frcmod (str | Path): frcmod file for molecule to be optimized
             mol2 (str | Path): mol2 file for molecule to be optimized
-            resname (str): residue ID used for molecule in pdb files. 
+            resname (str): residue ID used for molecule in pdb files.
         """
         print("Writing ForceBalance input files")
         print(
