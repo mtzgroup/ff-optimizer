@@ -1,0 +1,1212 @@
+| Startfile from command line: tc.in
+
+
+|       ***********************************************************
+|       *                 TeraChem v1.9-2025.01-dev               *
+|       *                   Development Version                   *
+|       *           Chemistry at the Speed of Graphics!           *
+|       ***********************************************************
+|       * This program may only be used in connection with        *
+|       * a valid license from PetaChem, LLC. Use of this program *
+|       * or results thereof indicates acceptance of all terms    *
+|       * and conditions stated in the license and that a valid   *
+|       * license agreement between the user and PetaChem, LLC    *
+|       * exists. PetaChem, LLC does not warrant the correctness  *
+|       * of results or their suitability for any purpose.        *
+|       * Please email bugs, suggestions, and comments to         *
+|       *                  help@petachem.com                      *
+|       *                                                         *
+|       ***********************************************************
+
+
+|       ***********************************************************
+|       *  Compiled by root         Wed Feb  5 07:16:34 PM PST 2025  *
+|       *  Supported architecture SMs: 52 61 70 80 90             *
+|       *  Build cuda_12.2.r12.2/compiler.33053471_0              *
+|       *  Git Version:                               *
+|       ***********************************************************
+
+
+| Job started   Tue Feb 18 16:09:44 2025
+| On fire-09-07 (available memory: 50819 MB)
+
+| ######################################### RUNTIME INFO ##########################################
+| terachem  tc.in 
+
+|  NVRM version: NVIDIA UNIX x86_64 Kernel Module  525.89.02  Wed Feb  1 23:23:25 UTC 2023
+|  GCC version:  gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04) 
+
+|  	linux-vdso.so.1 (0x00007fff1bf44000)
+|  	libcurl.so.4 => /lib/x86_64-linux-gnu/libcurl.so.4 (0x00007f40f6ced000)
+|  	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f40f6cd1000)
+|  	libimf.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libimf.so (0x00007f40f68e7000)
+|  	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f40f67fe000)
+|  	libmpi.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libmpi.so.12 (0x00007f40f4c00000)
+|  	libdftbplus.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libdftbplus.so (0x00007f40f48a8000)
+|  	libfsockets.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libfsockets.so (0x00007f40f67f8000)
+|  	libxmlf90.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libxmlf90.so (0x00007f40f67cd000)
+|  	libthcbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libthcbox.so.1 (0x00007f40f2a8b000)
+|  	libOpenMM.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libOpenMM.so (0x00007f40f2631000)
+|  	libFlexiBLE.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libFlexiBLE.so (0x00007f40f67b8000)
+|  	libnvToolsExt.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libnvToolsExt.so.1 (0x00007f40f2400000)
+|  	libgpubox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libgpubox.so.1 (0x00007f40f67ad000)
+|  	libcpubox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcpubox.so.1 (0x00007f40f67a7000)
+|  	libtensorbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libtensorbox.so.1 (0x00007f40f6789000)
+|  	libiobox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libiobox.so.1 (0x00007f40f6783000)
+|  	libintbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libintbox.so.1 (0x00007f408c8a1000)
+|  	libatmx2cbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libatmx2cbox.so.1 (0x00007f408c7e0000)
+|  	libperiodicbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libperiodicbox.so.1 (0x00007f4071959000)
+|  	libsqmbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libsqmbox.so.1 (0x00007f40715ad000)
+|  	libgridbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libgridbox.so.1 (0x00007f406f1e3000)
+|  	libdftbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libdftbox.so.1 (0x00007f406f0e3000)
+|  	libcibox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcibox.so.1 (0x00007f406ea94000)
+|  	libccbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libccbox.so.1 (0x00007f406e603000)
+|  	libsimbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libsimbox.so.1 (0x00007f40f6759000)
+|  	liboptbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/liboptbox.so.1 (0x00007f40f6722000)
+|  	libprotobuf.so.25 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libprotobuf.so.25 (0x00007f406e330000)
+|  	libcommbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcommbox.so.1 (0x00007f406e2cf000)
+|  	libssl.so.3 => /lib/x86_64-linux-gnu/libssl.so.3 (0x00007f406e22b000)
+|  	libcrypto.so.3 => /lib/x86_64-linux-gnu/libcrypto.so.3 (0x00007f406dde8000)
+|  	libcuda.so.1 => /lib/x86_64-linux-gnu/libcuda.so.1 (0x00007f406c108000)
+|  	libcudart.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcudart.so.12 (0x00007f406be00000)
+|  	libcublas.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcublas.so.12 (0x00007f4065600000)
+|  	libcufft.so.11 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcufft.so.11 (0x00007f405a800000)
+|  	libcusparse.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcusparse.so.12 (0x00007f404aa00000)
+|  	libcusolver.so.11 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcusolver.so.11 (0x00007f4043800000)
+|  	libcublasLt.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcublasLt.so.12 (0x00007f4021000000)
+|  	libsvml.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libsvml.so (0x00007f401f9d1000)
+|  	libirng.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libirng.so (0x00007f401f600000)
+|  	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f401f3d4000)
+|  	libiomp5.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libiomp5.so (0x00007f401ee00000)
+|  	libcilkrts.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcilkrts.so.5 (0x00007f401ea00000)
+|  	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f40f66fc000)
+|  	libintlc.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libintlc.so.5 (0x00007f4065588000)
+|  	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f401e7d7000)
+|  	/lib64/ld-linux-x86-64.so.2 (0x00007f40f6da3000)
+|  	libnghttp2.so.14 => /lib/x86_64-linux-gnu/libnghttp2.so.14 (0x00007f40f66d2000)
+|  	libidn2.so.0 => /lib/x86_64-linux-gnu/libidn2.so.0 (0x00007f40f2610000)
+|  	librtmp.so.1 => /lib/x86_64-linux-gnu/librtmp.so.1 (0x00007f406c0e9000)
+|  	libssh.so.4 => /lib/x86_64-linux-gnu/libssh.so.4 (0x00007f404a993000)
+|  	libpsl.so.5 => /lib/x86_64-linux-gnu/libpsl.so.5 (0x00007f406c0d5000)
+|  	libgssapi_krb5.so.2 => /lib/x86_64-linux-gnu/libgssapi_krb5.so.2 (0x00007f4065534000)
+|  	libldap-2.5.so.0 => /lib/x86_64-linux-gnu/libldap-2.5.so.0 (0x00007f405a7a1000)
+|  	liblber-2.5.so.0 => /lib/x86_64-linux-gnu/liblber-2.5.so.0 (0x00007f406c0c4000)
+|  	libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1 (0x00007f404a8c4000)
+|  	libbrotlidec.so.1 => /lib/x86_64-linux-gnu/libbrotlidec.so.1 (0x00007f406c0b6000)
+|  	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f406c0b1000)
+|  	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f406c0ac000)
+|  	libifport.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libifport.so.5 (0x00007f406bdd6000)
+|  	libifcoremt.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libifcoremt.so.5 (0x00007f401f25a000)
+|  	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f406bdd1000)
+|  	libnvJitLink.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libnvJitLink.so.12 (0x00007f401b600000)
+|  	libunistring.so.2 => /lib/x86_64-linux-gnu/libunistring.so.2 (0x00007f401ec56000)
+|  	libgnutls.so.30 => /lib/x86_64-linux-gnu/libgnutls.so.30 (0x00007f401b415000)
+|  	libhogweed.so.6 => /lib/x86_64-linux-gnu/libhogweed.so.6 (0x00007f404a87c000)
+|  	libnettle.so.8 => /lib/x86_64-linux-gnu/libnettle.so.8 (0x00007f40437ba000)
+|  	libgmp.so.10 => /lib/x86_64-linux-gnu/libgmp.so.10 (0x00007f4043738000)
+|  	libkrb5.so.3 => /lib/x86_64-linux-gnu/libkrb5.so.3 (0x00007f401b34a000)
+|  	libk5crypto.so.3 => /lib/x86_64-linux-gnu/libk5crypto.so.3 (0x00007f404a84d000)
+|  	libcom_err.so.2 => /lib/x86_64-linux-gnu/libcom_err.so.2 (0x00007f406bdcb000)
+|  	libkrb5support.so.0 => /lib/x86_64-linux-gnu/libkrb5support.so.0 (0x00007f404372a000)
+|  	libsasl2.so.2 => /lib/x86_64-linux-gnu/libsasl2.so.2 (0x00007f401f9b6000)
+|  	libbrotlicommon.so.1 => /lib/x86_64-linux-gnu/libbrotlicommon.so.1 (0x00007f401f993000)
+|  	libp11-kit.so.0 => /lib/x86_64-linux-gnu/libp11-kit.so.0 (0x00007f401b20f000)
+|  	libtasn1.so.6 => /lib/x86_64-linux-gnu/libtasn1.so.6 (0x00007f401f97b000)
+|  	libkeyutils.so.1 => /lib/x86_64-linux-gnu/libkeyutils.so.1 (0x00007f406bdc2000)
+|  	libresolv.so.2 => /lib/x86_64-linux-gnu/libresolv.so.2 (0x00007f401f967000)
+|  	libffi.so.8 => /lib/x86_64-linux-gnu/libffi.so.8 (0x00007f401f95a000)
+| #################################################################################################
+
+| Checking Amazon Cloud instance ID...   Not found
+| Cannot find license.dat file /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/license.dat
+
+
+| TRYING THE NETWORK LICENSE...
+| Connecting to license server '54.208.252.40' port '8877'...
+| Connected!
+| Checking your license...
+
+| **************************************************************
+|  Greetings, Martinez Group! You have 1000 licenses in total
+|  IN USE: 49
+|  AVAILABLE: 951
+| **************************************************************
+
+-----------------------------------
+Processed Input file:
+                      run frequencies
+                   method ub3lyp
+                   charge -1
+                 spinmult 3
+              coordinates hydroxide.xyz
+                precision double
+                min_delta 0.01
+                    basis aug-pcseg-1
+-----------------------------------
+Jobname: hydroxide
+Scratch data will be generated
+Scratch directory: ./scr.hydroxide
+| Random number seed: 1422691298
+
+XYZ coordinates hydroxide.xyz
+Molden File Output: ./scr.hydroxide/hydroxide.molden
+Using basis set: aug-pcseg-1
+dmrgstart not found
+Spin multiplicity: 3
+DIIS will use up to 10 vectors.
+Condition number limit for the DIIS overlap matrix is            0
+WF convergence threshold: 5.00e-07
+Using DIIS algorithm to converge WF
+Maximum number of SCF iterations: 100
+Incremental fock with rebuild every 8 iterations
+Will switch to conventional Fock if diffuse functions are detected
+X-matrix tolerance: 1.00e-04
+PRECISION: DOUBLE
+TeraChem will select linear algebra engine
+DFT Functional requested: b3lyp
+Method: B3LYP 
+  Hartree-Fock exact exchange:          0.20 
+  Slater exchange functional:           0.80 
+  Becke 1988 exchange functional:       0.72 
+  Lee-Yang-Parr correlation functional: 0.81 
+  VWN(I) correlation functional:        0.19 
+Wavefunction: UNRESTRICTED
+DFT grid type: 1
+Using dynamic DFT grids.
+Initial guess generated by maximum overlap
+
+********************************************
+********** FREQUENCY ANALYSIS **************
+********************************************
+*************WARNING***************
+Unrecognized or unnecessary keywords:
+These are being ignored.
+   min_delta 0.01
+***********************************
+Starting TensorBox...
+| TeraChem will select linear algebra engine
+| Using cuSolver for matrix diagonalization
+
+| using 1 out of 1 CUDA devices
+|   Device 0: NVIDIA GeForce GTX TITAN X, 12207MB, CC 5.2 -- CPU THREAD 0
+| -------------------------------------------------------------------
+| CPU Memory Available: 18127.88 MegaWords 
+| GPU Memory Available: 1269.88 MegaWords 
+| Maximum recommended basis set size: 13300 basis functions
+|  (limited by GPU memory)
+| -------------------------------------------------------------------
+| Initialize GPUBox with 128 MW of memory
+
+****** QM coordinates ******
+O         1.0768409160        -1.8991839161        -1.3503985661  
+H         1.5681590840        -2.5978160839        -1.8686014339  
+
+Basis set:       aug-pcseg-1
+Total atoms:     2
+Total charge:    -1
+Total electrons: 10 (6-alpha, 4-beta)
+Number electrons modeled by ECPs: 0
+Total orbitals:  34
+Total AO shells: 14 (7 S-shells; 5 P-shells; 2 D-shells; 0 F-shells; 0 G-shells)
+Spin multiplicity: 3
+Nuclear repulsion energy (QM atoms): 4.237626648095 a.u.
+
+*********************************************************************
+*** Frequency Analysis by Finite Difference of Analytic Gradients ***
+*********************************************************************
+Search for computed Hessian in ./scr.hydroxide/Hessian.bin ...  ...Hessian not found. 
+Search for restart file in ./scr.hydroxide/Hessian.restart ...   ...No restart file found. 
+Compute Hessian from scratch.
+Computing the Hessian via finite differences with a 3 point formula
+Using displacements of 0.0050 bohr
+Numerical Hessian requires 12 displacements
+
+*** Reference Geometry ***
+          Molecular Geometry (bohr)
+ O      2.034934     -3.588937     -2.551883
+ H      2.963391     -4.909161     -3.531145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6449 (3224 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   6.00000000, trace of guess*guess   6.00000000,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   4.00000000, trace of guess*guess   4.00000000,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.2043614979     -75.0533640195    10.0000024476    -7.3595235556     -75.0533640195     0.14  
+|                 >>> SWITCHING TO GRID 0 <<<
+|    2     0.1126414531      -0.5647889946    10.0003609545    -7.2140420738     -75.6181530140     0.07  
+|    3     0.0311761393      -0.0751282266    10.0002384019    -7.2118772985     -75.6932812406     0.07  
+|    4     0.0227014166      -0.0108027695    10.0002451006    -7.2643303787     -75.7040840101     0.07  
+|                 >>> SWITCHING TO GRID 1 <<<
+|    5     0.0092796881      -0.0030146032    10.0000003796    -7.2230620194     -75.7070986133     0.09  
+|    6     0.0028233887      -0.0017469373    10.0000003165    -7.2356524983     -75.7088455507     0.10  
+|    7     0.0008177553      -0.0001375988    10.0000002492    -7.2361554620     -75.7089831495     0.09  
+|    8     0.0001903897      -0.0000150435    10.0000002238    -7.2355437462     -75.7089981931     0.09  
+|    9     0.0000441318      -0.0000006108    10.0000002184    -7.2354617326     -75.7089988039     0.09  
+|   10     0.0000121578      -0.0000000495    10.0000002159    -7.2354754083     -75.7089988534     0.09  
+|   11     0.0000050192      -0.0000000031    10.0000002160    -7.2354802288     -75.7089988565     0.09  
+|   12     0.0000051174      +0.0000000005    10.0000002165    -7.2354797762     -75.7089988559     0.10  
+|   13     0.0000051475      -0.0000000006    10.0000002168    -7.2354798358     -75.7089988566     0.09  
+|   14     0.0000051300      -0.0000000016    10.0000002173    -7.2354798841     -75.7089988581     0.10  
+|   15     0.0000051365      -0.0000000035    10.0000002185    -7.2354798289     -75.7089988617     0.09  
+|   16     0.0000048123      -0.0000000513    10.0000002322    -7.2354804085     -75.7089989130     0.09  
+|   17     0.0000048189      -0.0000001111    10.0000002623    -7.2354816201     -75.7089990241     0.09  
+|   18     0.0000148450      -0.0000001729    10.0000003124    -7.2354904799     -75.7089991970     0.09  
+|   19     0.0004895675      -0.0000003011    10.0000007320    -7.2357596394     -75.7089994981     0.09  
+|   20     0.0001575906      -0.0000002096    10.0000005209    -7.2355758864     -75.7089997078     0.09  
+|   21     0.0001457355      +0.0000000043    10.0000005143    -7.2355688830     -75.7089997035     0.09  
+|   22     0.0001366394      -0.0000000449    10.0000005318    -7.2355633437     -75.7089997484     0.09  
+|   23     0.0003827112      -0.0000000627    10.0000008272    -7.2356942718     -75.7089998111     0.09  
+|   24     0.0005553273      +0.0000003308    10.0000009866    -7.2357821205     -75.7089994804     0.09  
+|   25     0.0006640281      +0.0000003017    10.0000010285    -7.2358383838     -75.7089991787     0.09  
+|   26     0.0005915292      -0.0000002070    10.0000010259    -7.2357997196     -75.7089993857     0.09  
+|   27     0.0001727217      -0.0000007318    10.0000009993    -7.2355745559     -75.7090001176     0.09  
+|   28     0.0000113374      -0.0000000676    10.0000009721    -7.2354877252     -75.7090001852     0.09  
+|   29     0.0000029659      -0.0000000004    10.0000009532    -7.2354800211     -75.7090001856     0.09  
+|   30     0.0000004317      -0.0000000007    10.0000009498    -7.2354814251     -75.7090001863     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7090001863 a.u.
+HOMO-LUMO GAP: alpha: 3.312 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.105963, -1.940595, -1.381115} ANGS
+DIPOLE MOMENT: {-2.313084, 3.289119, 2.439666} (|D| = 4.703258) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002409 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+   -0.0000061062    -0.0000270432    -0.0000400490
+    0.0000061062     0.0000270432     0.0000400490
+---------------------------------------------------
+Net gradient: -2.442003e-15  2.664806e-15 -4.225895e-15
+Net torque:   -2.639132e-05 -4.316336e-05  3.316997e-05
+
+Writing out molden info
+Completed initial gradient at reference geometry
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+   -0.0000061062    -0.0000270432    -0.0000400490
+    0.0000061062     0.0000270432     0.0000400490
+---------------------------------------------------
+Net gradient: -2.442003e-15  2.664806e-15 -4.225895e-15
+Net torque:   -2.639132e-05 -4.316336e-05  3.316997e-05
+
+Total Dipole Moment: {-0.910030, 1.294029, 0.959831} (|D| = 1.850390) a.u.
+
+Maximum gradient component at reference geometry: 4.00e-05
+Deal with potential Hessian restart
+Will write Hessian.restart file
+Positioned restart file at start of displacements
+
+*** Displacement 1 ***
+          Molecular Geometry (bohr)
+ O      2.039934     -3.588937     -2.551883
+ H      2.963391     -4.909161     -3.531145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6449 (3224 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   6.00002584, trace of guess*guess   6.00005392,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   4.00042147, trace of guess*guess   4.00084343,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0021412661     -75.7096563736    10.0004481793    -7.2361322130     -75.7096563736     0.08  
+|    2     0.0002862399      +0.0006581909    10.0000008719    -7.2354786431     -75.7089981827     0.09  
+|    3     0.0003040463      -0.0000003192    10.0000008679    -7.2362357677     -75.7089985019     0.09  
+|    4     0.0000467538      -0.0000001346    10.0000008691    -7.2358024825     -75.7089986365     0.09  
+|    5     0.0000166133      -0.0000000225    10.0000008690    -7.2358512095     -75.7089986590     0.09  
+|    6     0.0000054359      -0.0000000036    10.0000008691    -7.2358362423     -75.7089986626     0.09  
+|    7     0.0000006740      -0.0000000027    10.0000008692    -7.2358436327     -75.7089986653     0.09  
+|    8     0.0000002290      -0.0000000010    10.0000008692    -7.2358433622     -75.7089986664     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089986664 a.u.
+HOMO-LUMO GAP: alpha: 3.313 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.108452, -1.940595, -1.381115} ANGS
+DIPOLE MOMENT: {-2.302050, 3.291146, 2.441168} (|D| = 4.700040) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002405 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+    0.0004645195    -0.0007024141    -0.0005439314
+   -0.0004645195     0.0007024141     0.0005439314
+---------------------------------------------------
+Net gradient:  4.212071e-15 -9.014057e-16 -3.767711e-15
+Net torque:   -3.026394e-05 -4.741111e-05  3.537954e-05
+
+Total Dipole Moment: {-0.905689, 1.294826, 0.960422} (|D| = 1.849124) a.u.
+
+
+*** Displacement 2 ***
+          Molecular Geometry (bohr)
+ O      2.029934     -3.588937     -2.551883
+ H      2.963391     -4.909161     -3.531145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6449 (3224 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   5.99995339, trace of guess*guess   5.99991577,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   3.99914822, trace of guess*guess   3.99829844,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0042919214     -75.7076747761     9.9991026257    -7.2345348513     -75.7076747761     0.08  
+|    2     0.0005794969      -0.0013233409    10.0000010195    -7.2358609934     -75.7089981170     0.09  
+|    3     0.0006161383      -0.0000001075    10.0000010276    -7.2343227368     -75.7089982245     0.09  
+|    4     0.0000943157      -0.0000010398    10.0000010252    -7.2352014078     -75.7089992643     0.09  
+|    5     0.0000336661      -0.0000000619    10.0000010254    -7.2351042662     -75.7089993261     0.09  
+|    6     0.0000109567      -0.0000000367    10.0000010252    -7.2351344786     -75.7089993628     0.09  
+|    7     0.0000013417      +0.0000000032    10.0000010251    -7.2351195729     -75.7089993597     0.09  
+|    8     0.0000004547      +0.0000000010    10.0000010250    -7.2351200842     -75.7089993587     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089993587 a.u.
+HOMO-LUMO GAP: alpha: 3.312 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.103474, -1.940595, -1.381115} ANGS
+DIPOLE MOMENT: {-2.324090, 3.287081, 2.438157} (|D| = 4.706475) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002413 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+   -0.0004775209     0.0006423773     0.0004592412
+    0.0004775209    -0.0006423773    -0.0004592412
+---------------------------------------------------
+Net gradient:  6.529065e-16 -1.421118e-14 -4.884439e-15
+Net torque:   -2.275438e-05 -3.893603e-05  3.080283e-05
+
+Total Dipole Moment: {-0.914361, 1.293227, 0.959237} (|D| = 1.851656) a.u.
+
+
+*** Displacement 3 ***
+          Molecular Geometry (bohr)
+ O      2.034934     -3.583937     -2.551883
+ H      2.963391     -4.909161     -3.531145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6449 (3224 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   5.99999198, trace of guess*guess   5.99998711,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   3.99981962, trace of guess*guess   3.99963933,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0009125433     -75.7087186637     9.9998128059    -7.2348448784     -75.7087186637     0.08  
+|    2     0.0001224913      -0.0002794208    10.0000011942    -7.2351268475     -75.7089980845     0.09  
+|    3     0.0001347236      -0.0000002256    10.0000011920    -7.2347939367     -75.7089983101     0.09  
+|    4     0.0000676674      -0.0000001429    10.0000011902    -7.2350520132     -75.7089984530     0.09  
+|    5     0.0000199984      -0.0000000251    10.0000011900    -7.2349543364     -75.7089984781     0.09  
+|    6     0.0000036092      -0.0000000147    10.0000011899    -7.2349742963     -75.7089984928     0.09  
+|    7     0.0000007138      +0.0000000021    10.0000011902    -7.2349685026     -75.7089984906     0.09  
+|    8     0.0000001606      -0.0000000013    10.0000011902    -7.2349694267     -75.7089984919     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089984919 a.u.
+HOMO-LUMO GAP: alpha: 3.311 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.105963, -1.938106, -1.381115} ANGS
+DIPOLE MOMENT: {-2.311046, 3.298662, 2.437516} (|D| = 4.707822) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002415 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+   -0.0006729087     0.0009211581     0.0006627058
+    0.0006729087    -0.0009211581    -0.0006627058
+---------------------------------------------------
+Net gradient: -1.265481e-14 -2.665619e-15  3.761314e-15
+Net torque:   -2.382130e-05 -4.365982e-05  3.649890e-05
+
+Total Dipole Moment: {-0.909229, 1.297783, 0.958985} (|D| = 1.852185) a.u.
+
+
+*** Displacement 4 ***
+          Molecular Geometry (bohr)
+ O      2.034934     -3.593937     -2.551883
+ H      2.963391     -4.909161     -3.531145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6450 (3225 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   6.00007178, trace of guess*guess   6.00015550,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   4.00119843, trace of guess*guess   4.00240090,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0061162899     -75.7108675444    10.0012708625    -7.2368187850     -75.7108675444     0.08  
+|    2     0.0008060199      +0.0018728069    10.0000006760    -7.2349618588     -75.7089947375     0.09  
+|    3     0.0008610370      -0.0000009229    10.0000006728    -7.2371071548     -75.7089956604     0.09  
+|    4     0.0001284647      -0.0000013883    10.0000006773    -7.2359162332     -75.7089970487     0.09  
+|    5     0.0000242496      -0.0000000653    10.0000006780    -7.2360188129     -75.7089971140     0.09  
+|    6     0.0000097019      -0.0000000064    10.0000006786    -7.2359843188     -75.7089971204     0.09  
+|    7     0.0000009457      -0.0000000050    10.0000006785    -7.2359968671     -75.7089971254     0.09  
+|    8     0.0000003277      -0.0000000016    10.0000006784    -7.2359971079     -75.7089971270     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089971270 a.u.
+HOMO-LUMO GAP: alpha: 3.313 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.105963, -1.943084, -1.381115} ANGS
+DIPOLE MOMENT: {-2.315113, 3.279551, 2.441806} (|D| = 4.698683) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002403 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+    0.0006717592    -0.0009841378    -0.0007546540
+   -0.0006717592     0.0009841378     0.0007546540
+---------------------------------------------------
+Net gradient: -8.881025e-15 -3.109058e-15 -8.444092e-15
+Net torque:   -2.881031e-05 -4.283567e-05  3.021598e-05
+
+Total Dipole Moment: {-0.910828, 1.290265, 0.960673} (|D| = 1.848590) a.u.
+
+
+*** Displacement 5 ***
+          Molecular Geometry (bohr)
+ O      2.034934     -3.588937     -2.546883
+ H      2.963391     -4.909161     -3.531145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6450 (3225 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   5.99993897, trace of guess*guess   5.99988539,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   3.99894793, trace of guess*guess   3.99789867,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0053361280     -75.7073622635     9.9988883574    -7.2343778359     -75.7073622635     0.08  
+|    2     0.0007128966      -0.0016360700    10.0000014492    -7.2360162433     -75.7089983335     0.09  
+|    3     0.0007589271      +0.0000003245    10.0000014533    -7.2341189429     -75.7089980090     0.09  
+|    4     0.0001033020      -0.0000014283    10.0000014501    -7.2351605870     -75.7089994373     0.09  
+|    5     0.0000171051      -0.0000000261    10.0000014498    -7.2350815924     -75.7089994634     0.09  
+|    6     0.0000050862      -0.0000000127    10.0000014496    -7.2351076736     -75.7089994760     0.09  
+|    7     0.0000008396      +0.0000000008    10.0000014496    -7.2351013162     -75.7089994753     0.09  
+|    8     0.0000002054      +0.0000000016    10.0000014497    -7.2351010626     -75.7089994737     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089994737 a.u.
+HOMO-LUMO GAP: alpha: 3.312 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.105963, -1.940595, -1.378626} ANGS
+DIPOLE MOMENT: {-2.311572, 3.286961, 2.450512} (|D| = 4.706643) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002413 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+   -0.0005049332     0.0006780430     0.0004868061
+    0.0005049332    -0.0006780430    -0.0004868061
+---------------------------------------------------
+Net gradient: -7.321617e-15 -3.551846e-15  9.312646e-15
+Net torque:   -2.467878e-05 -4.500790e-05  3.709107e-05
+
+Total Dipole Moment: {-0.909436, 1.293180, 0.964098} (|D| = 1.851722) a.u.
+
+
+*** Displacement 6 ***
+          Molecular Geometry (bohr)
+ O      2.034934     -3.588937     -2.556883
+ H      2.963391     -4.909161     -3.531145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6449 (3224 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   6.00005430, trace of guess*guess   6.00011837,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   4.00088758, trace of guess*guess   4.00177925,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0045327377     -75.7103854080    10.0009423274    -7.2364722298     -75.7103854080     0.08  
+|    2     0.0006043699      +0.0013884653    10.0000004445    -7.2350953402     -75.7089969428     0.09  
+|    3     0.0006357385      -0.0000006049    10.0000004387    -7.2366825376     -75.7089975477     0.09  
+|    4     0.0000952967      -0.0000006920    10.0000004413    -7.2357806440     -75.7089982397     0.09  
+|    5     0.0000139699      -0.0000000352    10.0000004409    -7.2358781621     -75.7089982749     0.09  
+|    6     0.0000022968      +0.0000000049    10.0000004409    -7.2358613564     -75.7089982699     0.09  
+|    7     0.0000003929      +0.0000000009    10.0000004409    -7.2358620457     -75.7089982690     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089982690 a.u.
+HOMO-LUMO GAP: alpha: 3.313 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.105963, -1.940595, -1.383604} ANGS
+DIPOLE MOMENT: {-2.314587, 3.291258, 2.428777} (|D| = 4.699856) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002405 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+    0.0004979033    -0.0007391180    -0.0005669895
+   -0.0004979033     0.0007391180     0.0005669895
+---------------------------------------------------
+Net gradient:  2.239962e-16  1.763130e-15  3.329802e-15
+Net torque:   -2.845864e-05 -4.133723e-05  2.889549e-05
+
+Total Dipole Moment: {-0.910622, 1.294871, 0.955547} (|D| = 1.849051) a.u.
+
+
+*** Displacement 7 ***
+          Molecular Geometry (bohr)
+ O      2.034934     -3.588937     -2.551883
+ H      2.968391     -4.909161     -3.531145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6449 (3224 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   5.99995021, trace of guess*guess   5.99990653,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   3.99912718, trace of guess*guess   3.99825643,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0044156967     -75.7076415078     9.9990784087    -7.2345193881     -75.7076415078     0.08  
+|    2     0.0005957748      -0.0013570058    10.0000010203    -7.2358805404     -75.7089985136     0.09  
+|    3     0.0006307119      +0.0000002168    10.0000010273    -7.2343043238     -75.7089982968     0.09  
+|    4     0.0000844758      -0.0000010254    10.0000010249    -7.2351773200     -75.7089993222     0.09  
+|    5     0.0000175281      -0.0000000249    10.0000010252    -7.2351043964     -75.7089993470     0.09  
+|    6     0.0000069837      -0.0000000159    10.0000010252    -7.2351294853     -75.7089993630     0.09  
+|    7     0.0000007262      +0.0000000017    10.0000010251    -7.2351204245     -75.7089993613     0.09  
+|    8     0.0000002262      +0.0000000013    10.0000010251    -7.2351202475     -75.7089993600     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089993600 a.u.
+HOMO-LUMO GAP: alpha: 3.312 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.106120, -1.940595, -1.381115} ANGS
+DIPOLE MOMENT: {-2.324091, 3.287080, 2.438147} (|D| = 4.706470) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002413 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+   -0.0004775688     0.0006423475     0.0004591058
+    0.0004775688    -0.0006423475    -0.0004591058
+---------------------------------------------------
+Net gradient: -1.554800e-15 -7.090682e-15  3.115834e-15
+Net torque:   -2.290396e-05 -3.910933e-05  3.089390e-05
+
+Total Dipole Moment: {-0.914361, 1.293227, 0.959234} (|D| = 1.851654) a.u.
+
+
+*** Displacement 8 ***
+          Molecular Geometry (bohr)
+ O      2.034934     -3.588937     -2.551883
+ H      2.958391     -4.909161     -3.531145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6449 (3224 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   6.00005188, trace of guess*guess   6.00011273,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   4.00084177, trace of guess*guess   4.00168553,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0042853877     -75.7103121064    10.0008945332    -7.2364206177     -75.7103121064     0.08  
+|    2     0.0005716773      +0.0013151294    10.0000008745    -7.2351156775     -75.7089969769     0.09  
+|    3     0.0006068106      -0.0000008887    10.0000008667    -7.2366269395     -75.7089978657     0.09  
+|    4     0.0000934721      -0.0000006927    10.0000008690    -7.2357619484     -75.7089985583     0.09  
+|    5     0.0000332004      -0.0000000793    10.0000008689    -7.2358593226     -75.7089986377     0.09  
+|    6     0.0000108568      -0.0000000220    10.0000008690    -7.2358293934     -75.7089986596     0.09  
+|    7     0.0000013373      -0.0000000055    10.0000008691    -7.2358441631     -75.7089986652     0.09  
+|    8     0.0000004588      -0.0000000011    10.0000008692    -7.2358436109     -75.7089986662     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089986662 a.u.
+HOMO-LUMO GAP: alpha: 3.313 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.105807, -1.940595, -1.381115} ANGS
+DIPOLE MOMENT: {-2.302053, 3.291145, 2.441166} (|D| = 4.700040) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002405 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+    0.0004645074    -0.0007024503    -0.0005439850
+   -0.0004645074     0.0007024503     0.0005439850
+---------------------------------------------------
+Net gradient: -2.442382e-15 -1.346904e-15  2.233999e-15
+Net torque:   -3.029924e-05 -4.747237e-05  3.542884e-05
+
+Total Dipole Moment: {-0.905690, 1.294826, 0.960421} (|D| = 1.849124) a.u.
+
+
+*** Displacement 9 ***
+          Molecular Geometry (bohr)
+ O      2.034934     -3.588937     -2.551883
+ H      2.963391     -4.904161     -3.531145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6450 (3225 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   6.00001269, trace of guess*guess   6.00002855,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   4.00017688, trace of guess*guess   4.00035384,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0009201455     -75.7092738272    10.0001902295    -7.2361184354     -75.7092738272     0.08  
+|    2     0.0001213338      +0.0002772092    10.0000006745    -7.2358428491     -75.7089966180     0.09  
+|    3     0.0001316979      -0.0000003966    10.0000006768    -7.2361675616     -75.7089970146     0.09  
+|    4     0.0000683019      -0.0000000469    10.0000006784    -7.2359135063     -75.7089970616     0.09  
+|    5     0.0000198040      -0.0000000559    10.0000006786    -7.2360123373     -75.7089971175     0.09  
+|    6     0.0000035715      -0.0000000073    10.0000006787    -7.2359918794     -75.7089971248     0.09  
+|    7     0.0000007047      -0.0000000026    10.0000006784    -7.2359975806     -75.7089971274     0.09  
+|    8     0.0000001664      +0.0000000014    10.0000006783    -7.2359966721     -75.7089971261     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089971261 a.u.
+HOMO-LUMO GAP: alpha: 3.313 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.105963, -1.940438, -1.381115} ANGS
+DIPOLE MOMENT: {-2.315111, 3.279540, 2.441806} (|D| = 4.698674) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002403 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+    0.0006717413    -0.0009840873    -0.0007545485
+   -0.0006717413     0.0009840873     0.0007545485
+---------------------------------------------------
+Net gradient: -1.022142e-14 -9.311562e-15 -9.763457e-15
+Net torque:   -2.872101e-05 -4.275525e-05  3.019264e-05
+
+Total Dipole Moment: {-0.910828, 1.290260, 0.960673} (|D| = 1.848586) a.u.
+
+
+*** Displacement 10 ***
+          Molecular Geometry (bohr)
+ O      2.034934     -3.588937     -2.551883
+ H      2.963391     -4.914161     -3.531145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6449 (3224 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   5.99993181, trace of guess*guess   5.99987561,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   3.99879033, trace of guess*guess   3.99758472,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0061266067     -75.7071177607     9.9987233568    -7.2341370388     -75.7071177607     0.08  
+|    2     0.0008145867      -0.0018789609    10.0000011927    -7.2360225923     -75.7089967216     0.09  
+|    3     0.0008734316      +0.0000001901    10.0000011965    -7.2338382657     -75.7089965315     0.09  
+|    4     0.0001308366      -0.0000018851    10.0000011915    -7.2350497607     -75.7089984166     0.09  
+|    5     0.0000245248      -0.0000000516    10.0000011907    -7.2349470655     -75.7089984682     0.09  
+|    6     0.0000097217      -0.0000000260    10.0000011900    -7.2349818520     -75.7089984942     0.09  
+|    7     0.0000009562      +0.0000000017    10.0000011901    -7.2349692897     -75.7089984925     0.09  
+|    8     0.0000003331      +0.0000000016    10.0000011902    -7.2349689800     -75.7089984909     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089984909 a.u.
+HOMO-LUMO GAP: alpha: 3.311 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.105963, -1.940752, -1.381115} ANGS
+DIPOLE MOMENT: {-2.311045, 3.298650, 2.437515} (|D| = 4.707813) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002415 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+   -0.0006729288     0.0009212249     0.0006628199
+    0.0006729288    -0.0009212249    -0.0006628199
+---------------------------------------------------
+Net gradient: -1.998727e-15 -1.731948e-14 -8.652042e-15
+Net torque:   -2.373564e-05 -4.357361e-05  3.646346e-05
+
+Total Dipole Moment: {-0.909228, 1.297779, 0.958985} (|D| = 1.852182) a.u.
+
+
+*** Displacement 11 ***
+          Molecular Geometry (bohr)
+ O      2.034934     -3.588937     -2.551883
+ H      2.963391     -4.909161     -3.526145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6449 (3224 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   6.00006087, trace of guess*guess   6.00012917,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   4.00104510, trace of guess*guess   4.00209299,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0053215371     -75.7106278214    10.0011064008    -7.2365795681     -75.7106278214     0.08  
+|    2     0.0007058468      +0.0016312436    10.0000004415    -7.2349599102     -75.7089965778     0.09  
+|    3     0.0007505009      -0.0000006426    10.0000004366    -7.2368310568     -75.7089972204     0.09  
+|    4     0.0001021830      -0.0000010164    10.0000004404    -7.2358033715     -75.7089982368     0.09  
+|    5     0.0000170282      -0.0000000349    10.0000004406    -7.2358822084     -75.7089982716     0.09  
+|    6     0.0000051101      +0.0000000034    10.0000004410    -7.2358563145     -75.7089982682     0.09  
+|    7     0.0000008325      -0.0000000022    10.0000004409    -7.2358626555     -75.7089982705     0.09  
+|    8     0.0000002040      -0.0000000016    10.0000004409    -7.2358628793     -75.7089982720     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089982720 a.u.
+HOMO-LUMO GAP: alpha: 3.313 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.105963, -1.940595, -1.380958} ANGS
+DIPOLE MOMENT: {-2.314587, 3.291264, 2.428795} (|D| = 4.699870) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002405 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+    0.0004980071    -0.0007392896    -0.0005669566
+   -0.0004980071     0.0007392896     0.0005669566
+---------------------------------------------------
+Net gradient: -4.884548e-15  4.885849e-15  4.426581e-15
+Net torque:   -2.824805e-05 -4.120553e-05  2.891771e-05
+
+Total Dipole Moment: {-0.910621, 1.294873, 0.955554} (|D| = 1.849057) a.u.
+
+
+*** Displacement 12 ***
+          Molecular Geometry (bohr)
+ O      2.034934     -3.588937     -2.551883
+ H      2.963391     -4.909161     -3.536145
+
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 2321 (1160 points/atom)
+Setting up the DFT grid...
+| time to set the grid = 0.00 s
+DFT grid points: 6450 (3225 points/atom)
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change      Electrons        XC Energy           Energy        Time(s)
+----------------------------------------------------------------------------------------------------------
+| Purifying alpha guess...
+| Trace of guess   5.99995047, trace of guess*guess   5.99991073,  electron number   6.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| Purifying beta guess...
+| Trace of guess   3.99910137, trace of guess*guess   3.99820685,  electron number   4.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+|                 >>> SWITCHING TO GRID 1 <<<
+|    1     0.0045394767     -75.7076042370     9.9990532849    -7.2344833534     -75.7076042370     0.08  
+|    2     0.0006136489      -0.0013943736    10.0000014462    -7.2358831344     -75.7089986106     0.09  
+|    3     0.0006463813      +0.0000002163    10.0000014514    -7.2342655291     -75.7089983943     0.09  
+|    4     0.0000962113      -0.0000010584    10.0000014492    -7.2351830184     -75.7089994527     0.09  
+|    5     0.0000140384      -0.0000000163    10.0000014496    -7.2350856735     -75.7089994690     0.09  
+|    6     0.0000023522      -0.0000000067    10.0000014497    -7.2351025675     -75.7089994757     0.09  
+|    7     0.0000004046      -0.0000000010    10.0000014497    -7.2351019204     -75.7089994767     0.09  
+----------------------------------------------------------------------------------------------------------
+FINAL ENERGY: -75.7089994767 a.u.
+HOMO-LUMO GAP: alpha: 3.312 eV
+               beta:  3.804 eV 
+CENTER OF MASS: {1.105963, -1.940595, -1.381271} ANGS
+DIPOLE MOMENT: {-2.311572, 3.286967, 2.450530} (|D| = 4.706656) DEBYE
+SPIN SZ:         1.000000
+SPIN S-SQUARED: 2.002413 (exact: 2.00)
+
+Running Mulliken population analysis...
+
+
+Gradient units are Hartree/Bohr
+---------------------------------------------------
+        dE/dX            dE/dY            dE/dZ
+   -0.0005048237     0.0006778633     0.0004868343
+    0.0005048237    -0.0006778633    -0.0004868343
+---------------------------------------------------
+Net gradient:  2.650657e-15  1.318498e-15  4.433465e-15
+Net torque:   -2.446469e-05 -4.487387e-05  3.711323e-05
+
+Total Dipole Moment: {-0.909435, 1.293182, 0.964105} (|D| = 1.851727) a.u.
+
+
+Finished computing Hessian
+Hessian has been written to disk
+
+ *** Hessian Matrix (Hartree/Bohr^2) ***
+             1          2          3          4          5          6
+        ---------  ---------  ---------  ---------  ---------  ---------
+   1  9.420403551417912e-02 -1.344729612734884e-01 -1.003004549026415e-01 -9.420583059165491e-02 1.344730720826984e-01 1.003001693998668e-01
+   2  -1.344729612734884e-01 1.905295865894059e-01 1.417260381424521e-01 1.344732820182837e-01 -1.905304063235574e-01 -1.417256348523541e-01
+   3  -1.003004549026415e-01 1.417260381424521e-01 1.053795595413937e-01 1.002963648686739e-01 -1.417264664030350e-01 -1.053793262909359e-01
+   4  -9.420583059165491e-02 1.344732820182837e-01 1.002963648686739e-01 9.420762566957534e-02 -1.344733928277152e-01 -1.002960793665532e-01
+   5  1.344730720826984e-01 -1.905304063235574e-01 -1.417264664030350e-01 -1.344733928277152e-01 1.905312260585540e-01 1.417260631134043e-01
+   6  1.003001693998668e-01 -1.417256348523541e-01 -1.053793262909359e-01 -1.002960793665532e-01 1.417260631134043e-01 1.053790930410758e-01
+
+
+Dipole moment derivatives:
+
+ Atom        dMuX/dX            dMuX/dY         dMuX/dZ (a.u.)
+------  -----------------  -----------------  -----------------
+    1       0.8671219306       0.1599955561       0.1185998878
+    2      -0.8670335797      -0.1599818550      -0.1186077694
+
+ Atom        dMuY/dX            dMuY/dY         dMuY/dZ (a.u.)
+------  -----------------  -----------------  -----------------
+    1       0.1599186158       0.7518670491      -0.1690401743
+    2      -0.1598934820      -0.7518613675       0.1690465936
+
+ Atom        dMuZ/dX            dMuZ/dY         dMuZ/dZ (a.u.)
+------  -----------------  -----------------  -----------------
+    1       0.1184606782      -0.1688087846       0.8551158163
+    2      -0.1187619650       0.1688028238      -0.8551155479
+
+*** Vibrational Frequency Analysis ***
+
+Vibrational Frequencies Before Projection of Rotation/Translation
+  1        142.48407599403183i
+  2          0.60099469301432i
+  3          0.00025061396037i
+  4          0.02918706332639
+  5         27.90950534409168
+  6       3300.40565507051679
+
+Remove Rotational and Translational Modes
+
+Center of Mass at: 2.089967860322 -3.667192482060 -2.609928273466
+
+Failed to create inertia tensor file.
+Failed to create output file to save moments of inertia!
+Translational-Rotational degrees of freedom:   5
+Point Group Symmetry:        Cinfv
+Rotational symmetry number:  1
+Coordinates of molecule in Eckart frame: 
+O      -0.1119008882     -0.0000000000      0.0000000000
+H       1.7759482935     -0.0000000000      0.0000000000
+Vibrational Frequencies/Thermochemical Analysis After Removing Rotation and Translation
+Temperature (Kelvin):     300.00
+Mode      Eigenvalue(AU)      Frequency(cm-1)    Intensity(km/mol)          Vib.Temp(K)              ZPE(AU)       Vib.Energy(AU)             -T*S(AU)
+  1         0.6420410129      3300.4018619911       272.0635988309      4748.3656321072         0.0075188689         0.0000000020        -0.0000000021
+
+
+-----------------------
+THERMOCHEMISTRY
+-----------------------
+
+Temperature         = 300.00 K
+Pressure            = 1.0 atm
+Total Mass          = 17.002739677000000995 AMU
+
+-----------------------
+INNER ENERGY
+-----------------------
+
+CAUTION: Thermal rotational energy is printed out for both linear
+         and non-linear molecules. Please choose the appropriate
+         value depending on your system.
+
+Inner energy, U = Eelec + ZPE + Evib + Erot + Etrans
+Eelec  - total energy from electronic structure calculation
+ZPE    - zero temperature vibrational energy from frequency calculation
+Evib   - finite temperature correction to ZPE due to population of 
+         excited vibrational states (vibrational thermal energy)
+Erot   - rotational thermal energy
+Etrans - translational thermal energy
+
+Summary of thermal and non-thermal (ZPE) contributions to inner energy, U:
+Vibrational zero point energy (ZPE)                     = 0.007518868899145788 AU =     4.71500600 kcal/mol
+Thermal vibrational energy (Evib)                       = 0.000000002010107385 AU =     0.00000126 kcal/mol
+Thermal rotational energy (Erot) of linear molecule     = 0.000949443153306380 AU =     0.59578470 kcal/mol
+Thermal rotational energy (Erot) of non-linear molecule = 0.001424164729959570 AU =     0.89367705 kcal/mol
+Thermal translational energy (Etrans)                   = 0.001424164729959570 AU =     0.89367705 kcal/mol
+
+
+Summary of total thermal and non-thermal corrections for a linear molecule:
+Total thermal (Evib+Erot+Etrans) correction             = 0.002373609893373335 AU =     1.48946301 kcal/mol
+Total non-thermal (ZPE) correction                      = 0.007518868899145788 AU =     4.71500600 kcal/mol
+--------------------------------------------------------------------------------------------
+Total correction                                        = 0.009892478792519123 AU =     6.20446901 kcal/mol
+
+
+Summary of total thermal and non-thermal corrections for a non-linear molecule:
+Total thermal (Evib+Erot+Etrans) correction             = 0.002848331470026525 AU =     1.78735536 kcal/mol
+Total non-thermal (ZPE) correction                      = 0.007518868899145788 AU =     4.71500600 kcal/mol
+--------------------------------------------------------------------------------------------
+Total correction                                        = 0.010367200369172314 AU =     6.50236136 kcal/mol
+
+
+-----------------------
+ENTHALPY
+-----------------------
+
+Enthalpy, H = U + kB*T
+          kB is Boltzmann's constant
+Thermal enthalpy correction (kB*T)                      = 0.000949443153306380 AU =     0.59578470 kcal/mol
+
+-----------------------
+ENTROPY
+-----------------------
+
+There are four entropic (S) contributions: electronic (Selec),
+vibrational (Svib), translational (Strans), and rotational (Srot).
+The entropic corrections given below have been multiplied by
+temperature (T) to give the units of energy.
+T*S = T*(Selec+Svib+Srot+Strans
+
+CAUTION: 1. The electronic entropy correction printed below is not
+            applicable for systems with spatial degeneracies besides spin
+            degeneracies, such as, the OH radical. The electronic entropy
+            correction printed below accounts only for spin degeneracies,
+            and hence, cannot be used for systems with spatial degeneracies.
+         2. The rotational entropy printed below corresponds to systems
+            with symmetry number, sn = 1. However, we also print a list of
+            rotational entropy corrections corresponding to other symmetry numbers.
+            Please exercise caution and choose the appropriate rotational entropy
+            correction for your system depending on the system's symmetry number.
+
+Electronic entropy (T*Selec)                            = 0.001043069915614189 AU =     0.65453639 kcal/mol
+Vibrational entropy (T*Svib)                            = 0.000000002135675488 AU =     0.00000134 kcal/mol
+Translational entropy (T*Strans)                        = 0.016467845877566091 AU =    10.33373151 kcal/mol
+Rotational entropy (T*Srot)                             = 0.007667729259165852 AU =     4.81157378 kcal/mol
+--------------------------------------------------------------------------------------------
+Total entropy correction (T*S)                          = 0.025178647188021621 AU =    15.79984303 kcal/mol
+
+
+List of rotational entropy corrections for symmetry numbers, sn=1 to 20, 24, and 60, is given below:
+sn = 1           T*Srot =     4.81157378 kcal/mol          T*S =    15.79984303 kcal/mol
+sn = 2           T*Srot =     4.39860730 kcal/mol          T*S =    15.38687654 kcal/mol
+sn = 3           T*Srot =     4.15703739 kcal/mol          T*S =    15.14530663 kcal/mol
+sn = 4           T*Srot =     3.98564081 kcal/mol          T*S =    14.97391006 kcal/mol
+sn = 5           T*Srot =     3.85269530 kcal/mol          T*S =    14.84096454 kcal/mol
+sn = 6           T*Srot =     3.74407090 kcal/mol          T*S =    14.73234015 kcal/mol
+sn = 7           T*Srot =     3.65223029 kcal/mol          T*S =    14.64049953 kcal/mol
+sn = 8           T*Srot =     3.57267432 kcal/mol          T*S =    14.56094357 kcal/mol
+sn = 9           T*Srot =     3.50250099 kcal/mol          T*S =    14.49077024 kcal/mol
+sn = 10          T*Srot =     3.43972881 kcal/mol          T*S =    14.42799806 kcal/mol
+sn = 11          T*Srot =     3.38294446 kcal/mol          T*S =    14.37121371 kcal/mol
+sn = 12          T*Srot =     3.33110442 kcal/mol          T*S =    14.31937366 kcal/mol
+sn = 13          T*Srot =     3.28341620 kcal/mol          T*S =    14.27168544 kcal/mol
+sn = 14          T*Srot =     3.23926380 kcal/mol          T*S =    14.22753305 kcal/mol
+sn = 15          T*Srot =     3.19815890 kcal/mol          T*S =    14.18642815 kcal/mol
+sn = 16          T*Srot =     3.15970784 kcal/mol          T*S =    14.14797708 kcal/mol
+sn = 17          T*Srot =     3.12358862 kcal/mol          T*S =    14.11185786 kcal/mol
+sn = 18          T*Srot =     3.08953451 kcal/mol          T*S =    14.07780375 kcal/mol
+sn = 19          T*Srot =     3.05732209 kcal/mol          T*S =    14.04559133 kcal/mol
+sn = 20          T*Srot =     3.02676233 kcal/mol          T*S =    14.01503157 kcal/mol
+sn = 24          T*Srot =     2.91813793 kcal/mol          T*S =    13.90640718 kcal/mol
+sn = 60          T*Srot =     2.37222593 kcal/mol          T*S =    13.36049518 kcal/mol
+
+
+-----------------------
+GIBBS FREE ENTHALPY
+-----------------------
+
+Gibbs free enthalpy, G    = H - T*S = U + kB*T - T*S
+                     G    = Eelec + ZPE + Evib + Erot + Etrans + kB*T - T*S
+Total correction, G-Eelec = ZPE + Evib + Erot + Etrans + kB*T - T*S
+                  G-Eelec = ZPE + Evib + Erot + Etrans + kB*T - T*Selec - T*Svib - T*Srot - T*Strans
+
+Total correction (G-Eelec) for a linear molecule        = -0.014341755411354108 AU =    -8.99958932 kcal/mol
+Total correction (G-Eelec) for a non-linear molecule    = -0.013867033834700920 AU =    -8.70169697 kcal/mol
+
+
+| Total processing time: 14.51 sec 
+
+| Job finished: Tue Feb 18 16:10:07 2025
+

@@ -1,0 +1,26 @@
+calctype: hessian
+model:
+    basis: aug-pcseg-1
+    method: B3LYP
+structure:
+    extras:
+        xyz_comments:
+        - '-7.5708998712682558e+01'
+        - frame
+        - '4'
+        - xyz
+        - file
+        - generated
+        - by
+        - TeraChem
+    geometry:
+    -   - 2.0349344124116677
+        - -3.5889374641580236
+        - -2.551883450747577
+    -   - 2.9633911906144164
+        - -4.9091609240492735
+        - -3.5311449485495743
+    identifiers: {}
+    symbols:
+    - O
+    - H

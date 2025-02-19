@@ -1,0 +1,12 @@
+run frequencies
+method ub3lyp
+
+charge -1
+spinmult 3
+coordinates hydroxide.xyz
+precision double
+min_delta 0.01
+basis aug-pcseg-1
+maxit 2
+! this is a comment line
+# so is this
