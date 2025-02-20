@@ -1,4 +1,6 @@
 calctype: energy
+extras:
+    id: 3
 keywords:
     resp: 'yes'
 model:

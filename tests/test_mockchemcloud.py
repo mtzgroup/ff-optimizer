@@ -20,7 +20,7 @@ def test_inputFromTCin():
 def test_inputFromTCin2():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
-    inp = ccm.inputFromTCin("resp.in")
+    inp = ccm.inputFromTCin("resp.in", extras={"id" : 3})
     inp.save("test.yaml")
     test = checkUtils.checkFiles("test.yaml", "ref_resp.yaml")
     os.remove("test.yaml")
@@ -193,12 +193,13 @@ def test_computeNoFiles(monkeypatch):
 def compute1():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
-    inputs = [ccm.inputFromTCin("wat1.in")]
+    inputs = [ccm.inputFromTCin("wat1.in", extras={"bloop": True})]
     outputs = cc.compute("terachem", inputs)
     assert isinstance(outputs, ProgramOutput)
     result = outputs.results
     assert checkUtils.checkFloats(result.energy, -75.5788691372, 0.00000001)
     assert checkUtils.checkFloats(result.gradient[0,0], -0.0006380621, 0.000001)
+    assert outputs.input_data.extras["bloop"]
 
 @pytest.mark.chemcloud
 def test_compute1(monkeypatch):
@@ -259,7 +260,6 @@ def computeFailure():
     assert len(outputs[0].traceback) > 0
  
 @pytest.mark.chemcloud
-@pytest.mark.debug
 def test_computeFailure(monkeypatch):
     computeFailure()
     os.chdir(os.path.dirname(__file__))

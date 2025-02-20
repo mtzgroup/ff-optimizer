@@ -1,4 +1,5 @@
 calctype: hessian
+extras: {}
 keywords:
     min_delta: '0.01'
     precision: double

@@ -10,7 +10,7 @@ def grep(filename, string):
                 return line
 
 # Makes a ProgramInput with all the keywords in a TeraChem input file
-def inputFromTCin(inp):
+def inputFromTCin(inp, extras={}):
     keywords = {}
     charge = None
     spinmult = None
@@ -46,13 +46,13 @@ def inputFromTCin(inp):
         calc = "optimization"
     model = {"method" : method, "basis" : basis}
     mol = Structure.open(coords, charge=charge, multiplicity=spinmult)
-    inp = ProgramInput(structure=mol, calctype=calc, model=model, keywords=keywords)
+    inp = ProgramInput(structure=mol, calctype=calc, model=model, keywords=keywords, extras=extras)
     return inp
             
 
 # Reads the BARE MINIMUM from a TeraChem output to make a valid ProgramInput
 # Requires coordinates file to be where the output file says it is
-def inputFromTCout(output):
+def inputFromTCout(output, extras={}):
     coordinates = grep(output, "XYZ coordinates").split()[2]
     method = grep(output, "Method:").split()[1]
     basis = grep(output, "Using basis set:").split()[3]
@@ -68,7 +68,7 @@ def inputFromTCout(output):
     # Neglect MD, etc. for now
     else:
         calc = "energy"
-    inp = ProgramInput(structure=mol, calctype=calc, model=model)
+    inp = ProgramInput(structure=mol, calctype=calc, model=model, extras=extras)
     return inp
 
 def tclinesFromInput(inp):
@@ -132,9 +132,9 @@ def programOutputFromTCout(tcout, inp=None, getFiles=False):
     with open(tcout, "r") as f:
         lines = list(f.readlines())
     stdout = "".join(lines)
-    extras = inp.extras
-    scr = Path(grep(tcout, "Scratch directory:").split()[2])
+    extras = {}
     if getFiles:
+        scr = Path(grep(tcout, "Scratch directory:").split()[2])
         files = collectFiles(scr, inp)
     else:
         files = {}

@@ -5,7 +5,7 @@ from pathlib import Path
 from shutil import copyfile, rmtree
 from time import sleep
 
-from chemcloud import CCClient
+from chemcloud import compute
 from qcio import ProgramInput, Structure
 from qcparse import parse
 
@@ -182,9 +182,11 @@ class QMEngine:
             name = utils.getName(f)
             out = f"tc_{name}.out"
             try:
-                parse(out, "terachem")
+                result = parse(out, "terachem")
+                assert result.energy
+                assert result.gradient.any()
             except Exception:
-                # print(f)
+                print(f)
                 # print(e)
                 xyzs.append(f)
         self.getQMRefData(xyzs)
@@ -380,8 +382,6 @@ class ChemcloudEngine(QMEngine):
             inp: Input object containing configuration parameters.
         """
         self.batchSize = inp.batchsize
-        self.retries = inp.retries
-        self.client = CCClient()
         super().__init__(inp)
         self.setKeywords(self.doResp)
 
@@ -484,60 +484,6 @@ class ChemcloudEngine(QMEngine):
             #    "Spin multiplicity ('spinmult') must be specified in input file"
             # )
 
-    def computeBatch(self, programInputs: list):
-        """
-        Compute a batch of QM calculations using ChemCloud.
-
-        Args:
-            programInputs (list): List of program inputs for QM calculations.
-
-        Returns:
-            tuple: Status code and list of outputs from the calculations.
-        """
-        status = 0
-        # If there are no jobs to run after restart
-        if len(programInputs) == 0:
-            return status, []
-        batchSize = min(self.batchSize, len(programInputs))
-        outputs = []
-        stride = int(len(programInputs) / batchSize)
-        # import pickle
-        # with open("inputs.pickle", "wb") as f:
-        #    pickle.dump(programInputs, f)
-        try:
-            # HOW TO RESTART IF CODE FAILS AFTER SUBMISSION?
-            # only need extra files if running resp
-            futureResults = [
-                self.client.compute(
-                    "terachem", programInputs[i::stride], collect_files=self.doResp
-                )
-                for i in range(stride)
-            ]
-            outputBatches = [futureResults[i].get() for i in range(stride)]
-            for batch in outputBatches:
-                # avoid accidentally unpacking Output object if batch is a
-                # single Output object
-                if batchSize > 1:
-                    for output in batch:
-                        outputs.append(output)
-                else:
-                    outputs.append(batch)
-        except Exception as e:
-            traceback.print_exc()
-            print(e)
-            self.batchSize = int(batchSize / 2)
-            print(
-                f"Submission failed; resubmitting with batch size {str(self.batchSize)}"
-            )
-            # sleep(30)
-            if self.batchSize < 1:
-                status = -1
-                return status, outputs
-            tempStatus, outputs = self.computeBatch(programInputs)
-            if tempStatus == -1:
-                status = -1
-        return status, outputs
-
     def createProgramInputs(self, xyzs: list, useBackup: bool = False) -> list:
         """
         Create program inputs for QM calculations.
@@ -603,7 +549,6 @@ class ChemcloudEngine(QMEngine):
             outfile = Path(f"tc_{jobID}.out")
             if not outfile.is_file():
                 import pdb
-
                 pdb.set_trace()
             # end debug
             if not output.success:
@@ -626,18 +571,27 @@ class ChemcloudEngine(QMEngine):
             RuntimeError: If ChemCloud returns an unexpected number of outputs or if batch submission fails.
         """
         programInputs = self.createProgramInputs(xyzs, useBackup=useBackup)
-        status, outputs = self.computeBatch(programInputs)
+        # If there are no jobs to run after restart
+        if len(programInputs) == 0:
+            return []
+
+        # run chemcloud jobs
+        outputs = compute("terachem", programInputs, collect_files=self.doResp)
+
+        # check for errors
         if len(outputs) != len(programInputs):
             dumpFailedJobs(programInputs, outputs)
             raise RuntimeError(
                 "ChemCloud did not return the same number of outputs as inputs"
             )
         retryXyzs = self.getFailedJobs(outputs)
-        if status == -1:
+        if len(retryXyzs) > 0 and useBackup:
             dumpFailedJobs(programInputs, outputs)
             raise RuntimeError(
-                "Batch resubmission reached size 1; QM calculations incomplete"
+                f"Job ids {sorted([xyz.split('.')[0] for xyz in retryXyzs])} in {os.getcwd()} failed!"
             )
+
+        # return failed jobs
         return retryXyzs
 
     def getQMRefData(self, xyzs: list):
@@ -651,15 +605,14 @@ class ChemcloudEngine(QMEngine):
             RuntimeError: If QM calculations fail after multiple retries.
         """
         cwd = os.getcwd()
+        # Run calculations with default settings
         retryXyzs = self.runJobs(xyzs)
-        for _ in range(self.retries):
-            if len(retryXyzs) == 0:
-                break
-            retryXyzs = self.runJobs(retryXyzs, useBackup=True)
+
+        # Re-run failed calculations with backup settings
         if len(retryXyzs) > 0:
-            raise RuntimeError(
-                f"Job ids {sorted([xyz.split('.')[0] for xyz in retryXyzs])} in {os.getcwd()} failed {str(self.retries)} times!"
-            )
+            retryXyzs = self.runJobs(retryXyzs, useBackup=True)
+            
+        # collect results and write qdata.txt
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
         os.chdir(cwd)
