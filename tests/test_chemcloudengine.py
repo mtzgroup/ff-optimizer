@@ -1,5 +1,4 @@
 import os
-import pytest
 from pathlib import Path
 
 from qcio import ProgramInput, ProgramOutput, Provenance, Structure
@@ -102,6 +101,7 @@ def test_initResp():
     assert chemcloudEngine.keywords["resp"] == "yes"
     assert chemcloudEngine.backupKeywords["resp"] == "yes"
 
+
 def test_getQMRefData(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
@@ -133,6 +133,7 @@ def test_getQMRefData(monkeypatch):
     monkeypatch.setattr(qmengine.QMEngine, "writeFBdata", monkeyWrite)
     os.chdir(calcDir)
     chemcloudEngine.getQMRefData(xyzs)
+
 
 def test_createProgramInputsResp():
     os.chdir(os.path.dirname(__file__))
@@ -235,8 +236,10 @@ def test_dumpFailedJobs(monkeypatch):
     assert pass6Input
     assert pass6Output
 
+
 def monkeyWrite(self, output):
     pass
+
 
 def test_getFailedJobs(monkeypatch):
     os.chdir(os.path.dirname(__file__))
@@ -246,7 +249,7 @@ def test_getFailedJobs(monkeypatch):
     inp.sampledir = Path("")
     ccEngine = qmengine.ChemcloudEngine(inp)
     os.chdir("chemcloudengine")
-    
+
     monkeypatch.setattr(qmengine.ChemcloudEngine, "writeResult", monkeyWrite)
     inputs = []
     for i in range(1, 11):
@@ -254,13 +257,18 @@ def test_getFailedJobs(monkeypatch):
             inputs.append(ccm.inputFromTCout(f"tc_{i}_success.out", extras={"id": i}))
         else:
             inputs.append(ccm.inputFromTCout(f"tc_{i}.out", extras={"id": i}))
-    outputs = [ccm.programOutputFromTCout(f"tc_{i}.out", inp=inputs[i-1]) for i in range(1,11)]
+    outputs = [
+        ccm.programOutputFromTCout(f"tc_{i}.out", inp=inputs[i - 1])
+        for i in range(1, 11)
+    ]
     retryXyzs = ccEngine.getFailedJobs(outputs)
     assert retryXyzs == ["3.xyz", "6.xyz", "9.xyz"]
+
 
 # haha
 def monkeyDump(inputs, outputs):
     pass
+
 
 def test_runJobs(monkeypatch):
     os.chdir(os.path.dirname(__file__))
@@ -280,10 +288,14 @@ def test_runJobs(monkeypatch):
             inputs.append(ccm.inputFromTCout(f"tc_{i}_success.out", extras={"id": i}))
         else:
             inputs.append(ccm.inputFromTCout(f"tc_{i}.out", extras={"id": i}))
-    outputs = [ccm.programOutputFromTCout(f"tc_{i}.out", inp=inputs[i-1]) for i in range(1,11)]
+    outputs = [
+        ccm.programOutputFromTCout(f"tc_{i}.out", inp=inputs[i - 1])
+        for i in range(1, 11)
+    ]
     ccm.patcher(monkeypatch, qmengine, outputs)
     retryXyzs = ccEngine.runJobs(xyzs)
     assert retryXyzs == ["3.xyz", "6.xyz", "9.xyz"]
+
 
 def test_runJobsFail(monkeypatch):
     os.chdir(os.path.dirname(__file__))
@@ -303,22 +315,25 @@ def test_runJobsFail(monkeypatch):
             inputs.append(ccm.inputFromTCout(f"tc_{i}_success.out", extras={"id": i}))
         else:
             inputs.append(ccm.inputFromTCout(f"tc_{i}.out", extras={"id": i}))
-    outputs = [ccm.programOutputFromTCout(f"tc_{i}.out", inp=inputs[i-1]) for i in range(1,8)]
+    outputs = [
+        ccm.programOutputFromTCout(f"tc_{i}.out", inp=inputs[i - 1])
+        for i in range(1, 8)
+    ]
     ccm.patcher(monkeypatch, qmengine, outputs)
     crash = ""
     try:
-        retryXyzs = ccEngine.runJobs(xyzs)
+        ccEngine.runJobs(xyzs)
     except Exception as e:
         crash = e
     assert str(crash) == "ChemCloud did not return the same number of outputs as inputs"
-        
+
+
 def test_runJobsBackup(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
     inp.tctemplate = "qmengine/tc.in"
     inp.tctemplate_backup = "qmengine/tc_backup.in"
     inp.sampledir = Path("")
-
 
     def monkeyDumpKeywords(inputs, outputs):
         with open("temp.txt", "w") as f:
@@ -336,7 +351,10 @@ def test_runJobsBackup(monkeypatch):
             inputs.append(ccm.inputFromTCout(f"tc_{i}_success.out", extras={"id": i}))
         else:
             inputs.append(ccm.inputFromTCout(f"tc_{i}.out", extras={"id": i}))
-    outputs = [ccm.programOutputFromTCout(f"tc_{i}.out", inp=inputs[i-1]) for i in range(1,11)]
+    outputs = [
+        ccm.programOutputFromTCout(f"tc_{i}.out", inp=inputs[i - 1])
+        for i in range(1, 11)
+    ]
     ccm.patcher(monkeypatch, qmengine, outputs)
     crash = ""
     try:

@@ -1,12 +1,15 @@
-from qcparse import parse
-from qcio import ProgramInput, Structure, ProgramOutput, Files
-from pathlib import Path
-from . import chemcloud_mocks as ccm
-from . import checkUtils
 import os
-import pytest
+from pathlib import Path
+
 import chemcloud as cc
 import numpy as np
+import pytest
+from qcio import Files, ProgramOutput
+from qcparse import parse
+
+from . import checkUtils
+from . import chemcloud_mocks as ccm
+
 
 def test_inputFromTCin():
     os.chdir(os.path.dirname(__file__))
@@ -17,15 +20,16 @@ def test_inputFromTCin():
     os.remove("test.yaml")
     assert test
 
+
 def test_inputFromTCin2():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
-    inp = ccm.inputFromTCin("resp.in", extras={"id" : 3})
+    inp = ccm.inputFromTCin("resp.in", extras={"id": 3})
     inp.save("test.yaml")
     test = checkUtils.checkFiles("test.yaml", "ref_resp.yaml")
     os.remove("test.yaml")
     assert test
-    
+
 
 @pytest.mark.chemcloud
 def test_RunInputFromTCin():
@@ -48,6 +52,7 @@ def test_inputFromTCout():
     os.remove("test.yaml")
     assert test
 
+
 def test_collectFiles1():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
@@ -60,6 +65,7 @@ def test_collectFiles1():
             lines = ccm.readLines(file)
             assert lines == files[key]
 
+
 def test_collectFiles2():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
@@ -68,11 +74,12 @@ def test_collectFiles2():
     assert len(files.keys()) == 2
     lines = ccm.readLines("ccinput.in")
     assert files["tc.in"] == lines
-    refCoords = np.loadtxt("wat1.xyz", skiprows=2, usecols=(1,2,3))
+    refCoords = np.loadtxt("wat1.xyz", skiprows=2, usecols=(1, 2, 3))
     coordLines = files["geometry.xyz"].split("\n")[2:]
     testCoords = [line.split()[1:] for line in coordLines][:3]
     testCoords = np.asarray(testCoords)
     assert checkUtils.checkArrays(refCoords, testCoords, 1e-8)
+
 
 def test_programOutputFromTCout1():
     os.chdir(os.path.dirname(__file__))
@@ -84,6 +91,7 @@ def test_programOutputFromTCout1():
     assert len(output.results.files.keys()) == 11
     assert output.success
 
+
 def test_programOutputFromTCout2():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
@@ -94,6 +102,7 @@ def test_programOutputFromTCout2():
     assert len(output.results.files.keys()) == 0
     assert output.success
 
+
 def test_programOutputFromTCout3():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
@@ -102,6 +111,7 @@ def test_programOutputFromTCout3():
     assert output.input_data.model.method == "ub3lyp"
     assert len(output.results.files.keys()) == 0
     assert output.success
+
 
 def test_programOutputFromTCout4():
     os.chdir(os.path.dirname(__file__))
@@ -113,6 +123,7 @@ def test_programOutputFromTCout4():
     assert not output.results.files
     assert len(output.traceback) > 0
 
+
 def test_tclinesFromInput():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
@@ -123,6 +134,7 @@ def test_tclinesFromInput():
     test = checkUtils.checkFiles("temp.in", "ccinput.in")
     os.remove("temp.in")
     assert test
+
 
 def readCharges(stdout):
     lines = stdout.split("\n")
@@ -139,6 +151,7 @@ def readCharges(stdout):
         charges.append(splitLine[4])
     return charges
 
+
 def computeWithFiles():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
@@ -148,7 +161,7 @@ def computeWithFiles():
     assert isinstance(outputs[0], ProgramOutput)
     result = outputs[0].results
     assert checkUtils.checkFloats(result.energy, -75.5788691372, 0.00000001)
-    assert checkUtils.checkFloats(result.gradient[0,0], -0.0006380621, 0.000001)
+    assert checkUtils.checkFloats(result.gradient[0, 0], -0.0006380621, 0.000001)
     charges = readCharges(outputs[0].stdout)
     assert checkUtils.checkFloats(charges[0], -0.260148)
     espLines = result.files["scr.geometry/esp.xyz"].split("\n")
@@ -157,7 +170,10 @@ def computeWithFiles():
     with open(Path("scr.wat1") / "wat1.geometry", "r") as f:
         lines = list(f.readlines())
     lines = "".join(lines).split()
-    assert checkUtils.checkListsFloats(lines, result.files["scr.geometry/geometry.geometry"].split())
+    assert checkUtils.checkListsFloats(
+        lines, result.files["scr.geometry/geometry.geometry"].split()
+    )
+
 
 @pytest.mark.chemcloud
 def test_computeWithFiles(monkeypatch):
@@ -178,8 +194,9 @@ def computeNoFiles():
     assert isinstance(outputs[1], ProgramOutput)
     result = outputs[1].results
     assert checkUtils.checkFloats(result.energy, -75.5769406865, 0.00000001)
-    assert checkUtils.checkFloats(result.gradient[0,0], 0.0069999056, 0.000001)
+    assert checkUtils.checkFloats(result.gradient[0, 0], 0.0069999056, 0.000001)
     assert len(result.files.keys()) == 0
+
 
 @pytest.mark.chemcloud
 def test_computeNoFiles(monkeypatch):
@@ -190,6 +207,7 @@ def test_computeNoFiles(monkeypatch):
     ccm.patcher(monkeypatch, cc, outputs)
     computeNoFiles()
 
+
 def compute1():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
@@ -198,8 +216,9 @@ def compute1():
     assert isinstance(outputs, ProgramOutput)
     result = outputs.results
     assert checkUtils.checkFloats(result.energy, -75.5788691372, 0.00000001)
-    assert checkUtils.checkFloats(result.gradient[0,0], -0.0006380621, 0.000001)
+    assert checkUtils.checkFloats(result.gradient[0, 0], -0.0006380621, 0.000001)
     assert outputs.input_data.extras["bloop"]
+
 
 @pytest.mark.chemcloud
 def test_compute1(monkeypatch):
@@ -210,6 +229,7 @@ def test_compute1(monkeypatch):
     ccm.patcher(monkeypatch, cc, outputs)
     compute1()
 
+
 def computeFuture():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
@@ -219,6 +239,7 @@ def computeFuture():
     assert len(outputs) == 2
     assert isinstance(outputs[0], ProgramOutput)
 
+
 @pytest.mark.chemcloud
 def test_computeFuture(monkeypatch):
     computeFuture()
@@ -227,8 +248,8 @@ def test_computeFuture(monkeypatch):
     outputs = ["wat1.out", "wat2.out"]
     ccm.patcher(monkeypatch, cc, outputs)
     computeFuture()
-    
-    
+
+
 def computeFuture1():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
@@ -236,6 +257,7 @@ def computeFuture1():
     future = cc.compute("terachem", inputs, return_future=True)
     outputs = future.get()
     assert isinstance(outputs, ProgramOutput)
+
 
 @pytest.mark.chemcloud
 def test_computeFuture1(monkeypatch):
@@ -245,6 +267,7 @@ def test_computeFuture1(monkeypatch):
     outputs = ["wat1.out"]
     ccm.patcher(monkeypatch, cc, outputs)
     computeFuture1()
+
 
 def computeFailure():
     os.chdir(os.path.dirname(__file__))
@@ -258,7 +281,8 @@ def computeFailure():
     assert not outputs[0].success
     assert not outputs[1].success
     assert len(outputs[0].traceback) > 0
- 
+
+
 @pytest.mark.chemcloud
 def test_computeFailure(monkeypatch):
     computeFailure()

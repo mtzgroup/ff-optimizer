@@ -1,13 +1,15 @@
-from qcparse import parse
-import re
-from qcio import ProgramInput, Structure, ProgramOutput, Provenance, Files
 from pathlib import Path
+
+from qcio import Files, ProgramInput, ProgramOutput, Provenance, Structure
+from qcparse import parse
+
 
 def grep(filename, string):
     with open(filename, "r") as f:
         for line in f.readlines():
             if string in line:
                 return line
+
 
 # Makes a ProgramInput with all the keywords in a TeraChem input file
 def inputFromTCin(inp, extras={}):
@@ -23,7 +25,7 @@ def inputFromTCin(inp, extras={}):
             keyword = split[0].lower()
             if keyword.startswith("!") or keyword.startswith("#"):
                 continue
-            value = " ".join(split[1:]) # for the rare multitoken values
+            value = " ".join(split[1:])  # for the rare multitoken values
             if keyword == "method":
                 method = value
             elif keyword == "basis":
@@ -44,11 +46,13 @@ def inputFromTCin(inp, extras={}):
         calc = "transition_state"
     if calc == "minimize":
         calc = "optimization"
-    model = {"method" : method, "basis" : basis}
+    model = {"method": method, "basis": basis}
     mol = Structure.open(coords, charge=charge, multiplicity=spinmult)
-    inp = ProgramInput(structure=mol, calctype=calc, model=model, keywords=keywords, extras=extras)
+    inp = ProgramInput(
+        structure=mol, calctype=calc, model=model, keywords=keywords, extras=extras
+    )
     return inp
-            
+
 
 # Reads the BARE MINIMUM from a TeraChem output to make a valid ProgramInput
 # Requires coordinates file to be where the output file says it is
@@ -57,7 +61,7 @@ def inputFromTCout(output, extras={}):
     method = grep(output, "Method:").split()[1]
     basis = grep(output, "Using basis set:").split()[3]
     mol = Structure.open(coordinates)
-    model = {"method" : method, "basis" : basis}
+    model = {"method": method, "basis": basis}
     if grep(output, "SINGLE POINT GRADIENT CALCULATIONS"):
         calc = "gradient"
     # man I hope they don't fix the typo
@@ -71,6 +75,7 @@ def inputFromTCout(output, extras={}):
     inp = ProgramInput(structure=mol, calctype=calc, model=model, extras=extras)
     return inp
 
+
 def tclinesFromInput(inp):
     name = inp.calctype.name
     if name == "hessian":
@@ -82,14 +87,21 @@ def tclinesFromInput(inp):
     else:
         calctype = name
     keys = ["run", "coordinates", "charge", "spinmult", "method", "basis"]
-    vals = [calctype, "geometry.xyz", inp.structure.charge, inp.structure.multiplicity, inp.model.method, inp.model.basis]
+    vals = [
+        calctype,
+        "geometry.xyz",
+        inp.structure.charge,
+        inp.structure.multiplicity,
+        inp.model.method,
+        inp.model.basis,
+    ]
     lines = ""
     for key, val in zip(keys, vals):
         lines += "%-20s %1s\n" % (key, val)
     for key in inp.keywords.keys():
         lines += ("%-20s %1s\n" % (key, inp.keywords[key])).rstrip(" ")
     return lines
-    
+
 
 def readLines(file):
     try:
@@ -102,11 +114,12 @@ def readLines(file):
         lines = b"".join(lines)
     return lines
 
+
 def collectFiles(scratch, inp):
     scratch = Path(scratch)
     files = {}
     if scratch.is_dir():
-        name = scratch.name.split('.')[1]
+        name = scratch.name.split(".")[1]
         for scratchfile in sorted(scratch.iterdir()):
             lines = readLines(scratchfile)
             files["scr.geometry/" + scratchfile.name.replace(name, "geometry")] = lines
@@ -115,6 +128,7 @@ def collectFiles(scratch, inp):
     files["tc.in"] = tclines
     files["geometry.xyz"] = coords
     return files
+
 
 def programOutputFromTCout(tcout, inp=None, getFiles=False):
     if not inp:
@@ -139,10 +153,20 @@ def programOutputFromTCout(tcout, inp=None, getFiles=False):
     else:
         files = {}
     provenance = Provenance(program="terachem")
-    output = ProgramOutput(input_data = inp, success=success, results=result, files=files, provenance=provenance, extras=extras, stdout=stdout, traceback=traceback)
+    output = ProgramOutput(
+        input_data=inp,
+        success=success,
+        results=result,
+        files=files,
+        provenance=provenance,
+        extras=extras,
+        stdout=stdout,
+        traceback=traceback,
+    )
     return output
 
-class MockFutureResult():
+
+class MockFutureResult:
     def __init__(self, outputs):
         self.outputs = outputs
 
@@ -160,7 +184,9 @@ class MockFutureResult():
 
 def patcher(monkeypatch, target, outputs):
 
-    def mockCompute(program, inputs, return_future=False, collect_files=False, outputs=outputs):
+    def mockCompute(
+        program, inputs, return_future=False, collect_files=False, outputs=outputs
+    ):
         if not isinstance(outputs, list):
             outputs = [outputs]
         if not isinstance(inputs, list):
@@ -169,9 +195,15 @@ def patcher(monkeypatch, target, outputs):
             programOutputs = outputs
         else:
             if collect_files:
-                programOutputs = [programOutputFromTCout(out, inp=inp, getFiles=True) for inp, out in zip(inputs, outputs)]
+                programOutputs = [
+                    programOutputFromTCout(out, inp=inp, getFiles=True)
+                    for inp, out in zip(inputs, outputs)
+                ]
             else:
-                programOutputs = [programOutputFromTCout(out, inp=inp) for inp, out in zip(inputs, outputs)]
+                programOutputs = [
+                    programOutputFromTCout(out, inp=inp)
+                    for inp, out in zip(inputs, outputs)
+                ]
         if len(programOutputs) == 1:
             programOutputs = programOutputs[0]
         if return_future:

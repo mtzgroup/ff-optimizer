@@ -1,6 +1,5 @@
 import os
 import subprocess
-import traceback
 from pathlib import Path
 from shutil import copyfile, rmtree
 from time import sleep
@@ -549,6 +548,7 @@ class ChemcloudEngine(QMEngine):
             outfile = Path(f"tc_{jobID}.out")
             if not outfile.is_file():
                 import pdb
+
                 pdb.set_trace()
             # end debug
             if not output.success:
@@ -611,7 +611,7 @@ class ChemcloudEngine(QMEngine):
         # Re-run failed calculations with backup settings
         if len(retryXyzs) > 0:
             retryXyzs = self.runJobs(retryXyzs, useBackup=True)
-            
+
         # collect results and write qdata.txt
         energies, grads, coords, espXYZs, esps = super().readQMRefData()
         super().writeFBdata(energies, grads, coords, espXYZs, esps)
