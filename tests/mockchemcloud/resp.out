@@ -1,0 +1,257 @@
+| Startfile from command line: resp.in
+
+
+|       ***********************************************************
+|       *                 TeraChem v1.9-2025.01-dev               *
+|       *                   Development Version                   *
+|       *           Chemistry at the Speed of Graphics!           *
+|       ***********************************************************
+|       * This program may only be used in connection with        *
+|       * a valid license from PetaChem, LLC. Use of this program *
+|       * or results thereof indicates acceptance of all terms    *
+|       * and conditions stated in the license and that a valid   *
+|       * license agreement between the user and PetaChem, LLC    *
+|       * exists. PetaChem, LLC does not warrant the correctness  *
+|       * of results or their suitability for any purpose.        *
+|       * Please email bugs, suggestions, and comments to         *
+|       *                  help@petachem.com                      *
+|       *                                                         *
+|       ***********************************************************
+
+
+|       ***********************************************************
+|       *  Compiled by root         Wed Feb  5 07:16:34 PM PST 2025  *
+|       *  Supported architecture SMs: 52 61 70 80 90             *
+|       *  Build cuda_12.2.r12.2/compiler.33053471_0              *
+|       *  Git Version:                               *
+|       ***********************************************************
+
+
+| Job started   Tue Feb 18 16:57:59 2025
+| On fire-09-07 (available memory: 50784 MB)
+
+| ######################################### RUNTIME INFO ##########################################
+| terachem  resp.in 
+
+|  NVRM version: NVIDIA UNIX x86_64 Kernel Module  525.89.02  Wed Feb  1 23:23:25 UTC 2023
+|  GCC version:  gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04) 
+
+|  	linux-vdso.so.1 (0x00007ffd62bf4000)
+|  	libcurl.so.4 => /lib/x86_64-linux-gnu/libcurl.so.4 (0x00007f1ece465000)
+|  	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f1ece449000)
+|  	libimf.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libimf.so (0x00007f1ece05f000)
+|  	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f1ecdf76000)
+|  	libmpi.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libmpi.so.12 (0x00007f1ecc400000)
+|  	libdftbplus.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libdftbplus.so (0x00007f1ecc0a8000)
+|  	libfsockets.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libfsockets.so (0x00007f1ecdf70000)
+|  	libxmlf90.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libxmlf90.so (0x00007f1ecdf45000)
+|  	libthcbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libthcbox.so.1 (0x00007f1eca28b000)
+|  	libOpenMM.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libOpenMM.so (0x00007f1ec9e31000)
+|  	libFlexiBLE.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libFlexiBLE.so (0x00007f1ecdf30000)
+|  	libnvToolsExt.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libnvToolsExt.so.1 (0x00007f1ec9c00000)
+|  	libgpubox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libgpubox.so.1 (0x00007f1ecdf25000)
+|  	libcpubox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcpubox.so.1 (0x00007f1ecdf1f000)
+|  	libtensorbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libtensorbox.so.1 (0x00007f1ecdf01000)
+|  	libiobox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libiobox.so.1 (0x00007f1ecdefb000)
+|  	libintbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libintbox.so.1 (0x00007f1e640a1000)
+|  	libatmx2cbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libatmx2cbox.so.1 (0x00007f1e63fe0000)
+|  	libperiodicbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libperiodicbox.so.1 (0x00007f1e49159000)
+|  	libsqmbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libsqmbox.so.1 (0x00007f1e48dad000)
+|  	libgridbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libgridbox.so.1 (0x00007f1e469e3000)
+|  	libdftbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libdftbox.so.1 (0x00007f1e468e3000)
+|  	libcibox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcibox.so.1 (0x00007f1e46294000)
+|  	libccbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libccbox.so.1 (0x00007f1e45e03000)
+|  	libsimbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libsimbox.so.1 (0x00007f1ecded1000)
+|  	liboptbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/liboptbox.so.1 (0x00007f1e45dce000)
+|  	libprotobuf.so.25 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libprotobuf.so.25 (0x00007f1e45afb000)
+|  	libcommbox.so.1 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcommbox.so.1 (0x00007f1e45a9a000)
+|  	libssl.so.3 => /lib/x86_64-linux-gnu/libssl.so.3 (0x00007f1e459f6000)
+|  	libcrypto.so.3 => /lib/x86_64-linux-gnu/libcrypto.so.3 (0x00007f1e455b3000)
+|  	libcuda.so.1 => /lib/x86_64-linux-gnu/libcuda.so.1 (0x00007f1e438d3000)
+|  	libcudart.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcudart.so.12 (0x00007f1e43600000)
+|  	libcublas.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcublas.so.12 (0x00007f1e3ce00000)
+|  	libcufft.so.11 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcufft.so.11 (0x00007f1e32000000)
+|  	libcusparse.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcusparse.so.12 (0x00007f1e22200000)
+|  	libcusolver.so.11 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcusolver.so.11 (0x00007f1e1b000000)
+|  	libcublasLt.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcublasLt.so.12 (0x00007f1df8800000)
+|  	libsvml.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libsvml.so (0x00007f1df71d1000)
+|  	libirng.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libirng.so (0x00007f1df6e00000)
+|  	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f1df6bd4000)
+|  	libiomp5.so => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libiomp5.so (0x00007f1df6600000)
+|  	libcilkrts.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libcilkrts.so.5 (0x00007f1df6200000)
+|  	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f1e438b3000)
+|  	libintlc.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libintlc.so.5 (0x00007f1e3cd88000)
+|  	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f1df5fd7000)
+|  	/lib64/ld-linux-x86-64.so.2 (0x00007f1ece51b000)
+|  	libnghttp2.so.14 => /lib/x86_64-linux-gnu/libnghttp2.so.14 (0x00007f1e435d6000)
+|  	libidn2.so.0 => /lib/x86_64-linux-gnu/libidn2.so.0 (0x00007f1e3cd67000)
+|  	librtmp.so.1 => /lib/x86_64-linux-gnu/librtmp.so.1 (0x00007f1ec9e0a000)
+|  	libssh.so.4 => /lib/x86_64-linux-gnu/libssh.so.4 (0x00007f1e22193000)
+|  	libpsl.so.5 => /lib/x86_64-linux-gnu/libpsl.so.5 (0x00007f1e435c2000)
+|  	libgssapi_krb5.so.2 => /lib/x86_64-linux-gnu/libgssapi_krb5.so.2 (0x00007f1e31fac000)
+|  	libldap-2.5.so.0 => /lib/x86_64-linux-gnu/libldap-2.5.so.0 (0x00007f1e22134000)
+|  	liblber-2.5.so.0 => /lib/x86_64-linux-gnu/liblber-2.5.so.0 (0x00007f1e3cd56000)
+|  	libzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1 (0x00007f1e22065000)
+|  	libbrotlidec.so.1 => /lib/x86_64-linux-gnu/libbrotlidec.so.1 (0x00007f1e3cd48000)
+|  	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f1e438aa000)
+|  	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f1e3cd43000)
+|  	libifport.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libifport.so.5 (0x00007f1e1afd6000)
+|  	libifcoremt.so.5 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libifcoremt.so.5 (0x00007f1df6a5a000)
+|  	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f1e3cd3e000)
+|  	libnvJitLink.so.12 => /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/lib/libnvJitLink.so.12 (0x00007f1df2e00000)
+|  	libunistring.so.2 => /lib/x86_64-linux-gnu/libunistring.so.2 (0x00007f1df6456000)
+|  	libgnutls.so.30 => /lib/x86_64-linux-gnu/libgnutls.so.30 (0x00007f1df2c15000)
+|  	libhogweed.so.6 => /lib/x86_64-linux-gnu/libhogweed.so.6 (0x00007f1e1af8e000)
+|  	libnettle.so.8 => /lib/x86_64-linux-gnu/libnettle.so.8 (0x00007f1e1af48000)
+|  	libgmp.so.10 => /lib/x86_64-linux-gnu/libgmp.so.10 (0x00007f1df714f000)
+|  	libkrb5.so.3 => /lib/x86_64-linux-gnu/libkrb5.so.3 (0x00007f1df2b4a000)
+|  	libk5crypto.so.3 => /lib/x86_64-linux-gnu/libk5crypto.so.3 (0x00007f1df7120000)
+|  	libcom_err.so.2 => /lib/x86_64-linux-gnu/libcom_err.so.2 (0x00007f1e3cd36000)
+|  	libkrb5support.so.0 => /lib/x86_64-linux-gnu/libkrb5support.so.0 (0x00007f1e22057000)
+|  	libsasl2.so.2 => /lib/x86_64-linux-gnu/libsasl2.so.2 (0x00007f1e1af2d000)
+|  	libbrotlicommon.so.1 => /lib/x86_64-linux-gnu/libbrotlicommon.so.1 (0x00007f1df2b27000)
+|  	libp11-kit.so.0 => /lib/x86_64-linux-gnu/libp11-kit.so.0 (0x00007f1df29ec000)
+|  	libtasn1.so.6 => /lib/x86_64-linux-gnu/libtasn1.so.6 (0x00007f1df6a42000)
+|  	libkeyutils.so.1 => /lib/x86_64-linux-gnu/libkeyutils.so.1 (0x00007f1e31fa5000)
+|  	libresolv.so.2 => /lib/x86_64-linux-gnu/libresolv.so.2 (0x00007f1e22043000)
+|  	libffi.so.8 => /lib/x86_64-linux-gnu/libffi.so.8 (0x00007f1df6449000)
+| #################################################################################################
+
+| Checking Amazon Cloud instance ID...   Not found
+| Cannot find license.dat file /global/software/TeraChem/2025.01-intel-2023.2.0-CUDA-12.2.1/license.dat
+
+
+| TRYING THE NETWORK LICENSE...
+| Connecting to license server '54.208.252.40' port '8877'...
+| Connected!
+| Checking your license...
+
+| **************************************************************
+|  Greetings, Martinez Group! You have 1000 licenses in total
+|  IN USE: 42
+|  AVAILABLE: 958
+| **************************************************************
+
+-----------------------------------
+Processed Input file:
+                   method hf
+                    basis 6-31gs
+              coordinates wat.xyz
+                   charge 0
+                     resp yes
+-----------------------------------
+Jobname: wat
+Scratch data will be generated
+Scratch directory: ./scr.wat
+| Random number seed: 675666230
+
+XYZ coordinates wat.xyz
+Molden File Output: ./scr.wat/wat.molden
+Using basis set: 6-31gs
+dmrgstart not found
+Spin multiplicity: 1
+DIIS will use up to 10 vectors.
+Condition number limit for the DIIS overlap matrix is            0
+WF convergence threshold: 3.00e-05
+Using DIIS algorithm to converge WF
+Maximum number of SCF iterations: 100
+Incremental fock with rebuild every 8 iterations
+Will switch to conventional Fock if diffuse functions are detected
+X-matrix tolerance: 1.00e-04
+PRECISION: DYNAMIC
+TeraChem will select linear algebra engine
+DFT Functional requested: hf
+Method: Hartree-Fock 
+Wavefunction: RESTRICTED
+Initial guess generated by maximum overlap
+
+********************************************
+***** SINGLE POINT ENERGY CALCULATIONS *****
+********************************************
+Starting TensorBox...
+| TeraChem will select linear algebra engine
+| Using cuSolver for matrix diagonalization
+
+| using 1 out of 1 CUDA devices
+|   Device 0: NVIDIA GeForce GTX TITAN X, 12207MB, CC 5.2 -- CPU THREAD 0
+| -------------------------------------------------------------------
+| CPU Memory Available: 18127.88 MegaWords 
+| GPU Memory Available: 1269.88 MegaWords 
+| Maximum recommended basis set size: 13300 basis functions
+|  (limited by GPU memory)
+| -------------------------------------------------------------------
+| Initialize GPUBox with 128 MW of memory
+
+****** QM coordinates ******
+O         1.0830000000        -1.9080000000        -1.3570000000  
+H         1.5620000000        -2.5890000000        -1.8620000000  
+H         0.3840000000        -1.2890000000        -1.1480000000  
+
+Basis set:       6-31gs
+Total atoms:     3
+Total charge:    0
+Total electrons: 10 (5-alpha, 5-beta)
+Number electrons modeled by ECPs: 0
+Total orbitals:  19
+Total AO shells: 10 (7 S-shells; 2 P-shells; 1 D-shells; 0 F-shells; 0 G-shells)
+Spin multiplicity: 1
+Nuclear repulsion energy (QM atoms): 9.051456220026 a.u.
+
+
+                      *** Start SCF Iterations ***
+
+ Iter     DIIS Error       Energy change         Energy        Time(s)
+------------------------------------------------------------------------
+| Purifying guess...
+| Trace of guess  10.00000000, trace of guess*guess  10.00000000,  electron number  10.00000000 
+| Guess is well-conditioned: purify...
+| Purification run on CPU (double precision)  using TC2 purification.
+| Density matrix purification finished after a total of 0 matrix multiplies
+| THRESPDP set to 1.00e+00
+|    1     0.7481514248     -75.5358537989     -75.5358537989     0.09  
+|    2     0.3449485879      -0.3427719979     -75.8786257967     0.03  
+|    3     0.0712897918      -0.0757370190     -75.9543628157     0.03  
+|    4     0.0108657230      -0.0058805700     -75.9602433858     0.03  
+|    5     0.0034702945      -0.0003236044     -75.9605669901     0.03  
+|    6     0.0007433838      -0.0000363941     -75.9606033842     0.03  
+| THRESPDP set to 9.09e-02
+|    7     0.0001897868      -0.0000003721     -75.9606037564     0.03  
+|    8     0.0000235353      -0.0000000897     -75.9606038461     0.03  
+------------------------------------------------------------------------
+FINAL ENERGY: -75.9606038461 a.u.
+HOMO-LUMO GAP: 17.933 eV
+CENTER OF MASS: {1.070689, -1.911469, -1.373563} ANGS
+DIPOLE MOMENT: {-0.530032, -0.152026, -0.716847} (|D| = 0.904386) DEBYE
+
+Computing ESP on molecular grid...
+Using layered Connolly surfaces for molecular grid...Total number of ESP grid points from 4 layers: 296
+Electrostatic potential written to file ./scr.wat/esp.xyz (unit: Ansgtrom)
+Fitting RESP charges to the computed ESP...
+ESP unrestrained charges:
+Atom          X          Y          Z     Charge   Exposure
+-----------------------------------------------------------
+   O   2.046573  -3.605597  -2.564358  -1.160802     0.7598
+   H   2.951752  -4.892501  -3.518670   0.579563     0.6613
+   H   0.725655  -2.435857  -2.169405   0.581239     0.6290
+-----------------------------------------------------------
+Quality of fit (RRMS): 0.152
+
+Solving Resp charge with restraints iteratively...
+Restraint parameters a:0.0005 , b:0.001 
+ESP restrained charges:
+Atom          X          Y          Z     Charge   Exposure
+-----------------------------------------------------------
+   O   2.046573  -3.605597  -2.564358  -1.153575     0.7598
+   H   2.951752  -4.892501  -3.518670   0.575994     0.6613
+   H   0.725655  -2.435857  -2.169405   0.577581     0.6290
+-----------------------------------------------------------
+Quality of fit (RRMS): 0.152
+
+Writing out molden info
+
+Running Mulliken population analysis...
+
+| Total processing time: 0.41 sec 
+
+| Job finished: Tue Feb 18 16:58:08 2025
+

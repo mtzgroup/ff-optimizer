@@ -1,0 +1,32 @@
+calctype: hessian
+extras: {}
+keywords:
+    min_delta: '0.01'
+    precision: double
+model:
+    basis: aug-pcseg-1
+    method: ub3lyp
+structure:
+    charge: -1
+    extras:
+        xyz_comments:
+        - '-7.5708998712682558e+01'
+        - frame
+        - '4'
+        - xyz
+        - file
+        - generated
+        - by
+        - TeraChem
+    geometry:
+    -   - 2.0349344124116677
+        - -3.5889374641580236
+        - -2.551883450747577
+    -   - 2.9633911906144164
+        - -4.9091609240492735
+        - -3.5311449485495743
+    identifiers: {}
+    multiplicity: 3
+    symbols:
+    - O
+    - H

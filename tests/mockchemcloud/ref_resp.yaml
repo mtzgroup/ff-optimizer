@@ -1,0 +1,30 @@
+calctype: energy
+extras:
+    id: 3
+keywords:
+    resp: 'yes'
+model:
+    basis: 6-31gs
+    method: hf
+structure:
+    charge: 0
+    extras:
+        xyz_comments:
+        - converted
+        - from
+        - 1.pdb
+    geometry:
+    -   - 2.0465733943581284
+        - -3.6055974482320483
+        - -2.5643583528568605
+    -   - 2.951752208667956
+        - -4.892500939975248
+        - -3.518670046440291
+    -   - 0.7256548323485884
+        - -2.435856976295131
+        - -2.169405592542134
+    identifiers: {}
+    symbols:
+    - O
+    - H
+    - H

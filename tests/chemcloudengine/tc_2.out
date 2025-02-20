@@ -125,7 +125,7 @@ Jobname: 2
 Scratch directory: ./scr.2
 Random number seed: 624877999
 
-XYZ coordinates 2.pdb
+XYZ coordinates 2.xyz
 Molden File Output: ./scr.2/2.molden
 Using basis set: 6-31gss
 dmrgstart not found

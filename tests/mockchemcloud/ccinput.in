@@ -1,0 +1,10 @@
+run                  gradient
+coordinates          geometry.xyz
+charge               1
+spinmult             2
+method               uhf
+basis                6-31g*
+resp                 yes
+threall              1e-15
+convthre             1e-6
+precision            double

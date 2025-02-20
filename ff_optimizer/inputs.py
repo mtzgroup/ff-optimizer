@@ -391,10 +391,13 @@ class Input:
         },
     )
     retries: int = field(
-        default=3,
+        default=1,
         metadata={
             "comment": """
         Number of times failed calculations on ChemCloud are retried.
+        Changing to more than one may help with semi-reliable connections,
+        and changing to 0 disables retrying calculations with the backup
+        TeraChem input file.
         """
         },
     )

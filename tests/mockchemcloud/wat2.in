@@ -1,0 +1,10 @@
+method  uhf
+charge 1
+spinmult 2
+coordinates wat2.xyz
+resp yes
+run gradient
+basis 6-31g*
+threall 1e-15
+convthre 1e-6
+precision double

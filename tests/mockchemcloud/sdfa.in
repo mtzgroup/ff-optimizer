@@ -1,0 +1,7 @@
+run                  gradient            
+coordinates          geometry.xyz        
+charge               1                   
+spinmult             2                   
+method               uhf                 
+basis                6-31g*              
+resp                 yes                 
