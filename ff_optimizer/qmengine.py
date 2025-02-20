@@ -185,8 +185,8 @@ class QMEngine:
                 assert result.energy
                 assert result.gradient.any()
             except Exception:
-                print(f)
-                # print(e)
+                #print(f)
+                #print(e)
                 xyzs.append(f)
         self.getQMRefData(xyzs)
 
