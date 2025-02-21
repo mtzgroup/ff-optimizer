@@ -246,7 +246,7 @@ class TestQMEngine:
         qmEngine.writeFBdata(energies, grads, coords, espXYZs, esps)
 
         check = checkUtils.checkFiles("qdata.txt", testdir / "qdataResp.txt")
-        # os.remove("qdata.txt")
+        os.remove("qdata.txt")
         os.remove("all.mdcrd")
         assert check
 

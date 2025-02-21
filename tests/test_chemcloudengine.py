@@ -1,4 +1,5 @@
 import os
+import pytest
 from pathlib import Path
 
 from qcio import ProgramInput, ProgramOutput, Provenance, Structure
@@ -371,6 +372,7 @@ def test_runJobsBackup(monkeypatch):
     assert crash.startswith("Job ids ['3', '6', '9']")
     assert keywords["threall"] == "1.0e-14"
 
+
 def test_runJobs1(monkeypatch):
     os.chdir(os.path.dirname(__file__))
     inp = getDefaults()
@@ -388,6 +390,7 @@ def test_runJobs1(monkeypatch):
     def monkeyGetFailedJobs(self, outputs):
         assert isinstance(outputs, list)
         assert len(outputs) == 1
+        return []
 
     monkeypatch.setattr(qmengine.ChemcloudEngine, "getFailedJobs", monkeyGetFailedJobs)
     ccEngine.runJobs(["1.xyz"])
