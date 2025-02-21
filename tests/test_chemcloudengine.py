@@ -370,3 +370,24 @@ def test_runJobsBackup(monkeypatch):
     os.remove("temp.txt")
     assert crash.startswith("Job ids ['3', '6', '9']")
     assert keywords["threall"] == "1.0e-14"
+
+def test_runJobs1(monkeypatch):
+    os.chdir(os.path.dirname(__file__))
+    inp = getDefaults()
+    inp.tctemplate = "qmengine/tc.in"
+    inp.tctemplate_backup = "qmengine/tc_backup.in"
+    inp.sampledir = Path("")
+    monkeypatch.setattr(qmengine, "dumpFailedJobs", monkeyDump)
+    monkeypatch.setattr(qmengine.ChemcloudEngine, "writeResult", monkeyWrite)
+    ccEngine = qmengine.ChemcloudEngine(inp)
+    os.chdir("chemcloudengine")
+
+    outputs = [ccm.programOutputFromTCout("tc_1.out")]
+    ccm.patcher(monkeypatch, qmengine, outputs)
+
+    def monkeyGetFailedJobs(self, outputs):
+        assert isinstance(outputs, list)
+        assert len(outputs) == 1
+
+    monkeypatch.setattr(qmengine.ChemcloudEngine, "getFailedJobs", monkeyGetFailedJobs)
+    ccEngine.runJobs(["1.xyz"])
