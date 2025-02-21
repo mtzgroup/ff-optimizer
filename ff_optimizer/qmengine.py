@@ -577,6 +577,8 @@ class ChemcloudEngine(QMEngine):
 
         # run chemcloud jobs
         outputs = compute("terachem", programInputs, collect_files=self.doResp)
+        if not isinstance(outputs, list):
+            outputs = [outputs]
 
         # check for errors
         if len(outputs) != len(programInputs):

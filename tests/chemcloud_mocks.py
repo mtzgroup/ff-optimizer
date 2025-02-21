@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from qcio import Files, ProgramInput, ProgramOutput, Provenance, Structure
+from qcio import *
 from qcparse import parse
 
 
@@ -141,23 +141,25 @@ def programOutputFromTCout(tcout, inp=None, getFiles=False):
         traceback = "oh no!"
     try:
         result = parse(tcout, "terachem")
+        resultDict = result.model_dump(mode="json", exclude_unset=True)
+        if getFiles:
+            scr = Path(grep(tcout, "Scratch directory:").split()[2])
+            files = collectFiles(scr, inp)
+        else:
+            files = {}
+        resultDict["files"] = files
+        result = SinglePointResults(**resultDict)
     except:
         result = Files(files={})
     with open(tcout, "r") as f:
         lines = list(f.readlines())
     stdout = "".join(lines)
     extras = {}
-    if getFiles:
-        scr = Path(grep(tcout, "Scratch directory:").split()[2])
-        files = collectFiles(scr, inp)
-    else:
-        files = {}
     provenance = Provenance(program="terachem")
     output = ProgramOutput(
         input_data=inp,
         success=success,
         results=result,
-        files=files,
         provenance=provenance,
         extras=extras,
         stdout=stdout,
