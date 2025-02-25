@@ -189,13 +189,15 @@ def patcher(monkeypatch, target, outputs):
     def mockCompute(
         program, inputs, return_future=False, collect_files=False, outputs=outputs
     ):
-        if not isinstance(outputs, list):
-            outputs = [outputs]
+        # handle case where inputs is a single ProgramInput
+        isOutput = False
         if not isinstance(inputs, list):
             inputs = [inputs]
-        if isinstance(outputs[0], ProgramOutput):
-            programOutputs = outputs
-        else:
+            isOutput = True
+            if not isinstance(outputs, list):
+                outputs = [outputs]
+        # if outputs are tc output files (or Paths to them)
+        if not isinstance(outputs[0], ProgramOutput):
             if collect_files:
                 programOutputs = [
                     programOutputFromTCout(out, inp=inp, getFiles=True)
@@ -206,7 +208,9 @@ def patcher(monkeypatch, target, outputs):
                     programOutputFromTCout(out, inp=inp)
                     for inp, out in zip(inputs, outputs)
                 ]
-        if len(programOutputs) == 1:
+        else:
+            programOutputs = outputs
+        if isOutput:
             programOutputs = programOutputs[0]
         if return_future:
             result = MockFutureResult(programOutputs)
