@@ -208,10 +208,22 @@ def test_computeNoFiles(monkeypatch):
     computeNoFiles()
 
 
-def compute1():
+def compute1list():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
     inputs = [ccm.inputFromTCin("wat1.in", extras={"bloop": True})]
+    outputs = cc.compute("terachem", inputs)
+    assert isinstance(outputs, list)
+    result = outputs[0].results
+    assert checkUtils.checkFloats(result.energy, -75.5788691372, 0.00000001)
+    assert checkUtils.checkFloats(result.gradient[0, 0], -0.0006380621, 0.000001)
+    assert outputs[0].input_data.extras["bloop"]
+
+
+def compute1input():
+    os.chdir(os.path.dirname(__file__))
+    os.chdir("mockchemcloud")
+    inputs = ccm.inputFromTCin("wat1.in", extras={"bloop": True})
     outputs = cc.compute("terachem", inputs)
     assert isinstance(outputs, ProgramOutput)
     result = outputs.results
@@ -222,12 +234,14 @@ def compute1():
 
 @pytest.mark.chemcloud
 def test_compute1(monkeypatch):
-    compute1()
+    compute1list()
+    compute1input()
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
     outputs = ["wat1.out"]
     ccm.patcher(monkeypatch, cc, outputs)
-    compute1()
+    compute1list()
+    compute1input()
 
 
 def computeFuture():
@@ -250,7 +264,16 @@ def test_computeFuture(monkeypatch):
     computeFuture()
 
 
-def computeFuture1():
+def computeFuture1list():
+    os.chdir(os.path.dirname(__file__))
+    os.chdir("mockchemcloud")
+    inputs = [ccm.inputFromTCin("wat1.in")]
+    future = cc.compute("terachem", inputs, return_future=True)
+    outputs = future.get()
+    assert isinstance(outputs, list)
+
+
+def computeFuture1input():
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
     inputs = ccm.inputFromTCin("wat1.in")
@@ -261,12 +284,14 @@ def computeFuture1():
 
 @pytest.mark.chemcloud
 def test_computeFuture1(monkeypatch):
-    computeFuture1()
+    computeFuture1list()
+    computeFuture1input()
     os.chdir(os.path.dirname(__file__))
     os.chdir("mockchemcloud")
     outputs = ["wat1.out"]
     ccm.patcher(monkeypatch, cc, outputs)
-    computeFuture1()
+    computeFuture1list()
+    computeFuture1input()
 
 
 def computeFailure():
