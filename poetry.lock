@@ -45,13 +45,13 @@ files = [
 
 [[package]]
 name = "chemcloud"
-version = "0.14.0"
+version = "0.15.0"
 description = "Fast, secure, scalable quantum chemistry. A Python client for the the ChemCloud server."
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "chemcloud-0.14.0-py3-none-any.whl", hash = "sha256:78725c272584b3f88d388d026ea2954b5556e2430eba5fefb97dadf7f8d5435c"},
-    {file = "chemcloud-0.14.0.tar.gz", hash = "sha256:a5591efeee9cb594ae41451791afe89fd7a1f076275a13a79c89cbbef5acb3df"},
+    {file = "chemcloud-0.15.0-py3-none-any.whl", hash = "sha256:5ae4ffd502b506ff540ff9b1a4da587f2c8f7b18b57699dbc369f92c1b1763a3"},
+    {file = "chemcloud-0.15.0.tar.gz", hash = "sha256:41598f9bc311cb6d727a3b1dd519c3066138d5faf6b9f65ce6876f144cbd0270"},
 ]
 
 [package.dependencies]
@@ -1284,4 +1284,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "2fc738753b8012987a2f879218aaeb75f5a216ef9ba95416991bc5e4bf265e09"
+content-hash = "44ad880b3fc690bf7db2b264e755b46aa6108bca269e03ae5ce517bfe8b087cc"
