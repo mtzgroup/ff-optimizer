@@ -1,0 +1,22 @@
+This demo was originally used in a Martinez group meeting in 2024. 
+
+It uses slurm to run the QM calculations. You may need to alter 
+2_sampling/sbatch_template.sh to load the appropriate version of 
+TeraChem. There are more instructions within the comments in that 
+file. 
+
+This example was produced using the setup function of ff-opt, and 
+won't function correctly unless you re-do the setup step yourself
+or alter the paths of the directories in input.yaml. Check the setup 
+example if you want to see how to use the setup command. 
+
+Therefore,it does not perform initial training; the optimization begins
+with the MM sampling step. In such cases, dynamicsdir is the same folder 
+as input.yaml, the "conformers" file that every MM sampling trajectory
+begins from is butadiene.xyz. Changing the random seed and using a 
+thermostat is enough to produce different trajectories. 
+
+To run ff-opt:
+  1. Activate a poetry shell with `poetry shell`
+  2. Load an amber module compiled with the correct python version (currently 3.11+)
+  3. Run `ff-opt optimize input.yaml`

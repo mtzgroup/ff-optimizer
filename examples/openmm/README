@@ -1,0 +1,10 @@
+This demo shows how to use OpenMM for the MD sampling step. Note 
+that the name of the train and valid md.in files is set to md.py
+in the input file. In 2_sampling, you can find an example python
+script to run the sampling step and extra instructions on how to
+construct such a python script. 
+
+To run ff-opt:
+  1. Activate a poetry shell with `poetry shell`
+  2. Load an amber module compiled with the correct python version (currently 3.11+)
+  3. Run `ff-opt optimize input.yaml`

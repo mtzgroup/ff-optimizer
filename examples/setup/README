@@ -1,0 +1,11 @@
+The before folder includes all you need to run the setup command:
+just an xyz file!
+
+The after folder shows what the results of a successful setup command
+should look like. 
+
+To run ff-opt:
+  1. Activate a poetry shell with `poetry shell`
+  2. Load an amber module compiled with the correct python version (currently 3.11+)
+  3. Head to the before folder
+  4. Run `ff-opt setup butadiene.xyz`

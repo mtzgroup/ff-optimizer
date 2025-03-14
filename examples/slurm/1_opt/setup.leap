@@ -1,6 +1,0 @@
-source leaprc.gaff
-loadamberparams dasa.frcmod
-DAS = loadmol2 dasa.mol2
-x = loadpdb conf.pdb
-saveamberparm x dasa.prmtop opt.inpcrd
-quit
