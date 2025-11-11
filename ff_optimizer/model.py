@@ -137,6 +137,8 @@ class Model(AbstractModel):
             qmEngine = qmengine.SlurmEngine(inp)
         elif inp.qmengine == "chemcloud":
             qmEngine = qmengine.ChemcloudEngine(inp)
+        elif inp.qmengine == "sge":
+            qmEngine = qmengine.SGEEngine(inp)
         return qmEngine
 
     def initializeMMEngine(self, inp: Input) -> mmengine.MMEngine:

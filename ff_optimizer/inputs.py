@@ -242,12 +242,15 @@ class Input:
         metadata={
             "comment": """
         Specifies which qmengine to use to run QM calculations.
-        Options are "chemcloud", "slurm", and "debug".
+        Options are "chemcloud", "slurm", "sge", and "debug".
         If "chemcloud", options are read from a valid TeraChem input
         file (tc_template.in) and sent to chemcloud.
-        If "queue", a sbatch_template.sh file must be provided. This
+        If "slurm", a sbatch_template.sh file must be provided. This
         file allows the QM TeraChem calculations to be run by a
-        SLURM scheduler.                                            
+        SLURM scheduler.
+        If "sge", a sge_template.sh file must be provided. This
+        file allows the QM TeraChem calculations to be run by a
+        SGE scheduler.                                     
         If "debug", TeraChem will be run locally, one job at a time.
         """
         },
@@ -540,7 +543,7 @@ class Input:
             raise ValueError(
                 "Stride for creating initial data from dynamics must be at least 1"
             )
-        qmengines = ["chemcloud", "slurm", "debug"]
+        qmengines = ["chemcloud", "slurm", "debug", "sge"]
         if self.qmengine not in qmengines:
             raise ValueError(f"QMEngine {self.qmengine} has not been implemented")
         mmengines = ["amber", "openmm"]
