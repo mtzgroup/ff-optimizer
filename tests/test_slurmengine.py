@@ -17,6 +17,9 @@ def clean():
                 os.remove(f)
         if f.name == "all.mdcrd" or f.name == "qdata.txt":
             os.remove(f)
+    for i in range(1, 26):
+        if Path(f"sbatch_{i}.sh").exists():
+            os.remove(f"sbatch_{i}.sh")
 
 
 class TestSbatchEngine:

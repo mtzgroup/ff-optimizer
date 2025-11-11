@@ -620,6 +620,138 @@ class ChemcloudEngine(QMEngine):
         os.chdir(cwd)
 
 
+class SGEEngine(QMEngine):
+    def __init__(self, inp):
+        """
+        Initialize the SGEEngine.
+
+        Args:
+            inp: Input object containing configuration parameters.
+        """
+        self.readSGEScript(inp.sampledir / inp.sgetemplate)
+        self.inp = inp
+        super().__init__(inp)
+
+    def readSGEScript(self, sgeScriptFile: str):
+        """
+        Read the SGE script file.
+
+        Args:
+            sgeScriptFile (str): Path to the SGE script file.
+        """
+        with open(sgeScriptFile, "r") as f:
+            self.sgeScriptLines = f.readlines()
+
+    def replaceVars(self, line, index):
+        """
+        Replace variables in an SGE script line.
+
+        Args:
+            line (str): Line from the SGE script file.
+            index (str): Job index.
+
+        Returns:
+            str: Updated line with variables replaced.
+        """
+        tcin = f"tc_{index}.in"
+        tcbackup = f"tc_backup_{index}.in"
+        line = line.replace("JOBID", index)
+        line = line.replace("TCTEMPLATEBACKUP", tcbackup)
+        line = line.replace("TCTEMPLATE", tcin)
+        return line
+
+    def writeSGEScript(self, index: str, fileName: str):
+        """
+        Write an SGE script for a specific job.
+
+        Args:
+            index (str): Job index.
+            fileName (str): Name of the output SGE script file.
+        """
+        index = str(index)
+        with open(fileName, "w") as f:
+            for line in self.sgeScriptLines:
+                f.write(self.replaceVars(line, index))
+
+    def sgeCommand(self, command: list):
+        """
+        Execute an SGE command with retries.
+
+        Args:
+            command (list): SGE command to execute.
+
+        Returns:
+            bytes: Output of the SGE command.
+
+        Raises:
+            RuntimeError: If the SGE command fails after maximum retries.
+        """
+        maxTries = 10
+        i = 1
+        done = False
+        while i < maxTries and not done:
+            try:
+                output = subprocess.check_output(command)
+                done = True
+            except:
+                sleep(2)
+                i += 1
+        if not done:
+            raise RuntimeError(f"SGE command {str(command)} failed")
+        return output
+
+    def waitForJobs(self, jobIDs):
+        """
+        Wait for SGE jobs to complete.
+
+        Args:
+            jobIDs (list): List of SGE job IDs to wait for.
+        """
+        while len(jobIDs) > 0:
+            runningIDs = []
+            sleep(10)
+            status = self.sgeCommand(["qstat"])
+            for line in status.decode("utf-8").split("\n"):
+                if line.strip():
+                    runningID = line.split()[0]
+                    if runningID in jobIDs:
+                        runningIDs.append(runningID)
+            jobIDs = runningIDs
+
+    def getQMRefData(self, xyzs: list):
+        """
+        Perform QM calculations and get reference data using SGE.
+
+        Args:
+            xyzs (list): List of XYZ file paths.
+
+        Returns:
+            tuple: Energies, gradients, coordinates, ESP XYZs, and ESP values.
+        """
+        jobIDs = []
+        for xyz in xyzs:
+            name = xyz.name.split(".")[0]
+            super().writeInputFile(self.inputSettings, xyz, f"tc_{name}.in")
+            super().writeInputFile(
+                self.backupInputSettings, xyz, f"tc_backup_{name}.in"
+            )
+            self.writeSGEScript(name, f"sge_{name}.sh")
+            job = self.sgeCommand(["qsub", f"sge_{name}.sh"])
+            jobIDs.append(job.split()[2])
+        self.waitForJobs(jobIDs)
+
+        for xyz in xyzs:
+            name = xyz.name.split(".")[0]
+            if self.doResp:
+                copyfile(f"scr.{name}/esp.xyz", f"esp_{name}.xyz")
+            scr = Path(f"scr.{name}")
+            if scr.is_dir():
+                rmtree(scr)
+
+        energies, grads, coords, espXYZs, esps = super().readQMRefData()
+        super().writeFBdata(energies, grads, coords, espXYZs, esps)
+
+
 def dumpFailedJobs(programInputs: list, outputs: list):
     """
     Dump information about failed jobs for debugging.
